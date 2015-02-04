@@ -1,0 +1,661 @@
+//Need more data to complete
+
+Phantom "Head"
+
+// original 2D phantom
+// -------------------
+
+Object Calotte
+{ [ Ellipsoid:        dx=9.6; dy=12;   dz=12.5; ]; formula=H2O;  rho=BONE;; priority = 1; }
+Object BrainMatter
+{ [ Ellipsoid:        dx=9.0; dy=11.4; dz=11.9; ]; formula=H2O;  rho=BRAIN;; priority = 1; }
+Object Ventricle
+{ [ Ellipsoid: y=-3.6; dx=1.8; dy= 3.6; dz= 3.6; ]; formula=H2O;  rho=LYMPH;; priority = 1; }
+Object FrontalSinus
+{ [ Ellipsoid: y= 8.4; dx=1.8; dy= 3.0; dz= 3.0; ]; formula=H2O;  rho=AIR;; priority = 1; }
+
+Object Eye1
+{ [ Sphere: x=-4.7;  y= 4.3;  z= 0.872; r=2.0;]; formula=H2O;  rho=BLOOD;; priority = 1;}
+Object Eye2
+{ [ Sphere: x= 4.7;  y= 4.3;  z= 0.872; r=2.0;];formula=H2O;  rho=BLOOD;; priority = 1;}
+Object LowContrast25dHUup
+{ [ Sphere: x=-1.08; y=-9 ;            r=0.4;]; formula=H2O;  rho=BRAINUP;; priority = 1; }
+Object LowContrast25dHUdown
+{ [ Sphere: x= 1.08; y=-9 ;            r=0.4;]; formula=H2O;  rho=BRAINDOWN;; priority = 1; }
+
+Object BoneAroundFrontalSinus1
+{ [ Ellipt_Cyl: y=3.6; dx=1.2; dy=4.0; l=0.5*cos(15); axis(0,-cos(30),sin(30)); a_y(0,sin(30),cos(30));]; formula=H2O;  rho=BONE;; priority = 1; }
+Object BoneAroundFrontalSinus2
+{ [ Ellipt_Cyl: y=9.6; dx=0.525561; dy=2; l=0.4; axis(1,0,0);  a_y(0,-sin(30),cos(30))]; formula=H2O;  rho=BONE;; priority = 1; }
+Object Bone1
+{ [ Ellipsoid_free: x=-1.9; y=5.4; dx=1.206483*cos(15);  dy=0.420276*cos(15); dz=3.0; a_z(sin(15),0,cos(15)); a_x(cos(15)*cos(120),sin(120),-sin(15)*cos(120));]; formula=H2O;  rho=BONE;; priority = 1; }
+Object Bone2
+{ [ Ellipsoid_free: x=1.9; y=5.4; dx=1.2*cos(15); dy=0.42*cos(15); dz=3.0; a_z(-sin(15),0,cos(15)); a_x(cos(15)*cos(60),sin(60),sin(15)*cos(60));]; formula=H2O;  rho=BONE;; priority = 1;  }
+Object Bone3
+{ [ Ellipt_Cyl: x=-4.3; y=6.8; z=-1; dx=1.8; dy=0.24; l=4.0; axis(0,0,1); a_x(cos(150),sin(150),0) ;]; formula=H2O;  rho=BONE;; priority = 1;  }
+Object Bone4
+{ [ Ellipt_Cyl: x=4.3; y=6.8; z=-1; dx=1.8; dy=0.24; l=4.0;axis(0,0,1); a_x(cos(30),sin(30),0); ]; formula=H2O;  rho=BONE;; priority = 1;  }
+Object SubduralHematoma
+{ [ Ellipsoid_free: x=6.393945; y=-6.393945; dx=1.2; dy=0.42; dz=1.2;a_x(cos(58.1),sin(58.1),0); a_z(0,0,1);];formula=H2O;  rho=HEMATOMA;; priority = 1;  }
+Object Bone5
+{ [ Cone_y: y=-11.15; z=-0.2;  r1=0.5; r2=0.2; l=1.5; ]; formula=H2O;  rho=BONE;; priority = 1; }
+{ [ Cone_y: y=-11.15; z= 0.2;  r1=0.5; r2=0.2; l=1.5;];  formula=H2O;  rho=BONE;; priority = 1;  }
+
+
+
+// inner ear on the right side
+// ---------------------------
+{  [ Ellipsoid: x=9.1; y=0.0; z=0; .0; dx=4.2; dy=1.8; dz=1.8; x<9.1]; formula=H2O;  rho=BONE;; priority = 1; }
+
+
+// Mid Level
+
+{  [ Sphere: z=0; x=8.8; y=0.0; r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	} 
+{  [ Sphere: z=0; x=8.4; y=0.0; r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=8.0; y=0.0; r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=7.6; y=0.0; r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=7.2; y=0.0; r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=6.8; y=0.0; r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=6.4; y=0.0; r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=6.0; y=0.0; r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=5.6; y=0.0; r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+{  [ Sphere: z=0; x=8.6; y=0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=8.2; y=0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=7.8; y=0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=7.4; y=0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=7.0; y=0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=6.6; y=0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=6.2; y=0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=5.8; y=0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+{  [ Sphere: z=0; x=8.8; y=2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=8.4; y=2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=8.0; y=2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=7.6; y=2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=7.2; y=2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=6.8; y=2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=6.4; y=2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=6.0; y=2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+{  [ Sphere: z=0; x=8.6; y=3*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=8.2; y=3*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=7.8; y=3*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=7.4; y=3*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=7.0; y=3*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=6.6; y=3*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+{  [ Sphere: z=0; x=8.6; y=-0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=8.2; y=-0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=7.8; y=-0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=7.4; y=-0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=7.0; y=-0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=6.6; y=-0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=6.2; y=-0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=5.8; y=-0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+{  [ Sphere: z=0; x=8.8; y=-2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=8.4; y=-2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=8.0; y=-2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=7.6; y=-2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=7.2; y=-2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=6.8; y=-2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=6.4; y=-2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=6.0; y=-2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+{  [ Sphere: z=0; x=8.6; y=-3*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=8.2; y=-3*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=7.8; y=-3*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=7.4; y=-3*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=7.0; y=-3*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0; x=6.6; y=-3*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+
+// upper level 1st floor
+
+{  [ Sphere: z=0.2*sqrt(3); x=8.6; y=0; r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0.2*sqrt(3); x=8.2; y=0; r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0.2*sqrt(3); x=7.8; y=0; r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0.2*sqrt(3); x=7.4; y=0; r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0.2*sqrt(3); x=7.0; y=0; r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0.2*sqrt(3); x=6.6; y=0; r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0.2*sqrt(3); x=6.2; y=0; r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0.2*sqrt(3); x=5.8; y=0; r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+{  [ Sphere: z=0.2*sqrt(3); x=8.8; y=0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0.2*sqrt(3); x=8.4; y=0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0.2*sqrt(3); x=8.0; y=0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0.2*sqrt(3); x=7.6; y=0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0.2*sqrt(3); x=7.2; y=0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0.2*sqrt(3); x=6.8; y=0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0.2*sqrt(3); x=6.4; y=0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0.2*sqrt(3); x=6.0; y=0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+{  [ Sphere: z=0.2*sqrt(3); x=8.6; y=2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0.2*sqrt(3); x=8.2; y=2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0.2*sqrt(3); x=7.8; y=2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0.2*sqrt(3); x=7.4; y=2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0.2*sqrt(3); x=7.0; y=2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0.2*sqrt(3); x=6.6; y=2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0.2*sqrt(3); x=6.2; y=2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+{  [ Sphere: z=0.2*sqrt(3); x=8.8; y=3*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0.2*sqrt(3); x=8.4; y=3*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0.2*sqrt(3); x=8.0; y=3*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0.2*sqrt(3); x=7.6; y=3*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0.2*sqrt(3); x=7.2; y=3*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0.2*sqrt(3); x=6.8; y=3*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+{  [ Sphere: z=0.2*sqrt(3); x=8.8; y=-0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0.2*sqrt(3); x=8.4; y=-0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0.2*sqrt(3); x=8.0; y=-0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0.2*sqrt(3); x=7.6; y=-0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0.2*sqrt(3); x=7.2; y=-0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0.2*sqrt(3); x=6.8; y=-0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0.2*sqrt(3); x=6.4; y=-0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0.2*sqrt(3); x=6.0; y=-0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+{  [ Sphere: z=0.2*sqrt(3); x=8.6; y=-2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0.2*sqrt(3); x=8.2; y=-2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0.2*sqrt(3); x=7.8; y=-2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0.2*sqrt(3); x=7.4; y=-2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0.2*sqrt(3); x=7.0; y=-2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0.2*sqrt(3); x=6.6; y=-2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0.2*sqrt(3); x=6.2; y=-2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+{  [ Sphere: z=0.2*sqrt(3); x=8.8; y=-3*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0.2*sqrt(3); x=8.4; y=-3*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0.2*sqrt(3); x=8.0; y=-3*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0.2*sqrt(3); x=7.6; y=-3*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0.2*sqrt(3); x=7.2; y=-3*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=0.2*sqrt(3); x=6.8; y=-3*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+
+// lower level 1st floor
+
+{  [ Sphere: z=-0.2*sqrt(3); x=8.6; y=0; r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-0.2*sqrt(3); x=8.2; y=0; r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-0.2*sqrt(3); x=7.8; y=0; r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-0.2*sqrt(3); x=7.4; y=0; r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-0.2*sqrt(3); x=7.0; y=0; r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-0.2*sqrt(3); x=6.6; y=0; r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-0.2*sqrt(3); x=6.2; y=0; r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-0.2*sqrt(3); x=5.8; y=0; r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+{  [ Sphere: z=-0.2*sqrt(3); x=8.8; y=0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-0.2*sqrt(3); x=8.4; y=0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-0.2*sqrt(3); x=8.0; y=0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-0.2*sqrt(3); x=7.6; y=0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-0.2*sqrt(3); x=7.2; y=0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-0.2*sqrt(3); x=6.8; y=0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-0.2*sqrt(3); x=6.4; y=0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-0.2*sqrt(3); x=6.0; y=0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+{  [ Sphere: z=-0.2*sqrt(3); x=8.6; y=2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-0.2*sqrt(3); x=8.2; y=2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-0.2*sqrt(3); x=7.8; y=2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-0.2*sqrt(3); x=7.4; y=2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-0.2*sqrt(3); x=7.0; y=2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-0.2*sqrt(3); x=6.6; y=2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-0.2*sqrt(3); x=6.2; y=2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+{  [ Sphere: z=-0.2*sqrt(3); x=8.8; y=3*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-0.2*sqrt(3); x=8.4; y=3*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-0.2*sqrt(3); x=8.0; y=3*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-0.2*sqrt(3); x=7.6; y=3*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-0.2*sqrt(3); x=7.2; y=3*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-0.2*sqrt(3); x=6.8; y=3*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+{  [ Sphere: z=-0.2*sqrt(3); x=8.8; y=-0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-0.2*sqrt(3); x=8.4; y=-0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-0.2*sqrt(3); x=8.0; y=-0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-0.2*sqrt(3); x=7.6; y=-0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-0.2*sqrt(3); x=7.2; y=-0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-0.2*sqrt(3); x=6.8; y=-0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-0.2*sqrt(3); x=6.4; y=-0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-0.2*sqrt(3); x=6.0; y=-0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+{  [ Sphere: z=-0.2*sqrt(3); x=8.6; y=-2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-0.2*sqrt(3); x=8.2; y=-2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-0.2*sqrt(3); x=7.8; y=-2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-0.2*sqrt(3); x=7.4; y=-2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-0.2*sqrt(3); x=7.0; y=-2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-0.2*sqrt(3); x=6.6; y=-2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-0.2*sqrt(3); x=6.2; y=-2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+{  [ Sphere: z=-0.2*sqrt(3); x=8.8; y=-3*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-0.2*sqrt(3); x=8.4; y=-3*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-0.2*sqrt(3); x=8.0; y=-3*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-0.2*sqrt(3); x=7.6; y=-3*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-0.2*sqrt(3); x=7.2; y=-3*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-0.2*sqrt(3); x=6.8; y=-3*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+
+// upper level 2nd floor
+
+{  [ Sphere: z=2*0.2*sqrt(3); x=8.8; y=0; r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=2*0.2*sqrt(3); x=8.4; y=0; r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=2*0.2*sqrt(3); x=8.0; y=0; r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=2*0.2*sqrt(3); x=7.6; y=0; r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=2*0.2*sqrt(3); x=7.2; y=0; r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=2*0.2*sqrt(3); x=6.8; y=0; r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=2*0.2*sqrt(3); x=6.4; y=0; r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=2*0.2*sqrt(3); x=6.0; y=0; r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+{  [ Sphere: z=2*0.2*sqrt(3); x=8.6; y=0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=2*0.2*sqrt(3); x=8.2; y=0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=2*0.2*sqrt(3); x=7.8; y=0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=2*0.2*sqrt(3); x=7.4; y=0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=2*0.2*sqrt(3); x=7.0; y=0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=2*0.2*sqrt(3); x=6.6; y=0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=2*0.2*sqrt(3); x=6.2; y=0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+{  [ Sphere: z=2*0.2*sqrt(3); x=8.8; y=2*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=2*0.2*sqrt(3); x=8.4; y=2*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=2*0.2*sqrt(3); x=8.0; y=2*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=2*0.2*sqrt(3); x=7.6; y=2*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=2*0.2*sqrt(3); x=7.2; y=2*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=2*0.2*sqrt(3); x=6.8; y=2*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=2*0.2*sqrt(3); x=6.4; y=2*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+{  [ Sphere: z=2*0.2*sqrt(3); x=8.6; y=3*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=2*0.2*sqrt(3); x=8.2; y=3*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=2*0.2*sqrt(3); x=7.8; y=3*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=2*0.2*sqrt(3); x=7.4; y=3*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=2*0.2*sqrt(3); x=7.0; y=3*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+{  [ Sphere: z=2*0.2*sqrt(3); x=8.6; y=-0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=2*0.2*sqrt(3); x=8.2; y=-0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=2*0.2*sqrt(3); x=7.8; y=-0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=2*0.2*sqrt(3); x=7.4; y=-0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=2*0.2*sqrt(3); x=7.0; y=-0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=2*0.2*sqrt(3); x=6.6; y=-0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=2*0.2*sqrt(3); x=6.2; y=-0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+{  [ Sphere: z=2*0.2*sqrt(3); x=8.8; y=-2*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=2*0.2*sqrt(3); x=8.4; y=-2*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=2*0.2*sqrt(3); x=8.0; y=-2*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=2*0.2*sqrt(3); x=7.6; y=-2*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=2*0.2*sqrt(3); x=7.2; y=-2*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=2*0.2*sqrt(3); x=6.8; y=-2*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=2*0.2*sqrt(3); x=6.4; y=-2*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+{  [ Sphere: z=2*0.2*sqrt(3); x=8.6; y=-3*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=2*0.2*sqrt(3); x=8.2; y=-3*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=2*0.2*sqrt(3); x=7.8; y=-3*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=2*0.2*sqrt(3); x=7.4; y=-3*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=2*0.2*sqrt(3); x=7.0; y=-3*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+
+// lower level 2nd floor
+
+{  [ Sphere: z=-2*0.2*sqrt(3); x=8.8; y=0; r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-2*0.2*sqrt(3); x=8.4; y=0; r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-2*0.2*sqrt(3); x=8.0; y=0; r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-2*0.2*sqrt(3); x=7.6; y=0; r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-2*0.2*sqrt(3); x=7.2; y=0; r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-2*0.2*sqrt(3); x=6.8; y=0; r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-2*0.2*sqrt(3); x=6.4; y=0; r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-2*0.2*sqrt(3); x=6.0; y=0; r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+{  [ Sphere: z=-2*0.2*sqrt(3); x=8.6; y=0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-2*0.2*sqrt(3); x=8.2; y=0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-2*0.2*sqrt(3); x=7.8; y=0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-2*0.2*sqrt(3); x=7.4; y=0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-2*0.2*sqrt(3); x=7.0; y=0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-2*0.2*sqrt(3); x=6.6; y=0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-2*0.2*sqrt(3); x=6.2; y=0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+{  [ Sphere: z=-2*0.2*sqrt(3); x=8.8; y=2*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-2*0.2*sqrt(3); x=8.4; y=2*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-2*0.2*sqrt(3); x=8.0; y=2*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-2*0.2*sqrt(3); x=7.6; y=2*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-2*0.2*sqrt(3); x=7.2; y=2*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-2*0.2*sqrt(3); x=6.8; y=2*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-2*0.2*sqrt(3); x=6.4; y=2*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+{  [ Sphere: z=-2*0.2*sqrt(3); x=8.6; y=3*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-2*0.2*sqrt(3); x=8.2; y=3*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-2*0.2*sqrt(3); x=7.8; y=3*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-2*0.2*sqrt(3); x=7.4; y=3*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-2*0.2*sqrt(3); x=7.0; y=3*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+{  [ Sphere: z=-2*0.2*sqrt(3); x=8.6; y=-0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-2*0.2*sqrt(3); x=8.2; y=-0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-2*0.2*sqrt(3); x=7.8; y=-0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-2*0.2*sqrt(3); x=7.4; y=-0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-2*0.2*sqrt(3); x=7.0; y=-0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-2*0.2*sqrt(3); x=6.6; y=-0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-2*0.2*sqrt(3); x=6.2; y=-0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+{  [ Sphere: z=-2*0.2*sqrt(3); x=8.8; y=-2*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-2*0.2*sqrt(3); x=8.4; y=-2*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-2*0.2*sqrt(3); x=8.0; y=-2*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-2*0.2*sqrt(3); x=7.6; y=-2*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-2*0.2*sqrt(3); x=7.2; y=-2*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-2*0.2*sqrt(3); x=6.8; y=-2*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-2*0.2*sqrt(3); x=6.4; y=-2*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+{  [ Sphere: z=-2*0.2*sqrt(3); x=8.6; y=-3*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-2*0.2*sqrt(3); x=8.2; y=-3*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-2*0.2*sqrt(3); x=7.8; y=-3*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-2*0.2*sqrt(3); x=7.4; y=-3*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-2*0.2*sqrt(3); x=7.0; y=-3*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+
+// upper level 3rd floor
+
+{  [ Sphere: z=3*0.2*sqrt(3); x=8.6; y=0;  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=3*0.2*sqrt(3); x=8.2; y=0;  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=3*0.2*sqrt(3); x=7.8; y=0;  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=3*0.2*sqrt(3); x=7.4; y=0;  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=3*0.2*sqrt(3); x=7.0; y=0;  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=3*0.2*sqrt(3); x=6.6; y=0;  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+{  [ Sphere: z=3*0.2*sqrt(3); x=8.8; y=0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=3*0.2*sqrt(3); x=8.4; y=0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=3*0.2*sqrt(3); x=8.0; y=0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=3*0.2*sqrt(3); x=7.6; y=0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=3*0.2*sqrt(3); x=7.2; y=0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=3*0.2*sqrt(3); x=6.8; y=0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+{  [ Sphere: z=3*0.2*sqrt(3); x=8.6; y=2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=3*0.2*sqrt(3); x=8.2; y=2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=3*0.2*sqrt(3); x=7.8; y=2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=3*0.2*sqrt(3); x=7.4; y=2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=3*0.2*sqrt(3); x=7.0; y=2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+{  [ Sphere: z=3*0.2*sqrt(3); x=8.8; y=3*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=3*0.2*sqrt(3); x=8.4; y=3*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=3*0.2*sqrt(3); x=8.0; y=3*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=3*0.2*sqrt(3); x=7.6; y=3*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+{  [ Sphere: z=3*0.2*sqrt(3); x=8.8; y=-0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=3*0.2*sqrt(3); x=8.4; y=-0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=3*0.2*sqrt(3); x=8.0; y=-0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=3*0.2*sqrt(3); x=7.6; y=-0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=3*0.2*sqrt(3); x=7.2; y=-0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=3*0.2*sqrt(3); x=6.8; y=-0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+{  [ Sphere: z=3*0.2*sqrt(3); x=8.6; y=-2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=3*0.2*sqrt(3); x=8.2; y=-2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=3*0.2*sqrt(3); x=7.8; y=-2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=3*0.2*sqrt(3); x=7.4; y=-2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=3*0.2*sqrt(3); x=7.0; y=-2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+{  [ Sphere: z=3*0.2*sqrt(3); x=8.8; y=-3*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=3*0.2*sqrt(3); x=8.4; y=-3*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=3*0.2*sqrt(3); x=8.0; y=-3*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=3*0.2*sqrt(3); x=7.6; y=-3*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+
+// lower level 3rd floor
+
+{  [ Sphere: z=-3*0.2*sqrt(3); x=8.6; y=0;  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-3*0.2*sqrt(3); x=8.2; y=0;  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-3*0.2*sqrt(3); x=7.8; y=0;  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-3*0.2*sqrt(3); x=7.4; y=0;  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-3*0.2*sqrt(3); x=7.0; y=0;  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-3*0.2*sqrt(3); x=6.6; y=0;  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+{  [ Sphere: z=-3*0.2*sqrt(3); x=8.8; y=0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-3*0.2*sqrt(3); x=8.4; y=0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-3*0.2*sqrt(3); x=8.0; y=0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-3*0.2*sqrt(3); x=7.6; y=0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-3*0.2*sqrt(3); x=7.2; y=0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-3*0.2*sqrt(3); x=6.8; y=0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+{  [ Sphere: z=-3*0.2*sqrt(3); x=8.6; y=2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-3*0.2*sqrt(3); x=8.2; y=2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-3*0.2*sqrt(3); x=7.8; y=2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-3*0.2*sqrt(3); x=7.4; y=2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-3*0.2*sqrt(3); x=7.0; y=2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+{  [ Sphere: z=-3*0.2*sqrt(3); x=8.8; y=3*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-3*0.2*sqrt(3); x=8.4; y=3*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-3*0.2*sqrt(3); x=8.0; y=3*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-3*0.2*sqrt(3); x=7.6; y=3*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+{  [ Sphere: z=-3*0.2*sqrt(3); x=8.8; y=-0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-3*0.2*sqrt(3); x=8.4; y=-0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-3*0.2*sqrt(3); x=8.0; y=-0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-3*0.2*sqrt(3); x=7.6; y=-0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-3*0.2*sqrt(3); x=7.2; y=-0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-3*0.2*sqrt(3); x=6.8; y=-0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+{  [ Sphere: z=-3*0.2*sqrt(3); x=8.6; y=-2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-3*0.2*sqrt(3); x=8.2; y=-2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-3*0.2*sqrt(3); x=7.8; y=-2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-3*0.2*sqrt(3); x=7.4; y=-2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-3*0.2*sqrt(3); x=7.0; y=-2*0.2*sqrt(3);  r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+{  [ Sphere: z=-3*0.2*sqrt(3); x=8.8; y=-3*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-3*0.2*sqrt(3); x=8.4; y=-3*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-3*0.2*sqrt(3); x=8.0; y=-3*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+{  [ Sphere: z=-3*0.2*sqrt(3); x=7.6; y=-3*0.2*sqrt(3); r=0.15; ]; formula=H2O;  rho=AIR;; priority = 1;  	}  
+
+
+
+//-----------------------------------------------------------------------------
+// Element 11
+Object SmallBones
+{  [ Ellipsoid: x=-7.0; y=-1.0;         z=0.0; dx=0.0357/2; dy=0.0357/2; dz=0.4000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0; y=-1.0+2*0.0357; z=0.0; dx=0.0357/2; dy=0.0357/2; dz=0.4000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0; y=-1.0+4*0.0357; z=0.0; dx=0.0357/2; dy=0.0357/2; dz=0.4000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0; y=-1.0+6*0.0357; z=0.0; dx=0.0357/2; dy=0.0357/2; dz=0.4000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0; y=-1.0+8*0.0357; z=0.0; dx=0.0357/2; dy=0.0357/2; dz=0.4000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+
+{  [ Ellipsoid: x=-7.0; y=-1.0; z=0.0+2*0.4000; dx=0.0357/2; dy=0.0357/2; dz=0.4000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0; y=-1.0; z=0.0+4*0.4000; dx=0.0357/2; dy=0.0357/2; dz=0.4000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0; y=-1.0; z=0.0+6*0.4000; dx=0.0357/2; dy=0.0357/2; dz=0.4000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0; y=-1.0; z=0.0+8*0.4000; dx=0.0357/2; dy=0.0357/2; dz=0.4000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+
+//-----------------------------------------------------------------------------
+// Element 12
+
+{  [ Ellipsoid: x=-7.0; y=-1.0+12*0.04        ; z=0.0; dx=0.0357/2; dy=0.0357/2; dz=0.2000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0; y=-1.0+12*0.04+2*0.0357; z=0.0; dx=0.0357/2; dy=0.0357/2; dz=0.2000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0; y=-1.0+12*0.04+4*0.0357; z=0.0; dx=0.0357/2; dy=0.0357/2; dz=0.2000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0; y=-1.0+12*0.04+6*0.0357; z=0.0; dx=0.0357/2; dy=0.0357/2; dz=0.2000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0; y=-1.0+12*0.04+8*0.0357; z=0.0; dx=0.0357/2; dy=0.0357/2; dz=0.2000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+
+{  [ Ellipsoid: x=-7.0; y=-1.0+12*0.04; z=0.0+2*0.2000; dx=0.0357/2; dy=0.0357/2; dz=0.2000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0; y=-1.0+12*0.04; z=0.0+4*0.2000; dx=0.0357/2; dy=0.0357/2; dz=0.2000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0; y=-1.0+12*0.04; z=0.0+6*0.2000; dx=0.0357/2; dy=0.0357/2; dz=0.2000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0; y=-1.0+12*0.04; z=0.0+8*0.2000; dx=0.0357/2; dy=0.0357/2; dz=0.2000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+
+//-----------------------------------------------------------------------------
+// Element 13
+
+{  [ Ellipsoid: x=-7.0; y=-1.0+24*0.04        ; z=0.0; dx=0.0357/2; dy=0.0357/2; dz=0.1000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0; y=-1.0+24*0.04+2*0.0357; z=0.0; dx=0.0357/2; dy=0.0357/2; dz=0.1000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0; y=-1.0+24*0.04+4*0.0357; z=0.0; dx=0.0357/2; dy=0.0357/2; dz=0.1000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0; y=-1.0+24*0.04+6*0.0357; z=0.0; dx=0.0357/2; dy=0.0357/2; dz=0.1000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0; y=-1.0+24*0.04+8*0.0357; z=0.0; dx=0.0357/2; dy=0.0357/2; dz=0.1000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+
+{  [ Ellipsoid: x=-7.0; y=-1.0+24*0.04; z=0.0+2*0.1000; dx=0.0357/2; dy=0.0357/2; dz=0.1000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0; y=-1.0+24*0.04; z=0.0+4*0.1000; dx=0.0357/2; dy=0.0357/2; dz=0.1000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0; y=-1.0+24*0.04; z=0.0+6*0.1000; dx=0.0357/2; dy=0.0357/2; dz=0.1000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0; y=-1.0+24*0.04; z=0.0+8*0.1000; dx=0.0357/2; dy=0.0357/2; dz=0.1000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+
+//-----------------------------------------------------------------------------
+// Element 14
+
+{  [ Ellipsoid: x=-7.0; y=-1.0+36*0.04        ; z=0.0; dx=0.0357/2; dy=0.0357/2; dz=0.0500/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0; y=-1.0+36*0.04+2*0.0357; z=0.0; dx=0.0357/2; dy=0.0357/2; dz=0.0500/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0; y=-1.0+36*0.04+4*0.0357; z=0.0; dx=0.0357/2; dy=0.0357/2; dz=0.0500/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0; y=-1.0+36*0.04+6*0.0357; z=0.0; dx=0.0357/2; dy=0.0357/2; dz=0.0500/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0; y=-1.0+36*0.04+8*0.0357; z=0.0; dx=0.0357/2; dy=0.0357/2; dz=0.0500/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+
+{  [ Ellipsoid: x=-7.0; y=-1.0+36*0.04; z=0.0+2*0.0500; dx=0.0357/2; dy=0.0357/2; dz=0.0500/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0; y=-1.0+36*0.04; z=0.0+4*0.0500; dx=0.0357/2; dy=0.0357/2; dz=0.0500/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0; y=-1.0+36*0.04; z=0.0+6*0.0500; dx=0.0357/2; dy=0.0357/2; dz=0.0500/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0; y=-1.0+36*0.04; z=0.0+8*0.0500; dx=0.0357/2; dy=0.0357/2; dz=0.0500/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+
+//=============================================================================
+// Element 21
+
+{  [ Ellipsoid: x=-7.0+2*0.04; y=-1.0        ; z=0.0; dx=0.0312/2; dy=0.0312/2; dz=0.4000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+2*0.04; y=-1.0+2*0.0312; z=0.0; dx=0.0312/2; dy=0.0312/2; dz=0.4000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+2*0.04; y=-1.0+4*0.0312; z=0.0; dx=0.0312/2; dy=0.0312/2; dz=0.4000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+2*0.04; y=-1.0+6*0.0312; z=0.0; dx=0.0312/2; dy=0.0312/2; dz=0.4000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+2*0.04; y=-1.0+8*0.0312; z=0.0; dx=0.0312/2; dy=0.0312/2; dz=0.4000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+
+{  [ Ellipsoid: x=-7.0+2*0.04; y=-1.0; z=0.0+2*0.4000; dx=0.0312/2; dy=0.0312/2; dz=0.4000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+2*0.04; y=-1.0; z=0.0+4*0.4000; dx=0.0312/2; dy=0.0312/2; dz=0.4000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+2*0.04; y=-1.0; z=0.0+6*0.4000; dx=0.0312/2; dy=0.0312/2; dz=0.4000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+2*0.04; y=-1.0; z=0.0+8*0.4000; dx=0.0312/2; dy=0.0312/2; dz=0.4000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+
+//-----------------------------------------------------------------------------
+// Element 22
+
+{  [ Ellipsoid: x=-7.0+2*0.04; y=-1.0+12*0.04        ; z=0.0; dx=0.0312/2; dy=0.0312/2; dz=0.2000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+2*0.04; y=-1.0+12*0.04+2*0.0312; z=0.0; dx=0.0312/2; dy=0.0312/2; dz=0.2000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+2*0.04; y=-1.0+12*0.04+4*0.0312; z=0.0; dx=0.0312/2; dy=0.0312/2; dz=0.2000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+2*0.04; y=-1.0+12*0.04+6*0.0312; z=0.0; dx=0.0312/2; dy=0.0312/2; dz=0.2000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+2*0.04; y=-1.0+12*0.04+8*0.0312; z=0.0; dx=0.0312/2; dy=0.0312/2; dz=0.2000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+
+{  [ Ellipsoid: x=-7.0+2*0.04; y=-1.0+12*0.04; z=0.0+2*0.2000; dx=0.0312/2; dy=0.0312/2; dz=0.2000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+2*0.04; y=-1.0+12*0.04; z=0.0+4*0.2000; dx=0.0312/2; dy=0.0312/2; dz=0.2000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+2*0.04; y=-1.0+12*0.04; z=0.0+6*0.2000; dx=0.0312/2; dy=0.0312/2; dz=0.2000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+2*0.04; y=-1.0+12*0.04; z=0.0+8*0.2000; dx=0.0312/2; dy=0.0312/2; dz=0.2000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+
+//-----------------------------------------------------------------------------
+// Element 23
+
+{  [ Ellipsoid: x=-7.0+2*0.04; y=-1.0+24*0.04        ; z=0.0; dx=0.0312/2; dy=0.0312/2; dz=0.1000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+2*0.04; y=-1.0+24*0.04+2*0.0312; z=0.0; dx=0.0312/2; dy=0.0312/2; dz=0.1000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+2*0.04; y=-1.0+24*0.04+4*0.0312; z=0.0; dx=0.0312/2; dy=0.0312/2; dz=0.1000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+2*0.04; y=-1.0+24*0.04+6*0.0312; z=0.0; dx=0.0312/2; dy=0.0312/2; dz=0.1000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+2*0.04; y=-1.0+24*0.04+8*0.0312; z=0.0; dx=0.0312/2; dy=0.0312/2; dz=0.1000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+
+{  [ Ellipsoid: x=-7.0+2*0.04; y=-1.0+24*0.04; z=0.0+2*0.1000; dx=0.0312/2; dy=0.0312/2; dz=0.1000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+2*0.04; y=-1.0+24*0.04; z=0.0+4*0.1000; dx=0.0312/2; dy=0.0312/2; dz=0.1000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+2*0.04; y=-1.0+24*0.04; z=0.0+6*0.1000; dx=0.0312/2; dy=0.0312/2; dz=0.1000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+2*0.04; y=-1.0+24*0.04; z=0.0+8*0.1000; dx=0.0312/2; dy=0.0312/2; dz=0.1000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+
+//-----------------------------------------------------------------------------
+// Element 24
+
+{  [ Ellipsoid: x=-7.0+2*0.04; y=-1.0+36*0.04        ; z=0.0; dx=0.0312/2; dy=0.0312/2; dz=0.0500/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+2*0.04; y=-1.0+36*0.04+2*0.0312; z=0.0; dx=0.0312/2; dy=0.0312/2; dz=0.0500/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+2*0.04; y=-1.0+36*0.04+4*0.0312; z=0.0; dx=0.0312/2; dy=0.0312/2; dz=0.0500/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+2*0.04; y=-1.0+36*0.04+6*0.0312; z=0.0; dx=0.0312/2; dy=0.0312/2; dz=0.0500/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+2*0.04; y=-1.0+36*0.04+8*0.0312; z=0.0; dx=0.0312/2; dy=0.0312/2; dz=0.0500/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+
+{  [ Ellipsoid: x=-7.0+2*0.04; y=-1.0+36*0.04; z=0.0+2*0.0500; dx=0.0312/2; dy=0.0312/2; dz=0.0500/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+2*0.04; y=-1.0+36*0.04; z=0.0+4*0.0500; dx=0.0312/2; dy=0.0312/2; dz=0.0500/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+2*0.04; y=-1.0+36*0.04; z=0.0+6*0.0500; dx=0.0312/2; dy=0.0312/2; dz=0.0500/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+2*0.04; y=-1.0+36*0.04; z=0.0+8*0.0500; dx=0.0312/2; dy=0.0312/2; dz=0.0500/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+
+//=============================================================================
+// Element 31
+
+{  [ Ellipsoid: x=-7.0+4*0.04; y=-1.0        ; z=0.0; dx=0.0278/2; dy=0.0278/2; dz=0.4000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+4*0.04; y=-1.0+2*0.0278; z=0.0; dx=0.0278/2; dy=0.0278/2; dz=0.4000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+4*0.04; y=-1.0+4*0.0278; z=0.0; dx=0.0278/2; dy=0.0278/2; dz=0.4000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+4*0.04; y=-1.0+6*0.0278; z=0.0; dx=0.0278/2; dy=0.0278/2; dz=0.4000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+4*0.04; y=-1.0+8*0.0278; z=0.0; dx=0.0278/2; dy=0.0278/2; dz=0.4000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+
+{  [ Ellipsoid: x=-7.0+4*0.04; y=-1.0; z=0.0+2*0.4000; dx=0.0278/2; dy=0.0278/2; dz=0.4000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+4*0.04; y=-1.0; z=0.0+4*0.4000; dx=0.0278/2; dy=0.0278/2; dz=0.4000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+4*0.04; y=-1.0; z=0.0+6*0.4000; dx=0.0278/2; dy=0.0278/2; dz=0.4000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+4*0.04; y=-1.0; z=0.0+8*0.4000; dx=0.0278/2; dy=0.0278/2; dz=0.4000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+
+//-----------------------------------------------------------------------------
+// Element 32
+
+{  [ Ellipsoid: x=-7.0+4*0.04; y=-1.0+12*0.04        ; z=0.0; dx=0.0278/2; dy=0.0278/2; dz=0.2000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+4*0.04; y=-1.0+12*0.04+2*0.0278; z=0.0; dx=0.0278/2; dy=0.0278/2; dz=0.2000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+4*0.04; y=-1.0+12*0.04+4*0.0278; z=0.0; dx=0.0278/2; dy=0.0278/2; dz=0.2000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+4*0.04; y=-1.0+12*0.04+6*0.0278; z=0.0; dx=0.0278/2; dy=0.0278/2; dz=0.2000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+4*0.04; y=-1.0+12*0.04+8*0.0278; z=0.0; dx=0.0278/2; dy=0.0278/2; dz=0.2000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+
+{  [ Ellipsoid: x=-7.0+4*0.04; y=-1.0+12*0.04; z=0.0+2*0.2000; dx=0.0278/2; dy=0.0278/2; dz=0.2000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+4*0.04; y=-1.0+12*0.04; z=0.0+4*0.2000; dx=0.0278/2; dy=0.0278/2; dz=0.2000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+4*0.04; y=-1.0+12*0.04; z=0.0+6*0.2000; dx=0.0278/2; dy=0.0278/2; dz=0.2000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+4*0.04; y=-1.0+12*0.04; z=0.0+8*0.2000; dx=0.0278/2; dy=0.0278/2; dz=0.2000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+
+//-----------------------------------------------------------------------------
+// Element 33
+
+{  [ Ellipsoid: x=-7.0+4*0.04; y=-1.0+24*0.04        ; z=0.0; dx=0.0278/2; dy=0.0278/2; dz=0.1000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+4*0.04; y=-1.0+24*0.04+2*0.0278; z=0.0; dx=0.0278/2; dy=0.0278/2; dz=0.1000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+4*0.04; y=-1.0+24*0.04+4*0.0278; z=0.0; dx=0.0278/2; dy=0.0278/2; dz=0.1000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+4*0.04; y=-1.0+24*0.04+6*0.0278; z=0.0; dx=0.0278/2; dy=0.0278/2; dz=0.1000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+4*0.04; y=-1.0+24*0.04+8*0.0278; z=0.0; dx=0.0278/2; dy=0.0278/2; dz=0.1000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+
+{  [ Ellipsoid: x=-7.0+4*0.04; y=-1.0+24*0.04; z=0.0+2*0.1000; dx=0.0278/2; dy=0.0278/2; dz=0.1000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+4*0.04; y=-1.0+24*0.04; z=0.0+4*0.1000; dx=0.0278/2; dy=0.0278/2; dz=0.1000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+4*0.04; y=-1.0+24*0.04; z=0.0+6*0.1000; dx=0.0278/2; dy=0.0278/2; dz=0.1000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+4*0.04; y=-1.0+24*0.04; z=0.0+8*0.1000; dx=0.0278/2; dy=0.0278/2; dz=0.1000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+
+//-----------------------------------------------------------------------------
+// Element 34
+
+{  [ Ellipsoid: x=-7.0+4*0.04; y=-1.0+36*0.04        ; z=0.0; dx=0.0278/2; dy=0.0278/2; dz=0.0500/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+4*0.04; y=-1.0+36*0.04+2*0.0278; z=0.0; dx=0.0278/2; dy=0.0278/2; dz=0.0500/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+4*0.04; y=-1.0+36*0.04+4*0.0278; z=0.0; dx=0.0278/2; dy=0.0278/2; dz=0.0500/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+4*0.04; y=-1.0+36*0.04+6*0.0278; z=0.0; dx=0.0278/2; dy=0.0278/2; dz=0.0500/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+4*0.04; y=-1.0+36*0.04+8*0.0278; z=0.0; dx=0.0278/2; dy=0.0278/2; dz=0.0500/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+
+{  [ Ellipsoid: x=-7.0+4*0.04; y=-1.0+36*0.04; z=0.0+2*0.0500; dx=0.0278/2; dy=0.0278/2; dz=0.0500/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+4*0.04; y=-1.0+36*0.04; z=0.0+4*0.0500; dx=0.0278/2; dy=0.0278/2; dz=0.0500/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+4*0.04; y=-1.0+36*0.04; z=0.0+6*0.0500; dx=0.0278/2; dy=0.0278/2; dz=0.0500/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+4*0.04; y=-1.0+36*0.04; z=0.0+8*0.0500; dx=0.0278/2; dy=0.0278/2; dz=0.0500/2; ];  formula=H2O;  rho=BONE;; priority = 1;  	} 
+
+//=============================================================================
+// Element 41
+
+{  [ Ellipsoid: x=-7.0+6*0.04; y=-1.0        ; z=0.0; dx=0.0250/2; dy=0.0250/2; dz=0.4000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+6*0.04; y=-1.0+2*0.0250; z=0.0; dx=0.0250/2; dy=0.0250/2; dz=0.4000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+6*0.04; y=-1.0+4*0.0250; z=0.0; dx=0.0250/2; dy=0.0250/2; dz=0.4000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+6*0.04; y=-1.0+6*0.0250; z=0.0; dx=0.0250/2; dy=0.0250/2; dz=0.4000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+6*0.04; y=-1.0+8*0.0250; z=0.0; dx=0.0250/2; dy=0.0250/2; dz=0.4000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+
+{  [ Ellipsoid: x=-7.0+6*0.04; y=-1.0; z=0.0+2*0.4000; dx=0.0250/2; dy=0.0250/2; dz=0.4000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+6*0.04; y=-1.0; z=0.0+4*0.4000; dx=0.0250/2; dy=0.0250/2; dz=0.4000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+6*0.04; y=-1.0; z=0.0+6*0.4000; dx=0.0250/2; dy=0.0250/2; dz=0.4000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+6*0.04; y=-1.0; z=0.0+8*0.4000; dx=0.0250/2; dy=0.0250/2; dz=0.4000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+
+//-----------------------------------------------------------------------------
+// Element 42
+
+{  [ Ellipsoid: x=-7.0+6*0.04; y=-1.0+12*0.04        ; z=0.0; dx=0.0250/2; dy=0.0250/2; dz=0.2000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+6*0.04; y=-1.0+12*0.04+2*0.0250; z=0.0; dx=0.0250/2; dy=0.0250/2; dz=0.2000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+6*0.04; y=-1.0+12*0.04+4*0.0250; z=0.0; dx=0.0250/2; dy=0.0250/2; dz=0.2000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+6*0.04; y=-1.0+12*0.04+6*0.0250; z=0.0; dx=0.0250/2; dy=0.0250/2; dz=0.2000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+6*0.04; y=-1.0+12*0.04+8*0.0250; z=0.0; dx=0.0250/2; dy=0.0250/2; dz=0.2000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+
+{  [ Ellipsoid: x=-7.0+6*0.04; y=-1.0+12*0.04; z=0.0+2*0.2000; dx=0.0250/2; dy=0.0250/2; dz=0.2000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+6*0.04; y=-1.0+12*0.04; z=0.0+4*0.2000; dx=0.0250/2; dy=0.0250/2; dz=0.2000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+6*0.04; y=-1.0+12*0.04; z=0.0+6*0.2000; dx=0.0250/2; dy=0.0250/2; dz=0.2000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+6*0.04; y=-1.0+12*0.04; z=0.0+8*0.2000; dx=0.0250/2; dy=0.0250/2; dz=0.2000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+
+//-----------------------------------------------------------------------------
+// Element 43
+
+{  [ Ellipsoid: x=-7.0+6*0.04; y=-1.0+24*0.04        ; z=0.0; dx=0.0250/2; dy=0.0250/2; dz=0.1000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+6*0.04; y=-1.0+24*0.04+2*0.0250; z=0.0; dx=0.0250/2; dy=0.0250/2; dz=0.1000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+6*0.04; y=-1.0+24*0.04+4*0.0250; z=0.0; dx=0.0250/2; dy=0.0250/2; dz=0.1000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+6*0.04; y=-1.0+24*0.04+6*0.0250; z=0.0; dx=0.0250/2; dy=0.0250/2; dz=0.1000/2; ];   formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+6*0.04; y=-1.0+24*0.04+8*0.0250; z=0.0; dx=0.0250/2; dy=0.0250/2; dz=0.1000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+
+{  [ Ellipsoid: x=-7.0+6*0.04; y=-1.0+24*0.04; z=0.0+2*0.1000; dx=0.0250/2; dy=0.0250/2; dz=0.1000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+6*0.04; y=-1.0+24*0.04; z=0.0+4*0.1000; dx=0.0250/2; dy=0.0250/2; dz=0.1000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+6*0.04; y=-1.0+24*0.04; z=0.0+6*0.1000; dx=0.0250/2; dy=0.0250/2; dz=0.1000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+6*0.04; y=-1.0+24*0.04; z=0.0+8*0.1000; dx=0.0250/2; dy=0.0250/2; dz=0.1000/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+
+//-----------------------------------------------------------------------------
+// Element 44
+{  [ Ellipsoid: x=-7.0+6*0.04; y=-1.0+36*0.04        ; z=0.0; dx=0.0250/2; dy=0.0250/2; dz=0.0500/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+6*0.04; y=-1.0+36*0.04+2*0.0250; z=0.0; dx=0.0250/2; dy=0.0250/2; dz=0.0500/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+6*0.04; y=-1.0+36*0.04+4*0.0250; z=0.0; dx=0.0250/2; dy=0.0250/2; dz=0.0500/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+6*0.04; y=-1.0+36*0.04+6*0.0250; z=0.0; dx=0.0250/2; dy=0.0250/2; dz=0.0500/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+6*0.04; y=-1.0+36*0.04+8*0.0250; z=0.0; dx=0.0250/2; dy=0.0250/2; dz=0.0500/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+6*0.04; y=-1.0+36*0.04; z=0.0+2*0.0500; dx=0.0250/2; dy=0.0250/2; dz=0.0500/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+6*0.04; y=-1.0+36*0.04; z=0.0+4*0.0500; dx=0.0250/2; dy=0.0250/2; dz=0.0500/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+6*0.04; y=-1.0+36*0.04; z=0.0+6*0.0500; dx=0.0250/2; dy=0.0250/2; dz=0.0500/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+{  [ Ellipsoid: x=-7.0+6*0.04; y=-1.0+36*0.04; z=0.0+8*0.0500; dx=0.0250/2; dy=0.0250/2; dz=0.0500/2; ]; formula=H2O;  rho=BONE;; priority = 1;  	} 
+
+

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<java version="1.6.0_20" class="java.beans.XMLDecoder"> 
+ <object class="edu.stanford.rsl.conrad.physics.materials.Mixture"> 
+  <void property="density"> 
+   <double>5.37</double> 
+  </void> 
+  <void property="name"> 
+   <string>lyso</string> 
+  </void> 
+  <void property="weightedAtomicComposition"> 
+   <object class="edu.stanford.rsl.conrad.physics.materials.utils.WeightedAtomicComposition"> 
+    <void property="compositionTable"> 
+     <void method="put"> 
+      <string>Lu</string> 
+      <double>54.417109978439996</double> 
+     </void> 
+     <void method="put"> 
+      <string>O</string> 
+      <double>3.792149696</double> 
+     </void> 
+     <void method="put"> 
+      <string>Si</string> 
+      <double>2.33736044491</double> 
+     </void> 
+     <void method="put"> 
+      <string>Y</string> 
+      <double>32.78541956328925</double> 
+     </void> 
+    </void> 
+   </object> 
+  </void> 
+ </object> 
+</java> 

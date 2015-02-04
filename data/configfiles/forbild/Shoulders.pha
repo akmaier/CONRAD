@@ -1,0 +1,26 @@
+
+Phantom "Shoulders"
+
+Object Clavicle
+{ [ Cylinder:  axis (20,9,-2);  x=-10;  y=5.5;  z=16;  l=17;    r=0.5; ]; formula=H2O;  rho=CLAVICULUM; priority = 1;} 
+{ [ Cylinder:  axis (20,-9,2);  x=10;   y=5.5;  z=16;  l=17;    r=0.5 ;] formula=H2O;  rho=CLAVICULUM; priority = 1; }    
+{ [ Cylinder:  axis (20,9,-2);  x=-10;  y=5.5;  z=16;  l=16.5;  r=0.4; ]; formula=H2O;  rho=BONEMARROW; priority = 1; } 
+{ [ Cylinder:  axis (20,-9,2);  x=10;   y=5.5;  z=16;  l=16.5 ; r=0.4; ] formula=H2O;  rho=BONEMARROW; priority = 1; } 
+
+Object Shoulder Blade
+{ [ Ellipsoid_free:   a_x(2,-1,0); a_y(1,2,0);  x=12 ;  y=-5;    z=15 ;   dx=4.5;  dy=0.5;  dz=6;    z<15; ]; formula=H2O;  rho=SKAPULUM; priority = 1;}
+{ [ Ellipsoid_free:   a_x(2,1,0);  a_y(-1,2,0); x=-12;    y=-5;    z=15 ;   dx=4.5;  dy=0.5;  dz=6;    z<15 ;]; formula=H2O ; rho=SKAPULUM ;priority = 1;}
+{ [ Ellipsoid_free:   a_x(2,-1,0); a_y(1,2,0);  x=12;   y=-5;    z=15  ;  dx=4  ;  dy=0.4 ; dz=5.5 ; z<15; ]; formula=H2O  ;rho=BONEMARROW ;priority = 1;}
+{ [ Ellipsoid_free:   a_x(2,1,0) ; a_y(-1,2,0); x=-12 ;   y=-5;   z=15  ;  dx=4  ;  dy=0.4 ; dz=5.5 ; z<15; ]; formula=H2O ; rho=BONEMARROW; priority = 1;}
+
+Object Humerus
+{ [ Sphere: x=-22;     y=0 ;z=15;    r=2.5; ];   formula=H2O;  rho=HUMERUS;priority = 1;    }
+{ [ Sphere: x=22;      y=0; z=15;    r=2.5; ];   formula=H2O;  rho=HUMERUS;priority = 1;    }
+{ [ Sphere: x=-22;     y=0; z=15;    r=2;   ];   formula=H2O;  rho=BONEMARROW ;priority = 1;}
+{ [ Sphere: x=22;      y=0 ;z=15;    r=2;   ];   formula=H2O ; rho=BONEMARROW;priority = 1; }
+{ [ Sphere: x=-16.5;   y=0; z=15;    r=2.5; ];   formula=H2O;  rho=HUMERUS; priority = 1;   }
+{ [ Sphere: x=16.5;    y=0; z=15;    r=2.5; ];   formula=H2O;  rho=HUMERUS;priority = 1;    }
+{ [ Sphere: x=-16.5;   y=0 ;z=15;    r=2 ;  ] ;  formula=H2O;  rho=BONEMARROW ;priority = 1;}
+{ [ Sphere: x=16.5;    y=0; z=15 ;   r=2 ;  ] ;  formula=H2O ; rho=BONEMARROW;priority = 1; }
+
+

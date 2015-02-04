@@ -1,0 +1,2406 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<java version="1.6.0_20" class="java.beans.XMLDecoder"> 
+ <object class="java.util.TreeMap"> 
+  <void method="put"> 
+   <object class="edu.stanford.rsl.conrad.physics.materials.utils.AttenuationType" method="valueOf"> 
+    <string>COHERENT_ATTENUATION</string> 
+   </object> 
+   <object class="edu.stanford.rsl.conrad.utils.interpolation.NumberInterpolatingTreeMap"> 
+    <void method="put"> 
+     <double>0.0010</double> 
+     <double>8.112</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0015</double> 
+     <double>7.672</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0020</double> 
+     <double>7.187</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0030</double> 
+     <double>6.267</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0040</double> 
+     <double>5.466</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.004132</double> 
+     <double>5.372</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.00438</double> 
+     <double>5.194</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.004698</double> 
+     <double>4.981</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0050</double> 
+     <double>4.785</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0060</double> 
+     <double>4.205</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0080</double> 
+     <double>3.311</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.01</double> 
+     <double>2.69</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.015</double> 
+     <double>1.773</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.02</double> 
+     <double>1.252</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.03</double> 
+     <double>0.7078</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.03049</double> 
+     <double>0.691</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.04</double> 
+     <double>0.4616</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.05</double> 
+     <double>0.3274</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.06</double> 
+     <double>0.2438</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.08</double> 
+     <double>0.1495</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.1</double> 
+     <double>0.1012</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.15</double> 
+     <double>0.04919</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.2</double> 
+     <double>0.02905</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.3</double> 
+     <double>0.01353</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.4</double> 
+     <double>0.007785</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.5</double> 
+     <double>0.00505</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.6</double> 
+     <double>0.003537</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.8</double> 
+     <double>0.002009</double> 
+    </void> 
+    <void method="put"> 
+     <double>1.0</double> 
+     <double>0.001292</double> 
+    </void> 
+    <void method="put"> 
+     <double>1.022</double> 
+     <double>0.001238</double> 
+    </void> 
+    <void method="put"> 
+     <double>1.25</double> 
+     <double>8.305E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>1.5</double> 
+     <double>5.777E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>2.0</double> 
+     <double>3.256E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>2.044</double> 
+     <double>3.118E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>3.0</double> 
+     <double>1.449E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>4.0</double> 
+     <double>8.156E-5</double> 
+    </void> 
+    <void method="put"> 
+     <double>5.0</double> 
+     <double>5.223E-5</double> 
+    </void> 
+    <void method="put"> 
+     <double>6.0</double> 
+     <double>3.627E-5</double> 
+    </void> 
+    <void method="put"> 
+     <double>7.0</double> 
+     <double>2.665E-5</double> 
+    </void> 
+    <void method="put"> 
+     <double>8.0</double> 
+     <double>2.04E-5</double> 
+    </void> 
+    <void method="put"> 
+     <double>9.0</double> 
+     <double>1.612E-5</double> 
+    </void> 
+    <void method="put"> 
+     <double>10.0</double> 
+     <double>1.306E-5</double> 
+    </void> 
+    <void method="put"> 
+     <double>11.0</double> 
+     <double>1.079E-5</double> 
+    </void> 
+    <void method="put"> 
+     <double>12.0</double> 
+     <double>9.072E-6</double> 
+    </void> 
+    <void method="put"> 
+     <double>13.0</double> 
+     <double>7.726E-6</double> 
+    </void> 
+    <void method="put"> 
+     <double>14.0</double> 
+     <double>6.663E-6</double> 
+    </void> 
+    <void method="put"> 
+     <double>15.0</double> 
+     <double>5.807E-6</double> 
+    </void> 
+    <void method="put"> 
+     <double>16.0</double> 
+     <double>5.1E-6</double> 
+    </void> 
+    <void method="put"> 
+     <double>18.0</double> 
+     <double>4.031E-6</double> 
+    </void> 
+    <void method="put"> 
+     <double>20.0</double> 
+     <double>3.266E-6</double> 
+    </void> 
+    <void method="put"> 
+     <double>22.0</double> 
+     <double>2.699E-6</double> 
+    </void> 
+    <void method="put"> 
+     <double>24.0</double> 
+     <double>2.267E-6</double> 
+    </void> 
+    <void method="put"> 
+     <double>26.0</double> 
+     <double>1.932E-6</double> 
+    </void> 
+    <void method="put"> 
+     <double>28.0</double> 
+     <double>1.666E-6</double> 
+    </void> 
+    <void method="put"> 
+     <double>30.0</double> 
+     <double>1.451E-6</double> 
+    </void> 
+    <void method="put"> 
+     <double>40.0</double> 
+     <double>8.161E-7</double> 
+    </void> 
+    <void method="put"> 
+     <double>50.0</double> 
+     <double>5.223E-7</double> 
+    </void> 
+    <void method="put"> 
+     <double>60.0</double> 
+     <double>3.628E-7</double> 
+    </void> 
+    <void method="put"> 
+     <double>80.0</double> 
+     <double>2.041E-7</double> 
+    </void> 
+    <void method="put"> 
+     <double>100.0</double> 
+     <double>1.306E-7</double> 
+    </void> 
+    <void method="put"> 
+     <double>150.0</double> 
+     <double>5.807E-8</double> 
+    </void> 
+    <void method="put"> 
+     <double>200.0</double> 
+     <double>3.265E-8</double> 
+    </void> 
+    <void method="put"> 
+     <double>300.0</double> 
+     <double>1.451E-8</double> 
+    </void> 
+    <void method="put"> 
+     <double>400.0</double> 
+     <double>8.161E-9</double> 
+    </void> 
+    <void method="put"> 
+     <double>500.0</double> 
+     <double>5.223E-9</double> 
+    </void> 
+    <void method="put"> 
+     <double>600.0</double> 
+     <double>3.628E-9</double> 
+    </void> 
+    <void method="put"> 
+     <double>800.0</double> 
+     <double>2.041E-9</double> 
+    </void> 
+    <void method="put"> 
+     <double>1000.0</double> 
+     <double>1.306E-9</double> 
+    </void> 
+    <void method="put"> 
+     <double>1500.0</double> 
+     <double>5.807E-10</double> 
+    </void> 
+    <void method="put"> 
+     <double>2000.0</double> 
+     <double>3.265E-10</double> 
+    </void> 
+    <void method="put"> 
+     <double>3000.0</double> 
+     <double>1.451E-10</double> 
+    </void> 
+    <void method="put"> 
+     <double>4000.0</double> 
+     <double>8.161E-11</double> 
+    </void> 
+    <void method="put"> 
+     <double>5000.0</double> 
+     <double>5.223E-11</double> 
+    </void> 
+    <void method="put"> 
+     <double>6000.0</double> 
+     <double>3.628E-11</double> 
+    </void> 
+    <void method="put"> 
+     <double>8000.0</double> 
+     <double>2.041E-11</double> 
+    </void> 
+    <void method="put"> 
+     <double>10000.0</double> 
+     <double>1.306E-11</double> 
+    </void> 
+    <void method="put"> 
+     <double>15000.0</double> 
+     <double>5.807E-12</double> 
+    </void> 
+    <void method="put"> 
+     <double>20000.0</double> 
+     <double>3.265E-12</double> 
+    </void> 
+    <void method="put"> 
+     <double>30000.0</double> 
+     <double>1.451E-12</double> 
+    </void> 
+    <void method="put"> 
+     <double>40000.0</double> 
+     <double>8.161E-13</double> 
+    </void> 
+    <void method="put"> 
+     <double>50000.0</double> 
+     <double>5.223E-13</double> 
+    </void> 
+    <void method="put"> 
+     <double>60000.0</double> 
+     <double>3.628E-13</double> 
+    </void> 
+    <void method="put"> 
+     <double>80000.0</double> 
+     <double>2.041E-13</double> 
+    </void> 
+    <void method="put"> 
+     <double>100000.0</double> 
+     <double>1.306E-13</double> 
+    </void> 
+   </object> 
+  </void> 
+  <void method="put"> 
+   <object class="edu.stanford.rsl.conrad.physics.materials.utils.AttenuationType" method="valueOf"> 
+    <string>INCOHERENT_ATTENUATION</string> 
+   </object> 
+   <object class="edu.stanford.rsl.conrad.utils.interpolation.NumberInterpolatingTreeMap"> 
+    <void method="put"> 
+     <double>0.0010</double> 
+     <double>0.005025</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0015</double> 
+     <double>0.009324</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0020</double> 
+     <double>0.01367</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0030</double> 
+     <double>0.02182</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0040</double> 
+     <double>0.02899</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.004132</double> 
+     <double>0.02987</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.00438</double> 
+     <double>0.03147</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.004698</double> 
+     <double>0.03348</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0050</double> 
+     <double>0.03532</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0060</double> 
+     <double>0.04104</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0080</double> 
+     <double>0.05119</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.01</double> 
+     <double>0.06005</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.015</double> 
+     <double>0.07657</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.02</double> 
+     <double>0.08725</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.03</double> 
+     <double>0.1</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.03049</double> 
+     <double>0.1005</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.04</double> 
+     <double>0.1067</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.05</double> 
+     <double>0.1103</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.06</double> 
+     <double>0.112</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.08</double> 
+     <double>0.1124</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.1</double> 
+     <double>0.1107</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.15</double> 
+     <double>0.1042</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.2</double> 
+     <double>0.09759</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.3</double> 
+     <double>0.08666</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.4</double> 
+     <double>0.0784</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.5</double> 
+     <double>0.07202</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.6</double> 
+     <double>0.06682</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.8</double> 
+     <double>0.05891</double> 
+    </void> 
+    <void method="put"> 
+     <double>1.0</double> 
+     <double>0.05307</double> 
+    </void> 
+    <void method="put"> 
+     <double>1.022</double> 
+     <double>0.05253</double> 
+    </void> 
+    <void method="put"> 
+     <double>1.25</double> 
+     <double>0.04752</double> 
+    </void> 
+    <void method="put"> 
+     <double>1.5</double> 
+     <double>0.04323</double> 
+    </void> 
+    <void method="put"> 
+     <double>2.0</double> 
+     <double>0.03692</double> 
+    </void> 
+    <void method="put"> 
+     <double>2.044</double> 
+     <double>0.03646</double> 
+    </void> 
+    <void method="put"> 
+     <double>3.0</double> 
+     <double>0.02906</double> 
+    </void> 
+    <void method="put"> 
+     <double>4.0</double> 
+     <double>0.02425</double> 
+    </void> 
+    <void method="put"> 
+     <double>5.0</double> 
+     <double>0.02095</double> 
+    </void> 
+    <void method="put"> 
+     <double>6.0</double> 
+     <double>0.01852</double> 
+    </void> 
+    <void method="put"> 
+     <double>7.0</double> 
+     <double>0.01664</double> 
+    </void> 
+    <void method="put"> 
+     <double>8.0</double> 
+     <double>0.01515</double> 
+    </void> 
+    <void method="put"> 
+     <double>9.0</double> 
+     <double>0.01392</double> 
+    </void> 
+    <void method="put"> 
+     <double>10.0</double> 
+     <double>0.0129</double> 
+    </void> 
+    <void method="put"> 
+     <double>11.0</double> 
+     <double>0.01203</double> 
+    </void> 
+    <void method="put"> 
+     <double>12.0</double> 
+     <double>0.01129</double> 
+    </void> 
+    <void method="put"> 
+     <double>13.0</double> 
+     <double>0.01063</double> 
+    </void> 
+    <void method="put"> 
+     <double>14.0</double> 
+     <double>0.01006</double> 
+    </void> 
+    <void method="put"> 
+     <double>15.0</double> 
+     <double>0.009551</double> 
+    </void> 
+    <void method="put"> 
+     <double>16.0</double> 
+     <double>0.009096</double> 
+    </void> 
+    <void method="put"> 
+     <double>18.0</double> 
+     <double>0.008315</double> 
+    </void> 
+    <void method="put"> 
+     <double>20.0</double> 
+     <double>0.007667</double> 
+    </void> 
+    <void method="put"> 
+     <double>22.0</double> 
+     <double>0.007118</double> 
+    </void> 
+    <void method="put"> 
+     <double>24.0</double> 
+     <double>0.006653</double> 
+    </void> 
+    <void method="put"> 
+     <double>26.0</double> 
+     <double>0.006247</double> 
+    </void> 
+    <void method="put"> 
+     <double>28.0</double> 
+     <double>0.005896</double> 
+    </void> 
+    <void method="put"> 
+     <double>30.0</double> 
+     <double>0.005579</double> 
+    </void> 
+    <void method="put"> 
+     <double>40.0</double> 
+     <double>0.004435</double> 
+    </void> 
+    <void method="put"> 
+     <double>50.0</double> 
+     <double>0.003702</double> 
+    </void> 
+    <void method="put"> 
+     <double>60.0</double> 
+     <double>0.003189</double> 
+    </void> 
+    <void method="put"> 
+     <double>80.0</double> 
+     <double>0.002516</double> 
+    </void> 
+    <void method="put"> 
+     <double>100.0</double> 
+     <double>0.002088</double> 
+    </void> 
+    <void method="put"> 
+     <double>150.0</double> 
+     <double>0.001487</double> 
+    </void> 
+    <void method="put"> 
+     <double>200.0</double> 
+     <double>0.001166</double> 
+    </void> 
+    <void method="put"> 
+     <double>300.0</double> 
+     <double>8.26E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>400.0</double> 
+     <double>6.47E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>500.0</double> 
+     <double>5.357E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>600.0</double> 
+     <double>4.586E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>800.0</double> 
+     <double>3.582E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>1000.0</double> 
+     <double>2.947E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>1500.0</double> 
+     <double>2.058E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>2000.0</double> 
+     <double>1.593E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>3000.0</double> 
+     <double>1.107E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>4000.0</double> 
+     <double>8.547E-5</double> 
+    </void> 
+    <void method="put"> 
+     <double>5000.0</double> 
+     <double>6.989E-5</double> 
+    </void> 
+    <void method="put"> 
+     <double>6000.0</double> 
+     <double>5.926E-5</double> 
+    </void> 
+    <void method="put"> 
+     <double>8000.0</double> 
+     <double>4.567E-5</double> 
+    </void> 
+    <void method="put"> 
+     <double>10000.0</double> 
+     <double>3.729E-5</double> 
+    </void> 
+    <void method="put"> 
+     <double>15000.0</double> 
+     <double>2.577E-5</double> 
+    </void> 
+    <void method="put"> 
+     <double>20000.0</double> 
+     <double>1.981E-5</double> 
+    </void> 
+    <void method="put"> 
+     <double>30000.0</double> 
+     <double>1.366E-5</double> 
+    </void> 
+    <void method="put"> 
+     <double>40000.0</double> 
+     <double>1.049E-5</double> 
+    </void> 
+    <void method="put"> 
+     <double>50000.0</double> 
+     <double>8.542E-6</double> 
+    </void> 
+    <void method="put"> 
+     <double>60000.0</double> 
+     <double>7.222E-6</double> 
+    </void> 
+    <void method="put"> 
+     <double>80000.0</double> 
+     <double>5.535E-6</double> 
+    </void> 
+    <void method="put"> 
+     <double>100000.0</double> 
+     <double>4.504E-6</double> 
+    </void> 
+   </object> 
+  </void> 
+  <void method="put"> 
+   <object class="edu.stanford.rsl.conrad.physics.materials.utils.AttenuationType" method="valueOf"> 
+    <string>PHOTOELECTRIC_ABSORPTION</string> 
+   </object> 
+   <object class="edu.stanford.rsl.conrad.utils.interpolation.NumberInterpolatingTreeMap"> 
+    <void method="put"> 
+     <double>0.0010</double> 
+     <double>8577.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0015</double> 
+     <double>3483.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0020</double> 
+     <double>1760.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0030</double> 
+     <double>647.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0040</double> 
+     <double>311.4</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.004132</double> 
+     <double>864.1</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.00438</double> 
+     <double>1045.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.004698</double> 
+     <double>1024.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0050</double> 
+     <double>879.9</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0060</double> 
+     <double>552.5</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0080</double> 
+     <double>259.7</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.01</double> 
+     <double>143.1</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.015</double> 
+     <double>47.39</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.02</double> 
+     <double>21.34</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.03</double> 
+     <double>6.821</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.03049</double> 
+     <double>6.514</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.04</double> 
+     <double>19.7</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.05</double> 
+     <double>10.76</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.06</double> 
+     <double>6.519</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.08</double> 
+     <double>2.914</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.1</double> 
+     <double>1.546</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.15</double> 
+     <double>0.4828</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.2</double> 
+     <double>0.2114</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.3</double> 
+     <double>0.06747</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.4</double> 
+     <double>0.03102</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.5</double> 
+     <double>0.01746</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.6</double> 
+     <double>0.01116</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.8</double> 
+     <double>0.005777</double> 
+    </void> 
+    <void method="put"> 
+     <double>1.0</double> 
+     <double>0.003607</double> 
+    </void> 
+    <void method="put"> 
+     <double>1.022</double> 
+     <double>0.003433</double> 
+    </void> 
+    <void method="put"> 
+     <double>1.25</double> 
+     <double>0.002315</double> 
+    </void> 
+    <void method="put"> 
+     <double>1.5</double> 
+     <double>0.001658</double> 
+    </void> 
+    <void method="put"> 
+     <double>2.0</double> 
+     <double>0.00101</double> 
+    </void> 
+    <void method="put"> 
+     <double>2.044</double> 
+     <double>9.739E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>3.0</double> 
+     <double>5.362E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>4.0</double> 
+     <double>3.554E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>5.0</double> 
+     <double>2.63E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>6.0</double> 
+     <double>2.076E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>7.0</double> 
+     <double>1.71E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>8.0</double> 
+     <double>1.452E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>9.0</double> 
+     <double>1.26E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>10.0</double> 
+     <double>1.112E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>11.0</double> 
+     <double>9.947E-5</double> 
+    </void> 
+    <void method="put"> 
+     <double>12.0</double> 
+     <double>8.992E-5</double> 
+    </void> 
+    <void method="put"> 
+     <double>13.0</double> 
+     <double>8.206E-5</double> 
+    </void> 
+    <void method="put"> 
+     <double>14.0</double> 
+     <double>7.543E-5</double> 
+    </void> 
+    <void method="put"> 
+     <double>15.0</double> 
+     <double>6.979E-5</double> 
+    </void> 
+    <void method="put"> 
+     <double>16.0</double> 
+     <double>6.49E-5</double> 
+    </void> 
+    <void method="put"> 
+     <double>18.0</double> 
+     <double>5.693E-5</double> 
+    </void> 
+    <void method="put"> 
+     <double>20.0</double> 
+     <double>5.07E-5</double> 
+    </void> 
+    <void method="put"> 
+     <double>22.0</double> 
+     <double>4.571E-5</double> 
+    </void> 
+    <void method="put"> 
+     <double>24.0</double> 
+     <double>4.16E-5</double> 
+    </void> 
+    <void method="put"> 
+     <double>26.0</double> 
+     <double>3.816E-5</double> 
+    </void> 
+    <void method="put"> 
+     <double>28.0</double> 
+     <double>3.525E-5</double> 
+    </void> 
+    <void method="put"> 
+     <double>30.0</double> 
+     <double>3.274E-5</double> 
+    </void> 
+    <void method="put"> 
+     <double>40.0</double> 
+     <double>2.416E-5</double> 
+    </void> 
+    <void method="put"> 
+     <double>50.0</double> 
+     <double>1.914E-5</double> 
+    </void> 
+    <void method="put"> 
+     <double>60.0</double> 
+     <double>1.584E-5</double> 
+    </void> 
+    <void method="put"> 
+     <double>80.0</double> 
+     <double>1.178E-5</double> 
+    </void> 
+    <void method="put"> 
+     <double>100.0</double> 
+     <double>9.378E-6</double> 
+    </void> 
+    <void method="put"> 
+     <double>150.0</double> 
+     <double>6.213E-6</double> 
+    </void> 
+    <void method="put"> 
+     <double>200.0</double> 
+     <double>4.642E-6</double> 
+    </void> 
+    <void method="put"> 
+     <double>300.0</double> 
+     <double>3.084E-6</double> 
+    </void> 
+    <void method="put"> 
+     <double>400.0</double> 
+     <double>2.309E-6</double> 
+    </void> 
+    <void method="put"> 
+     <double>500.0</double> 
+     <double>1.845E-6</double> 
+    </void> 
+    <void method="put"> 
+     <double>600.0</double> 
+     <double>1.537E-6</double> 
+    </void> 
+    <void method="put"> 
+     <double>800.0</double> 
+     <double>1.152E-6</double> 
+    </void> 
+    <void method="put"> 
+     <double>1000.0</double> 
+     <double>9.21E-7</double> 
+    </void> 
+    <void method="put"> 
+     <double>1500.0</double> 
+     <double>6.133E-7</double> 
+    </void> 
+    <void method="put"> 
+     <double>2000.0</double> 
+     <double>4.599E-7</double> 
+    </void> 
+    <void method="put"> 
+     <double>3000.0</double> 
+     <double>3.065E-7</double> 
+    </void> 
+    <void method="put"> 
+     <double>4000.0</double> 
+     <double>2.299E-7</double> 
+    </void> 
+    <void method="put"> 
+     <double>5000.0</double> 
+     <double>1.839E-7</double> 
+    </void> 
+    <void method="put"> 
+     <double>6000.0</double> 
+     <double>1.532E-7</double> 
+    </void> 
+    <void method="put"> 
+     <double>8000.0</double> 
+     <double>1.149E-7</double> 
+    </void> 
+    <void method="put"> 
+     <double>10000.0</double> 
+     <double>9.19E-8</double> 
+    </void> 
+    <void method="put"> 
+     <double>15000.0</double> 
+     <double>6.128E-8</double> 
+    </void> 
+    <void method="put"> 
+     <double>20000.0</double> 
+     <double>4.595E-8</double> 
+    </void> 
+    <void method="put"> 
+     <double>30000.0</double> 
+     <double>3.063E-8</double> 
+    </void> 
+    <void method="put"> 
+     <double>40000.0</double> 
+     <double>2.297E-8</double> 
+    </void> 
+    <void method="put"> 
+     <double>50000.0</double> 
+     <double>1.838E-8</double> 
+    </void> 
+    <void method="put"> 
+     <double>60000.0</double> 
+     <double>1.531E-8</double> 
+    </void> 
+    <void method="put"> 
+     <double>80000.0</double> 
+     <double>1.149E-8</double> 
+    </void> 
+    <void method="put"> 
+     <double>100000.0</double> 
+     <double>9.19E-9</double> 
+    </void> 
+   </object> 
+  </void> 
+  <void method="put"> 
+   <object class="edu.stanford.rsl.conrad.physics.materials.utils.AttenuationType" method="valueOf"> 
+    <string>NUCLEAR_FIELD_PAIRPRODUCTION</string> 
+   </object> 
+   <object class="edu.stanford.rsl.conrad.utils.interpolation.NumberInterpolatingTreeMap"> 
+    <void method="put"> 
+     <double>0.0010</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0015</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0020</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0030</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0040</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.004132</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.00438</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.004698</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0050</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0060</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0080</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.01</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.015</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.02</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.03</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.03049</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.04</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.05</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.06</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.08</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.1</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.15</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.2</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.3</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.4</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.5</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.6</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.8</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>1.0</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>1.022</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>1.25</double> 
+     <double>1.77E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>1.5</double> 
+     <double>8.211E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>2.0</double> 
+     <double>0.002794</double> 
+    </void> 
+    <void method="put"> 
+     <double>2.044</double> 
+     <double>0.002986</double> 
+    </void> 
+    <void method="put"> 
+     <double>3.0</double> 
+     <double>0.007108</double> 
+    </void> 
+    <void method="put"> 
+     <double>4.0</double> 
+     <double>0.01094</double> 
+    </void> 
+    <void method="put"> 
+     <double>5.0</double> 
+     <double>0.01424</double> 
+    </void> 
+    <void method="put"> 
+     <double>6.0</double> 
+     <double>0.01709</double> 
+    </void> 
+    <void method="put"> 
+     <double>7.0</double> 
+     <double>0.01963</double> 
+    </void> 
+    <void method="put"> 
+     <double>8.0</double> 
+     <double>0.02192</double> 
+    </void> 
+    <void method="put"> 
+     <double>9.0</double> 
+     <double>0.02399</double> 
+    </void> 
+    <void method="put"> 
+     <double>10.0</double> 
+     <double>0.02589</double> 
+    </void> 
+    <void method="put"> 
+     <double>11.0</double> 
+     <double>0.02764</double> 
+    </void> 
+    <void method="put"> 
+     <double>12.0</double> 
+     <double>0.02926</double> 
+    </void> 
+    <void method="put"> 
+     <double>13.0</double> 
+     <double>0.03077</double> 
+    </void> 
+    <void method="put"> 
+     <double>14.0</double> 
+     <double>0.03215</double> 
+    </void> 
+    <void method="put"> 
+     <double>15.0</double> 
+     <double>0.03343</double> 
+    </void> 
+    <void method="put"> 
+     <double>16.0</double> 
+     <double>0.03462</double> 
+    </void> 
+    <void method="put"> 
+     <double>18.0</double> 
+     <double>0.0368</double> 
+    </void> 
+    <void method="put"> 
+     <double>20.0</double> 
+     <double>0.03874</double> 
+    </void> 
+    <void method="put"> 
+     <double>22.0</double> 
+     <double>0.04051</double> 
+    </void> 
+    <void method="put"> 
+     <double>24.0</double> 
+     <double>0.04211</double> 
+    </void> 
+    <void method="put"> 
+     <double>26.0</double> 
+     <double>0.04357</double> 
+    </void> 
+    <void method="put"> 
+     <double>28.0</double> 
+     <double>0.04491</double> 
+    </void> 
+    <void method="put"> 
+     <double>30.0</double> 
+     <double>0.04615</double> 
+    </void> 
+    <void method="put"> 
+     <double>40.0</double> 
+     <double>0.05114</double> 
+    </void> 
+    <void method="put"> 
+     <double>50.0</double> 
+     <double>0.0549</double> 
+    </void> 
+    <void method="put"> 
+     <double>60.0</double> 
+     <double>0.05777</double> 
+    </void> 
+    <void method="put"> 
+     <double>80.0</double> 
+     <double>0.06208</double> 
+    </void> 
+    <void method="put"> 
+     <double>100.0</double> 
+     <double>0.06509</double> 
+    </void> 
+    <void method="put"> 
+     <double>150.0</double> 
+     <double>0.06994</double> 
+    </void> 
+    <void method="put"> 
+     <double>200.0</double> 
+     <double>0.07281</double> 
+    </void> 
+    <void method="put"> 
+     <double>300.0</double> 
+     <double>0.07617</double> 
+    </void> 
+    <void method="put"> 
+     <double>400.0</double> 
+     <double>0.0781</double> 
+    </void> 
+    <void method="put"> 
+     <double>500.0</double> 
+     <double>0.07939</double> 
+    </void> 
+    <void method="put"> 
+     <double>600.0</double> 
+     <double>0.08028</double> 
+    </void> 
+    <void method="put"> 
+     <double>800.0</double> 
+     <double>0.08152</double> 
+    </void> 
+    <void method="put"> 
+     <double>1000.0</double> 
+     <double>0.08231</double> 
+    </void> 
+    <void method="put"> 
+     <double>1500.0</double> 
+     <double>0.08344</double> 
+    </void> 
+    <void method="put"> 
+     <double>2000.0</double> 
+     <double>0.08404</double> 
+    </void> 
+    <void method="put"> 
+     <double>3000.0</double> 
+     <double>0.08473</double> 
+    </void> 
+    <void method="put"> 
+     <double>4000.0</double> 
+     <double>0.08508</double> 
+    </void> 
+    <void method="put"> 
+     <double>5000.0</double> 
+     <double>0.08532</double> 
+    </void> 
+    <void method="put"> 
+     <double>6000.0</double> 
+     <double>0.08547</double> 
+    </void> 
+    <void method="put"> 
+     <double>8000.0</double> 
+     <double>0.08567</double> 
+    </void> 
+    <void method="put"> 
+     <double>10000.0</double> 
+     <double>0.08582</double> 
+    </void> 
+    <void method="put"> 
+     <double>15000.0</double> 
+     <double>0.08597</double> 
+    </void> 
+    <void method="put"> 
+     <double>20000.0</double> 
+     <double>0.08607</double> 
+    </void> 
+    <void method="put"> 
+     <double>30000.0</double> 
+     <double>0.08616</double> 
+    </void> 
+    <void method="put"> 
+     <double>40000.0</double> 
+     <double>0.08621</double> 
+    </void> 
+    <void method="put"> 
+     <double>50000.0</double> 
+     <double>0.08626</double> 
+    </void> 
+    <void method="put"> 
+     <double>60000.0</double> 
+     <double>0.08631</double> 
+    </void> 
+    <void method="put"> 
+     <double>80000.0</double> 
+     <double>0.08631</double> 
+    </void> 
+    <void method="put"> 
+     <double>100000.0</double> 
+     <double>0.08636</double> 
+    </void> 
+   </object> 
+  </void> 
+  <void method="put"> 
+   <object class="edu.stanford.rsl.conrad.physics.materials.utils.AttenuationType" method="valueOf"> 
+    <string>ELECTRON_FIELD_PAIRPRODUCTION</string> 
+   </object> 
+   <object class="edu.stanford.rsl.conrad.utils.interpolation.NumberInterpolatingTreeMap"> 
+    <void method="put"> 
+     <double>0.0010</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0015</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0020</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0030</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0040</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.004132</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.00438</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.004698</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0050</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0060</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0080</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.01</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.015</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.02</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.03</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.03049</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.04</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.05</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.06</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.08</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.1</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.15</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.2</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.3</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.4</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.5</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.6</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.8</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>1.0</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>1.022</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>1.25</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>1.5</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>2.0</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>2.044</double> 
+     <double>0.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>3.0</double> 
+     <double>1.016E-5</double> 
+    </void> 
+    <void method="put"> 
+     <double>4.0</double> 
+     <double>4.147E-5</double> 
+    </void> 
+    <void method="put"> 
+     <double>5.0</double> 
+     <double>8.255E-5</double> 
+    </void> 
+    <void method="put"> 
+     <double>6.0</double> 
+     <double>1.266E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>7.0</double> 
+     <double>1.705E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>8.0</double> 
+     <double>2.13E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>9.0</double> 
+     <double>2.537E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>10.0</double> 
+     <double>2.923E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>11.0</double> 
+     <double>3.288E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>12.0</double> 
+     <double>3.633E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>13.0</double> 
+     <double>3.957E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>14.0</double> 
+     <double>4.265E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>15.0</double> 
+     <double>4.557E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>16.0</double> 
+     <double>4.834E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>18.0</double> 
+     <double>5.347E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>20.0</double> 
+     <double>5.812E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>22.0</double> 
+     <double>6.242E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>24.0</double> 
+     <double>6.633E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>26.0</double> 
+     <double>6.994E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>28.0</double> 
+     <double>7.33E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>30.0</double> 
+     <double>7.642E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>40.0</double> 
+     <double>8.933E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>50.0</double> 
+     <double>9.912E-4</double> 
+    </void> 
+    <void method="put"> 
+     <double>60.0</double> 
+     <double>0.001069</double> 
+    </void> 
+    <void method="put"> 
+     <double>80.0</double> 
+     <double>0.001186</double> 
+    </void> 
+    <void method="put"> 
+     <double>100.0</double> 
+     <double>0.001271</double> 
+    </void> 
+    <void method="put"> 
+     <double>150.0</double> 
+     <double>0.001411</double> 
+    </void> 
+    <void method="put"> 
+     <double>200.0</double> 
+     <double>0.001499</double> 
+    </void> 
+    <void method="put"> 
+     <double>300.0</double> 
+     <double>0.001607</double> 
+    </void> 
+    <void method="put"> 
+     <double>400.0</double> 
+     <double>0.001672</double> 
+    </void> 
+    <void method="put"> 
+     <double>500.0</double> 
+     <double>0.001716</double> 
+    </void> 
+    <void method="put"> 
+     <double>600.0</double> 
+     <double>0.001749</double> 
+    </void> 
+    <void method="put"> 
+     <double>800.0</double> 
+     <double>0.001793</double> 
+    </void> 
+    <void method="put"> 
+     <double>1000.0</double> 
+     <double>0.001823</double> 
+    </void> 
+    <void method="put"> 
+     <double>1500.0</double> 
+     <double>0.001867</double> 
+    </void> 
+    <void method="put"> 
+     <double>2000.0</double> 
+     <double>0.001892</double> 
+    </void> 
+    <void method="put"> 
+     <double>3000.0</double> 
+     <double>0.001919</double> 
+    </void> 
+    <void method="put"> 
+     <double>4000.0</double> 
+     <double>0.001935</double> 
+    </void> 
+    <void method="put"> 
+     <double>5000.0</double> 
+     <double>0.001945</double> 
+    </void> 
+    <void method="put"> 
+     <double>6000.0</double> 
+     <double>0.001952</double> 
+    </void> 
+    <void method="put"> 
+     <double>8000.0</double> 
+     <double>0.001961</double> 
+    </void> 
+    <void method="put"> 
+     <double>10000.0</double> 
+     <double>0.001967</double> 
+    </void> 
+    <void method="put"> 
+     <double>15000.0</double> 
+     <double>0.001975</double> 
+    </void> 
+    <void method="put"> 
+     <double>20000.0</double> 
+     <double>0.001979</double> 
+    </void> 
+    <void method="put"> 
+     <double>30000.0</double> 
+     <double>0.001983</double> 
+    </void> 
+    <void method="put"> 
+     <double>40000.0</double> 
+     <double>0.001986</double> 
+    </void> 
+    <void method="put"> 
+     <double>50000.0</double> 
+     <double>0.001988</double> 
+    </void> 
+    <void method="put"> 
+     <double>60000.0</double> 
+     <double>0.001989</double> 
+    </void> 
+    <void method="put"> 
+     <double>80000.0</double> 
+     <double>0.00199</double> 
+    </void> 
+    <void method="put"> 
+     <double>100000.0</double> 
+     <double>0.001991</double> 
+    </void> 
+   </object> 
+  </void> 
+  <void method="put"> 
+   <object class="edu.stanford.rsl.conrad.physics.materials.utils.AttenuationType" method="valueOf"> 
+    <string>TOTAL_WITH_COHERENT_ATTENUATION</string> 
+   </object> 
+   <object class="edu.stanford.rsl.conrad.utils.interpolation.NumberInterpolatingTreeMap"> 
+    <void method="put"> 
+     <double>0.0010</double> 
+     <double>8585.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0015</double> 
+     <double>3491.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0020</double> 
+     <double>1767.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0030</double> 
+     <double>653.3</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0040</double> 
+     <double>316.9</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.004132</double> 
+     <double>869.5</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.00438</double> 
+     <double>1050.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.004698</double> 
+     <double>1029.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0050</double> 
+     <double>884.8</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0060</double> 
+     <double>556.7</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0080</double> 
+     <double>263.1</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.01</double> 
+     <double>145.8</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.015</double> 
+     <double>49.24</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.02</double> 
+     <double>22.68</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.03</double> 
+     <double>7.629</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.03049</double> 
+     <double>7.306</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.04</double> 
+     <double>20.26</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.05</double> 
+     <double>11.2</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.06</double> 
+     <double>6.875</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.08</double> 
+     <double>3.176</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.1</double> 
+     <double>1.758</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.15</double> 
+     <double>0.6361</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.2</double> 
+     <double>0.3381</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.3</double> 
+     <double>0.1677</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.4</double> 
+     <double>0.1172</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.5</double> 
+     <double>0.09453</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.6</double> 
+     <double>0.08153</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.8</double> 
+     <double>0.0667</double> 
+    </void> 
+    <void method="put"> 
+     <double>1.0</double> 
+     <double>0.05797</double> 
+    </void> 
+    <void method="put"> 
+     <double>1.022</double> 
+     <double>0.0572</double> 
+    </void> 
+    <void method="put"> 
+     <double>1.25</double> 
+     <double>0.05085</double> 
+    </void> 
+    <void method="put"> 
+     <double>1.5</double> 
+     <double>0.04628</double> 
+    </void> 
+    <void method="put"> 
+     <double>2.0</double> 
+     <double>0.04105</double> 
+    </void> 
+    <void method="put"> 
+     <double>2.044</double> 
+     <double>0.04074</double> 
+    </void> 
+    <void method="put"> 
+     <double>3.0</double> 
+     <double>0.03686</double> 
+    </void> 
+    <void method="put"> 
+     <double>4.0</double> 
+     <double>0.03567</double> 
+    </void> 
+    <void method="put"> 
+     <double>5.0</double> 
+     <double>0.03559</double> 
+    </void> 
+    <void method="put"> 
+     <double>6.0</double> 
+     <double>0.03598</double> 
+    </void> 
+    <void method="put"> 
+     <double>7.0</double> 
+     <double>0.03664</double> 
+    </void> 
+    <void method="put"> 
+     <double>8.0</double> 
+     <double>0.03745</double> 
+    </void> 
+    <void method="put"> 
+     <double>9.0</double> 
+     <double>0.03831</double> 
+    </void> 
+    <void method="put"> 
+     <double>10.0</double> 
+     <double>0.03921</double> 
+    </void> 
+    <void method="put"> 
+     <double>11.0</double> 
+     <double>0.04011</double> 
+    </void> 
+    <void method="put"> 
+     <double>12.0</double> 
+     <double>0.04101</double> 
+    </void> 
+    <void method="put"> 
+     <double>13.0</double> 
+     <double>0.04189</double> 
+    </void> 
+    <void method="put"> 
+     <double>14.0</double> 
+     <double>0.04272</double> 
+    </void> 
+    <void method="put"> 
+     <double>15.0</double> 
+     <double>0.04351</double> 
+    </void> 
+    <void method="put"> 
+     <double>16.0</double> 
+     <double>0.04427</double> 
+    </void> 
+    <void method="put"> 
+     <double>18.0</double> 
+     <double>0.04571</double> 
+    </void> 
+    <void method="put"> 
+     <double>20.0</double> 
+     <double>0.04704</double> 
+    </void> 
+    <void method="put"> 
+     <double>22.0</double> 
+     <double>0.0483</double> 
+    </void> 
+    <void method="put"> 
+     <double>24.0</double> 
+     <double>0.04947</double> 
+    </void> 
+    <void method="put"> 
+     <double>26.0</double> 
+     <double>0.05056</double> 
+    </void> 
+    <void method="put"> 
+     <double>28.0</double> 
+     <double>0.05158</double> 
+    </void> 
+    <void method="put"> 
+     <double>30.0</double> 
+     <double>0.05253</double> 
+    </void> 
+    <void method="put"> 
+     <double>40.0</double> 
+     <double>0.0565</double> 
+    </void> 
+    <void method="put"> 
+     <double>50.0</double> 
+     <double>0.05962</double> 
+    </void> 
+    <void method="put"> 
+     <double>60.0</double> 
+     <double>0.06205</double> 
+    </void> 
+    <void method="put"> 
+     <double>80.0</double> 
+     <double>0.06579</double> 
+    </void> 
+    <void method="put"> 
+     <double>100.0</double> 
+     <double>0.06846</double> 
+    </void> 
+    <void method="put"> 
+     <double>150.0</double> 
+     <double>0.07285</double> 
+    </void> 
+    <void method="put"> 
+     <double>200.0</double> 
+     <double>0.07548</double> 
+    </void> 
+    <void method="put"> 
+     <double>300.0</double> 
+     <double>0.07861</double> 
+    </void> 
+    <void method="put"> 
+     <double>400.0</double> 
+     <double>0.08042</double> 
+    </void> 
+    <void method="put"> 
+     <double>500.0</double> 
+     <double>0.08164</double> 
+    </void> 
+    <void method="put"> 
+     <double>600.0</double> 
+     <double>0.08249</double> 
+    </void> 
+    <void method="put"> 
+     <double>800.0</double> 
+     <double>0.08367</double> 
+    </void> 
+    <void method="put"> 
+     <double>1000.0</double> 
+     <double>0.08442</double> 
+    </void> 
+    <void method="put"> 
+     <double>1500.0</double> 
+     <double>0.08552</double> 
+    </void> 
+    <void method="put"> 
+     <double>2000.0</double> 
+     <double>0.08609</double> 
+    </void> 
+    <void method="put"> 
+     <double>3000.0</double> 
+     <double>0.08676</double> 
+    </void> 
+    <void method="put"> 
+     <double>4000.0</double> 
+     <double>0.0871</double> 
+    </void> 
+    <void method="put"> 
+     <double>5000.0</double> 
+     <double>0.08734</double> 
+    </void> 
+    <void method="put"> 
+     <double>6000.0</double> 
+     <double>0.08748</double> 
+    </void> 
+    <void method="put"> 
+     <double>8000.0</double> 
+     <double>0.08768</double> 
+    </void> 
+    <void method="put"> 
+     <double>10000.0</double> 
+     <double>0.08782</double> 
+    </void> 
+    <void method="put"> 
+     <double>15000.0</double> 
+     <double>0.08797</double> 
+    </void> 
+    <void method="put"> 
+     <double>20000.0</double> 
+     <double>0.08806</double> 
+    </void> 
+    <void method="put"> 
+     <double>30000.0</double> 
+     <double>0.08816</double> 
+    </void> 
+    <void method="put"> 
+     <double>40000.0</double> 
+     <double>0.08821</double> 
+    </void> 
+    <void method="put"> 
+     <double>50000.0</double> 
+     <double>0.08826</double> 
+    </void> 
+    <void method="put"> 
+     <double>60000.0</double> 
+     <double>0.08831</double> 
+    </void> 
+    <void method="put"> 
+     <double>80000.0</double> 
+     <double>0.08831</double> 
+    </void> 
+    <void method="put"> 
+     <double>100000.0</double> 
+     <double>0.08836</double> 
+    </void> 
+   </object> 
+  </void> 
+  <void method="put"> 
+   <object class="edu.stanford.rsl.conrad.physics.materials.utils.AttenuationType" method="valueOf"> 
+    <string>TOTAL_WITHOUT_COHERENT_ATTENUATION</string> 
+   </object> 
+   <object class="edu.stanford.rsl.conrad.utils.interpolation.NumberInterpolatingTreeMap"> 
+    <void method="put"> 
+     <double>0.0010</double> 
+     <double>8577.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0015</double> 
+     <double>3483.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0020</double> 
+     <double>1760.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0030</double> 
+     <double>647.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0040</double> 
+     <double>311.4</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.004132</double> 
+     <double>864.2</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.00438</double> 
+     <double>1045.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.004698</double> 
+     <double>1024.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0050</double> 
+     <double>880.0</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0060</double> 
+     <double>552.5</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.0080</double> 
+     <double>259.8</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.01</double> 
+     <double>143.2</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.015</double> 
+     <double>47.46</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.02</double> 
+     <double>21.43</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.03</double> 
+     <double>6.921</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.03049</double> 
+     <double>6.615</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.04</double> 
+     <double>19.8</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.05</double> 
+     <double>10.87</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.06</double> 
+     <double>6.631</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.08</double> 
+     <double>3.026</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.1</double> 
+     <double>1.656</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.15</double> 
+     <double>0.5869</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.2</double> 
+     <double>0.309</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.3</double> 
+     <double>0.1541</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.4</double> 
+     <double>0.1094</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.5</double> 
+     <double>0.08948</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.6</double> 
+     <double>0.07799</double> 
+    </void> 
+    <void method="put"> 
+     <double>0.8</double> 
+     <double>0.06469</double> 
+    </void> 
+    <void method="put"> 
+     <double>1.0</double> 
+     <double>0.05668</double> 
+    </void> 
+    <void method="put"> 
+     <double>1.022</double> 
+     <double>0.05596</double> 
+    </void> 
+    <void method="put"> 
+     <double>1.25</double> 
+     <double>0.05002</double> 
+    </void> 
+    <void method="put"> 
+     <double>1.5</double> 
+     <double>0.0457</double> 
+    </void> 
+    <void method="put"> 
+     <double>2.0</double> 
+     <double>0.04072</double> 
+    </void> 
+    <void method="put"> 
+     <double>2.044</double> 
+     <double>0.04042</double> 
+    </void> 
+    <void method="put"> 
+     <double>3.0</double> 
+     <double>0.03672</double> 
+    </void> 
+    <void method="put"> 
+     <double>4.0</double> 
+     <double>0.03558</double> 
+    </void> 
+    <void method="put"> 
+     <double>5.0</double> 
+     <double>0.03553</double> 
+    </void> 
+    <void method="put"> 
+     <double>6.0</double> 
+     <double>0.03595</double> 
+    </void> 
+    <void method="put"> 
+     <double>7.0</double> 
+     <double>0.03662</double> 
+    </void> 
+    <void method="put"> 
+     <double>8.0</double> 
+     <double>0.03743</double> 
+    </void> 
+    <void method="put"> 
+     <double>9.0</double> 
+     <double>0.03829</double> 
+    </void> 
+    <void method="put"> 
+     <double>10.0</double> 
+     <double>0.0392</double> 
+    </void> 
+    <void method="put"> 
+     <double>11.0</double> 
+     <double>0.0401</double> 
+    </void> 
+    <void method="put"> 
+     <double>12.0</double> 
+     <double>0.041</double> 
+    </void> 
+    <void method="put"> 
+     <double>13.0</double> 
+     <double>0.04188</double> 
+    </void> 
+    <void method="put"> 
+     <double>14.0</double> 
+     <double>0.04271</double> 
+    </void> 
+    <void method="put"> 
+     <double>15.0</double> 
+     <double>0.04351</double> 
+    </void> 
+    <void method="put"> 
+     <double>16.0</double> 
+     <double>0.04426</double> 
+    </void> 
+    <void method="put"> 
+     <double>18.0</double> 
+     <double>0.0457</double> 
+    </void> 
+    <void method="put"> 
+     <double>20.0</double> 
+     <double>0.04704</double> 
+    </void> 
+    <void method="put"> 
+     <double>22.0</double> 
+     <double>0.04829</double> 
+    </void> 
+    <void method="put"> 
+     <double>24.0</double> 
+     <double>0.04947</double> 
+    </void> 
+    <void method="put"> 
+     <double>26.0</double> 
+     <double>0.05056</double> 
+    </void> 
+    <void method="put"> 
+     <double>28.0</double> 
+     <double>0.05158</double> 
+    </void> 
+    <void method="put"> 
+     <double>30.0</double> 
+     <double>0.05253</double> 
+    </void> 
+    <void method="put"> 
+     <double>40.0</double> 
+     <double>0.0565</double> 
+    </void> 
+    <void method="put"> 
+     <double>50.0</double> 
+     <double>0.05962</double> 
+    </void> 
+    <void method="put"> 
+     <double>60.0</double> 
+     <double>0.06205</double> 
+    </void> 
+    <void method="put"> 
+     <double>80.0</double> 
+     <double>0.06579</double> 
+    </void> 
+    <void method="put"> 
+     <double>100.0</double> 
+     <double>0.06846</double> 
+    </void> 
+    <void method="put"> 
+     <double>150.0</double> 
+     <double>0.07285</double> 
+    </void> 
+    <void method="put"> 
+     <double>200.0</double> 
+     <double>0.07548</double> 
+    </void> 
+    <void method="put"> 
+     <double>300.0</double> 
+     <double>0.07861</double> 
+    </void> 
+    <void method="put"> 
+     <double>400.0</double> 
+     <double>0.08042</double> 
+    </void> 
+    <void method="put"> 
+     <double>500.0</double> 
+     <double>0.08164</double> 
+    </void> 
+    <void method="put"> 
+     <double>600.0</double> 
+     <double>0.08249</double> 
+    </void> 
+    <void method="put"> 
+     <double>800.0</double> 
+     <double>0.08367</double> 
+    </void> 
+    <void method="put"> 
+     <double>1000.0</double> 
+     <double>0.08442</double> 
+    </void> 
+    <void method="put"> 
+     <double>1500.0</double> 
+     <double>0.08552</double> 
+    </void> 
+    <void method="put"> 
+     <double>2000.0</double> 
+     <double>0.08609</double> 
+    </void> 
+    <void method="put"> 
+     <double>3000.0</double> 
+     <double>0.08676</double> 
+    </void> 
+    <void method="put"> 
+     <double>4000.0</double> 
+     <double>0.0871</double> 
+    </void> 
+    <void method="put"> 
+     <double>5000.0</double> 
+     <double>0.08734</double> 
+    </void> 
+    <void method="put"> 
+     <double>6000.0</double> 
+     <double>0.08748</double> 
+    </void> 
+    <void method="put"> 
+     <double>8000.0</double> 
+     <double>0.08768</double> 
+    </void> 
+    <void method="put"> 
+     <double>10000.0</double> 
+     <double>0.08782</double> 
+    </void> 
+    <void method="put"> 
+     <double>15000.0</double> 
+     <double>0.08797</double> 
+    </void> 
+    <void method="put"> 
+     <double>20000.0</double> 
+     <double>0.08806</double> 
+    </void> 
+    <void method="put"> 
+     <double>30000.0</double> 
+     <double>0.08816</double> 
+    </void> 
+    <void method="put"> 
+     <double>40000.0</double> 
+     <double>0.08821</double> 
+    </void> 
+    <void method="put"> 
+     <double>50000.0</double> 
+     <double>0.08826</double> 
+    </void> 
+    <void method="put"> 
+     <double>60000.0</double> 
+     <double>0.08831</double> 
+    </void> 
+    <void method="put"> 
+     <double>80000.0</double> 
+     <double>0.08831</double> 
+    </void> 
+    <void method="put"> 
+     <double>100000.0</double> 
+     <double>0.08836</double> 
+    </void> 
+   </object> 
+  </void> 
+ </object> 
+</java> 

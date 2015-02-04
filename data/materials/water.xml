@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<java version="1.6.0_20" class="java.beans.XMLDecoder"> 
+ <object class="edu.stanford.rsl.conrad.physics.materials.Compound"> 
+  <void property="density"> 
+   <double>1.0</double> 
+  </void> 
+  <void property="formula"> 
+   <string>H2O</string> 
+  </void> 
+  <void property="name"> 
+   <string>water</string> 
+  </void> 
+  <void property="weightedAtomicComposition"> 
+   <object class="edu.stanford.rsl.conrad.physics.materials.utils.WeightedAtomicComposition"> 
+    <void property="compositionTable"> 
+     <void method="put"> 
+      <string>H</string> 
+      <double>2.01588</double> 
+     </void> 
+     <void method="put"> 
+      <string>O</string> 
+      <double>16.0</double> 
+     </void> 
+    </void> 
+   </object> 
+  </void> 
+ </object> 
+</java> 

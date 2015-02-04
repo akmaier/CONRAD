@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<java version="1.6.0_20" class="java.beans.XMLDecoder"> 
+ <object class="edu.stanford.rsl.conrad.physics.materials.Compound"> 
+  <void property="density"> 
+   <double>7.4</double> 
+  </void> 
+  <void property="formula"> 
+   <string>Lu2SO5</string> 
+  </void> 
+  <void property="name"> 
+   <string>lso</string> 
+  </void> 
+  <void property="weightedAtomicComposition"> 
+   <object class="edu.stanford.rsl.conrad.physics.materials.utils.WeightedAtomicComposition"> 
+    <void property="compositionTable"> 
+     <void method="put"> 
+      <string>Lu</string> 
+      <double>349.932</double> 
+     </void> 
+     <void method="put"> 
+      <string>O</string> 
+      <double>80.0</double> 
+     </void> 
+     <void method="put"> 
+      <string>S</string> 
+      <double>32.066</double> 
+     </void> 
+    </void> 
+   </object> 
+  </void> 
+ </object> 
+</java> 

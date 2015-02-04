@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<java version="1.7.0" class="java.beans.XMLDecoder">
+ <object class="edu.stanford.rsl.conrad.physics.materials.Mixture">
+  <void property="density">
+   <double>1.322</double>
+  </void>
+  <void property="name">
+   <string>Ultravist300</string>
+  </void>
+  <void property="weightedAtomicComposition">
+   <object class="edu.stanford.rsl.conrad.physics.materials.utils.WeightedAtomicComposition">
+    <void property="compositionTable">
+     <void method="put">
+      <string>C</string>
+      <double>0.17035043888809093</double>
+     </void>
+     <void method="put">
+      <string>H</string>
+      <double>0.13095684571092975</double>
+     </void>
+     <void method="put">
+      <string>I</string>
+      <double>0.3000032217785258</double>
+     </void>
+     <void method="put">
+      <string>N</string>
+      <double>0.03311975643661052</double>
+     </void>
+     <void method="put">
+      <string>O</string>
+      <double>0.988969737185843</double>
+     </void>
+    </void>
+   </object>
+  </void>
+ </object>
+</java>

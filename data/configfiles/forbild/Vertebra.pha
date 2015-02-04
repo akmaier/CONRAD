@@ -1,0 +1,22 @@
+
+Phantom "Vertebra"
+
+
+{ [ Cylinder_z:  x=X;     y=Y;   z=Z;   l=height;   r=1.75;]; formula=H2O;  rho=KORTIKALIS;; priority = 1; }
+
+{ [ Box: x=X;     y=Y-1.4;    z=Z;   dx=2*sqrt(1.3725);   dy=0.2; dz=height;  ]; formula=H2O;  rho=KORTIKALIS; ; priority = 1;} 
+
+{ [ Cylinder_z:  x=X;     y=Y;  z=Z;   l=height;   r=1.5; ]; formula=H2O;  rho=SPONGIOSA;  priority = 1;} 
+
+{ [ Box: x=X-2;   y=Y-1.975;  z=Z;   dx=4; dy=0.95;dz=height; r(-0.95,4-sqrt(1.3725),0) < ((-0.95*(-4+X)+(-2.45+Y)*(4-sqrt(1.3725)))/sqrt(0.95*0.95+(4-sqrt(1.3725))*(4-sqrt(1.3725))));    r(-2,32,0)>((-2*(-4+X)+32*(Y-2.45))/sqrt(1028));   ]; formula=H2O;  rho=KORTIKALIS;priority = 1;}
+
+{ [ Box: x=X+2;   y=Y-1.975;  z=Z;   dx=4;  dy=0.95;  dz=height; r(0.95,4-sqrt(1.3725),0) < ((0.95*(4+X)+(-2.45+Y)*(4-sqrt(1.3725)))/sqrt(0.95*0.95+(4-sqrt(1.3725))*(4-sqrt(1.3725))));        r(2,32,0)>((2*(4+X)+32*(Y-2.45))/sqrt(1028)); ]; formula=H2O; rho=KORTIKALIS;priority = 1; }
+
+{ [ Box:x=X;  y=-2.35+Y;  z=Z;   dx=1.6;   dy=0.3;  dz=height; r(-2,4,0) > ( ( -2*(0.4+X)+4*(-2.45+Y) )/sqrt(20) ); r(-2,-4,0) < ( ( -2*(-0.4+X)-4*(-2.45+Y) )/sqrt(20) ); ]; formula=H2O; rho=KORTIKALIS;priority = 1; } 
+
+{ [ Box:x=X;     y=-3.25+Y;  z=Z;   dx=0.8;  dy=1.6;  dz=height  ]; formula=H2O;  rho=KORTIKALIS;priority = 1; } 
+{ [ Cylinder_z:  x=X;     y=Y-4.05;   z=Z;   l=height;   r=0.4;       y<Y-4.05; ]; formula=H2O;  rho=KORTIKALIS; priority = 1;}
+
+
+
+

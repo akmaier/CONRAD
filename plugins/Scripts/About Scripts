@@ -1,0 +1,21 @@
+This folder contains example Javascript scripts that
+ImageJ 1.41 and later can run. To run JavaScript, ImageJ
+uses the Mozilla Rhino interpreter built into Java 1.6
+for Linux and Windows. Mac users, and users of earlier
+versions of Java, must download JavaScript.jar into the
+plugins folder. This JAR file is available at:
+
+  http://rsb.info.nih.gov/ij/download/tools/JavaScript.jar
+
+To run a script, download it, drag and drop it on the 
+"ImageJ" window, then press ctrl-r (Macros>Run Macro).
+Or copy it the clipboard, press shift+v (File>New>System Clipboard),
+then press ctrl+j (Macros>Evaluate JavaScript).
+
+More information is available at
+    
+   http://rsb.info.nih.gov/ij/developer/javascript.html
+
+Example scripts are available at
+
+   http://rsb.info.nih.gov/ij/macros/js/.

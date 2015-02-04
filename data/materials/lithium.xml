@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<java version="1.6.0_20" class="java.beans.XMLDecoder"> 
+ <object class="edu.stanford.rsl.conrad.physics.materials.Element"> 
+  <void property="atomicNumber"> 
+   <double>3.0</double> 
+  </void> 
+  <void property="atomicWeight"> 
+   <double>6.941</double> 
+  </void> 
+  <void property="density"> 
+   <double>0.53</double> 
+  </void> 
+  <void property="name"> 
+   <string>lithium</string> 
+  </void> 
+  <void property="symbol"> 
+   <string>Li</string> 
+  </void> 
+  <void property="weightedAtomicComposition"> 
+   <object class="edu.stanford.rsl.conrad.physics.materials.utils.WeightedAtomicComposition"> 
+    <void property="compositionTable"> 
+     <void method="put"> 
+      <string>Li</string> 
+      <double>1.0</double> 
+     </void> 
+    </void> 
+   </object> 
+  </void> 
+ </object> 
+</java> 

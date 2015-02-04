@@ -1,0 +1,987 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<java version="1.7.0_51" class="java.beans.XMLDecoder">
+ <object class="edu.stanford.rsl.conrad.utils.Configuration">
+  <void property="currentPath">
+   <string>d:\Desktop</string>
+  </void>
+  <void property="detector">
+   <object class="edu.stanford.rsl.conrad.physics.detector.PolychromaticDetectorWithNoise">
+    <void property="configured">
+     <boolean>true</boolean>
+    </void>
+    <void property="model">
+     <object class="edu.stanford.rsl.conrad.physics.absorption.PolychromaticAbsorptionModel">
+      <void property="inputSpectrum">
+       <object class="edu.stanford.rsl.conrad.physics.PolychromaticXRaySpectrum">
+        <void property="delta">
+         <double>2.5</double>
+        </void>
+       </object>
+      </void>
+     </object>
+    </void>
+   </object>
+  </void>
+  <void property="filterPipeline">
+   <array class="edu.stanford.rsl.conrad.filtering.ImageFilteringTool" length="1">
+    <void index="0">
+     <object class="edu.stanford.rsl.conrad.filtering.SimulateXRayDetector">
+      <void property="configured">
+       <boolean>true</boolean>
+      </void>
+     </object>
+    </void>
+   </array>
+  </void>
+  <void property="geometry">
+   <object class="edu.stanford.rsl.conrad.geometry.trajectories.CircularTrajectory">
+    <void property="averageAngularIncrement">
+     <double>3.0</double>
+    </void>
+    <void property="detectorHeight">
+     <int>480</int>
+    </void>
+    <void property="detectorUDirection">
+     <object class="java.lang.Enum" method="valueOf">
+      <class>edu.stanford.rsl.conrad.geometry.Projection$CameraAxisDirection</class>
+      <string>DETECTORMOTION_PLUS</string>
+     </object>
+    </void>
+    <void property="detectorVDirection">
+     <object class="java.lang.Enum" method="valueOf">
+      <class>edu.stanford.rsl.conrad.geometry.Projection$CameraAxisDirection</class>
+      <string>ROTATIONAXIS_PLUS</string>
+     </object>
+    </void>
+    <void property="detectorWidth">
+     <int>620</int>
+    </void>
+    <void property="numProjectionMatrices">
+     <int>120</int>
+    </void>
+    <void property="originInPixelsX">
+     <double>127.5</double>
+    </void>
+    <void property="originInPixelsY">
+     <double>127.5</double>
+    </void>
+    <void property="originInPixelsZ">
+     <double>127.5</double>
+    </void>
+    <void property="pixelDimensionX">
+     <double>0.6</double>
+    </void>
+    <void property="pixelDimensionY">
+     <double>0.6</double>
+    </void>
+    <void property="primaryAnglesString">
+     <string>0.0 3.0 6.0 9.0 12.0 15.0 18.0 21.0 24.0 27.0 30.0 33.0 36.0 39.0 42.0 45.0 48.0 51.0 54.0 57.0 60.0 63.0 66.0 69.0 72.0 75.0 78.0 81.0 84.0 87.0 90.0 93.0 96.0 99.0 102.0 105.0 108.0 111.0 114.0 117.0 120.0 123.0 126.0 129.0 132.0 135.0 138.0 141.0 144.0 147.0 150.0 153.0 156.0 159.0 162.0 165.0 168.0 171.0 174.0 177.0 180.0 183.0 186.0 189.0 192.0 195.0 198.0 201.0 204.0 207.0 210.0 213.0 216.0 219.0 222.0 225.0 228.0 231.0 234.0 237.0 240.0 243.0 246.0 249.0 252.0 255.0 258.0 261.0 264.0 267.0 270.0 273.0 276.0 279.0 282.0 285.0 288.0 291.0 294.0 297.0 300.0 303.0 306.0 309.0 312.0 315.0 318.0 321.0 324.0 327.0 330.0 333.0 336.0 339.0 342.0 345.0 348.0 351.0 354.0 357.0</string>
+    </void>
+    <void property="projectionMatrices">
+     <array class="edu.stanford.rsl.conrad.geometry.Projection" length="120">
+      <void index="0">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-310.0 -2000.0 0.0 217000.0]; [-240.0 0.0 2000.0 168000.0]; [-1.0 0.0 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="1">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-204.90324328803024 -2013.4832159444607 4.1633363423443375E-13 217000.0]; [-239.67108834109777 -12.560629498306328 2000.0000000000002 168000.00000000003]; [-0.9986295347545738 -0.05233595624294383 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="2">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-99.24486102885774 -2021.4476143495197 3.383959779057478E-13 217000.0]; [-238.6852548883852 -25.086831184236893 2000.0000000000007 168000.00000000003]; [-0.9945218953682733 -0.10452846326765346 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="3">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[6.685544495968941 -2023.8713653527466 -6.714628852932946E-13 217000.0]; [-237.04520174283306 -37.54427160965563 2000.0 168000.0]; [-0.9876883405951378 -0.15643446504023087 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="4">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[112.59762540803888 -2020.7478256211168 -1.6120438317557278E-13 217000.0]; [-234.75542417611314 -49.8988057962624 2000.0000000000002 168000.0]; [-0.9781476007338057 -0.20791169081775931 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="5">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[218.20108405543033 -2012.0855565599181 -2.2737367544323206E-13 217000.0]; [-231.8221983093764 -62.11657082460498 1999.9999999999998 168000.0]; [-0.9659258262890683 -0.25881904510252074 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="6">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[323.20646869839715 -1997.9083008465404 -5.60440582830779E-13 217000.0]; [-228.25356391083668 -74.1640786499874 2000.0000000000005 168000.00000000003]; [-0.9510565162951535 -0.3090169943749474 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="7">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[427.32596687646804 -1978.2549173534467 2.2737367544323206E-13 217000.0]; [-224.05930235932843 -86.00830789087206 2000.0 168000.0]; [-0.9335804264972017 -0.35836794954530027 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="8">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[530.2741942823941 -1953.1792746387002 -1.163513729807164E-13 217000.00000000003]; [-219.25090983422427 -97.61679433819195 2000.0000000000002 168000.00000000003]; [-0.9135454576426009 -0.40673664307580015 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="9">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[631.7689769806994 -1922.750103295995 -1.1102230246251565E-13 217000.0]; [-213.8415658052083 -108.95771993749122 2000.0000000000002 168000.0]; [-0.8910065241883679 -0.45399049973954675 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="10">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[731.532124826824 -1887.0508075688776 2.220446049250313E-13 217000.0]; [-207.84609690826528 -120.0000000000001 2000.0 168000.0]; [-0.8660254037844387 -0.49999999999999994 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="11">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[829.2901939669724 -1846.1792367455064 -1.0658141036401604E-14 217000.0]; [-201.280936306902 -130.71336840360647 1999.9999999999998 168000.0]; [-0.838670567945424 -0.544639035015027 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="12">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[924.7752363287125 -1800.2474169605616 -2.2737367544323206E-13 217000.0]; [-194.1640786499874 -141.06846055019355 2000.0 168000.0]; [-0.8090169943749475 -0.5877852522924731 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="13">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[1017.725534048014 -1749.3812441393914 -3.4372504842394846E-13 217000.0]; [-186.51503074967303 -151.03689385196054 2000.0 168000.0]; [-0.7771459614569709 -0.6293203910498375 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="14">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[1107.886316819724 -1693.7201389260342 -2.2737367544323206E-13 217000.0]; [-178.35475811457462 -160.59134552612596 2000.0000000000002 168000.0]; [-0.7431448254773942 -0.6691306063588582 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="15">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[1195.0104602052652 -1633.4166645409248 0.0 217000.0]; [-169.7056274847714 -169.70562748477138 2000.0 168000.0]; [-0.7071067811865476 -0.7071067811865475 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="16">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[1278.859162983542 -1568.6361086157087 2.327027459614328E-13 217000.0]; [-160.59134552612574 -178.35475811457462 2000.0000000000002 168000.0]; [-0.6691306063588582 -0.7431448254773942 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="17">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[1359.202601688492 -1499.5560301513365 5.329070518200777E-15 217000.00000000003]; [-151.0368938519606 -186.51503074967258 2000.000000000001 168000.00000000003]; [-0.6293203910498375 -0.7771459614569708 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="18">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[1435.8205605392282 -1426.36577284118 2.2737367544323206E-13 217000.0]; [-141.06846055019355 -194.1640786499874 2000.0 168000.0]; [-0.5877852522924731 -0.8090169943749475 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="19">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[1508.5030350361894 -1349.2659460931359 0.0 217000.0]; [-130.71336840360675 -201.28093630690174 2000.0 168000.0]; [-0.5446390350150272 -0.8386705679454239 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="20">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[1577.0508075688772 -1268.4678751731763 -1.1368683772161603E-13 217000.0]; [-120.00000000000003 -207.84609690826525 2000.0 168000.0]; [-0.5000000000000001 -0.8660254037844386 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="21">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[1641.275993457476 -1184.1930219774877 0.0 217000.0]; [-108.95771993749125 -213.84156580520826 2000.0 168000.0]; [-0.45399049973954686 -0.8910065241883678 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="22">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[1701.0025559317037 -1096.672378020807 1.1368683772161603E-13 217000.0]; [-97.61679433819198 -219.250909834224 2000.0000000000002 168000.0]; [-0.4067366430758004 -0.9135454576426009 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="23">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[1756.0667886353606 -1006.1458313047331 -2.2737367544323206E-13 217000.0]; [-86.00830789087206 -224.05930235932803 2000.0000000000005 168000.00000000003]; [-0.35836794954530016 -0.9335804264972017 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="24">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[1806.3177643340737 -912.8615088013926 -1.1368683772161605E-13 217000.0]; [-74.16407864998719 -228.25356391083645 2000.000000000001 168000.00000000003]; [-0.30901699437494745 -0.9510565162951535 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="25">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[1851.6177485963553 -817.0750963546527 5.2846615972157477E-14 217000.0]; [-62.11657082460509 -231.82219830937618 1999.9999999999998 168000.0]; [-0.25881904510252074 -0.9659258262890683 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="26">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[1891.842577314106 -719.0491378629984 -1.1368683772161603E-13 217000.0]; [-49.89880579626222 -234.75542417611337 2000.0 168000.0]; [-0.20791169081775923 -0.9781476007338057 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="27">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[1926.8819970278041 -619.0523156649547 -5.5511151231257833E-14 217000.0]; [-37.54427160965537 -237.04520174283306 2000.0000000000002 168000.0]; [-0.15643446504023092 -0.9876883405951378 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="28">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[1956.639967123574 -517.3587140994716 5.551115123125783E-14 217000.0]; [-25.086831184236807 -238.68525488838543 2000.0000000000007 168000.00000000003]; [-0.10452846326765346 -0.9945218953682733 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="29">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[1981.034923073835 -414.2470682598058 -2.875477633779156E-14 217000.0]; [-12.560629498306556 -239.67108834109777 2000.0000000000002 168000.00000000003]; [-0.052335956242943966 -0.9986295347545738 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="30">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[2000.0 -310.0000000000001 -8.777842193119295E-15 217000.0]; [-1.469576158976824E-14 -240.0 2000.0 168000.0]; [-6.123233995736766E-17 -1.0 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="31">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[2013.4832159444602 -204.9032432880303 -5.6510351953420474E-14 217000.00000000003]; [12.560629498306525 -239.67108834109777 2000.0000000000002 168000.00000000003]; [0.05233595624294384 -0.9986295347545738 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="32">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[2021.4476143495192 -99.24486102885805 -5.684341886080803E-14 217000.0]; [25.086831184236743 -238.6852548883854 2000.0000000000005 168000.0]; [0.10452846326765333 -0.9945218953682734 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="33">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[2023.8713653527473 6.685544495969339 -1.7053025658242407E-13 217000.00000000003]; [37.544271609655404 -237.0452017428331 2000.0000000000005 168000.00000000003]; [0.15643446504023104 -0.9876883405951377 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="34">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[2020.7478256211166 112.59762540803843 1.3322676295501942E-15 217000.0]; [49.898805796262245 -234.75542417611337 2000.0 168000.0]; [0.20791169081775912 -0.9781476007338057 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="35">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[2012.085556559918 218.20108405543044 -1.1102230246251567E-13 217000.0]; [62.116570824605006 -231.82219830937618 2000.0 168000.0]; [0.25881904510252085 -0.9659258262890683 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="36">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[1997.908300846541 323.20646869839703 1.1368683772161603E-13 217000.0]; [74.16407864998736 -228.25356391083687 2000.0 168000.0]; [0.30901699437494734 -0.9510565162951536 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="37">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[1978.2549173534467 427.32596687646804 0.0 217000.0]; [86.00830789087217 -224.05930235932843 1999.9999999999998 168000.0]; [0.35836794954530027 -0.9335804264972017 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="38">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[1953.1792746386998 530.2741942823939 -2.6645352591003757E-15 217000.0]; [97.61679433819191 -219.25090983422425 2000.0000000000002 168000.0]; [0.4067366430758001 -0.913545457642601 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="39">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[1922.7501032959951 631.7689769806994 2.2470914018413168E-13 217000.0]; [108.9577199374911 -213.84156580520806 2000.0000000000002 168000.0]; [0.45399049973954675 -0.8910065241883679 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="40">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[1887.0508075688776 731.5321248268235 -2.6645352591003757E-15 217000.0]; [119.99999999999974 -207.84609690826534 2000.0000000000005 168000.00000000003]; [0.4999999999999998 -0.8660254037844387 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="41">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[1846.1792367455066 829.2901939669725 0.0 217000.0]; [130.7133684036065 -201.28093630690176 2000.0 168000.0]; [0.5446390350150271 -0.838670567945424 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="42">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[1800.2474169605618 924.7752363287125 -3.383959779057477E-13 217000.00000000003]; [141.06846055019358 -194.1640786499872 2000.0000000000005 168000.00000000003]; [0.587785252292473 -0.8090169943749475 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="43">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[1749.3812441393916 1017.7255340480136 0.0 217000.0]; [151.03689385196094 -186.5150307496728 2000.0000000000002 168000.0]; [0.6293203910498373 -0.777145961456971 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="44">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[1693.720138926035 1107.8863168197236 -2.220446049250313E-13 217000.0]; [160.59134552612613 -178.35475811457468 1999.9999999999998 168000.0]; [0.6691306063588579 -0.7431448254773945 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="45">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[1633.4166645409248 1195.0104602052652 2.2737367544323203E-13 217000.0]; [169.7056274847716 -169.7056274847714 1999.9999999999998 168000.0]; [0.7071067811865475 -0.7071067811865476 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="46">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[1568.6361086157085 1278.8591629835428 -4.547473508864641E-13 217000.00000000003]; [178.35475811457445 -160.59134552612574 2000.0000000000005 168000.00000000003]; [0.7431448254773944 -0.669130606358858 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="47">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[1499.5560301513358 1359.2026016884922 1.2168044349891716E-13 217000.0]; [186.51503074967326 -151.03689385196074 1999.9999999999998 168000.0]; [0.7771459614569709 -0.6293203910498374 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="48">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[1426.3657728411802 1435.820560539228 2.2737367544323206E-13 217000.0]; [194.16407864998737 -141.0684605501938 2000.0000000000002 168000.0]; [0.8090169943749473 -0.5877852522924732 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="49">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[1349.2659460931359 1508.5030350361894 -5.329070518200751E-15 217000.0]; [201.2809363069015 -130.71336840360632 2000.0000000000002 168000.0]; [0.8386705679454239 -0.5446390350150273 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="50">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[1268.467875173176 1577.0508075688776 -4.4941828036826337E-13 217000.0]; [207.84609690826528 -120.0000000000001 2000.0 168000.0]; [0.8660254037844387 -0.49999999999999994 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="51">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[1184.1930219774877 1641.275993457476 2.327027459614328E-13 217000.0]; [213.8415658052085 -108.95771993749102 2000.0 168000.0]; [0.8910065241883678 -0.45399049973954686 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="52">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[1096.6723780208063 1701.002555931704 2.2737367544323206E-13 217000.0]; [219.25090983422425 -97.61679433819178 2000.0000000000002 168000.0]; [0.913545457642601 -0.40673664307580004 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="53">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[1006.1458313047337 1756.06678863536 1.1102230246251565E-13 217000.0]; [224.05930235932817 -86.00830789087227 2000.0000000000002 168000.0]; [0.9335804264972016 -0.35836794954530066 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="54">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[912.8615088013925 1806.3177643340732 2.220446049250313E-13 217000.0]; [228.25356391083707 -74.1640786499874 1999.9999999999998 168000.0]; [0.9510565162951535 -0.3090169943749475 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="55">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[817.075096354653 1851.6177485963549 1.163513729807164E-13 217000.0]; [231.82219830937638 -62.11657082460493 1999.9999999999998 168000.0]; [0.9659258262890682 -0.258819045102521 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="56">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[719.0491378629984 1891.8425773141057 1.6120438317557273E-13 217000.0]; [234.75542417611314 -49.8988057962624 2000.0000000000002 168000.0]; [0.9781476007338057 -0.20791169081775931 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="57">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[619.0523156649548 1926.881997027804 1.665334536937735E-13 217000.00000000003]; [237.04520174283286 -37.54427160965533 2000.0000000000005 168000.00000000003]; [0.9876883405951377 -0.15643446504023098 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="58">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[517.3587140994723 1956.6399671235743 -6.714628852932947E-13 217000.0]; [238.68525488838583 -25.086831184236924 1999.9999999999998 168000.0]; [0.9945218953682733 -0.10452846326765373 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="59">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[414.2470682598064 1981.0349230738348 5.380140777333509E-13 217000.0]; [239.67108834109754 -12.56062949830647 2000.0000000000005 168000.00000000003]; [0.9986295347545738 -0.05233595624294425 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="60">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[310.0000000000002 2000.0 -2.8213825422640093E-14 217000.0]; [240.0 -2.2855137320012845E-13 2000.0 168000.0]; [1.0 -1.2246467991473532E-16 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="61">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[204.90324328803075 2013.4832159444607 3.33066907387547E-13 217000.0]; [239.67108834109777 12.560629498306346 2000.0000000000002 168000.00000000003]; [0.9986295347545738 0.052335956242943564 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="62">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[99.24486102885771 2021.4476143495194 1.942890293094024E-13 217000.0]; [238.6852548883852 25.086831184236818 2000.0000000000007 168000.00000000003]; [0.9945218953682733 0.1045284632676535 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="63">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-6.6855444959686565 2023.8713653527468 -2.7755575615628914E-13 217000.0]; [237.04520174283306 37.54427160965543 2000.0 168000.0]; [0.9876883405951378 0.15643446504023073 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="64">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-112.59762540803825 2020.7478256211164 -5.0182080713057076E-14 217000.0]; [234.75542417611337 49.898805796262394 2000.0 168000.0]; [0.9781476007338057 0.20791169081775907 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="65">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-218.2010840554296 2012.0855565599181 1.1102230246251565E-13 217000.0]; [231.82219830937643 62.11657082460477 2000.0000000000002 168000.0]; [0.9659258262890684 0.25881904510252035 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="66">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-323.2064686983978 1997.908300846541 -3.4372504842394846E-13 217000.0]; [228.25356391083685 74.16407864998735 2000.0 168000.0]; [0.9510565162951535 0.30901699437494773 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="67">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-427.32596687646827 1978.2549173534467 -2.167155344068306E-13 217000.0]; [224.0593023593282 86.00830789087222 2000.0000000000002 168000.0]; [0.9335804264972017 0.35836794954530043 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="68">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-530.2741942823933 1953.1792746387 -2.327027459614328E-13 217000.0]; [219.25090983422427 97.61679433819172 2000.0000000000002 168000.0]; [0.9135454576426011 0.4067366430757998 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="69">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-631.7689769806987 1922.7501032959956 4.4941828036826337E-13 217000.0]; [213.84156580520857 108.95771993749122 1999.9999999999998 168000.0]; [0.8910065241883681 0.45399049973954625 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="70">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-731.5321248268242 1887.050807568877 -2.327027459614328E-13 217000.0]; [207.84609690826525 119.9999999999998 2000.0 168000.0]; [0.8660254037844386 0.5000000000000001 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="71">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-829.2901939669723 1846.1792367455066 -1.163513729807164E-13 217000.0]; [201.28093630690176 130.71336840360627 2000.0 168000.0]; [0.838670567945424 0.5446390350150271 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="72">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-924.7752363287125 1800.2474169605618 -3.383959779057477E-13 217000.00000000003]; [194.1640786499872 141.06846055019358 2000.0000000000005 168000.00000000003]; [0.8090169943749475 0.587785252292473 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="73">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-1017.725534048014 1749.381244139392 1.1635137298071638E-13 217000.0]; [186.51503074967283 151.03689385196094 2000.0000000000002 168000.0]; [0.7771459614569711 0.6293203910498373 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="74">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-1107.886316819724 1693.7201389260342 -2.2737367544323206E-13 217000.0]; [178.35475811457462 160.59134552612596 2000.0000000000002 168000.0]; [0.7431448254773942 0.6691306063588582 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="75">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-1195.0104602052654 1633.4166645409252 2.2737367544323206E-13 217000.0]; [169.70562748477144 169.70562748477138 2000.0 168000.0]; [0.7071067811865477 0.7071067811865475 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="76">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-1278.859162983542 1568.6361086157087 1.163513729807164E-13 217000.0]; [160.5913455261258 178.35475811457457 2000.0 168000.0]; [0.6691306063588585 0.743144825477394 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="77">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-1359.2026016884931 1499.5560301513356 2.2204460492503133E-13 217000.00000000003]; [151.03689385196094 186.5150307496729 2000.0000000000005 168000.00000000003]; [0.6293203910498371 0.7771459614569711 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="78">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-1435.820560539228 1426.3657728411802 0.0 217000.0]; [141.06846055019358 194.1640786499876 2000.0000000000002 168000.0]; [0.5877852522924732 0.8090169943749473 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="79">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-1508.5030350361899 1349.2659460931352 0.0 217000.0]; [130.71336840360647 201.28093630690176 1999.9999999999998 168000.0]; [0.544639035015027 0.838670567945424 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="80">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-1577.0508075688765 1268.4678751731767 -2.6645352591003757E-15 217000.0]; [120.00000000000011 207.846096908265 2000.0000000000002 168000.0]; [0.5000000000000004 0.8660254037844385 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="81">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-1641.275993457476 1184.1930219774877 1.163513729807164E-13 217000.0]; [108.95771993749115 213.84156580520826 2000.0000000000002 168000.0]; [0.4539904997395469 0.8910065241883678 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="82">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-1701.002555931704 1096.6723780208065 2.6645352591003757E-15 217000.0]; [97.61679433819191 219.25090983422425 2000.0000000000002 168000.0]; [0.4067366430758001 0.913545457642601 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="83">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-1756.0667886353601 1006.1458313047339 -1.1102230246251565E-13 217000.0]; [86.00830789087206 224.0593023593284 2000.0000000000002 168000.0]; [0.3583679495453007 0.9335804264972016 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="84">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-1806.3177643340732 912.8615088013927 0.0 217000.0]; [74.16407864998742 228.25356391083707 2000.0 168000.0]; [0.30901699437494756 0.9510565162951535 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="85">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-1851.6177485963553 817.0750963546525 -2.664535259100363E-15 217000.0]; [62.11657082460517 231.8221983093764 1999.9999999999995 168000.0]; [0.25881904510252063 0.9659258262890683 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="86">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-1891.8425773141057 719.0491378629993 0.0 217000.0]; [49.89880579626224 234.7554241761131 2000.0000000000005 168000.0]; [0.2079116908177598 0.9781476007338056 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="87">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-1926.881997027804 619.0523156649548 0.0 217000.00000000003]; [37.544271609655404 237.0452017428331 2000.0000000000005 168000.00000000003]; [0.15643446504023104 0.9876883405951377 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="88">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-1956.6399671235736 517.3587140994733 -8.526512829121202E-14 217000.0]; [25.086831184237017 238.6852548883856 2000.0 168000.0]; [0.10452846326765423 0.9945218953682733 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="89">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-1981.0349230738354 414.2470682598048 1.454392162258955E-14 217000.0]; [12.560629498306408 239.67108834109774 2000.0000000000002 168000.0]; [0.052335956242943425 0.9986295347545739 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="90">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-2000.0 310.00000000000034 -2.633352657935786E-14 217000.0]; [4.408728476930471E-14 240.0 2000.0 168000.0]; [1.8369701987210297E-16 1.0 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="91">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-2013.4832159444602 204.9032432880318 1.3877787807814457E-14 217000.0]; [-12.56062949830632 239.67108834109774 2000.0000000000002 168000.0]; [-0.05233595624294306 0.9986295347545739 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="92">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-2021.4476143495192 99.24486102885697 -8.459899447643694E-14 217000.0]; [-25.0868311842369 238.6852548883856 2000.0000000000002 168000.0]; [-0.10452846326765387 0.9945218953682733 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="93">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-2023.871365352747 -6.6855444959686 0.0 217000.0]; [-37.54427160965536 237.04520174283306 2000.0000000000002 168000.0]; [-0.15643446504023067 0.9876883405951378 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="94">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-2020.7478256211166 -112.59762540803911 1.3322676295501878E-15 217000.0]; [-49.898805796262316 234.75542417611356 1999.9999999999998 168000.0]; [-0.20791169081775943 0.9781476007338056 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="95">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-2012.0855565599181 -218.20108405542948 1.1368683772161603E-13 217000.0]; [-62.11657082460487 231.82219830937643 2000.0000000000002 168000.0]; [-0.2588190451025203 0.9659258262890684 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="96">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-1997.908300846541 -323.2064686983968 1.1368683772161603E-13 217000.0]; [-74.16407864998733 228.25356391083687 2000.0 168000.0]; [-0.30901699437494723 0.9510565162951536 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="97">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-1978.2549173534467 -427.32596687646827 -2.6645352591003757E-15 217000.0]; [-86.00830789087198 224.0593023593282 2000.0000000000002 168000.0]; [-0.3583679495453004 0.9335804264972017 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="98">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-1953.1792746387 -530.2741942823932 -1.163513729807164E-13 217000.0]; [-97.61679433819182 219.2509098342245 2000.0000000000002 168000.0]; [-0.40673664307579976 0.9135454576426011 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="99">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-1922.7501032959954 -631.768976980699 -1.1368683772161603E-13 217000.0]; [-108.95771993749108 213.84156580520832 2000.0000000000002 168000.0]; [-0.45399049973954664 0.891006524188368 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="100">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-1887.0508075688772 -731.5321248268242 1.1368683772161603E-13 217000.0]; [-120.00000000000003 207.84609690826525 2000.0 168000.0]; [-0.5000000000000001 0.8660254037844386 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="101">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-1846.1792367455068 -829.2901939669716 2.2737367544323206E-13 217000.0]; [-130.71336840360638 201.28093630690182 2000.0 168000.0]; [-0.5446390350150266 0.8386705679454243 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="102">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-1800.2474169605616 -924.7752363287123 0.0 217000.0]; [-141.06846055019372 194.1640786499874 1999.9999999999998 168000.0]; [-0.5877852522924729 0.8090169943749476 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="103">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-1749.381244139392 -1017.7255340480128 -2.2737367544323206E-13 217000.0]; [-151.03689385196083 186.51503074967312 2000.0 168000.0]; [-0.6293203910498368 0.7771459614569713 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="104">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-1693.7201389260342 -1107.8863168197247 -1.163513729807164E-13 217000.0]; [-160.5913455261258 178.35475811457457 2000.0 168000.0]; [-0.6691306063588585 0.743144825477394 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="105">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-1633.416664540925 -1195.010460205265 -4.547473508864641E-13 217000.0]; [-169.70562748477136 169.7056274847719 1999.9999999999998 168000.0]; [-0.7071067811865474 0.7071067811865477 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="106">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-1568.6361086157099 -1278.8591629835412 -1.1635137298071646E-13 217000.0]; [-178.35475811457408 160.59134552612593 2000.000000000001 168000.00000000003]; [-0.7431448254773937 0.6691306063588588 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="107">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-1499.5560301513356 -1359.202601688493 -2.2737367544323206E-13 217000.0]; [-186.51503074967306 151.03689385196114 2000.0 168000.0]; [-0.7771459614569711 0.6293203910498372 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="108">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-1426.3657728411806 -1435.8205605392277 5.329070518200802E-15 217000.0]; [-194.16407864998692 141.06846055019338 2000.0000000000007 168000.0]; [-0.8090169943749473 0.5877852522924734 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="109">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-1349.2659460931354 -1508.50303503619 -2.1671553440683056E-13 217000.0]; [-201.280936306902 130.71336840360647 1999.9999999999998 168000.0]; [-0.838670567945424 0.544639035015027 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="110">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-1268.4678751731765 -1577.0508075688763 2.2737367544323206E-13 217000.0]; [-207.84609690826522 120.00000000000011 2000.0 168000.0]; [-0.8660254037844384 0.5000000000000004 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="111">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-1184.193021977488 -1641.275993457476 0.0 217000.0]; [-213.84156580520826 108.95771993749128 2000.0000000000002 168000.0]; [-0.8910065241883678 0.45399049973954697 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="112">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-1096.6723780208067 -1701.0025559317037 -2.2737367544323206E-13 217000.0]; [-219.25090983422425 97.61679433819204 2000.0000000000002 168000.0]; [-0.913545457642601 0.40673664307580015 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="113">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-1006.1458313047342 -1756.0667886353604 -2.273736754432321E-13 217000.0]; [-224.05930235932797 86.00830789087232 2000.0000000000005 168000.00000000003]; [-0.9335804264972015 0.35836794954530077 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="114">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-912.8615088013928 -1806.3177643340732 3.383959779057477E-13 217000.0]; [-228.25356391083685 74.16407864998754 2000.0 168000.0]; [-0.9510565162951535 0.3090169943749476 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="115">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-817.0750963546527 -1851.6177485963553 2.828848266744899E-13 217000.0]; [-231.8221983093764 62.11657082460508 1999.9999999999998 168000.0]; [-0.9659258262890683 0.2588190451025207 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="116">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-719.0491378629995 -1891.8425773141057 -5.329070518200701E-15 217000.0]; [-234.7554241761131 49.89880579626231 2000.0000000000002 168000.0]; [-0.9781476007338056 0.20791169081775987 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="117">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-619.052315664955 -1926.881997027804 -1.163513729807164E-13 217000.0]; [-237.04520174283286 37.54427160965554 2000.0000000000005 168000.00000000003]; [-0.9876883405951377 0.15643446504023112 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="118">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-517.3587140994734 -1956.6399671235738 -2.2204460492503133E-13 217000.0]; [-238.6852548883856 25.086831184236814 2000.0 168000.0]; [-0.9945218953682733 0.1045284632676543 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+      <void index="119">
+       <object class="edu.stanford.rsl.conrad.geometry.Projection">
+        <void property="PMatrixSerialization">
+         <string>[[-414.2470682598049 -1981.0349230738354 -1.5265566588595902E-13 217000.0]; [-239.67108834109774 12.560629498306504 2000.0000000000002 168000.0]; [-0.9986295347545739 0.05233595624294348 0.0 700.0]]</string>
+        </void>
+       </object>
+      </void>
+     </array>
+    </void>
+    <void property="projectionStackSize">
+     <int>120</int>
+    </void>
+    <void property="reconDimensionX">
+     <int>256</int>
+    </void>
+    <void property="reconDimensionY">
+     <int>256</int>
+    </void>
+    <void property="reconDimensionZ">
+     <int>256</int>
+    </void>
+    <void property="reconVoxelSizes">
+     <void index="0">
+      <double>0.75</double>
+     </void>
+     <void index="1">
+      <double>0.75</double>
+     </void>
+     <void index="2">
+      <double>0.75</double>
+     </void>
+    </void>
+    <void property="rotationAxis">
+     <object class="edu.stanford.rsl.conrad.numerics.SimpleVector">
+      <void property="vectorSerialization">
+       <string>[0.0; 0.0; 1.0]</string>
+      </void>
+     </object>
+    </void>
+    <void property="sourceToAxisDistance">
+     <double>700.0</double>
+    </void>
+    <void property="sourceToDetectorDistance">
+     <double>1200.0</double>
+    </void>
+   </object>
+  </void>
+  <void property="recentFileOne">
+   <string>d:\Desktop\RandomDistributionPhantom.zip</string>
+  </void>
+  <void property="registry">
+   <object class="java.util.HashMap">
+    <void method="put">
+     <string>OPENCL_DEVICE_SELECTION</string>
+     <string>      Intel(R) Core(TM) i7-2820QM CPU @ 2.30GHz Intel(R) Corporation</string>
+    </void>
+   </object>
+  </void>
+  <void property="sink">
+   <object class="edu.stanford.rsl.conrad.io.IndividualFilesProjectionDataSink">
+    <void property="directory">
+     <string>D:\Desktop</string>
+    </void>
+    <void property="format">
+     <string>Float</string>
+    </void>
+    <void property="prefix">
+     <string>ja</string>
+    </void>
+   </object>
+  </void>
+ </object>
+</java>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<java version="1.6.0_20" class="java.beans.XMLDecoder"> 
+ <object class="edu.stanford.rsl.conrad.physics.materials.Compound"> 
+  <void property="density"> 
+   <double>2.18</double> 
+  </void> 
+  <void property="formula"> 
+   <string>CF2</string> 
+  </void> 
+  <void property="name"> 
+   <string>ptfe</string> 
+  </void> 
+  <void property="weightedAtomicComposition"> 
+   <object class="edu.stanford.rsl.conrad.physics.materials.utils.WeightedAtomicComposition"> 
+    <void property="compositionTable"> 
+     <void method="put"> 
+      <string>C</string> 
+      <double>12.01</double> 
+     </void> 
+     <void method="put"> 
+      <string>F</string> 
+      <double>37.996</double> 
+     </void> 
+    </void> 
+   </object> 
+  </void> 
+ </object> 
+</java> 

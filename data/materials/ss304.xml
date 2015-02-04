@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<java version="1.6.0_20" class="java.beans.XMLDecoder"> 
+ <object class="edu.stanford.rsl.conrad.physics.materials.Mixture"> 
+  <void property="density"> 
+   <double>7.92</double> 
+  </void> 
+  <void property="name"> 
+   <string>ss304</string> 
+  </void> 
+  <void property="weightedAtomicComposition"> 
+   <object class="edu.stanford.rsl.conrad.physics.materials.utils.WeightedAtomicComposition"> 
+    <void property="compositionTable"> 
+     <void method="put"> 
+      <string>Cr</string> 
+      <double>9.879240000000001</double> 
+     </void> 
+     <void method="put"> 
+      <string>Fe</string> 
+      <double>38.812275</double> 
+     </void> 
+     <void method="put"> 
+      <string>Mn</string> 
+      <double>1.0987600000000002</double> 
+     </void> 
+     <void method="put"> 
+      <string>Ni</string> 
+      <double>5.575835</double> 
+     </void> 
+    </void> 
+   </object> 
+  </void> 
+ </object> 
+</java> 
