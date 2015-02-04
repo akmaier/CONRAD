@@ -61,12 +61,12 @@
 	<classpathentry kind="lib" path="plugins/Input-Output/QuickTime_Plugins.jar"/>
 	<classpathentry kind="lib" path="plugins/VolumeJ/bij.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="D:/src/CONRAD/lib/weka.jar"/>
-	<classpathentry kind="lib" path="D:/src/CONRAD/lib/weka-src.jar"/>
-	<classpathentry kind="lib" path="D:/src/CONRAD/lib/trainablesegmentation.jar" sourcepath="lib/trainablesegmentation.zip"/>
-	<classpathentry kind="lib" path="D:/src/CONRAD/lib/simpleitk-0.8.0.jar"/>
-	<classpathentry kind="lib" path="D:/src/CONRAD/lib/jmathplot.jar"/>
-	<classpathentry kind="lib" path="D:/src/CONRAD/lib/jpop.0.7.3.jar"/>
-	<classpathentry kind="lib" path="D:/src/CONRAD/lib/wekaBRF_1.jar"/>
+	<classpathentry kind="lib" path="lib/weka.jar"/>
+	<classpathentry kind="lib" path="lib/weka-src.jar"/>
+	<classpathentry kind="lib" path="lib/trainablesegmentation.jar" sourcepath="lib/trainablesegmentation.zip"/>
+	<classpathentry kind="lib" path="lib/simpleitk-0.8.0.jar"/>
+	<classpathentry kind="lib" path="lib/jmathplot.jar"/>
+	<classpathentry kind="lib" path="lib/jpop.0.7.3.jar"/>
+	<classpathentry kind="lib" path="lib/wekaBRF_1.jar"/>
 	<classpathentry kind="output" path="src"/>
 </classpath>
