@@ -29,26 +29,37 @@ public class CombinedBreathingHeartMotionField extends ParzenWindowMotionField {
 		if (result == null){
 			ArrayList<PointND[]> allPoints= new ArrayList<PointND[]>();
 			int sizes = 0;
+			// Deformation caused by the breathing splines
 			ArrayList<TimeVariantSurfaceBSpline> variants = breathingHeartScene.getBreathing().getVariants();
 			for(int i=0; i< variants.size(); i++){
-				PointND [] current = variants.get(i).getRasterPoints(TessellationUtil.getSamplingU(variants.get(i)), TessellationUtil.getSamplingV(variants.get(i)), time);
+				PointND [] current = variants.get(i).getRasterPoints(
+						TessellationUtil.getSamplingU(variants.get(i)), 
+						TessellationUtil.getSamplingV(variants.get(i)), 
+						breathingHeartScene.getBreathing().getTimeWarper().warpTime(time));
 				allPoints.add(current);
 				sizes += current.length;
 			}
+			// fixed points that are time invariant in the breathing scene
 			ArrayList<SurfaceBSpline> invariants = breathingHeartScene.getBreathing().getSplines();
 			for(int i=0; i< invariants.size(); i++){
-				PointND [] current = invariants.get(i).getRasterPoints(TessellationUtil.getSamplingU(invariants.get(i)), TessellationUtil.getSamplingV(invariants.get(i)));
+				PointND [] current = invariants.get(i).getRasterPoints(
+						TessellationUtil.getSamplingU(invariants.get(i)), 
+						TessellationUtil.getSamplingV(invariants.get(i)));
 				allPoints.add(current);
 				sizes += current.length;
 			}
 			
 			SimpleVector diaphragmMotion =(breathingHeartScene.getBreathing().getDiaphragmMotionVector(0, time));
+			// Deformation caused by the motion of the heart.
 			variants = breathingHeartScene.getHeart().getVariants();
 			for(int i=0; i< variants.size(); i++){
-				PointND [] current = variants.get(i).getRasterPoints(TessellationUtil.getSamplingU(variants.get(i)), TessellationUtil.getSamplingV(variants.get(i)), time);
+				PointND [] current = variants.get(i).getRasterPoints(
+						TessellationUtil.getSamplingU(variants.get(i)), 
+						TessellationUtil.getSamplingV(variants.get(i)), 
+						breathingHeartScene.getHeart().getTimeWarper().warpTime(time));
 				for (int j =0;j<current.length;j++){
-					current[i].applyTransform(breathingHeartScene.getHeartTranslation());
-					current[i].applyTransform(new Translation(diaphragmMotion));
+					current[j].applyTransform(breathingHeartScene.getHeartTranslation());
+					current[j].applyTransform(new Translation(diaphragmMotion));
 				}
 				allPoints.add(current);
 				sizes += current.length;
