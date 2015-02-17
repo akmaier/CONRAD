@@ -98,7 +98,7 @@ kernel void backprojectRayDriven2DCL(
 	increment /= (distance * samplingRate);
 
 	const float val = sino[t +b*maxTIndex];
-	const float normalization = ( samplingRate * maxBetaIndex / deltaT / M_PI);
+	const float normalization = ( samplingRate * maxBetaIndex / deltaT / M_PI_F);
 	float sum = .0;
 	// compute the integral along the line.
 	for (float tLine = 0.0; tLine < distance * samplingRate; tLine += 1.0) {
@@ -109,7 +109,7 @@ if (true) {
 		//DistanceWeighting
 		float2 c2 = current - gridXH;
 		float radius = length(c2);
-		float phi = M_PI/2.0 + atan2(c2.y, c2.x);
+		float phi = M_PI_F/2.0 + atan2(c2.y, c2.x);
 		float dWeight = (focalLength + radius * sin(beta - phi))/focalLength;
 		valtemp /= (dWeight*dWeight);
 }
