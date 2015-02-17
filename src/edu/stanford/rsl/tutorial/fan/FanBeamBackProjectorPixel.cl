@@ -41,7 +41,7 @@ kernel void backprojectPixelDriven2DCL(
 	if (x >= gridSizeX || y >= gridSizeY) {
 		return;
 	}
-	float normalizationFactor = maxBetaIndex / M_PI;
+	float normalizationFactor = maxBetaIndex / M_PI_F;
 	int idx = x + y*gridSizeX;
 	grid[idx] = 0;
 	
@@ -69,7 +69,7 @@ kernel void backprojectPixelDriven2DCL(
 		float val = read_imagef(sino, linearSampler, bt).x;
 		//DistanceWeighting
 		float radius = length(point);
-		float phi = (float) ((M_PI/2) + atan2(point.y, point.x));
+		float phi = (float) ((M_PI_F/2) + atan2(point.y, point.x));
 		float dWeight = (focalLength  +radius*sin(beta - phi))/focalLength;
 		float valtemp = val / (dWeight*dWeight*normalizationFactor);
 

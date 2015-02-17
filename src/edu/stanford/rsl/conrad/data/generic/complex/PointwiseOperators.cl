@@ -42,16 +42,16 @@ inline float carg(cfloat a){
         return atan(a.y / a.x);
 
     }else if(a.x < 0 && a.y >= 0){
-        return atan(a.y / a.x) + M_PI;
+        return atan(a.y / a.x) + M_PI_F;
 
     }else if(a.x < 0 && a.y < 0){
-        return atan(a.y / a.x) - M_PI;
+        return atan(a.y / a.x) - M_PI_F;
 
     }else if(a.x == 0 && a.y > 0){
-        return M_PI/2;
+        return M_PI_F/2;
 
     }else if(a.x == 0 && a.y < 0){
-        return -M_PI/2;
+        return -M_PI_F/2;
 
     }else{
         return 0;

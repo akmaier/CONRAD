@@ -42,7 +42,7 @@ kernel void evaluateCylinder(global const float* parameter, global const float *
 	float v = (samplingValues[(iGID*2)+1] * numKnotsV);
 	
 	
-	float angle = (float) v/(numKnotsV -1) *2*M_PI;
+	float angle = (float) v/(numKnotsV -1) *2*M_PI_F;
 
 	
 	outputBuffer[(iGID*3)] = (float) (((-parameter[0] + parameter[0])/2)+0.5*(parameter[0]-(-parameter[0]))*(float) cos(angle));
@@ -70,7 +70,7 @@ kernel void evaluateSphere(global const float* parameter, global const float * s
 	float u = (samplingValues[(iGID*2)] * numKnotsU);
 	float v = (samplingValues[(iGID*2)+1] * numKnotsV);
 	
-	//float angle = ((float) u)/(numKnotsU-1) *2*M_PI;
+	//float angle = ((float) u)/(numKnotsU-1) *2*M_PI_F;
 
 	//float curveDistance = (float) (( (float) parameter[3]*2.0)/(numKnotsV-1));
 	//float scalingCurve = (float) sqrt(parameter[3]*parameter[3] - (parameter[3]-v*curveDistance)*(parameter[3]-v*curveDistance));
@@ -83,8 +83,8 @@ kernel void evaluateSphere(global const float* parameter, global const float * s
 	//outputBuffer[(iGID*3)+2] = (float) (parameter[2]-parameter[3]+v*curveDistance);
 	
 	
-	float angle1 = (float) v/(numKnotsV) *2*M_PI;
-	float angle2 = (float) u/(numKnotsU -1) *M_PI;
+	float angle1 = (float) v/(numKnotsV) *2*M_PI_F;
+	float angle2 = (float) u/(numKnotsU -1) *M_PI_F;
 	
 	float helper = parameter[0]*sin(angle2);
 	
@@ -225,8 +225,8 @@ kernel void evaluateEllipsoid(global const float* parameter, global const float 
 	float v = (samplingValues[(iGID*2)+1] * numKnotsV);
 	
 	
-	float angle1 = (float) v/(numKnotsV) *2*M_PI;
-	float angle2 = (float) u/(numKnotsU -1) *M_PI;
+	float angle1 = (float) v/(numKnotsV) *2*M_PI_F;
+	float angle2 = (float) u/(numKnotsU -1) *M_PI_F;
 	
 	outputBuffer[(iGID*3)] = (float) (((-parameter[0] + parameter[0])/2)+0.5*(parameter[0]-(-parameter[0]))*sin(angle2)*cos(angle1));
 	outputBuffer[(iGID*3)+1] = (float) (((-parameter[1]+ parameter[1])/2)+0.5*(parameter[1]-(-parameter[1]))*sin(angle2)*sin(angle1));
@@ -255,7 +255,7 @@ kernel void evaluateCone(global const float* parameter, global const float * sam
 	
 	float height = u*(parameter[2])/(float)(numKnotsU - 1);
 	//float factor = (float) u/(numKnotsU - 1);
-	float angle = (float) v/(numKnotsV) *2*M_PI;
+	float angle = (float) v/(numKnotsV) *2*M_PI_F;
 	
 	float coorZ = -parameter[2] + height;
 	//float coorZ = mix(-parameter[2], 0, factor);
