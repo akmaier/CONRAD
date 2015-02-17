@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - Andreas Maier, Magdalena Herbst, Michael Dorner, Salah Saleh, Anja Pohan, Stefan Nottrott, Frank Schebesch 
+ * Copyright (C) 2014 - Andreas Maier, Magdalena Herbst, Michael Dorner, Salah Saleh, Anja Pohan, Stefan Nottrott, Frank Schebesch, Martin Berger 
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
  */
 package edu.stanford.rsl.conrad.data.numeric.opencl;
