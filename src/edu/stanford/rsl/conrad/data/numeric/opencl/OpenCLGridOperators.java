@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - Andreas Maier, Magdalena Herbst, Michael Dorner, Salah Saleh, Anja Pohan, Stefan Nottrott, Frank Schebesch, Martin Berger 
+ * Copyright (C) 2014 - Andreas Maier, Magdalena Herbst, Michael Dorner, Salah Saleh, Anja Pohan, Stefan Nottrott, Frank Schebesch 
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
  */
 package edu.stanford.rsl.conrad.data.numeric.opencl;
@@ -9,7 +9,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.FloatBuffer;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import com.jogamp.opencl.CLBuffer;
 import com.jogamp.opencl.CLCommandQueue;
@@ -21,7 +23,9 @@ import com.jogamp.opencl.CLProgram;
 
 import edu.stanford.rsl.conrad.data.numeric.NumericGrid;
 import edu.stanford.rsl.conrad.data.numeric.NumericGridOperator;
+import edu.stanford.rsl.conrad.filtering.ImageFilteringTool;
 import edu.stanford.rsl.conrad.opencl.OpenCLUtil;
+import edu.stanford.rsl.conrad.utils.CONRAD;
 
 public class OpenCLGridOperators extends NumericGridOperator {
 
@@ -51,14 +55,30 @@ public class OpenCLGridOperators extends NumericGridOperator {
 	 * @return All instances of existing OpenCLGridOperator classes
 	 */
 	public static OpenCLGridOperators[] getAllInstances(){
-		// TODO: replace with automatic search on java class path
-		// Problem is that this might be really slow. 
-		return new OpenCLGridOperators[]{
-				new OpenCLGridOperators()
-		};
+		ArrayList<Object> found;
+		OpenCLGridOperators [] list = null;
+		ArrayList<OpenCLGridOperators> sorted = new ArrayList<>();
+		sorted.add(new OpenCLGridOperators());
+		// this is the default case and needs to be added first as cl file contains global variables and defines
+		try {
+			found = CONRAD.getInstancesFromConrad(OpenCLGridOperators.class);
+			Iterator<Object> it = found.iterator();
+			while (it.hasNext()) {
+				OpenCLGridOperators element = (OpenCLGridOperators) it.next();
+				if(!element.programFile.equals(sorted.get(0).programFile))
+					sorted.add(element);
+			}
+			list = new OpenCLGridOperators[found.size()];
+			sorted.toArray(list);
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return list;
 	}
 
-	
+
 	/**
 	 * Obtains all OpenCLGridOperators instances and concatenates all related 
 	 * cl-source files to one long string

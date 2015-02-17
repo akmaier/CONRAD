@@ -15,7 +15,7 @@ import edu.stanford.rsl.conrad.data.numeric.Grid2D;
 
 public class OpenCLNumericMemoryDelegate3D extends OpenCLMemoryDelegate {
 	
-	ArrayList<Grid2D> hostMemory;
+	protected ArrayList<Grid2D> hostMemory;
 
 	public OpenCLNumericMemoryDelegate3D(ArrayList<Grid2D> buffer, CLContext context,
 			CLDevice device) {
