@@ -2,6 +2,9 @@ package edu.stanford.rsl.tutorial.cone;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import com.jogamp.opencl.CLBuffer;
 import com.jogamp.opencl.CLCommandQueue;
@@ -19,6 +22,8 @@ import com.jogamp.opencl.CLMemory.Mem;
 
 
 
+
+
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
 import edu.stanford.rsl.conrad.data.numeric.Grid3D;
 import edu.stanford.rsl.conrad.data.numeric.InterpolationOperators;
@@ -29,6 +34,7 @@ import edu.stanford.rsl.conrad.numerics.SimpleOperators;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
 import edu.stanford.rsl.conrad.opencl.OpenCLUtil;
 import edu.stanford.rsl.conrad.utils.Configuration;
+import edu.stanford.rsl.conrad.utils.RegKeys;
 
 public class ConeBeamBackprojector {
 
@@ -103,50 +109,69 @@ public class ConeBeamBackprojector {
 		double originY = -geo.getOriginY();
 		double originZ = -geo.getOriginZ();
 		
-		for(int x = 0; x < imgSizeX; x++) {
-			double xTrans = x*spacingX-originX;
-			for(int y = 0; y < imgSizeY ; y++) {
-				double yTrans = y*spacingY-originY;
-				for(int z = 0; z < imgSizeZ; z++) {
-					SimpleVector point3d = new SimpleVector(xTrans, yTrans, z*spacingZ-originZ, 1);
-					for(int p = 0; p < maxProjs; p++) {
-						SimpleVector point2d = SimpleOperators.multiply(projMats[p].computeP(), point3d);
-						double coordU = point2d.getElement(0) / point2d.getElement(2);
-						double coordV = point2d.getElement(1) / point2d.getElement(2);
-
-						/*
-						// TEST // TODO
-						if(0==p)
-							System.out.println("Sino - Min: " + sino.getGridOperator().min(sino) + " Max: " + sino.getGridOperator().max(sino));
-						int uplusOne = Math.min((int)coordU+1, geo.getDetectorWidth()-1);
-						int vplusOne = Math.min((int)coordV+1, geo.getDetectorHeight()-1);
-						float[] values = new float[]{sino.getAtIndex((int)coordU, (int)coordV, p), sino.getAtIndex(uplusOne, (int)coordV, p),
-								sino.getAtIndex((int)coordU, vplusOne, p), sino.getAtIndex(uplusOne, vplusOne, p)};
-						float sumVal = values[0] + values[1] + values[2] + values[3];
-						if (sumVal != 0)
-							System.out.println("NOT NULL");
-						// /TEST
-						 */
-						
-						float val = (float) (InterpolationOperators.interpolateLinear(sino, p, coordU, coordV)/(point2d.getElement(2)*point2d.getElement(2)));
-
-						/*
-						// TEST // TODO
-						if(sumVal/4 != val || 0 != val)
-							System.out.println("[" + x + ", " + y + ", " +z + "] = " + val + " = interp(" + p + ", " + coordU + ", " + coordV + "), " + sumVal/4);
-						// /TEST
-						 */
-						grid.addAtIndex(x, y, z, val);
+		int nThreads = Integer.valueOf(conf.getRegistryEntry(RegKeys.MAX_THREADS));
+		// TODO Error-Checking for thread number
+		ExecutorService executorService = Executors.newFixedThreadPool(nThreads);
+		for(int i = 0; i < imgSizeX; i++) {
+			final int x = i;
+			executorService.execute(new Runnable(){
+				@Override
+				public void run(){
+					System.out.println("Working on slice "+String.valueOf(x+1)+" of "+imgSizeX);
+					double xTrans = x*spacingX-originX;
+					for(int y = 0; y < imgSizeY ; y++) {
+						double yTrans = y*spacingY-originY;
+						for(int z = 0; z < imgSizeZ; z++) {
+							SimpleVector point3d = new SimpleVector(xTrans, yTrans, z*spacingZ-originZ, 1);
+							for(int p = 0; p < maxProjs; p++) {
+								SimpleVector point2d = SimpleOperators.multiply(projMats[p].computeP(), point3d);
+								double coordU = point2d.getElement(0) / point2d.getElement(2);
+								double coordV = point2d.getElement(1) / point2d.getElement(2);
+		
+								/*
+								// TEST // TODO
+								if(0==p)
+									System.out.println("Sino - Min: " + sino.getGridOperator().min(sino) + " Max: " + sino.getGridOperator().max(sino));
+								int uplusOne = Math.min((int)coordU+1, geo.getDetectorWidth()-1);
+								int vplusOne = Math.min((int)coordV+1, geo.getDetectorHeight()-1);
+								float[] values = new float[]{sino.getAtIndex((int)coordU, (int)coordV, p), sino.getAtIndex(uplusOne, (int)coordV, p),
+										sino.getAtIndex((int)coordU, vplusOne, p), sino.getAtIndex(uplusOne, vplusOne, p)};
+								float sumVal = values[0] + values[1] + values[2] + values[3];
+								if (sumVal != 0)
+									System.out.println("NOT NULL");
+								// /TEST
+								 */
+								
+								float val = (float) (InterpolationOperators.interpolateLinear(sino, p, coordU, coordV)/(point2d.getElement(2)*point2d.getElement(2)));
+		
+								/*
+								// TEST // TODO
+								if(sumVal/4 != val || 0 != val)
+									System.out.println("[" + x + ", " + y + ", " +z + "] = " + val + " = interp(" + p + ", " + coordU + ", " + coordV + "), " + sumVal/4);
+								// /TEST
+								 */
+								grid.addAtIndex(x, y, z, val);
+							}
+						}
 					}
-				}
-			}
+				}});
+		}
+		executorService.shutdown();
+		try {
+			executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+		} catch (InterruptedException e) {
+		  System.out.println("Exception waiting for thread termination: "+e);
 		}
 
 		return grid;
 	}
 
-	public Grid3D backprojectPixelDrivenCL(Grid3D sino) {
+	public Grid3D backprojectPixelDrivenCL(Grid3D sino){
 		Configuration conf = Configuration.getGlobalConfiguration();
+		return backprojectPixelDrivenCL(sino, conf);
+	}
+	
+	public Grid3D backprojectPixelDrivenCL(Grid3D sino, Configuration conf) {
 		Trajectory geo = conf.getGeometry();
 		int maxV = geo.getDetectorHeight();
 		int maxU = geo.getDetectorWidth();

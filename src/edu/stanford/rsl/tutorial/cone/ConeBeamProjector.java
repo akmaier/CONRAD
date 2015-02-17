@@ -56,7 +56,7 @@ public class ConeBeamProjector {
 			System.err.println("ConeBeamProjector: Invalid projection index");
 			return null;
 		}
-		Grid2D sino = new Grid2D(maxV,maxU); //
+		Grid2D sino = new Grid2D(maxU,maxV); //
 		double spacingX = geo.getVoxelSpacingX();
 		double spacingY = geo.getVoxelSpacingY();
 		double spacingZ = geo.getVoxelSpacingZ();
@@ -82,8 +82,7 @@ public class ConeBeamProjector {
 							|| coordV <= 0)
 						continue;
 					float val = grid.getAtIndex(x, y, z);
-					InterpolationOperators.addInterpolateLinear(sino,
-							coordV, coordU, val); //
+					InterpolationOperators.addInterpolateLinear(sino, coordV, coordU, val); //
 					// }
 				}
 			}
