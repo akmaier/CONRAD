@@ -20,7 +20,7 @@ public abstract class NumericPointwiseOperators{
 				nonCLFound = true;
 			}
 		}
-		return (nonCLFound ? NumericGridOperator.getInstance() : OpenCLGridOperators.getInstance() );
+		return (nonCLFound ? NumericGridOperator.getInstance() : new OpenCLGridOperators());
 	}
 	
 	/** Fill a NumericGrid with the given value */
