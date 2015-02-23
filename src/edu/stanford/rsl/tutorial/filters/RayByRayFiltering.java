@@ -7,8 +7,6 @@ import edu.stanford.rsl.conrad.data.numeric.Grid1D;
 import edu.stanford.rsl.conrad.data.numeric.Grid1DComplex;
 import edu.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators;
 import edu.stanford.rsl.conrad.utils.UserUtil;
-import edu.stanford.rsl.tutorial.GridKernel;
-import edu.stanford.rsl.tutorial.RamLakKernel;
 
 /**
  * @author Salaheldin Saleh. me@s-saleh.com

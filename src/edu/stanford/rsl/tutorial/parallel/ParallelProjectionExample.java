@@ -1,7 +1,7 @@
 package edu.stanford.rsl.tutorial.parallel;
 
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
-import edu.stanford.rsl.tutorial.RamLakKernel;
+import edu.stanford.rsl.tutorial.filters.RamLakKernel;
 import edu.stanford.rsl.tutorial.phantoms.DotsGrid2D;
 import edu.stanford.rsl.tutorial.phantoms.MickeyMouseGrid2D;
 import edu.stanford.rsl.tutorial.phantoms.Phantom;

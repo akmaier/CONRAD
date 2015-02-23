@@ -8,17 +8,18 @@ import java.util.List;
 
 
 
+
 import ij.ImageJ;
 import ij.ImagePlus;
 import ij.io.Opener;
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
 import edu.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators;
 import edu.stanford.rsl.conrad.utils.ImageUtil;
-import edu.stanford.rsl.tutorial.RamLakKernel;
 import edu.stanford.rsl.tutorial.fan.CosineFilter;
 import edu.stanford.rsl.tutorial.fan.FanBeamBackprojector2D;
 import edu.stanford.rsl.tutorial.fan.FanBeamProjector2D;
 import edu.stanford.rsl.tutorial.fan.redundancy.SilverWeights;
+import edu.stanford.rsl.tutorial.filters.RamLakKernel;
 import edu.stanford.rsl.tutorial.phantoms.DotsGrid2D;
 import edu.stanford.rsl.tutorial.phantoms.MickeyMouseGrid2D;
 import edu.stanford.rsl.tutorial.phantoms.Phantom;

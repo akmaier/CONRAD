@@ -11,6 +11,7 @@ import edu.stanford.rsl.tutorial.cone.ConeBeamCosineFilter;
 import edu.stanford.rsl.tutorial.cone.ConeBeamProjector;
 import edu.stanford.rsl.tutorial.fan.FanBeamBackprojector2D;
 import edu.stanford.rsl.tutorial.fan.FanBeamProjector2D;
+import edu.stanford.rsl.tutorial.filters.RamLakKernel;
 import edu.stanford.rsl.tutorial.parallel.ParallelBackprojector2D;
 import edu.stanford.rsl.tutorial.parallel.ParallelProjector2D;
 import edu.stanford.rsl.tutorial.phantoms.DotsGrid2D;

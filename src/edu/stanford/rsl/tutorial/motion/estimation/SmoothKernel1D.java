@@ -5,7 +5,7 @@ import edu.stanford.rsl.conrad.data.numeric.Grid2D;
 import edu.stanford.rsl.conrad.data.numeric.Grid3D;
 import edu.stanford.rsl.conrad.utils.FFTUtil;
 import edu.stanford.rsl.conrad.utils.VisualizationUtil;
-import edu.stanford.rsl.tutorial.GridKernel;
+import edu.stanford.rsl.tutorial.filters.GridKernel;
 /**
  * This class implements the 1-D version of a smoothing kernel (1 1 1)
  * @author Marco Boegel
@@ -124,6 +124,6 @@ public class SmoothKernel1D extends Grid1DComplex implements GridKernel {
 
 }
 /*
- * Copyright (C) 2010-2014 Marco Bögel
+ * Copyright (C) 2010-2014 Marco Bï¿½gel
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
 */

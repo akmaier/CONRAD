@@ -14,8 +14,8 @@ import edu.stanford.rsl.conrad.opencl.OpenCLProjectionPhantomRenderer;
 import edu.stanford.rsl.conrad.phantom.AnalyticPhantom4D;
 import edu.stanford.rsl.conrad.phantom.renderer.PhantomRenderer;
 import edu.stanford.rsl.conrad.utils.Configuration;
-import edu.stanford.rsl.tutorial.RamLakKernel;
 import edu.stanford.rsl.tutorial.cone.ConeBeamCosineFilter;
+import edu.stanford.rsl.tutorial.filters.RamLakKernel;
 import edu.stanford.rsl.tutorial.motion.compensation.OpenCLMotionCompensatedBackProjector;
 
 public class MotionCompensatedReconExample {

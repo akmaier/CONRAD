@@ -15,8 +15,8 @@ import edu.stanford.rsl.conrad.phantom.renderer.PhantomRenderer;
 import edu.stanford.rsl.conrad.utils.CONRAD;
 import edu.stanford.rsl.conrad.utils.Configuration;
 import edu.stanford.rsl.conrad.utils.ImageUtil;
-import edu.stanford.rsl.tutorial.RamLakKernel;
 import edu.stanford.rsl.tutorial.cone.ConeBeamCosineFilter;
+import edu.stanford.rsl.tutorial.filters.RamLakKernel;
 
 public class VolumeCenteringTest {
 

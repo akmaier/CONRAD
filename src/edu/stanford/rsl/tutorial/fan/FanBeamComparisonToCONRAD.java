@@ -8,9 +8,9 @@ import edu.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators;
 import edu.stanford.rsl.conrad.geometry.trajectories.Trajectory;
 import edu.stanford.rsl.conrad.utils.Configuration;
 import edu.stanford.rsl.conrad.utils.ImageUtil;
-import edu.stanford.rsl.tutorial.RamLakKernel;
 import edu.stanford.rsl.tutorial.fan.FanBeamBackprojector2D;
 import edu.stanford.rsl.tutorial.fan.redundancy.ParkerWeights;
+import edu.stanford.rsl.tutorial.filters.RamLakKernel;
 
 /**
  * This class is used to compare the tutorial fan beam reconstruction pipeline 

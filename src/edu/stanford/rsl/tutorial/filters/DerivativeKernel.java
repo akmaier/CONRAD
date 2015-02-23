@@ -1,4 +1,4 @@
-package edu.stanford.rsl.tutorial;
+package edu.stanford.rsl.tutorial.filters;
 
 import edu.stanford.rsl.conrad.data.numeric.Grid1D;
 import edu.stanford.rsl.conrad.utils.VisualizationUtil;

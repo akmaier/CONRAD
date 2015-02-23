@@ -1,7 +1,7 @@
 package edu.stanford.rsl.tutorial.parallel;
 
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
-import edu.stanford.rsl.tutorial.RamLakKernel;
+import edu.stanford.rsl.tutorial.filters.RamLakKernel;
 import edu.stanford.rsl.tutorial.phantoms.DotsGrid2D;
 import edu.stanford.rsl.tutorial.phantoms.Phantom;
 import ij.ImageJ;
@@ -31,7 +31,7 @@ public class ParallelReconExample {
 		
 		// Project forward parallel
 		ParallelProjector2D projector = new ParallelProjector2D(Math.PI, Math.PI/180.0, 400, 1);
-		Grid2D sinogram = projector.projectRayDriven(phan);
+		Grid2D sinogram = projector.projectRayDrivenCL(phan);
 		sinogram.show("The Sinogram");
 		Grid2D filteredSinogram = new Grid2D(sinogram);
 		

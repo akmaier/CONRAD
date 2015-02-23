@@ -11,10 +11,10 @@ import edu.stanford.rsl.tutorial.cone.ConeBeamBackprojector;
 import edu.stanford.rsl.tutorial.cone.ConeBeamCosineFilter;
 import edu.stanford.rsl.tutorial.cone.ConeBeamProjector;
 import edu.stanford.rsl.tutorial.fan.CosineFilter;
+import edu.stanford.rsl.tutorial.filters.RamLakKernel;
 import edu.stanford.rsl.tutorial.motion.estimation.CylinderVolumeMask;
 import edu.stanford.rsl.tutorial.parallel.ParallelBackprojector2D;
 import edu.stanford.rsl.tutorial.parallel.ParallelProjector2D;
-import edu.stanford.rsl.tutorial.RamLakKernel;
 import edu.stanford.rsl.tutorial.phantoms.DotsGrid2D;
 import edu.stanford.rsl.tutorial.phantoms.MickeyMouseGrid2D;
 import edu.stanford.rsl.tutorial.phantoms.Phantom;
@@ -222,6 +222,6 @@ Configuration.loadConfiguration();
 
 }
 /*
- * Copyright (C) 2010-2014  Marco Bögel
+ * Copyright (C) 2010-2014  Marco Bï¿½gel
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
 */

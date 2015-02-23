@@ -2,6 +2,8 @@ package edu.stanford.rsl.tutorial;
 
 import ij.ImageJ;
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
+import edu.stanford.rsl.tutorial.filters.DerivativeKernel;
+import edu.stanford.rsl.tutorial.filters.HilbertKernel;
 import edu.stanford.rsl.tutorial.parallel.ParallelBackprojector2D;
 import edu.stanford.rsl.tutorial.parallel.ParallelProjector2D;
 import edu.stanford.rsl.tutorial.phantoms.MickeyMouseGrid2D;

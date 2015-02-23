@@ -3,7 +3,7 @@ package edu.stanford.rsl.tutorial.truncation;
 import ij.ImageJ;
 import edu.stanford.rsl.apps.gui.Citeable;
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
-import edu.stanford.rsl.tutorial.RamLakKernel;
+import edu.stanford.rsl.tutorial.filters.RamLakKernel;
 import edu.stanford.rsl.tutorial.parallel.ParallelBackprojector2D;
 import edu.stanford.rsl.tutorial.parallel.ParallelProjector2D;
 import edu.stanford.rsl.tutorial.phantoms.Phantom;
