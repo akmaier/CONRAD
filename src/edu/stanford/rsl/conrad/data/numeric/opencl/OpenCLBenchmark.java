@@ -7,15 +7,12 @@ package edu.stanford.rsl.conrad.data.numeric.opencl;
 import com.jogamp.opencl.CLContext;
 import com.jogamp.opencl.CLDevice;
 
-import edu.stanford.rsl.conrad.data.OpenCLMemoryDelegate;
-import edu.stanford.rsl.conrad.data.numeric.Grid1D;
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
-import edu.stanford.rsl.conrad.data.numeric.NumericGridOperator;
-import edu.stanford.rsl.conrad.data.numeric.opencl.delegates.OpenCLNumericMemoryDelegateLinear;
 import edu.stanford.rsl.conrad.opencl.OpenCLUtil;
-import edu.stanford.rsl.tutorial.phantoms.Phantom;
 
-
+/**
+ * OpenCLBenchmark is a tiny benchmark for testing local and global memory kernels and demo how an extension of new kernels works.
+ */
 public class OpenCLBenchmark {
 	
 
@@ -47,38 +44,20 @@ public class OpenCLBenchmark {
 					grid2D.setAtIndex(i, j, val);
 				}
 			}
+				
 			
-			OpenCLGrid2D openCLGrid2D = new OpenCLGrid2D(grid2D, context, device);
-			((OpenCLGridOperators) openCLGrid2D.getGridOperator()).sumGlobalMemory(openCLGrid2D); // initialize
-			
-			double sum = 0.0;
-
-			long startGlobal = System.currentTimeMillis();
-			for (int i = 0; i<iterations; i++) 
-			{
-				sum = ((OpenCLGridOperators) openCLGrid2D.getGridOperator()).sumGlobalMemory(openCLGrid2D);
-			}			
-			long endGlobal = (System.currentTimeMillis() - startGlobal);
-			
-			if ( (int)sum != x*y ) {
-				System.out.println("\tWrong result in global sum: " + sum + " != " + x*y);
-			}
-			
-			openCLGrid2D.release();
-			openCLGrid2D = null;
-			
-			
-			// local version
+			// local version, using the standard OpenClGridOperators class
 			
 			OpenCLGrid2D openCLGrid2DLocal = new OpenCLGrid2D(grid2D, context, device);
-			openCLGrid2DLocal.getGridOperator().sum(openCLGrid2DLocal); // initialize
+			OpenCLGridOperators openCLGridOperatos = (OpenCLGridOperators) openCLGrid2DLocal.getGridOperator();
+			openCLGridOperatos.sum(openCLGrid2DLocal); // initialize
 			
-			sum = 0.0;
+			double sum = 0.0;
 			
 			long startLocal = System.currentTimeMillis();
 			for (int i = 0; i<iterations; i++) 
 			{
-				sum = openCLGrid2DLocal.getGridOperator().sum(openCLGrid2DLocal);
+				sum = openCLGridOperatos.sum(openCLGrid2DLocal);
 			}
 			long endLocal = (System.currentTimeMillis() - startLocal);
 			
@@ -86,18 +65,51 @@ public class OpenCLBenchmark {
 			if ((int)sum != x*y) {
 				System.out.println("\tWrong result in local sum: " + sum + " != " + x);
 			}
-
-
-			System.out.format(leftAlignFormat, (x + " x " + y)+ " pixels ", endLocal/iterations, endGlobal/iterations);
 			
 			openCLGrid2DLocal.release();
 			openCLGrid2DLocal = null;
+			
+
+			/*
+			 * In this example we extend the standard OpenCL grid operators by a new method 'sumGlobalMemory(...)'. 
+			 * Therefore we have to instantiate the new class ExtendedOpenCLGridOperators by its singleton.
+			 * Then we can set this new, extended grid operator class to the grid.
+			 */
+			
+			OpenCLGrid2D openCLGrid2DGlobal = new OpenCLGrid2D(grid2D, context, device);
+			
+			openCLGrid2DGlobal.setNumericGridOperator(ExtendedOpenCLGridOperators.getInstance()); // set a new numeric grid operator class
+			
+			ExtendedOpenCLGridOperators gg = (ExtendedOpenCLGridOperators) openCLGrid2DGlobal.getGridOperator(); // continue as usual, but with a cast
+			gg.sumGlobalMemory(openCLGrid2DGlobal);
+			
+			
+			sum = 0.0;
+
+			long startGlobal = System.currentTimeMillis();
+			for (int i = 0; i<iterations; i++) 
+			{
+				sum = gg.sumGlobalMemory(openCLGrid2DGlobal);
+			}			
+			long endGlobal = (System.currentTimeMillis() - startGlobal);
+			
+			if ( (int)sum != x*y ) {
+				System.out.println("\tWrong result in global sum: " + sum + " != " + x*y);
+			}
+			
+			openCLGrid2DGlobal.release();
+			openCLGrid2DGlobal = null;
+			
+			
+			System.out.format(leftAlignFormat, (x + " x " + y)+ " pixels ", endLocal/iterations, endGlobal/iterations);
+
 				
 		}
+		
 		System.out.format("+----------------------+-------+--------+%n");
 		
 		
-		//min
+		// last, but not lead: min
 		Grid2D grid2D = new Grid2D(512, 512);
 		
 		grid2D.setAtIndex(1, 2, -0.12345f);
