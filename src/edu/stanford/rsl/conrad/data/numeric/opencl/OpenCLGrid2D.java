@@ -13,7 +13,7 @@ import edu.stanford.rsl.conrad.data.numeric.NumericGridOperator;
 import edu.stanford.rsl.conrad.data.numeric.opencl.delegates.OpenCLNumericMemoryDelegateLinear;
 import edu.stanford.rsl.conrad.opencl.OpenCLUtil;
 
-public class OpenCLGrid2D extends Grid2D implements OpenCLGridInterface{
+public class OpenCLGrid2D extends Grid2D implements OpenCLGridInterface {
 	
 	OpenCLMemoryDelegate delegate;
 	
@@ -24,11 +24,14 @@ public class OpenCLGrid2D extends Grid2D implements OpenCLGridInterface{
 	public OpenCLGrid2D(Grid2D input, CLContext context, CLDevice device){
 		super(input);
 		this.initializeDelegate(context, device);
+		this.numericGridOperator = OpenCLGridOperators.getInstance();
 	}
 
+	
 	public OpenCLGrid2D(Grid2D input) {
 		this(input, OpenCLUtil.getStaticContext(), OpenCLUtil.getStaticContext().getMaxFlopsDevice());
 	}
+	
 	
 	@Override
 	public OpenCLGrid2D clone(){
@@ -52,7 +55,7 @@ public class OpenCLGrid2D extends Grid2D implements OpenCLGridInterface{
 	
 	@Override
 	public NumericGridOperator getGridOperator() {
-		return new OpenCLGridOperators();
+		return this.numericGridOperator;
 	}
 	
 	
