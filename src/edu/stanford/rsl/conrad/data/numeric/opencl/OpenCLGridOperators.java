@@ -53,6 +53,7 @@ public class OpenCLGridOperators extends NumericGridOperator {
 	}
 	
 	static OpenCLGridOperators op = new OpenCLGridOperators();
+	
 	public static OpenCLGridOperators getInstance() {
 		return op;
 	}
@@ -696,4 +697,3 @@ public class OpenCLGridOperators extends NumericGridOperator {
 		return content;
 	}
 }
-

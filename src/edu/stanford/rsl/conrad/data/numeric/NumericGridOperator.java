@@ -6,16 +6,15 @@ package edu.stanford.rsl.conrad.data.numeric;
 
 import edu.stanford.rsl.conrad.data.numeric.iterators.NumericPointwiseIteratorND;
 
-/**
- * NumericGridOperator contains operations which can be applied to grids. It is implemented as singleton, because all grids share the same operations.
- */
+
 public class NumericGridOperator {
 	
 	static NumericGridOperator op = new NumericGridOperator();
-	protected NumericGridOperator() { }
+	
 	public static NumericGridOperator getInstance() {
 		return op;
 	}
+	
 	
 	/** Fill a NumericGrid with the given value */
 	public void fill(final NumericGrid grid, float val) {

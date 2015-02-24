@@ -32,6 +32,7 @@ public class ExtendedOpenCLGridOperators extends OpenCLGridOperators {
 	}
 
 	static ExtendedOpenCLGridOperators op = new ExtendedOpenCLGridOperators();
+	
 	public static ExtendedOpenCLGridOperators getInstance() {
 		return op;
 	}

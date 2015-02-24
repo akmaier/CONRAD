@@ -1,3 +1,4 @@
+
 // This is a template for furhter kernels; rename input, output, and cache
 kernel void kernelTemplate(global float *input, global float *output, const uint num_elements, local float *cache)
 {

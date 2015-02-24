@@ -3,6 +3,7 @@
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
 */
 
+#define LOCAL_GROUP_XDIM 256
 
 /* Sum of all entries in grid stored in result */
 kernel void sum(global float *grid, global float *result, const unsigned int num_elements, local float *cache)
@@ -87,7 +88,6 @@ kernel void dotProduct1(global const float *gridA, global const float *gridB, gl
             result[iGID] += (gridB[offset+i]*gridA[offset+i]);
         }
     }
-    
 }
 
 
@@ -254,6 +254,7 @@ kernel void copyGrid(global float *gridA,  global const float *gridB, int const 
     gridA[global_id] = gridB[global_id];
 }
 
+
 /* grid = abs(grid) */
 kernel void absolute(global float *grid, int const num_elements )
 {
@@ -299,41 +300,6 @@ kernel void logarithm10(global float *grid, int const num_elements )
         return;
     
     grid[global_id] = log10(grid[global_id]);
-}
-
-
-/* grid = log(grid) */
-kernel void logarithm(global float *grid, int const num_elements )
-{
-    int global_id = get_global_id(0);
-    
-    if(global_id >= num_elements)
-        return;
-    
-    grid[global_id] = log(grid[global_id]);
-}
-
-
-/* grid = exp(grid) */
-kernel void exponential(global float *gridA, int const num_elements )
-{
-    int global_id = get_global_id(0);
-    
-    if(global_id >= num_elements)	
-        return;
-    
-    gridA[global_id] = exp(gridA[global_id]); 
-}
-
-
-kernel void minimalValue(global float *gridA, float value, int const num_elements )
-{
-    int global_id = get_global_id(0);
-    
-    if(global_id >= num_elements)	
-        return;
-    
-    gridA[global_id] = fmax(gridA[global_id], value); 
 }
 
 
