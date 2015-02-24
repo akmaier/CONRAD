@@ -7,7 +7,15 @@ package edu.stanford.rsl.conrad.data.numeric;
 import edu.stanford.rsl.conrad.data.numeric.iterators.NumericPointwiseIteratorND;
 
 
-public class NumericGridOperator{
+public class NumericGridOperator {
+	
+	static NumericGridOperator op = new NumericGridOperator();
+	
+	public static NumericGridOperator getInstance() {
+		return op;
+	}
+	
+	
 	/** Fill a NumericGrid with the given value */
 	public void fill(final NumericGrid grid, float val) {
 		NumericPointwiseIteratorND it = new NumericPointwiseIteratorND(grid);
@@ -389,11 +397,4 @@ public class NumericGridOperator{
 			System.err.println("Error in transpose");
 		return gridT;
 	}
-
-	static NumericGridOperator op = new NumericGridOperator();
-
-	public static NumericGridOperator getInstance() {
-		return op;
-	}
-
 }

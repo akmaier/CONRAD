@@ -12,9 +12,10 @@ import edu.stanford.rsl.conrad.data.Grid;
  * 
  * @author Andreas Keil
  */
-public abstract class NumericGrid extends Grid{
+public abstract class NumericGrid extends Grid {
 
 	protected boolean debug = true;
+	protected NumericGridOperator numericGridOperator;
 
 	/**
 	 * @return Returns the value at position idx
@@ -51,8 +52,15 @@ public abstract class NumericGrid extends Grid{
 	/*
 	 * Gives the grids corresponding grid operator
 	 */
-	public NumericGridOperator getGridOperator(){
-		return NumericGridOperator.getInstance();
+	public NumericGridOperator getGridOperator() {
+		if (numericGridOperator == null) {
+			numericGridOperator = NumericGridOperator.getInstance(); // standard grid operations
+		}
+		return numericGridOperator;
+	}
+	
+	public void setNumericGridOperator(NumericGridOperator numericGridOperator) {
+		this.numericGridOperator = numericGridOperator;
 	}
 }
 
