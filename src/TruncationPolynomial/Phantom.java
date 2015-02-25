@@ -25,12 +25,12 @@ public class Phantom extends Grid2D{
 		if (a) {
 			this.draw(this);	
 		} else {
-			for (int i = (int) Math.round(0.6*height); i < (int) Math.round(0.9*height); i++) {
-				for (int j = (int) Math.round(0.6*width); j < (int) Math.round(0.9*width); j++) {
-					this.putPixelValue(i, j, 1);
-				}
-			
-			}
+//			for (int i = (int) Math.round(0.6*height); i < (int) Math.round(0.9*height); i++) {
+//				for (int j = (int) Math.round(0.6*width); j < (int) Math.round(0.9*width); j++) {
+//					this.putPixelValue(i, j, 1);
+//				}
+//			
+//			}
 		}
 
 		// a, b, midPointx, midPointy, intesity, theta

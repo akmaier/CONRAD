@@ -95,7 +95,7 @@ public class FanBeamProjection extends Grid2D{
 		Phantom fanogram = new Phantom((int)Math.sqrt(Math.pow(phantom.getWidth(),2) + Math.pow(phantom.getHeight(),2)), steps);
 		
 		for (int betaGrad = 0; betaGrad < steps; betaGrad++) {
-			double beta = (betaGrad)* Math.toRadians(360)/steps;
+			double beta = (betaGrad) * 2 * Math.PI/steps;
 			
 			for (int t = -fanogram.getWidth()/2; t < fanogram.getWidth()/2; t++) {
 				double gamma = Math.atan((t/D));
