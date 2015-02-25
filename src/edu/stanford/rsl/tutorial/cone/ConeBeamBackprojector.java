@@ -60,13 +60,14 @@ public class ConeBeamBackprojector {
 			System.err.println("ConeBeamBackprojector: Invalid projection index");
 			return null;
 		}
+		
 		double spacingX = geo.getVoxelSpacingX();
 		double spacingY = geo.getVoxelSpacingY();
 		double spacingZ = geo.getVoxelSpacingZ();
 		double originX = -geo.getOriginX();
 		double originY = -geo.getOriginY();
 		double originZ = -geo.getOriginZ();
-		Grid3D grid = new Grid3D(imgSizeX,imgSizeY,imgSizeZ);
+		final Grid3D grid = new Grid3D(imgSizeX,imgSizeY,imgSizeZ);
 		grid.setOrigin(-originX, -originY, -originZ);
 		grid.setSpacing(spacingX, spacingY, spacingZ);
 		for(int x = 0; x < imgSizeX; x++) {
@@ -93,21 +94,21 @@ public class ConeBeamBackprojector {
 		return grid;
 	}
 	
-	public Grid3D backprojectPixelDriven(Grid3D sino) {
+	public Grid3D backprojectPixelDriven(final Grid3D sino) {
 		Configuration conf = Configuration.getGlobalConfiguration();
 		Trajectory geo = conf.getGeometry();
-		int imgSizeX = geo.getReconDimensionX();
-		int imgSizeY = geo.getReconDimensionY();
-		int imgSizeZ = geo.getReconDimensionZ();
-		Projection[] projMats = conf.getGeometry().getProjectionMatrices();
-		int maxProjs = conf.getGeometry().getProjectionStackSize();
-		Grid3D grid = new Grid3D(imgSizeX,imgSizeY,imgSizeZ);
-		double spacingX = geo.getVoxelSpacingX();
-		double spacingY = geo.getVoxelSpacingY();
-		double spacingZ = geo.getVoxelSpacingZ();
-		double originX = -geo.getOriginX();
-		double originY = -geo.getOriginY();
-		double originZ = -geo.getOriginZ();
+		final int imgSizeX = geo.getReconDimensionX();
+		final int imgSizeY = geo.getReconDimensionY();
+		final int imgSizeZ = geo.getReconDimensionZ();
+		final Projection[] projMats = conf.getGeometry().getProjectionMatrices();
+		final int maxProjs = conf.getGeometry().getProjectionStackSize();
+		final Grid3D grid = new Grid3D(imgSizeX,imgSizeY,imgSizeZ);
+		final double spacingX = geo.getVoxelSpacingX();
+		final double spacingY = geo.getVoxelSpacingY();
+		final double spacingZ = geo.getVoxelSpacingZ();
+		final double originX = -geo.getOriginX();
+		final double originY = -geo.getOriginY();
+		final double originZ = -geo.getOriginZ();
 		
 		int nThreads = Integer.valueOf(conf.getRegistryEntry(RegKeys.MAX_THREADS));
 		// TODO Error-Checking for thread number
