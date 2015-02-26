@@ -37,6 +37,7 @@ public class BackProjection extends Grid2D {
 		reconstructedRamlac.show();
 //		NumericPointwiseOperators.subtractedBy(reconstructedFiltered, reconstructedRamlac).show();
 	}
+	
 	public static Phantom filter(Phantom sinogram) {
 		Grid1DComplex[] sinogramTransform = new Grid1DComplex[(sinogram.getHeight())];
 		Grid1D[] filteredSinogram = new Grid1D[(sinogram.getHeight())];
@@ -65,9 +66,10 @@ public class BackProjection extends Grid2D {
 		}
 		return result;
 	}
+	
 	public static Phantom backproject(Phantom sinogram) {
 		
-		int a = Math.round((float)(sinogram.getWidth()/Math.sqrt(2)));
+		int a = sinogram.getWidth();//256;//Math.round((float)(sinogram.getWidth()/Math.sqrt(2)));
 		Phantom reconstructed = new Phantom(a,a);
 		
 		for (int y = 0; y < reconstructed.getHeight(); y++) {
@@ -84,6 +86,8 @@ public class BackProjection extends Grid2D {
 		}
 		return reconstructed;
 	}
+	
+	
 	public static Phantom ramlac(Phantom sinogram) {
 		Grid1DComplex[] sinogramTransform = new Grid1DComplex[(sinogram.getHeight())];
 		Grid1D[] filteredSinogram = new Grid1D[(sinogram.getHeight())];
