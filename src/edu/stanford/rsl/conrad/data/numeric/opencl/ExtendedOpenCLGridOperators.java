@@ -56,7 +56,7 @@ public class ExtendedOpenCLGridOperators extends OpenCLGridOperators {
 		int localSize = openCLSetup.getLocalSize();		
 		int globalSize = openCLSetup.getGlobalSize(elementCount);
 		
-		CLBuffer<FloatBuffer> resultBuffer = context.createFloatBuffer(globalSize, Mem.READ_ONLY);
+		CLBuffer<FloatBuffer> resultBuffer = context.createFloatBuffer(elementCount, Mem.READ_ONLY);
 		kernel.putArg(gridBuffer).putArg(resultBuffer).putArg(elementCount);
 		queue.put1DRangeKernel(kernel, 0, globalSize, localSize);
 		queue.putReadBuffer(resultBuffer, true);
