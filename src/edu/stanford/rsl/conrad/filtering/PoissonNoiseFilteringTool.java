@@ -35,7 +35,7 @@ public class PoissonNoiseFilteringTool extends IndividualImageFilteringTool {
 	
 	@Override
 	public Grid2D applyToolToImage(Grid2D imageProcessor) throws Exception {
-		Grid2D imp = new Grid2D(imageProcessor.getWidth(), imageProcessor.getHeight());
+		Grid2D imp = imageProcessor;
 		for (int k = 0; k < imageProcessor.getWidth(); k++){
 			for (int j = 0; j < imageProcessor.getHeight(); j++){
 				double value = StatisticsUtil.poissonRandomNumber(imageProcessor.getPixelValue(k, j));

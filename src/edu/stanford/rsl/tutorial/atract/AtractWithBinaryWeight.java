@@ -12,7 +12,7 @@ import edu.stanford.rsl.tutorial.fan.FanBeamProjector2D;
 import edu.stanford.rsl.tutorial.fan.dynamicCollimation.copyRedundantData;
 import edu.stanford.rsl.tutorial.fan.redundancy.BinaryWeights;
 import edu.stanford.rsl.tutorial.fan.redundancy.ParkerWeights;
-import edu.stanford.rsl.tutorial.RamLakKernel;
+import edu.stanford.rsl.tutorial.filters.RamLakKernel;
 import edu.stanford.rsl.tutorial.phantoms.DotsGrid2D;
 import edu.stanford.rsl.tutorial.phantoms.FilePhantom;
 import edu.stanford.rsl.tutorial.phantoms.MTFphantom;

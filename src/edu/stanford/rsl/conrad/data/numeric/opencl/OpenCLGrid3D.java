@@ -13,7 +13,7 @@ import edu.stanford.rsl.conrad.data.numeric.NumericGridOperator;
 import edu.stanford.rsl.conrad.data.numeric.opencl.delegates.OpenCLNumericMemoryDelegate3D;
 import edu.stanford.rsl.conrad.opencl.OpenCLUtil;
 
-public class OpenCLGrid3D extends Grid3D implements OpenCLGridInterface{
+public class OpenCLGrid3D extends Grid3D implements OpenCLGridInterface {
 	
 	protected OpenCLMemoryDelegate delegate;
 	
@@ -52,7 +52,7 @@ public class OpenCLGrid3D extends Grid3D implements OpenCLGridInterface{
 	
 	@Override
 	public NumericGridOperator getGridOperator() {
-		return new OpenCLGridOperators();
+		return this.numericGridOperator;
 	}
 	
 	

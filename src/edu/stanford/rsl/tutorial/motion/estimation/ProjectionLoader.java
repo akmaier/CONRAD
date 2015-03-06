@@ -9,8 +9,8 @@ import edu.stanford.rsl.conrad.io.FileProjectionSource;
 import edu.stanford.rsl.conrad.pipeline.ProjectionSource;
 import edu.stanford.rsl.conrad.utils.Configuration;
 import edu.stanford.rsl.conrad.utils.ImageGridBuffer;
-import edu.stanford.rsl.tutorial.RamLakKernel;
 import edu.stanford.rsl.tutorial.cone.ConeBeamCosineFilter;
+import edu.stanford.rsl.tutorial.filters.RamLakKernel;
 
 public class ProjectionLoader {
 
@@ -51,6 +51,6 @@ public class ProjectionLoader {
 	
 }
 /*
- * Copyright (C) 2010-2014 Marco Bögel
+ * Copyright (C) 2010-2014 Marco Bï¿½gel
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
 */

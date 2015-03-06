@@ -52,7 +52,7 @@ public class OpenCLGrid1D extends Grid1D implements OpenCLGridInterface{
 	
 	@Override
 	public NumericGridOperator getGridOperator() {
-		return new OpenCLGridOperators();
+		return this.numericGridOperator;
 	}
 	
 	

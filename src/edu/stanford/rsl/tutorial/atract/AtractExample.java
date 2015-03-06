@@ -2,9 +2,9 @@ package edu.stanford.rsl.tutorial.atract;
 
 import ij.ImageJ;
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
+import edu.stanford.rsl.tutorial.filters.RamLakKernel;
 import edu.stanford.rsl.tutorial.parallel.ParallelBackprojector2D;
 import edu.stanford.rsl.tutorial.parallel.ParallelProjector2D;
-import edu.stanford.rsl.tutorial.RamLakKernel;
 import edu.stanford.rsl.tutorial.phantoms.DotsGrid2D;
 import edu.stanford.rsl.tutorial.phantoms.MickeyMouseGrid2D;
 import edu.stanford.rsl.tutorial.phantoms.Phantom;
@@ -110,6 +110,6 @@ public class AtractExample {
 
 }
 /*
- * Copyright (C) 2010-2014  Marco Bögel
+ * Copyright (C) 2010-2014  Marco Bï¿½gel
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
 */

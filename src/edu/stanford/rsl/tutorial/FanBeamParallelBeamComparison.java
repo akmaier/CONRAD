@@ -6,6 +6,7 @@ import edu.stanford.rsl.tutorial.fan.CosineFilter;
 import edu.stanford.rsl.tutorial.fan.FanBeamBackprojector2D;
 import edu.stanford.rsl.tutorial.fan.FanBeamProjector2D;
 import edu.stanford.rsl.tutorial.fan.redundancy.ParkerWeights;
+import edu.stanford.rsl.tutorial.filters.RamLakKernel;
 import edu.stanford.rsl.tutorial.parallel.ParallelBackprojector2D;
 import edu.stanford.rsl.tutorial.parallel.ParallelProjector2D;
 import edu.stanford.rsl.tutorial.phantoms.DotsGrid2D;

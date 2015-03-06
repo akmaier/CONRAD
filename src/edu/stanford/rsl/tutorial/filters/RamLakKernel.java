@@ -1,4 +1,4 @@
-package edu.stanford.rsl.tutorial;
+package edu.stanford.rsl.tutorial.filters;
 
 import edu.stanford.rsl.conrad.data.numeric.Grid1D;
 import edu.stanford.rsl.conrad.data.numeric.Grid1DComplex;
@@ -7,21 +7,26 @@ import edu.stanford.rsl.conrad.utils.FFTUtil;
 import edu.stanford.rsl.conrad.utils.VisualizationUtil;
 
 /**
- * 
+ * Spatial discrete realization of the ramp filter using the Ram-Lak Convolver.
+ * See L. Zeng. "Medical Image Reconstruction: A Conceptual tutorial". 2009, page 44
+ * @author akmaier
+ *
  */
-public class SheppLoganKernel extends Grid1DComplex implements GridKernel {
+public class RamLakKernel extends Grid1DComplex implements GridKernel {
 
-	public SheppLoganKernel(final int size, double deltaS) {
+	public RamLakKernel(final int size, double deltaS) {
 		super(size);
 		final int paddedSize = getSize()[0];
-//		final float odd = -1.f / ((float) (Math.PI * Math.PI * deltaS));
-		setAtIndex(0, (float) (2 / (Math.PI*Math.PI*deltaS*deltaS)));
+		final float odd = -1.f / ((float) (Math.PI * Math.PI * deltaS));
+		setAtIndex(0, (float) (0.25f / (deltaS)));
 		for (int i = 1; i < paddedSize/2; ++i) {
-				setAtIndex(i,(float) (-2.0 / (Math.PI*Math.PI*deltaS*deltaS*(4*i*i-1.0))));
+			if (1 == (i % 2))
+				setAtIndex(i, odd / (i * i));
 		}
 		for (int i = paddedSize / 2; i < paddedSize; ++i) {
 			final float tmp = paddedSize - i;
-				setAtIndex(i,(float) (-2.0 / (Math.PI*Math.PI*deltaS*deltaS*(4*tmp*tmp-1.0))));
+			if (1 == (tmp % 2))
+				setAtIndex(i, odd / (tmp * tmp));
 		}
 		transformForward();
 	}
@@ -43,8 +48,12 @@ public class SheppLoganKernel extends Grid1DComplex implements GridKernel {
 	}
 
 	public final static void main(String[] args) {
-		SheppLoganKernel r = new SheppLoganKernel(320, 2);
+		RamLakKernel r = new RamLakKernel(320, 2);
 		VisualizationUtil.createPlot(r.getSubGrid(0, 512).getBuffer()).show();
 	}
 
 }
+/*
+ * Copyright (C) 2010-2014 Andreas Maier
+ * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
+*/

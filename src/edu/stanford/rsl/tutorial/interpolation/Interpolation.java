@@ -11,14 +11,14 @@ import edu.stanford.rsl.conrad.data.generic.datatypes.Complex;
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
 import edu.stanford.rsl.conrad.data.numeric.Grid2DComplex;
 import edu.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators;
-import edu.stanford.rsl.tutorial.RamLakKernel;
-import edu.stanford.rsl.tutorial.SheppLoganKernel;
 import edu.stanford.rsl.tutorial.fan.FanBeamBackprojector2D;
 import edu.stanford.rsl.tutorial.fan.FanBeamProjector2D;
 import edu.stanford.rsl.tutorial.fan.redundancy.BinaryWeights;
 import edu.stanford.rsl.tutorial.fan.redundancy.CompensationWeights;
 import edu.stanford.rsl.tutorial.fan.redundancy.ParkerWeights;
 import edu.stanford.rsl.tutorial.fan.redundancy.SilverWeights;
+import edu.stanford.rsl.tutorial.filters.RamLakKernel;
+import edu.stanford.rsl.tutorial.filters.SheppLoganKernel;
 import edu.stanford.rsl.tutorial.wedgefilter.DoubleWedgeFilterFanES;
 
 

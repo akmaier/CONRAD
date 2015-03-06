@@ -41,9 +41,13 @@ public class LogPoissonNoiseFilteringTool extends PoissonNoiseFilteringTool {
 	 */
 	private static final long serialVersionUID = -6025566244585199099L;
 	/**
-	 * 
+	 * the photon count that is used for the computation of the noise.
 	 */
 	private double photonCountMax = 75000;
+	/**
+	 * the maximal line integral value. Used to replace infinity in case of photon starvation.
+	 */
+	private double maxValue = 20;
 	
 	/**
 	 * @return the photonCountMax
@@ -75,7 +79,7 @@ public class LogPoissonNoiseFilteringTool extends PoissonNoiseFilteringTool {
 	
 	@Override
 	public Grid2D applyToolToImage(Grid2D imageProcessor) throws Exception {
-		Grid2D imp = new Grid2D(imageProcessor.getWidth(), imageProcessor.getHeight());
+		Grid2D imp = imageProcessor;
 		for (int k = 0; k < imageProcessor.getWidth(); k++){
 			for (int j = 0; j < imageProcessor.getHeight(); j++){
 				double scaled = imageProcessor.getPixelValue(k, j) * -1.0 ;
@@ -83,6 +87,7 @@ public class LogPoissonNoiseFilteringTool extends PoissonNoiseFilteringTool {
 				double noiseAdded = StatisticsUtil.poissonRandomNumber(expdomain);
 				double log = noiseAdded / photonCountMax;
 				double value =  -1.0 * Math.log(log);
+				if (log ==0) value = maxValue;
 				//double test = Math.exp(imageProcessor.getPixelValue(k, j) * -1.0);
 				//if (test == 0){
 				//	throw new RuntimeException("test was 0!");
@@ -126,6 +131,20 @@ public class LogPoissonNoiseFilteringTool extends PoissonNoiseFilteringTool {
 	@Override
 	public boolean isDeviceDependent() {
 		return false;
+	}
+
+	/**
+	 * @return the maxValue
+	 */
+	public double getMaxValue() {
+		return maxValue;
+	}
+
+	/**
+	 * @param maxValue the maxValue to set
+	 */
+	public void setMaxValue(double maxValue) {
+		this.maxValue = maxValue;
 	}
 	
 }
