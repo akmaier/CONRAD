@@ -142,38 +142,6 @@ public abstract class ReconstructionFilter extends MultiProjectionFilter {
 			init = true;
 		}
 	}
-	
-	public void setOffsetX(double offsetX) {
-		this.offsetX = offsetX;
-	}
-	
-	public double getOffsetX() {
-		return offsetX;
-	}
-	
-	public void setOffsetY(double offsetY) {
-		this.offsetY = offsetY;
-	}
-	
-	public double getOffsetY() {
-		return offsetY;
-	}
-	
-	public void setOffsetZ(double offsetZ) {
-		this.offsetZ = offsetZ;
-	}
-	
-	public double getOffsetZ() {
-		return offsetZ;
-	}
-	
-	public void setInit(boolean init) {
-		this.init = init;
-	}
-	
-	public boolean getInit(){
-		return init;
-	}
 
 }
 /*

@@ -123,7 +123,7 @@ public class VOIBasedReconstructionFilter extends FBPReconstructionFilter {
 		}
 	}
 
-	public synchronized void initializeVOIMap(){
+	protected synchronized void initializeVOIMap(){
 		if (useVOImap) {
 			voiMap = new boolean[maxI][maxJ][maxK];
 			CONRAD.log("Creating Voi map - Current Time:" + System.currentTimeMillis());
@@ -360,67 +360,7 @@ public class VOIBasedReconstructionFilter extends FBPReconstructionFilter {
 	public void setMaxI(int maxI) {
 		this.maxI = maxI;
 	}
-	
-	/**
-	 * @return maxI the maxI index
-	 */
-	public int getMaxI() {
-		return maxI;
-	}
-	
-	/**
-	 * 
-	 * @param maxJ the maxJ index to set
-	 */
-	public void setMaxJ(int maxJ) {
-		this.maxJ = maxJ;
-	}
-	
-	/**
-	 * @return maxJ the maxJ index
-	 */
-	public int getMaxJ() {
-		return maxJ;
-	}
-	
-	/**
-	 * 
-	 * @param maxK the maxK index to set
-	 */
-	public void setMaxK(int maxK) {
-		this.maxK = maxK;
-	}
-	
-	/**
-	 * @return maxK the maxK index
-	 */
-	public int getMaxK() {
-		return maxK;
-	}
-	
-	/**
-	 * 
-	 * @param lineOffset the line offset to set
-	 */
-	public void setLineOffset(double lineOffset) {
-		this.lineOffset = lineOffset;
-	}
-	
-	/**
-	 * 
-	 * @return the line offset
-	 */
-	public double getLineOffset() {
-		return lineOffset;
-	}
 
-	public VolumeOfInterest getInterestedInVolume() {
-		return interestedInVolume;
-	}
-	
-	public boolean getUseVOImap(){
-		return useVOImap;
-	}
 
 }
 /*
