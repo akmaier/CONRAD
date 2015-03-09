@@ -5,6 +5,7 @@
 
 package edu.stanford.rsl.conrad.data.numeric.opencl;
 
+import java.io.InputStream;
 import java.nio.FloatBuffer;
 
 import com.jogamp.opencl.CLBuffer;
@@ -35,6 +36,15 @@ public class ExtendedOpenCLGridOperators extends OpenCLGridOperators {
 	
 	public static ExtendedOpenCLGridOperators getInstance() {
 		return op;
+	}
+	
+	/**
+	 * Returns the extended OpenCL resource file
+	 * @return The corresponding cl kernel file as stream
+	 */
+	@Override
+	protected InputStream getExtendedCLResourceAsStream() {
+		return ExtendedOpenCLGridOperators.class.getResourceAsStream(extendedKernelFile);
 	}
 	
 	public double sumGlobalMemory(final NumericGrid grid) {
@@ -72,152 +82,4 @@ public class ExtendedOpenCLGridOperators extends OpenCLGridOperators {
 		return sum;
 	}
 	
-	
-	//TODO: weightedDotProduct do not use the new OpenCL implementation and therefore they are commented out. Update this functions
-/*
-	@Override
-	public double weightedDotProduct(NumericGrid grid1, NumericGrid grid2, double weightGrid2, double addGrid2) {
-		if (debug) System.out.println("Bei OpenCL weightedDotProduct");
-
-		// not possible to have a grid that is not implementing OpenCLGridInterface
-		OpenCLGridInterface clGridA = (OpenCLGridInterface)grid1;
-		OpenCLGridInterface clGridB = (OpenCLGridInterface)grid2;
-
-		CLDevice device = clGridA.getDelegate().getCLDevice(); 
-
-		clGridA.getDelegate().prepareForDeviceOperation();
-		clGridB.getDelegate().prepareForDeviceOperation();
-
-		CLBuffer<FloatBuffer> clmemA = clGridA.getDelegate().getCLBuffer();
-		CLBuffer<FloatBuffer> clmemB = clGridB.getDelegate().getCLBuffer();
-
-
-		int elementCount = clmemA.getCLCapacity();
-		CLProgram program = getProgram(device);
-		CLKernel kernel = getKernel("weightedDotProduct_persist_kernel", program);
-
-		int localWorkSize = 256;
-		int globalWorkSize = localWorkSize*this.persistentGroupSize;
-		// nperGroup needs to be multiples of localWorkSize (this causes overhead for small arrays with length < globalWorkSize)
-		int nperGroup = (OpenCLUtil.iDivUp(OpenCLUtil.iDivUp(elementCount,this.persistentGroupSize),localWorkSize))*localWorkSize;
-		// should always be an exact integer, thus no div up necessary
-		int nperWorkItem = nperGroup/localWorkSize;
-
-		CLBuffer<FloatBuffer> clmemResult = getPersistentResultBuffer(clGridA.getDelegate().getCLContext());
-
-		CLCommandQueue queue = OpenCLUtil.getStaticCommandQueue();
-
-		kernel.putArg(clmemA).putArg(clmemB).putArg((float)weightGrid2).putArg((float)addGrid2).putArg(clmemResult).putArg(nperGroup).putArg(nperWorkItem).putArg(elementCount);
-
-		queue.put1DRangeKernel(kernel, 0, globalWorkSize, localWorkSize)
-		.putReadBuffer(clmemResult, true)
-		.finish();
-
-		kernel.rewind();
-
-
-		double sum = 0;
-		while (clmemResult.getBuffer().hasRemaining()){
-			sum += clmemResult.getBuffer().get();
-		}
-
-		return sum;
-	}
-
-	@Override
-	public double weightedSSD(NumericGrid grid1, NumericGrid grid2, double weightGrid2, double addGrid2) {
-		if (debug) System.out.println("Bei OpenCL weightedSSD");
-
-		// not possible to have a grid that is not implementing OpenCLGridInterface
-		OpenCLGridInterface clGridA = (OpenCLGridInterface)grid1;
-		OpenCLGridInterface clGridB = (OpenCLGridInterface)grid2;
-
-		CLDevice device = clGridA.getDelegate().getCLDevice(); 
-
-		clGridA.getDelegate().prepareForDeviceOperation();
-		clGridB.getDelegate().prepareForDeviceOperation();
-
-		CLBuffer<FloatBuffer> clmemA = clGridA.getDelegate().getCLBuffer();
-		CLBuffer<FloatBuffer> clmemB = clGridB.getDelegate().getCLBuffer();
-
-		int elementCount = clmemA.getCLCapacity();
-		CLProgram program = getProgram(device);
-		CLKernel kernel = getKernel("weightedSSD_persist_kernel", program);
-
-		int localWorkSize = 256;
-		int globalWorkSize = 32768;
-		// nperGroup needs to be multiples of localWorkSize (this causes overhead for small arrays with length < globalWorkSize)
-		int nperGroup = (OpenCLUtil.iDivUp(OpenCLUtil.iDivUp(elementCount,128),localWorkSize))*localWorkSize;
-		// should always be an exact integer, thus no div up necessary
-		int nperWorkItem = nperGroup/localWorkSize;
-
-		CLBuffer<FloatBuffer> clmemResult = device.getContext().createFloatBuffer(128, Mem.WRITE_ONLY);
-
-		CLCommandQueue queue = OpenCLUtil.getStaticCommandQueue();
-
-		kernel.putArg(clmemA).putArg(clmemB).putArg((float)weightGrid2).putArg((float)addGrid2).putArg(clmemResult).putArg(nperGroup).putArg(nperWorkItem).putArg(elementCount);
-
-		queue.putWriteBuffer(clmemResult, true)
-		.put1DRangeKernel(kernel, 0, globalWorkSize, localWorkSize)
-		.putReadBuffer(clmemResult, true)
-		.finish();
-
-		kernel.rewind();
-
-
-		double sum = 0;
-		while (clmemResult.getBuffer().hasRemaining()){
-			sum += clmemResult.getBuffer().get();
-		}
-
-		clmemResult.release();
-		return sum;
-	}
-
-	@Override
-	public double weightedSSD(NumericGrid grid1, NumericGrid grid2, double weightGrid2) {
-		if (debug) System.out.println("Bei OpenCL weightedSSD");
-
-		// not possible to have a grid that is not implementing OpenCLGridInterface
-		OpenCLGridInterface clGridA = (OpenCLGridInterface)grid1;
-		OpenCLGridInterface clGridB = (OpenCLGridInterface)grid2;
-
-		CLDevice device = clGridA.getDelegate().getCLDevice(); 
-
-		clGridA.getDelegate().prepareForDeviceOperation();
-		clGridB.getDelegate().prepareForDeviceOperation();
-
-		CLBuffer<FloatBuffer> clmemA = clGridA.getDelegate().getCLBuffer();
-		CLBuffer<FloatBuffer> clmemB = clGridB.getDelegate().getCLBuffer();
-
-
-		int elementCount = clmemA.getCLCapacity();
-		CLProgram program = getProgram(device);
-		CLKernel kernel = getKernel("weightedSSD", program);
-
-		int localWork = 32;
-		int localWorkSize = Math.min(device.getMaxWorkGroupSize(), 128);
-		int globalWorkSize = OpenCLUtil.roundUp(localWorkSize, elementCount/localWork);
-		localWork = (elementCount / globalWorkSize)+1;
-
-		CLBuffer<FloatBuffer> clmemResult = device.getContext().createFloatBuffer(globalWorkSize, Mem.WRITE_ONLY);
-
-		CLCommandQueue queue = OpenCLUtil.getStaticCommandQueue();
-		kernel.putArg(clmemA).putArg(clmemB).putArg((float)weightGrid2).putArg(clmemResult).putArg(elementCount);
-
-		queue.put1DRangeKernel(kernel, 0, globalWorkSize, localWorkSize);
-		queue.putReadBuffer(clmemResult, true);
-		queue.finish();
-
-		kernel.rewind();
-
-		double sum = 0;
-		while (clmemResult.getBuffer().hasRemaining()){
-			sum += clmemResult.getBuffer().get();
-		}
-		clmemResult.release();
-		return sum;
-	}
-	 */
-
 }

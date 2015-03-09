@@ -4,10 +4,8 @@
  */
 package edu.stanford.rsl.conrad.data.numeric.opencl;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.SequenceInputStream;
 import java.nio.FloatBuffer;
 import java.util.Arrays;
@@ -42,8 +40,8 @@ public class OpenCLGridOperators extends NumericGridOperator {
 	private static HashMap<CLDevice, CLCommandQueue> deviceCommandQueueMap;
 	private static HashMap<String, Integer> kernelNameLocalSizeMap;
 	private static Set<String> nonVoidKernels = new HashSet<String>(Arrays.asList(new String[] {"maximum", "minimum", "sum", "stddev", "dotProduct"}) ); 
-	
-	
+
+
 	// singleton implementation
 	protected OpenCLGridOperators() { 
 		programKernelMap = new HashMap<String, HashMap<CLProgram,CLKernel>>();
@@ -51,14 +49,14 @@ public class OpenCLGridOperators extends NumericGridOperator {
 		deviceCommandQueueMap = new HashMap<CLDevice,CLCommandQueue>();
 		kernelNameLocalSizeMap = new HashMap<String, Integer>();
 	}
-	
+
 	static OpenCLGridOperators op = new OpenCLGridOperators();
-	
+
 	public static OpenCLGridOperators getInstance() {
 		return op;
 	}
-	
-	
+
+
 	/**
 	 * This class encapsulate the complete OpenCLSetup which contains all OpenCL properties belonging to and influencing each other. It is implemented as singleton.
 	 */
@@ -78,19 +76,19 @@ public class OpenCLGridOperators extends NumericGridOperator {
 		public OpenCLSetup(String kernelName, CLDevice device) { 
 			// device
 			this.device = device;
-			
+
 			// Program
 			CLProgram program = deviceProgramMap.get(device);
 			if(program == null)
 			{
-				InputStream programFile;
+				InputStream programFile = null;
 				if (extendedKernelFile == null) {
 					programFile = OpenCLGridOperators.class.getResourceAsStream(kernelFile);
 				}
 				else {
-					 programFile = new SequenceInputStream(OpenCLGridOperators.class.getResourceAsStream(kernelFile), OpenCLGridOperators.class.getResourceAsStream(extendedKernelFile));
+					programFile = new SequenceInputStream(OpenCLGridOperators.class.getResourceAsStream(kernelFile), getExtendedCLResourceAsStream());
 				}
-								
+
 				try {
 					program = device.getContext().createProgram(programFile).build();
 				} catch (IOException e) {
@@ -100,8 +98,8 @@ public class OpenCLGridOperators extends NumericGridOperator {
 				deviceProgramMap.put(device, program);
 			}
 			this.program = program;
-			
-			
+
+
 			// Kernel
 			HashMap<CLProgram, CLKernel> programMap = programKernelMap.get(kernelName);
 			if (programMap == null){
@@ -114,8 +112,8 @@ public class OpenCLGridOperators extends NumericGridOperator {
 				programMap.put(program, kernel);
 			}
 			this.kernel = kernel;
-			
-			
+
+
 			// queue
 			CLCommandQueue commandQueue = deviceCommandQueueMap.get(device);
 			if (commandQueue == null) {
@@ -123,8 +121,8 @@ public class OpenCLGridOperators extends NumericGridOperator {
 				deviceCommandQueueMap.put(device, commandQueue);
 			}
 			this.commandQueue = commandQueue;
-			
-			
+
+
 			// workgroup (local) size
 			Integer workgroupSize = kernelNameLocalSizeMap.get(kernelName);
 			if (workgroupSize == null) {
@@ -132,46 +130,56 @@ public class OpenCLGridOperators extends NumericGridOperator {
 				kernelNameLocalSizeMap.put(kernelName, workgroupSize);
 			}
 			this.localSize = workgroupSize; 
-			
-			
+
+
 			// context
 			this.context = device.getContext();
 		}
-		
-		
+
+
 		public CLDevice getDevice() {
 			return device;
 		}
-		
+
 
 		public CLContext getContext() {
 			return context;
 		}
-		
+
 
 		public CLProgram getProgram() {
 			return program;
 		}
-		
+
 
 		public CLCommandQueue getCommandQueue() {
 			return commandQueue;
 		}
-		
+
 
 		public int getLocalSize() {
 			return localSize;
 		}
-		
+
 
 		public CLKernel getKernel() {
 			return kernel;
 		}
-		
-		
+
+
 		public int getGlobalSize(int elementCount) {
 			return OpenCLUtil.roundUp(localSize, elementCount);
 		}
+	}
+
+	/**
+	 * Method to obtain the extended OpenCL resource
+	 * Has to be overwritten by the extended OpenCLGridOperators class
+	 * 
+	 * @return returns null on purpose
+	 */
+	protected InputStream getExtendedCLResourceAsStream(){
+		return null;
 	}
 
 
@@ -184,18 +192,18 @@ public class OpenCLGridOperators extends NumericGridOperator {
 	 */
 	private CLBuffer<FloatBuffer> runKernel(String kernelName, CLDevice device, CLBuffer<FloatBuffer> gridBuffer) { 
 		int elementCount = gridBuffer.getCLCapacity(); 
-		
+
 		OpenCLSetup openCLSetup = new OpenCLSetup(kernelName, device);
 
 		CLKernel kernel = openCLSetup.getKernel();
 		CLCommandQueue queue = openCLSetup.getCommandQueue();
 		CLContext context = openCLSetup.getContext();
-		
+
 		int localSize = openCLSetup.getLocalSize();		
 		int globalSize = openCLSetup.getGlobalSize(elementCount);
-		
+
 		CLBuffer<FloatBuffer> resultBuffer = null;
-				
+
 		if (nonVoidKernels.contains(kernelName)) {
 			resultBuffer = context.createFloatBuffer((globalSize/localSize), Mem.READ_WRITE);
 			kernel.putArg(gridBuffer).putArg(resultBuffer).putArg(elementCount).putNullArg(localSize*4); // 4 bytes per float
@@ -206,13 +214,13 @@ public class OpenCLGridOperators extends NumericGridOperator {
 			kernel.putArg(gridBuffer).putArg(elementCount);
 			queue.put1DRangeKernel(kernel, 0, globalSize, localSize);
 		}
-		
+
 		queue.finish();
 		kernel.rewind();
 		return resultBuffer;
 	}
 
-	
+
 	/**
 	 * 
 	 * @param Run a kernel with the format 'grid = grid operation value', such as stddev or addBy
@@ -223,18 +231,18 @@ public class OpenCLGridOperators extends NumericGridOperator {
 	 */
 	private CLBuffer<FloatBuffer> runKernel(String kernelName, CLDevice device, CLBuffer<FloatBuffer> gridBuffer, float value) { 
 		int elementCount = gridBuffer.getCLCapacity(); 
-		
+
 		OpenCLSetup openCLSetup = new OpenCLSetup(kernelName, device);
 
 		CLKernel kernel = openCLSetup.getKernel();
 		CLCommandQueue queue = openCLSetup.getCommandQueue();
 		CLContext context = openCLSetup.getContext();
-		
+
 		int localSize = openCLSetup.getLocalSize();		
 		int globalSize = openCLSetup.getGlobalSize(elementCount);
-		
+
 		CLBuffer<FloatBuffer> resultBuffer = null;
-				
+
 		if (nonVoidKernels.contains(kernelName)) {
 			resultBuffer = context.createFloatBuffer(globalSize/localSize, Mem.READ_ONLY);
 			kernel.putArg(gridBuffer).putArg(resultBuffer).putArg(value).putArg(elementCount).putNullArg(4*localSize);
@@ -245,12 +253,12 @@ public class OpenCLGridOperators extends NumericGridOperator {
 			kernel.putArg(gridBuffer).putArg(value).putArg(elementCount);
 			queue.put1DRangeKernel(kernel, 0, globalSize, localSize);
 		}
-		
+
 		queue.finish();
 		kernel.rewind();
 		return resultBuffer;
 	}
-	
+
 
 	/**
 	 * Run a kernel with the format 'gridA = gridA operation gridB', such as addBy or dotProduct
@@ -262,18 +270,18 @@ public class OpenCLGridOperators extends NumericGridOperator {
 	 */
 	private CLBuffer<FloatBuffer> runKernel(String kernelName, CLDevice device, CLBuffer<FloatBuffer> gridABuffer, CLBuffer<FloatBuffer> gridBBuffer) { 
 		int elementCount = gridABuffer.getCLCapacity(); 
-		
+
 		OpenCLSetup openCLSetup = new OpenCLSetup(kernelName, device);
 
 		CLKernel kernel = openCLSetup.getKernel();
 		CLCommandQueue queue = openCLSetup.getCommandQueue();
 		CLContext context = openCLSetup.getContext();
-		
+
 		int localSize = openCLSetup.getLocalSize();		
 		int globalSize = openCLSetup.getGlobalSize(elementCount);
-		
+
 		CLBuffer<FloatBuffer> resultBuffer = null;
-				
+
 		if (nonVoidKernels.contains(kernelName)) {
 			resultBuffer = context.createFloatBuffer((globalSize/localSize), Mem.READ_ONLY);
 			kernel.putArg(gridABuffer).putArg(gridBBuffer).putArg(resultBuffer).putArg(elementCount).putNullArg(4*localSize);
@@ -284,7 +292,7 @@ public class OpenCLGridOperators extends NumericGridOperator {
 			kernel.putArg(gridABuffer).putArg(gridBBuffer).putArg(elementCount);
 			queue.put1DRangeKernel(kernel, 0, globalSize, localSize);
 		}
-		
+
 		queue.finish();
 		kernel.rewind();
 		return resultBuffer;
@@ -298,7 +306,7 @@ public class OpenCLGridOperators extends NumericGridOperator {
 
 		clGrid.getDelegate().prepareForDeviceOperation();
 		int elementCount = grid.getNumberOfElements();
-		
+
 		CLBuffer<FloatBuffer> gridBuffer = clGrid.getDelegate().getCLBuffer();
 		CLBuffer<FloatBuffer> resultBuffer = runKernel("stddev", device, gridBuffer, (float)mean);
 
@@ -306,12 +314,12 @@ public class OpenCLGridOperators extends NumericGridOperator {
 		while (resultBuffer.getBuffer().hasRemaining()){
 			sum += resultBuffer.getBuffer().get();
 		}
-		
+
 		resultBuffer.release();
 		return Math.sqrt(sum/elementCount) ;	
 	}
-	
-	
+
+
 	@Override
 	public double dotProduct(final NumericGrid gridA, final NumericGrid gridB) {		
 		// not possible to have a grid that is not implementing OpenCLGridInterface
@@ -322,30 +330,30 @@ public class OpenCLGridOperators extends NumericGridOperator {
 		// TODO check if both live on the same device.
 
 		clGridA.getDelegate().prepareForDeviceOperation();
-		
+
 		CLBuffer<FloatBuffer> gridABuffer = clGridA.getDelegate().getCLBuffer();
 		CLBuffer<FloatBuffer> gridBBuffer = clGridB.getDelegate().getCLBuffer();
-		
+
 		CLBuffer<FloatBuffer> resultBuffer = runKernel("dotProduct", device, gridABuffer, gridBBuffer);
-		
+
 		double sum = 0;
 		while (resultBuffer.getBuffer().hasRemaining()) {
 			sum += resultBuffer.getBuffer().get();
 		}
-		
+
 		resultBuffer.release();
 		return sum;
 	}
-	
-	
-	
+
+
+
 	@Override
 	public double sum(final NumericGrid grid) {
 		OpenCLGridInterface clGrid = (OpenCLGridInterface)grid;
 		CLDevice device = clGrid.getDelegate().getCLDevice(); 
 
 		clGrid.getDelegate().prepareForDeviceOperation();
-		
+
 		CLBuffer<FloatBuffer> gridBuffer = clGrid.getDelegate().getCLBuffer();
 		CLBuffer<FloatBuffer> result = runKernel("sum", device, gridBuffer);
 
@@ -353,21 +361,21 @@ public class OpenCLGridOperators extends NumericGridOperator {
 		while (result.getBuffer().hasRemaining()) {
 			sum += result.getBuffer().get();
 		}
-		
+
 		result.release();
 		return sum;
 	}
-	
-	
 
-	
+
+
+
 	@Override
 	public float max(final NumericGrid grid) {
 		OpenCLGridInterface clGrid = (OpenCLGridInterface)grid;
 		CLDevice device = clGrid.getDelegate().getCLDevice(); 
 
 		clGrid.getDelegate().prepareForDeviceOperation();
-		
+
 		CLBuffer<FloatBuffer> clmem = clGrid.getDelegate().getCLBuffer();
 		CLBuffer<FloatBuffer> result = runKernel("maximum", device, clmem);
 
@@ -375,19 +383,19 @@ public class OpenCLGridOperators extends NumericGridOperator {
 		while (result.getBuffer().hasRemaining()) {
 			max = Math.max(max, result.getBuffer().get());
 		}
-		
+
 		result.release();
 		return max;
 	}
-	
-	
+
+
 	@Override
 	public float min(final NumericGrid grid) {
 		OpenCLGridInterface clGrid = (OpenCLGridInterface)grid;
 		CLDevice device = clGrid.getDelegate().getCLDevice(); 
 
 		clGrid.getDelegate().prepareForDeviceOperation();
-		
+
 		CLBuffer<FloatBuffer> clmem = clGrid.getDelegate().getCLBuffer();
 		CLBuffer<FloatBuffer> result = runKernel("minimum", device, clmem);
 
@@ -395,53 +403,53 @@ public class OpenCLGridOperators extends NumericGridOperator {
 		while (result.getBuffer().hasRemaining()) {
 			min = Math.min(min, result.getBuffer().get());
 		}
-		
+
 		result.release();
 		return min;
 	}
-		
-	
+
+
 	@Override
 	public void abs(final NumericGrid grid) {
 		OpenCLGridInterface clGrid = (OpenCLGridInterface)grid;
 		CLDevice device = clGrid.getDelegate().getCLDevice(); 
 
 		clGrid.getDelegate().prepareForDeviceOperation();
-		
+
 		CLBuffer<FloatBuffer> clmem = clGrid.getDelegate().getCLBuffer();
 		runKernel("absolute", device, clmem);
-		
+
 		clGrid.getDelegate().notifyDeviceChange();
 	}
-	
-	
+
+
 	@Override
 	public void exp(final NumericGrid grid) {
 		OpenCLGridInterface clGrid = (OpenCLGridInterface)grid;
 		CLDevice device = clGrid.getDelegate().getCLDevice(); 
 
 		clGrid.getDelegate().prepareForDeviceOperation();
-		
+
 		CLBuffer<FloatBuffer> clmem = clGrid.getDelegate().getCLBuffer();
 		runKernel("expontial", device, clmem);
-		
+
 		clGrid.getDelegate().notifyDeviceChange();
 	}
-		
-	
+
+
 	@Override
 	public void log(final NumericGrid grid) {
 		OpenCLGridInterface clGrid = (OpenCLGridInterface)grid;
 		CLDevice device = clGrid.getDelegate().getCLDevice(); 
 
 		clGrid.getDelegate().prepareForDeviceOperation();
-		
+
 		CLBuffer<FloatBuffer> clmem = clGrid.getDelegate().getCLBuffer();
 		runKernel("logarithm", device, clmem);
-		
+
 		clGrid.getDelegate().notifyDeviceChange();
 	}
-	
+
 
 	@Override
 	public void addBy(final NumericGrid grid, float val) {
@@ -450,13 +458,13 @@ public class OpenCLGridOperators extends NumericGridOperator {
 		CLDevice device = clGrid.getDelegate().getCLDevice(); 
 
 		clGrid.getDelegate().prepareForDeviceOperation();
-		
+
 		CLBuffer<FloatBuffer> clmem = clGrid.getDelegate().getCLBuffer();
 		runKernel("addByVal", device, clmem, val);
 		clGrid.getDelegate().notifyDeviceChange();
 	}
-	
-	
+
+
 	@Override
 	public void addBy(final NumericGrid gridA, final NumericGrid gridB) {
 		// not possible to have a grid that is not implementing OpenCLGridInterface
@@ -475,8 +483,8 @@ public class OpenCLGridOperators extends NumericGridOperator {
 		runKernel("addBy", device, clmemA, clmemB);
 		clGridA.getDelegate().notifyDeviceChange();
 	}
-	
-	
+
+
 	@Override
 	public void subtractBy(final NumericGrid grid, float val) {
 		// not possible to have a grid that is not implementing OpenCLGridInterface
@@ -484,13 +492,13 @@ public class OpenCLGridOperators extends NumericGridOperator {
 		CLDevice device = clGrid.getDelegate().getCLDevice(); 
 
 		clGrid.getDelegate().prepareForDeviceOperation();
-		
+
 		CLBuffer<FloatBuffer> clmem = clGrid.getDelegate().getCLBuffer();
 		runKernel("subtractByVal", device, clmem, val);
 		clGrid.getDelegate().notifyDeviceChange();
 	}
-	
-	
+
+
 	@Override
 	public void subtractBy(final NumericGrid gridA, final NumericGrid gridB) {
 		// not possible to have a grid that is not implementing OpenCLGridInterface
@@ -509,8 +517,8 @@ public class OpenCLGridOperators extends NumericGridOperator {
 		runKernel("subtractBy", device, clmemA, clmemB);
 		clGridA.getDelegate().notifyDeviceChange();
 	}
-	
-	
+
+
 	@Override
 	public void multiplyBy(final NumericGrid grid, float val) {		
 		// not possible to have a grid that is not implementing OpenCLGridInterface
@@ -518,13 +526,13 @@ public class OpenCLGridOperators extends NumericGridOperator {
 		CLDevice device = clGrid.getDelegate().getCLDevice(); 
 
 		clGrid.getDelegate().prepareForDeviceOperation();
-		
+
 		CLBuffer<FloatBuffer> clmem = clGrid.getDelegate().getCLBuffer();
 		runKernel("multiplyByVal", device, clmem, val);
 		clGrid.getDelegate().notifyDeviceChange();
 	}
-	
-	
+
+
 	@Override
 	public void copy(final NumericGrid gridA, final NumericGrid gridB) {
 		// not possible to have a grid that is not implementing OpenCLGridInterface
@@ -533,18 +541,18 @@ public class OpenCLGridOperators extends NumericGridOperator {
 
 		clGridA.getDelegate().prepareForDeviceOperation();
 		clGridB.getDelegate().prepareForDeviceOperation();
-		
+
 		// TODO check if both live on the same device.
 		CLDevice device = clGridA.getDelegate().getCLDevice(); 
 
 		CLBuffer<FloatBuffer> clmemA = clGridA.getDelegate().getCLBuffer();
 		CLBuffer<FloatBuffer> clmemB = clGridB.getDelegate().getCLBuffer();
-		
+
 		runKernel("copyGrid", device, clmemA, clmemB);
 		clGridA.getDelegate().notifyDeviceChange();
 	}
-		
-	
+
+
 	@Override
 	public void multiplyBy(final NumericGrid gridA, final NumericGrid gridB) {
 		// not possible to have a grid that is not implementing OpenCLGridInterface
@@ -553,18 +561,18 @@ public class OpenCLGridOperators extends NumericGridOperator {
 
 		clGridA.getDelegate().prepareForDeviceOperation();
 		clGridB.getDelegate().prepareForDeviceOperation();
-		
+
 		// TODO check if both live on the same device.
 		CLDevice device = clGridA.getDelegate().getCLDevice(); 
 
 		CLBuffer<FloatBuffer> clmemA = clGridA.getDelegate().getCLBuffer();
 		CLBuffer<FloatBuffer> clmemB = clGridB.getDelegate().getCLBuffer();
-		
+
 		runKernel("multiplyBy", device, clmemA, clmemB);
 		clGridA.getDelegate().notifyDeviceChange();
 	}
-	
-	
+
+
 	@Override
 	public void divideBy(final NumericGrid grid, float val) {		
 		// not possible to have a grid that is not implementing OpenCLGridInterface
@@ -572,13 +580,13 @@ public class OpenCLGridOperators extends NumericGridOperator {
 		CLDevice device = clGrid.getDelegate().getCLDevice(); 
 
 		clGrid.getDelegate().prepareForDeviceOperation();
-		
+
 		CLBuffer<FloatBuffer> clmem = clGrid.getDelegate().getCLBuffer();
 		runKernel("divideByVal", device, clmem, val);
 		clGrid.getDelegate().notifyDeviceChange();
 	}
-	
-	
+
+
 	@Override
 	public void fill(final NumericGrid grid, float val) {		
 		// not possible to have a grid that is not implementing OpenCLGridInterface
@@ -586,13 +594,13 @@ public class OpenCLGridOperators extends NumericGridOperator {
 		CLDevice device = clGrid.getDelegate().getCLDevice(); 
 
 		clGrid.getDelegate().prepareForDeviceOperation();
-		
+
 		CLBuffer<FloatBuffer> clmem = clGrid.getDelegate().getCLBuffer();
 		runKernel("fill", device, clmem, val);
 		clGrid.getDelegate().notifyDeviceChange();
 	}
-	
-	
+
+
 	@Override
 	public void removeNegative(final NumericGrid grid) {		
 		// not possible to have a grid that is not implementing OpenCLGridInterface
@@ -600,13 +608,13 @@ public class OpenCLGridOperators extends NumericGridOperator {
 		CLDevice device = clGrid.getDelegate().getCLDevice(); 
 
 		clGrid.getDelegate().prepareForDeviceOperation();
-		
+
 		CLBuffer<FloatBuffer> clmem = clGrid.getDelegate().getCLBuffer();
 		runKernel("minimalValue", device, clmem, 0);
 		clGrid.getDelegate().notifyDeviceChange();
 	}
-	
-	
+
+
 	@Override
 	public void pow(final NumericGrid grid, double val) {		
 		// not possible to have a grid that is not implementing OpenCLGridInterface
@@ -614,12 +622,12 @@ public class OpenCLGridOperators extends NumericGridOperator {
 		CLDevice device = clGrid.getDelegate().getCLDevice(); 
 
 		clGrid.getDelegate().prepareForDeviceOperation();
-		
+
 		CLBuffer<FloatBuffer> clmem = clGrid.getDelegate().getCLBuffer();
 		runKernel("power", device, clmem, (float)val);
 		clGrid.getDelegate().notifyDeviceChange();
 	}
-	
+
 	@Override
 	public void divideBy(final NumericGrid gridA, final NumericGrid gridB) {
 		// not possible to have a grid that is not implementing OpenCLGridInterface
@@ -628,72 +636,14 @@ public class OpenCLGridOperators extends NumericGridOperator {
 
 		clGridA.getDelegate().prepareForDeviceOperation();
 		clGridB.getDelegate().prepareForDeviceOperation();
-		
+
 		// TODO check if both live on the same device.
 		CLDevice device = clGridA.getDelegate().getCLDevice(); 
 
 		CLBuffer<FloatBuffer> clmemA = clGridA.getDelegate().getCLBuffer();
 		CLBuffer<FloatBuffer> clmemB = clGridB.getDelegate().getCLBuffer();
-		
+
 		runKernel("divideBy", device, clmemA, clmemB);
 		clGridA.getDelegate().notifyDeviceChange();
-	}
-	
-
-	
-	//TODO: Check the methods getAllInstances, getAllOpenCLGridOperatorProgramsAsString, and getCompleteRessourceAsString why they are necessary. 
-	
-	/**
-	 * Auxiliary method that lists all instances of GridOperators
-	 * Users can derive from OpenCLGridOperators and define their cl-file path
-	 * in the field "programFile"
-	 * 
-	 * Make sure that you add an instance of your personal OpenCLGridOperators in this method
-	 * @return All instances of existing OpenCLGridOperator classes
-	 */
-	public static OpenCLGridOperators[] getAllInstances(){
-		// TODO: replace with automatic search on java class path
-		// Problem is that this might be really slow. // Comment by Michael Dorner: It IS very slow.
-		return new OpenCLGridOperators[]{
-				new OpenCLGridOperators() 	// Comment by Michael Dorner: GridOperators are singletons. Therefore we should see any constructor in there. Additionally, why creating an array with only one entry?
-
-		};
-	}
-
-	
-	/**
-	 * Obtains all OpenCLGridOperators instances and concatenates all related 
-	 * cl-source files to one long string
-	 * @return Concatenated cl-source code
-	 */
-	public String getAllOpenCLGridOperatorProgramsAsString(){
-		String out = "";
-		OpenCLGridOperators[] instances = getAllInstances();
-		for (int i = 0; i < instances.length; i++) {
-			try {
-				out += instances[i].getCompleteRessourceAsString();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		return out;
-	}
-
-	/**
-	 * Reads a cl-program file and returns it as String
-	 * @return A cl-program file as String
-	 * @throws IOException
-	 */
-	protected String getCompleteRessourceAsString() throws IOException{
-		InputStream inStream = this.getClass().getResourceAsStream(kernelFile);
-		BufferedReader br = new BufferedReader(new InputStreamReader(inStream));
-		String content = "";
-		String line = br.readLine();
-		while (line != null){
-			content += line + "\n";
-			line = br.readLine();
-		};
-		return content;
 	}
 }
