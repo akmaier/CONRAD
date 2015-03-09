@@ -3,7 +3,7 @@
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
 */
 
-#define LOCAL_GROUP_XDIM 256
+//#define LOCAL_GROUP_XDIM 256
 
 /* Sum of all entries in grid stored in result */
 kernel void sum(global float *grid, global float *result, const unsigned int num_elements, local float *cache)
@@ -35,7 +35,7 @@ kernel void stddev(global float *grid, global float *result, float const mean, i
     const uint group_id = get_group_id(0);
     const uint local_size = get_local_size(0);
     
-    cache[local_id] = (global_id < num_elements) ? pow( (grid[global_id] - mean) , 2) : 0.0f; // sorry for this monster line
+    cache[local_id] = (global_id < num_elements) ? pow( (grid[global_id] - mean), 2) : 0.0f; // sorry for this monster line
     barrier(CLK_LOCAL_MEM_FENCE);
     
     for (unsigned int s = local_size >> 1; s > 0; s >>= 1) {
@@ -71,26 +71,6 @@ kernel void dotProduct(global const float *gridA, global const float *gridB, glo
 }
 
 
-kernel void dotProduct1(global const float *gridA, global const float *gridB, global float *result, int const numElements)
-{
-    int iGID = get_global_id(0);
-    int totalThreads = get_global_size(0);
-    int workPerThread = (numElements/totalThreads)+1;
-    
-    int offset = 0;
-    offset = iGID*workPerThread;
-    
-    result[iGID] = 0;
-    for(int i = 0; i<workPerThread; ++i)
-    {
-        if(offset +i < numElements)
-        {
-            result[iGID] += (gridB[offset+i]*gridA[offset+i]);
-        }
-    }
-}
-
-
 /* result = max(grid) */
 kernel void maximum(global const float *grid, global float *result, int const num_elements, local float *cache)
 {
@@ -99,7 +79,7 @@ kernel void maximum(global const float *grid, global float *result, int const nu
     const uint group_id = get_group_id(0);
     const uint local_size = get_local_size(0);
     
-    cache[local_id] = (global_id < num_elements) ? grid[global_id] : 0.0f;
+    cache[local_id] = (global_id < num_elements) ? grid[global_id] : -MAXFLOAT;
     barrier(CLK_LOCAL_MEM_FENCE);
     
     for (unsigned int s = local_size >> 1; s > 0; s >>= 1) {
@@ -121,7 +101,7 @@ kernel void minimum(global const float *grid, global float *result, int const nu
     const uint group_id = get_group_id(0);
     const uint local_size = get_local_size(0);
     
-    cache[local_id] = (global_id < num_elements) ? grid[global_id] : 0.0f;
+    cache[local_id] = (global_id < num_elements) ? grid[global_id] : MAXFLOAT;
     barrier(CLK_LOCAL_MEM_FENCE);
     
     for (unsigned int s = local_size >> 1; s > 0; s >>= 1) {

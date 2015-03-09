@@ -205,8 +205,8 @@ public class OpenCLGridOperators extends NumericGridOperator {
 		CLBuffer<FloatBuffer> resultBuffer = null;
 
 		if (nonVoidKernels.contains(kernelName)) {
-			resultBuffer = context.createFloatBuffer((globalSize/localSize), Mem.READ_WRITE);
-			kernel.putArg(gridBuffer).putArg(resultBuffer).putArg(elementCount).putNullArg(localSize*4); // 4 bytes per float
+			resultBuffer = context.createFloatBuffer((globalSize/localSize), Mem.READ_ONLY);
+			kernel.putArg(gridBuffer).putArg(resultBuffer).putArg(elementCount).putNullArg(4*localSize); // 4 bytes per float
 			queue.put1DRangeKernel(kernel, 0, globalSize, localSize);
 			queue.putReadBuffer(resultBuffer, true);			
 		}
@@ -300,7 +300,7 @@ public class OpenCLGridOperators extends NumericGridOperator {
 
 
 	@Override
-	public double stddev(final NumericGrid grid, double mean) {	
+	public float stddev(final NumericGrid grid, double mean) {	
 		OpenCLGridInterface clGrid = (OpenCLGridInterface)grid;
 		CLDevice device = clGrid.getDelegate().getCLDevice(); 
 
@@ -310,18 +310,18 @@ public class OpenCLGridOperators extends NumericGridOperator {
 		CLBuffer<FloatBuffer> gridBuffer = clGrid.getDelegate().getCLBuffer();
 		CLBuffer<FloatBuffer> resultBuffer = runKernel("stddev", device, gridBuffer, (float)mean);
 
-		double sum = 0.0;
+		float sum = 0.0f;
 		while (resultBuffer.getBuffer().hasRemaining()){
 			sum += resultBuffer.getBuffer().get();
 		}
 
 		resultBuffer.release();
-		return Math.sqrt(sum/elementCount) ;	
+		return (float) Math.sqrt(sum/elementCount);	
 	}
 
-
+/*
 	@Override
-	public double dotProduct(final NumericGrid gridA, final NumericGrid gridB) {		
+	public float dotProduct(final NumericGrid gridA, final NumericGrid gridB) {		
 		// not possible to have a grid that is not implementing OpenCLGridInterface
 
 		OpenCLGridInterface clGridA = (OpenCLGridInterface)gridA;
@@ -336,7 +336,7 @@ public class OpenCLGridOperators extends NumericGridOperator {
 
 		CLBuffer<FloatBuffer> resultBuffer = runKernel("dotProduct", device, gridABuffer, gridBBuffer);
 
-		double sum = 0;
+		float sum = 0.0f;
 		while (resultBuffer.getBuffer().hasRemaining()) {
 			sum += resultBuffer.getBuffer().get();
 		}
@@ -344,11 +344,11 @@ public class OpenCLGridOperators extends NumericGridOperator {
 		resultBuffer.release();
 		return sum;
 	}
-
+*/
 
 
 	@Override
-	public double sum(final NumericGrid grid) {
+	public float sum(final NumericGrid grid) {
 		OpenCLGridInterface clGrid = (OpenCLGridInterface)grid;
 		CLDevice device = clGrid.getDelegate().getCLDevice(); 
 
@@ -357,11 +357,12 @@ public class OpenCLGridOperators extends NumericGridOperator {
 		CLBuffer<FloatBuffer> gridBuffer = clGrid.getDelegate().getCLBuffer();
 		CLBuffer<FloatBuffer> result = runKernel("sum", device, gridBuffer);
 
-		double sum = 0.0;
+		float sum = 0.0f;
 		while (result.getBuffer().hasRemaining()) {
 			sum += result.getBuffer().get();
 		}
 
+		
 		result.release();
 		return sum;
 	}
@@ -379,7 +380,7 @@ public class OpenCLGridOperators extends NumericGridOperator {
 		CLBuffer<FloatBuffer> clmem = clGrid.getDelegate().getCLBuffer();
 		CLBuffer<FloatBuffer> result = runKernel("maximum", device, clmem);
 
-		float max = -Float.MAX_VALUE;
+		float max = Float.MIN_VALUE;
 		while (result.getBuffer().hasRemaining()) {
 			max = Math.max(max, result.getBuffer().get());
 		}
