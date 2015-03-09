@@ -67,7 +67,7 @@ public class ConeBeamBackprojector {
 		double originX = -geo.getOriginX();
 		double originY = -geo.getOriginY();
 		double originZ = -geo.getOriginZ();
-		final Grid3D grid = new Grid3D(imgSizeX,imgSizeY,imgSizeZ);
+		Grid3D grid = new Grid3D(imgSizeX,imgSizeY,imgSizeZ);
 		grid.setOrigin(-originX, -originY, -originZ);
 		grid.setSpacing(spacingX, spacingY, spacingZ);
 		for(int x = 0; x < imgSizeX; x++) {
