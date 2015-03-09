@@ -115,8 +115,6 @@ public class OpenCLBenchmark {
 		grid2D.setAtIndex(1, 2, -0.12345f);
 		
 		OpenCLGrid2D openCLGrid2D = new OpenCLGrid2D(grid2D, context, device);
-		openCLGrid2D.getGridOperator().sum(openCLGrid2D); // initialize
-		
 		float min = openCLGrid2D.getGridOperator().min(openCLGrid2D);
 		System.out.println("min:" + min);
 		

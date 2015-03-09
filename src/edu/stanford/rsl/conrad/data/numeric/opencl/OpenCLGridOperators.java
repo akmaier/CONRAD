@@ -600,7 +600,8 @@ public class OpenCLGridOperators extends NumericGridOperator {
 		clGrid.getDelegate().notifyDeviceChange();
 	}
 
-
+	/*
+	 * not yet implemented
 	@Override
 	public void removeNegative(final NumericGrid grid) {		
 		// not possible to have a grid that is not implementing OpenCLGridInterface
@@ -613,7 +614,7 @@ public class OpenCLGridOperators extends NumericGridOperator {
 		runKernel("minimalValue", device, clmem, 0);
 		clGrid.getDelegate().notifyDeviceChange();
 	}
-
+	*/
 
 	@Override
 	public void pow(final NumericGrid grid, double val) {		

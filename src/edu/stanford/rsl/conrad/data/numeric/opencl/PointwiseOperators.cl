@@ -279,6 +279,30 @@ kernel void power(global float *grid, const float exponent, int const num_elemen
 }
 
 
+/* grid = exp(grid) */
+kernel void expontial(global float *grid, int const num_elements )
+{
+    int global_id = get_global_id(0);
+    
+    if(global_id >= num_elements)
+        return;
+    
+    grid[global_id] = exp(grid[global_id]);
+}
+
+
+/* grid = log(grid) */
+kernel void logarithm(global float *grid, int const num_elements )
+{
+    int global_id = get_global_id(0);
+    
+    if(global_id >= num_elements)
+        return;
+    
+    grid[global_id] = log(grid[global_id]);
+}
+
+
 /* grid = log2(grid) */
 kernel void logarithm2(global float *grid, int const num_elements )
 {

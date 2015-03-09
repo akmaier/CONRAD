@@ -9,12 +9,12 @@ import edu.stanford.rsl.conrad.data.numeric.opencl.OpenCLGridOperators;
 
 
 /** The collection of all operators working point-wise on NumericGrid data. */
-public abstract class NumericPointwiseOperators{
+public abstract class NumericPointwiseOperators {
 	/*
 	 * Auxiliary method to select a combined grid operator
 	 */
 	public static NumericGridOperator selectGridOperator(NumericGrid ... grids) {
-		boolean nonCLFound =false;
+		boolean nonCLFound = false;
 		for (NumericGrid grid : grids){
 			if (!(grid instanceof OpenCLGridInterface)){
 				nonCLFound = true;
