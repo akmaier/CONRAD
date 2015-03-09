@@ -1,5 +1,7 @@
 package edu.stanford.rsl.wolfgang;
 
+import edu.stanford.rsl.conrad.data.generic.complex.ComplexGrid1D;
+import edu.stanford.rsl.conrad.data.numeric.Grid1D;
 import edu.stanford.rsl.conrad.data.numeric.Grid3D;
 import edu.stanford.rsl.conrad.geometry.trajectories.Trajectory;
 import edu.stanford.rsl.conrad.utils.Configuration;
@@ -22,10 +24,25 @@ public class Config {
 	private double spacingY;
 	private double angleInc;
 	
+	private double wuSpacing;
+	private double wvSpacing;
+	private double kSpacing;
+	
 	// spacing arrays in frequency space
-	private double[] wuSpacing;
-	private double[] wvSpacing;
-	private double[] kSpacing;
+	private Grid1D wuSpacingVec;
+	private Grid1D wvSpacingVec;
+	private Grid1D kSpacingVec;
+	
+	private float[] shiftFreqX;
+	private float[] shiftFreqY;
+	
+	private ComplexGrid1D complexShiftX;
+	private ComplexGrid1D complexShiftY;
+	
+	// translation-grid
+	private int[] translation;
+	private Grid3D mask;
+
 	
 	public Config(String xmlFilename){
 		/*int[] dims = data.getSize();
@@ -36,10 +53,24 @@ public class Config {
 		//hard coded
 		rp = 125.0f;
 		getGeometry(xmlFilename);
-		wuSpacing = createFrequArray(N, spacingX);
-		wvSpacing = createFrequArray(M, spacingY);
-		kSpacing = createFrequArray(K, angleInc);
+		wuSpacing = 1.0/(N*spacingX);
+		wvSpacing = 1.0/(M*spacingY);
+		kSpacing = 1.0/(K*angleInc);
+		wuSpacingVec = createFrequArray(N, (float)(wuSpacing));
+		wvSpacingVec = createFrequArray(M, (float)(wvSpacing));
+		kSpacingVec = createFrequArray(K, (float)(angleInc));
 		
+		// construct a shift vector
+		shiftFreqX = constructShiftFreq(wuSpacingVec, spacingX);
+		shiftFreqY = constructShiftFreq(wvSpacingVec, spacingY);
+		
+		complexShiftX = constructComplexShiftFreq(wuSpacingVec, spacingX);
+		complexShiftY = constructComplexShiftFreq(wvSpacingVec, spacingY);
+		
+//		createShift(0.0f);
+		
+		
+			
 	}
 	
 	private void getGeometry(String filename){
@@ -57,6 +88,8 @@ public class Config {
 		
 		D = geom.getSourceToDetectorDistance() - geom.getSourceToAxisDistance();
 		L = geom.getSourceToAxisDistance();
+		
+		
 		
 	}
 	public double getSourceToPatientDist(){
@@ -94,18 +127,85 @@ public class Config {
 	public double getAngleIncrement(){
 		return angleInc;
 	}
+	public double getUSpacing(){
+		return wuSpacing;
+	}
+	public double getVSpacing(){
+		return wvSpacing;
+	}
+	public double getKSpacing(){
+		return kSpacing;
+	}
+	public Grid1D getUSpacingVec(){
+		return wuSpacingVec;
+	}
+	public Grid1D getVSpacingVec(){
+		return wvSpacingVec;
+	}
+	public Grid1D getKSpacingVec(){
+		return kSpacingVec;
+	}
+	public float[] getShiftFreqX(){
+		return shiftFreqX;
+	}
+	public float[] getShiftFreqY(){
+		return shiftFreqY;
+	}
+	public ComplexGrid1D getComplexShiftFreqX(){
+		return complexShiftX;
+	}
+	public ComplexGrid1D getComplexShiftFreqY(){
+		return complexShiftY;
+	}
 	
-	private double[] createFrequArray(int dim, double spacing){
-		double[] frequArray = new double[dim];
-		for(int i = 0; i < (dim -1)/2; i++){
-			frequArray[i] = i*spacing;
+	private Grid1D createFrequArray(int dim, float freqSpacing){
+		Grid1D frequArray = new Grid1D(dim);
+		freqSpacing = 1.0f;//(dim*spacing);
+		for(int i = 0; i <= (dim -1)/2; i++){
+			frequArray.setAtIndex(i, i*freqSpacing) ;
 		}
 		int i = -dim/2;
 		for(int pos = dim/2; pos < dim; pos++, i++ ){
-			frequArray[pos] = i*spacing;
+			frequArray.setAtIndex(pos, i*freqSpacing);
 		}
 		return frequArray;
 	}
+	
+	private ComplexGrid1D  constructComplexShiftFreq(Grid1D spacingVec, double spacingLocal){
+		int dim = spacingVec.getSize()[0];
+		ComplexGrid1D frequencies = new ComplexGrid1D(spacingVec.getSize()[0]);
+		for(int i = 0; i < frequencies.getSize()[0]; i++){
+			frequencies.setAtIndex(i, (float)(Math.cos(-2*Math.PI*spacingVec.getAtIndex(i)/(dim*spacingLocal))), (float)(Math.sin(-2*Math.PI*spacingVec.getAtIndex(i)/(dim*spacingLocal)))); // = (float)(-2*Math.PI*spacingVec.getAtIndex(i)/(dim*spacingLocal));
+		}
+		return frequencies;
+	}
+	
+	
+	public void setTrans(int[] t){
+		translation = t;
+	}
+	private float[] constructShiftFreq(Grid1D spacingVec, double spacingLocal){
+		int dim = spacingVec.getSize()[0];
+		float[] frequencies = new float[dim];
+		for(int i = 0; i < frequencies.length; i++){
+			frequencies[i] = (float)(-2*Math.PI*spacingVec.getAtIndex(i)/(dim/*spacingLocal*/));
+		}
+		return frequencies;
+	}
+	
+	private void fillMask(){
+		
+	}
+//	private void createShift(float shift){
+//		frequencyShift = new ComplexGrid1D(frequencies.length);
+//		for(int i = 0; i < frequencyShift.getSize()[0]; i++){
+//			float angle =  (float)(frequencies[i]*Math.PI/2);
+//			frequencyShift.setRealAtIndex((float)(Math.cos(angle)), i);
+//			frequencyShift.setImagAtIndex((float)(Math.sin(angle)), i);
+//			
+//		}
+//	}
+	
 	
 
 }
