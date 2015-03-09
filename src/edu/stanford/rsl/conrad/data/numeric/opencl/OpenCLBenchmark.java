@@ -109,14 +109,24 @@ public class OpenCLBenchmark {
 		System.out.format("+----------------------+-------+--------+%n");
 		
 		
-		// last, but not lead: min
+		// last, but not lead: 
+		// dot product
 		Grid2D grid2D = new Grid2D(512, 512);
-		
-		grid2D.setAtIndex(1, 2, -0.12345f);
+		for(int i = 0; i<512; i++) {
+			for(int j = 0; j<512; j++) {
+				float val = 1.0f;
+				grid2D.setAtIndex(i, j, val);
+			}
+		}
 		
 		OpenCLGrid2D openCLGrid2D = new OpenCLGrid2D(grid2D, context, device);
+		double dotProduct = openCLGrid2D.getGridOperator().dotProduct(openCLGrid2D, openCLGrid2D);
+		System.out.println("dot product: " + dotProduct);
+
+		//min
+		openCLGrid2D.setAtIndex(1, 2, -0.12345f);
 		float min = openCLGrid2D.getGridOperator().min(openCLGrid2D);
-		System.out.println("min:" + min);
+		System.out.println("min: " + min);
 		
 
 		
