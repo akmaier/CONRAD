@@ -40,33 +40,33 @@ public class NumericGridOperator {
 	}
 
 	/** Get sum of all grid elements */
-	public double sum(final NumericGrid grid) {
-		double sum = 0;
+	public float sum(final NumericGrid grid) {
+		float sum = 0.0f;
 		NumericPointwiseIteratorND it = new NumericPointwiseIteratorND(grid);
 		while (it.hasNext())
 			sum += it.getNext();
-		return (float) sum;
+		return sum;
 	}
 	
 	/** Get sum of all grid elements */
-	public double sumSave(final NumericGrid grid) {
-		double sum = 0;
+	public float sumSave(final NumericGrid grid) {
+		float sum = 0.0f;
 		NumericPointwiseIteratorND it = new NumericPointwiseIteratorND(grid);
 		while (it.hasNext()) {
 			double val = it.getNext();
 			if (!(Double.isInfinite(val) || Double.isNaN(val)))
 				sum += val;
 		}
-		return (float) sum;
+		return sum;
 	}
 
 	/** Get l1 norm of all grid elements */
-	public double normL1(final NumericGrid grid) {
-		double res = 0;
+	public float normL1(final NumericGrid grid) {
+		float res = 0.0f;
 		NumericPointwiseIteratorND it = new NumericPointwiseIteratorND(grid);
 		while (it.hasNext()) {
-			double val = it.getNext();
-			if (!(Double.isInfinite(val) || Double.isNaN(val))) {
+			float val = it.getNext();
+			if (!(Float.isInfinite(val) || Float.isNaN(val))) {
 				if (0 > val) // add abs
 					res -= val;
 				else
@@ -92,7 +92,6 @@ public class NumericGridOperator {
 
 	public int countInvalidElements(NumericGrid grid) {
 		int res = 0;
-		
 		NumericPointwiseIteratorND it = new NumericPointwiseIteratorND(grid);
 		while (it.hasNext()) {
 			float val = it.getNext();
@@ -104,13 +103,13 @@ public class NumericGridOperator {
 
 	/** Get min of a NumericGrid */
 	public float min(final NumericGrid grid) {
-		float min = Float.MAX_VALUE;
-		NumericPointwiseIteratorND it1 = new NumericPointwiseIteratorND(grid);
-		while (it1.hasNext()) {
-			if (it1.get() < min) {
-				min = it1.get();
+		float min = +Float.MAX_VALUE;
+		NumericPointwiseIteratorND it = new NumericPointwiseIteratorND(grid);
+		while (it.hasNext()) {
+			if (it.get() < min) {
+				min = it.get();
 			}
-			it1.getNext();
+			it.getNext();
 		}
 		return min;
 	}
@@ -118,11 +117,11 @@ public class NumericGridOperator {
 	/** Get max of a NumericGrid */
 	public float max(final NumericGrid grid) {
 		float max = -Float.MAX_VALUE;
-		NumericPointwiseIteratorND it1 = new NumericPointwiseIteratorND(grid);
-		while (it1.hasNext()) {
-			if (it1.get() > max)
-				max = it1.get();
-			it1.getNext();
+		NumericPointwiseIteratorND it = new NumericPointwiseIteratorND(grid);
+		while (it.hasNext()) {
+			if (it.get() > max)
+				max = it.get();
+			it.getNext();
 		}
 		return max;
 	}
@@ -136,8 +135,8 @@ public class NumericGridOperator {
 	}
 
 	/** Compute dot product between grid1 and grid2 */
-	public double dotProduct(NumericGrid grid1, NumericGrid grid2) {
-		double value = 0.0;
+	public float dotProduct(NumericGrid grid1, NumericGrid grid2) {
+		float value = 0.0f;
 		NumericPointwiseIteratorND it1 = new NumericPointwiseIteratorND(grid1);
 		NumericPointwiseIteratorND it2 = new NumericPointwiseIteratorND(grid2);
 		while (it1.hasNext())
@@ -146,8 +145,8 @@ public class NumericGridOperator {
 	}
 	
 	/** Compute weighted dot product between grid1 and grid2 */
-	public double weightedDotProduct(NumericGrid grid1, NumericGrid grid2, double weightGrid2, double addGrid2) {
-		double value = 0.0;
+	public float weightedDotProduct(NumericGrid grid1, NumericGrid grid2, double weightGrid2, double addGrid2) {
+		float value = 0.0f;
 		NumericPointwiseIteratorND it1 = new NumericPointwiseIteratorND(grid1);
 		NumericPointwiseIteratorND it2 = new NumericPointwiseIteratorND(grid2);
 		while (it1.hasNext())
@@ -156,8 +155,8 @@ public class NumericGridOperator {
 	}
 	
 	/** Compute dot product between grid1 and grid2 */
-	public double weightedSSD(NumericGrid grid1, NumericGrid grid2, double weightGrid2, double addGrid2) {
-		double value = 0.0;
+	public float weightedSSD(NumericGrid grid1, NumericGrid grid2, double weightGrid2, double addGrid2) {
+		float value = 0.0f;
 		NumericPointwiseIteratorND it1 = new NumericPointwiseIteratorND(grid1);
 		NumericPointwiseIteratorND it2 = new NumericPointwiseIteratorND(grid2);
 		while (it1.hasNext()){
@@ -168,8 +167,8 @@ public class NumericGridOperator {
 	}
 	
 	/** Compute rmse between grid1 and grid2 */
-	public double rmse(NumericGrid grid1, NumericGrid grid2) {
-		double sum = 0.0;
+	public float rmse(NumericGrid grid1, NumericGrid grid2) {
+		float sum = 0.0f;
 		long numErrors = 0;
 		NumericPointwiseIteratorND it1 = new NumericPointwiseIteratorND(grid1);
 		NumericPointwiseIteratorND it2 = new NumericPointwiseIteratorND(grid2);
@@ -184,7 +183,7 @@ public class NumericGridOperator {
 			System.err.println("Errors in RMSE computation: "
 					+ ((double) numErrors * 100)
 					/ (grid1.getNumberOfElements()) + "%");
-		return Math.sqrt(sum/grid1.getNumberOfElements());
+		return (float)Math.sqrt(sum/grid1.getNumberOfElements());
 	}
 	
 	/** Compute grid1 = grid1 + grid2 */
@@ -331,14 +330,14 @@ public class NumericGridOperator {
 			it.setNext((it.get() < 0) ? 0 : it.get());
 	}
 
-	public double stddev(NumericGrid data, double mean) {
-		double theStdDev = 0;
+	public float stddev(NumericGrid data, double mean) {
+		float theStdDev = 0.0f;
 		NumericPointwiseIteratorND it = new NumericPointwiseIteratorND(data);
 		while (it.hasNext()){
 			double value =(it.getNext() - mean);
 			theStdDev += value*value;
 		}
-		return Math.sqrt(theStdDev / data.getNumberOfElements());
+		return (float)Math.sqrt(theStdDev / data.getNumberOfElements());
 	}
 
 	public void abs(NumericGrid data) {

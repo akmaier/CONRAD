@@ -9,12 +9,12 @@ import edu.stanford.rsl.conrad.data.numeric.opencl.OpenCLGridOperators;
 
 
 /** The collection of all operators working point-wise on NumericGrid data. */
-public abstract class NumericPointwiseOperators{
+public abstract class NumericPointwiseOperators {
 	/*
 	 * Auxiliary method to select a combined grid operator
 	 */
 	public static NumericGridOperator selectGridOperator(NumericGrid ... grids) {
-		boolean nonCLFound =false;
+		boolean nonCLFound = false;
 		for (NumericGrid grid : grids){
 			if (!(grid instanceof OpenCLGridInterface)){
 				nonCLFound = true;
@@ -29,7 +29,7 @@ public abstract class NumericPointwiseOperators{
 	}
 
 	/** Get sum of all grid elements */
-	public static double sum(final NumericGrid grid) {
+	public static float sum(final NumericGrid grid) {
 		return grid.getGridOperator().sum(grid);
 	}
 	
@@ -50,25 +50,25 @@ public abstract class NumericPointwiseOperators{
 	}
 
 	/** Compute dot product between grid1 and grid2 */
-	public static double dotProduct(NumericGrid grid1, NumericGrid grid2) {
+	public static float dotProduct(NumericGrid grid1, NumericGrid grid2) {
 		NumericGridOperator op = selectGridOperator(grid1, grid2);
 		return op.dotProduct(grid1, grid2);
 	}
 	
 	/** Compute dot product between grid1 and grid2 */
-	public static double weightedSSD(NumericGrid grid1, NumericGrid grid2, double weightGrid2, double addGrid2) {
+	public static float weightedSSD(NumericGrid grid1, NumericGrid grid2, double weightGrid2, double addGrid2) {
 		NumericGridOperator op = selectGridOperator(grid1, grid2);
 		return op.weightedSSD(grid1, grid2, weightGrid2, addGrid2);
 	}
 	
 	/** Compute dot product between grid1 and grid2 */
-	public static double weightedDotProduct(NumericGrid grid1, NumericGrid grid2, double weightGrid2, double subGrid2) {
+	public static float weightedDotProduct(NumericGrid grid1, NumericGrid grid2, double weightGrid2, double subGrid2) {
 		NumericGridOperator op = selectGridOperator(grid1, grid2);
 		return op.weightedSSD(grid1, grid2, weightGrid2, subGrid2);
 	}
 
 	/** Compute dot product between grid and itself. Same as square of l2 norm */
-	public static double dotProduct(NumericGrid grid) {
+	public static float dotProduct(NumericGrid grid) {
 		return dotProduct(grid, grid);
 	}
 
@@ -152,11 +152,11 @@ public abstract class NumericPointwiseOperators{
 		grid.getGridOperator().removeNegative(grid);
 	}
 	
-	public static double mean(NumericGrid data) {
+	public static float mean(NumericGrid data) {
 		return sum(data)/data.getNumberOfElements();
 	}
 
-	public static double stddev(NumericGrid data, double mean) {
+	public static float stddev(NumericGrid data, double mean) {
 		return data.getGridOperator().stddev(data, mean);
 	}
 
