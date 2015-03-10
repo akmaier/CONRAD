@@ -319,7 +319,7 @@ public class OpenCLGridOperators extends NumericGridOperator {
 		return (float) Math.sqrt(sum/elementCount);	
 	}
 
-/*
+
 	@Override
 	public float dotProduct(final NumericGrid gridA, final NumericGrid gridB) {		
 		// not possible to have a grid that is not implementing OpenCLGridInterface
@@ -330,6 +330,7 @@ public class OpenCLGridOperators extends NumericGridOperator {
 		// TODO check if both live on the same device.
 
 		clGridA.getDelegate().prepareForDeviceOperation();
+		clGridB.getDelegate().prepareForDeviceOperation();
 
 		CLBuffer<FloatBuffer> gridABuffer = clGridA.getDelegate().getCLBuffer();
 		CLBuffer<FloatBuffer> gridBBuffer = clGridB.getDelegate().getCLBuffer();
@@ -344,7 +345,7 @@ public class OpenCLGridOperators extends NumericGridOperator {
 		resultBuffer.release();
 		return sum;
 	}
-*/
+
 
 
 	@Override
