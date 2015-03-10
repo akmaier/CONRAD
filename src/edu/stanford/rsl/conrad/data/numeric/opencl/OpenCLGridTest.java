@@ -21,11 +21,11 @@ import edu.stanford.rsl.conrad.utils.CONRAD;
 
 public class OpenCLGridTest {
 	
-	private static final double smallValue = 5*CONRAD.FLOAT_EPSILON;
+	private static final double smallValue = 1e-6;
 
 	void fillBufferRandom(float[] buffer) {
 		for (int i = 0; i < buffer.length; i++) {
-			buffer[i] = (float) Math.random()*4 + 2f;
+			buffer[i] = (float) Math.random();
 		}
 	}
 	
