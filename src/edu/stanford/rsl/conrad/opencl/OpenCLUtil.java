@@ -77,7 +77,7 @@ public abstract class OpenCLUtil {
 	
 	public static void releaseContext (CLContext context){
 		program = null;
-		render  =null;
+		render = null;
 		simpleObjects = null;
 		yxdraw = null;
 		appendBuffer = null;
@@ -408,7 +408,7 @@ public abstract class OpenCLUtil {
 	}
 
 	public synchronized static void initProgram(CLContext context){
-		if (program==null){
+		if (program == null){
 			try {
 				program = context.createProgram(TestOpenCL.class.getResourceAsStream("bspline.cl")).build();
 			} catch (IOException e) {
