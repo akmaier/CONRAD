@@ -44,36 +44,35 @@ public class Test3DMovementCorrection {
 		// get configuration
 		String xmlFilename = "/proj/ciptmp/co98jaha/workspace/data/ConradSettingsForbild3D.xml";
 		Config conf = new Config(xmlFilename);
-		
+		conf.getMask().show();
 		float[] testShift = new float[conf.getNumberOfProjections()*2];
 		for(int i = 0; i < testShift.length; i++){
 			if(i%2 == 0){
-				testShift[i] = 0.5f;
+				testShift[i] = 50.0f;
 			}
 			else{
-				testShift[i] = 0.5f;
+				testShift[i] = 50.0f;
 			}
 		}
 		
-		
+//		
 		MovementCorrection3D mc = new MovementCorrection3D(projections, conf);
 		mc.setShiftVector(testShift);
 		mc.doFFT2();
-		//mc.applyShift();
 		//mc.getData().show("2D-Fouriertransformed");
 		mc.transposeData();
+		mc.applyShift();
 		//mc.getData().show();
-		mc.get2dFourierTransposedData().show("Before angle fft");
-		mc.doFFTAngle();
-			
-		mc.doiFFTAngle();
-		mc.get2dFourierTransposedData().show("After angle ifft");
+//		mc.get2dFourierTransposedData().show("Before angle fft");
+//		mc.doFFTAngle();
+//			
+//		mc.doiFFTAngle();
+//		mc.get2dFourierTransposedData().show("After angle ifft");
 		mc.backTransposeData();
 //		
 		mc.doiFFT2();
 //		
 		mc.getData().show("After pipeline");
-//		mc.applyShift();
 
 //		mc.getData().getRealGrid().show("backtransformed, real part");
 //		mc.getData().getImagGrid().show("backtransformed, imag part");

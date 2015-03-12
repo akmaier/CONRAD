@@ -2,6 +2,7 @@ package edu.stanford.rsl.wolfgang;
 
 import edu.stanford.rsl.conrad.data.generic.complex.ComplexGrid1D;
 import edu.stanford.rsl.conrad.data.numeric.Grid1D;
+import edu.stanford.rsl.conrad.data.numeric.Grid2D;
 import edu.stanford.rsl.conrad.data.numeric.Grid3D;
 import edu.stanford.rsl.conrad.geometry.trajectories.Trajectory;
 import edu.stanford.rsl.conrad.utils.Configuration;
@@ -33,15 +34,14 @@ public class Config {
 	private Grid1D wvSpacingVec;
 	private Grid1D kSpacingVec;
 	
+	
 	private float[] shiftFreqX;
 	private float[] shiftFreqY;
 	
-	private ComplexGrid1D complexShiftX;
-	private ComplexGrid1D complexShiftY;
 	
 	// translation-grid
 	private int[] translation;
-	private Grid3D mask;
+	private Grid2D mask;
 
 	
 	public Config(String xmlFilename){
@@ -63,10 +63,7 @@ public class Config {
 		// construct a shift vector
 		shiftFreqX = constructShiftFreq(wuSpacingVec, spacingX);
 		shiftFreqY = constructShiftFreq(wvSpacingVec, spacingY);
-		
-		complexShiftX = constructComplexShiftFreq(wuSpacingVec, spacingX);
-		complexShiftY = constructComplexShiftFreq(wvSpacingVec, spacingY);
-		
+		fillMask();
 //		createShift(0.0f);
 		
 		
@@ -151,18 +148,16 @@ public class Config {
 	public float[] getShiftFreqY(){
 		return shiftFreqY;
 	}
-	public ComplexGrid1D getComplexShiftFreqX(){
-		return complexShiftX;
+	public Grid2D getMask(){
+		return mask;
 	}
-	public ComplexGrid1D getComplexShiftFreqY(){
-		return complexShiftY;
-	}
+	
 	
 	private Grid1D createFrequArray(int dim, float freqSpacing){
 		Grid1D frequArray = new Grid1D(dim);
-		freqSpacing = 1.0f;//(dim*spacing);
+//		freqSpacing = 1.0f;//(dim*spacing);
 		for(int i = 0; i <= (dim -1)/2; i++){
-			frequArray.setAtIndex(i, i*freqSpacing) ;
+			frequArray.setAtIndex(i, i*freqSpacing);
 		}
 		int i = -dim/2;
 		for(int pos = dim/2; pos < dim; pos++, i++ ){
@@ -171,29 +166,39 @@ public class Config {
 		return frequArray;
 	}
 	
-	private ComplexGrid1D  constructComplexShiftFreq(Grid1D spacingVec, double spacingLocal){
-		int dim = spacingVec.getSize()[0];
-		ComplexGrid1D frequencies = new ComplexGrid1D(spacingVec.getSize()[0]);
-		for(int i = 0; i < frequencies.getSize()[0]; i++){
-			frequencies.setAtIndex(i, (float)(Math.cos(-2*Math.PI*spacingVec.getAtIndex(i)/(dim*spacingLocal))), (float)(Math.sin(-2*Math.PI*spacingVec.getAtIndex(i)/(dim*spacingLocal)))); // = (float)(-2*Math.PI*spacingVec.getAtIndex(i)/(dim*spacingLocal));
-		}
-		return frequencies;
-	}
 	
 	
 	public void setTrans(int[] t){
 		translation = t;
 	}
+	
 	private float[] constructShiftFreq(Grid1D spacingVec, double spacingLocal){
 		int dim = spacingVec.getSize()[0];
 		float[] frequencies = new float[dim];
 		for(int i = 0; i < frequencies.length; i++){
-			frequencies[i] = (float)(-2*Math.PI*spacingVec.getAtIndex(i)/(dim/*spacingLocal*/));
+			frequencies[i] = (float)(-2*Math.PI*spacingVec.getAtIndex(i)*spacingLocal/*/(dim*spacingLocal)*/);
 		}
 		return frequencies;
 	}
 	
 	private void fillMask(){
+		mask = new Grid2D(K,N);
+		for(int proj = 0; proj < mask.getSize()[0]; proj++){
+			float angle = kSpacingVec.getAtIndex(proj);
+			float xi = (float)(angle*(1-L/rp)/(L+D));
+			float value = (float)(angle/(angle-xi*(L+D)));
+			//System.out.println("angle: "+ angle + ", xi: "+xi+ ", absolute: "+ value);
+			if(angle/(angle-xi*(L+D)) > 0){
+				if(xi >= 0){
+					xi /= wuSpacing;
+				}
+				else{
+					xi = (float)(xi/wuSpacing + N/2.0f);
+				}
+				System.out.println("angle: "+ angle + ", xi: "+xi+ ", absolute: "+ value);
+				mask.setAtIndex(proj, (int)xi, 1.0f);
+			}
+		}
 		
 	}
 //	private void createShift(float shift){

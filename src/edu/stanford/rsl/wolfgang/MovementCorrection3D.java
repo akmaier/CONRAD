@@ -127,17 +127,17 @@ public class MovementCorrection3D {
 		//ComplexGrid1D shiftComplexFreqY = m_conf.getComplexShiftFreqY();
 		//float xShiftNormFactor = (float)(1.0f/(m_conf.getPixelXSpace()*m_conf.getUSpacing())); // = 640
 		//float yShiftNormFactor = (float)(1.0f/(m_conf.getPixelYSpace()*m_conf.getVSpacing())); // = 480
-		for(int angle = 0; angle < m_data.getSize()[2]; angle++){
+		for(int angle = 0; angle < m_2dFourierTransposed.getSize()[0]; angle++){
 			// get the shifts in both directions (in pixel)
 			float shiftX = m_shift[angle*2];
 			float shiftY = m_shift[angle*2+1];
 			//System.out.println(angle+1 + " of "+ m_data.getSize()[2]);
-			for(int u = 0; u < m_data.getSize()[0]; u++){
+			for(int u = 0; u < m_2dFourierTransposed.getSize()[1]; u++){
 				//complex number representing shift in x-direction
 				//Complex expShiftX = new Complex(Math.cos(shiftFreqX[u]*shiftX/*xShiftNormFactor/*+0.001*/),Math.sin(shiftFreqX[u]*shiftX/*xShiftNormFactor/*+0.001*/));			
 				float angleX = shiftFreqX[u]*shiftX;
 				//Complex expShiftX = shiftComplexFreqX.getAtIndex(u).power(shiftX);
-				for(int v = 0; v < m_data.getSize()[1]; v++){
+				for(int v = 0; v < m_2dFourierTransposed.getSize()[2]; v++){
 					// complex number representing shift in y-direction
 					//Complex expShiftY = new Complex(Math.cos(shiftFreqY[v]*shiftY/*yShiftNormFactor /*+0.001*/),Math.sin(shiftFreqY[v]*shiftY/*yShiftNormFactor/*+0.001*/));
 					
@@ -153,7 +153,7 @@ public class MovementCorrection3D {
 					Complex shift = getComplexFromAngles(sumAngles);
 //					float newVal = m_data.getRealAtIndex(u, v, angle);
 //					m_data.setAtIndex(u, v, angle, newVal*shift[0], newVal*shift[1]);//(u, v, angle, shift);
-					m_data.multiplyAtIndex(u, v, angle, shift);
+					m_2dFourierTransposed.multiplyAtIndex(angle, u, v,shift);
 					
 				}
 			}
