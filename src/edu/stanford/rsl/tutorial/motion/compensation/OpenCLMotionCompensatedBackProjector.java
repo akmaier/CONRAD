@@ -165,6 +165,11 @@ public class OpenCLMotionCompensatedBackProjector extends OpenCLBackProjector {
 	public double getReferenceTime() {
 		return referenceTime;
 	}
+	
+	@Override
+	public String getToolName(){
+		return "Motion Compensated OpenCL Backprojector";
+	}
 
 	/**
 	 * @param referenceTime the referenceTime to set
