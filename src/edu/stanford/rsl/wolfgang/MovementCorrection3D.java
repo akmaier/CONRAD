@@ -1,10 +1,29 @@
 package edu.stanford.rsl.wolfgang;
 
+import java.io.IOException;
+import java.nio.FloatBuffer;
+
 import edu.stanford.rsl.conrad.data.generic.complex.ComplexGrid3D;
 import edu.stanford.rsl.conrad.data.generic.complex.Fourier;
 import edu.stanford.rsl.conrad.data.generic.datatypes.Complex;
 import edu.stanford.rsl.conrad.data.generic.complex.ComplexGrid1D;
+import edu.stanford.rsl.conrad.data.numeric.Grid1D;
+import edu.stanford.rsl.conrad.data.numeric.Grid2D;
 import edu.stanford.rsl.conrad.data.numeric.Grid3D;
+import edu.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators;
+import edu.stanford.rsl.conrad.data.numeric.opencl.OpenCLGrid1D;
+import edu.stanford.rsl.conrad.data.numeric.opencl.OpenCLGrid3D;
+import edu.stanford.rsl.conrad.opencl.OpenCLUtil;
+import edu.stanford.rsl.jpop.GradientOptimizableFunction;
+
+
+import com.jogamp.opencl.CLBuffer;
+import com.jogamp.opencl.CLCommandQueue;
+import com.jogamp.opencl.CLContext;
+import com.jogamp.opencl.CLDevice;
+import com.jogamp.opencl.CLImage2d;
+import com.jogamp.opencl.CLKernel;
+import com.jogamp.opencl.CLProgram;
 
 public class MovementCorrection3D {
 
@@ -14,11 +33,13 @@ public class MovementCorrection3D {
 	private Config m_conf;
 	private ComplexGrid3D m_data;
 	private ComplexGrid3D m_2dFourierTransposed = null;
-	private float[] m_shift;
+	private Grid1D m_shift;
+	private Grid2D m_mask;
 	public MovementCorrection3D(Grid3D data, Config conf){
 		m_conf = conf;
 		m_data = new ComplexGrid3D(data);
-		m_shift = new float[2*conf.getNumberOfProjections()];
+		m_shift = new Grid1D(2*conf.getNumberOfProjections());
+		m_mask = conf.getMask();
 	}
 	
 	public void doFFT2(){
@@ -121,21 +142,21 @@ public class MovementCorrection3D {
 	public void applyShift(){
 		long time = System.currentTimeMillis();
 		//precomputed angles(-2*pi*xi/N) for u and v direction
-		float[] shiftFreqX = m_conf.getShiftFreqX();
-		float[] shiftFreqY = m_conf.getShiftFreqY();
+		Grid1D shiftFreqX = m_conf.getShiftFreqX();
+		Grid1D shiftFreqY = m_conf.getShiftFreqY();
 		//ComplexGrid1D shiftComplexFreqX = m_conf.getComplexShiftFreqX();
 		//ComplexGrid1D shiftComplexFreqY = m_conf.getComplexShiftFreqY();
 		//float xShiftNormFactor = (float)(1.0f/(m_conf.getPixelXSpace()*m_conf.getUSpacing())); // = 640
 		//float yShiftNormFactor = (float)(1.0f/(m_conf.getPixelYSpace()*m_conf.getVSpacing())); // = 480
 		for(int angle = 0; angle < m_2dFourierTransposed.getSize()[0]; angle++){
 			// get the shifts in both directions (in pixel)
-			float shiftX = m_shift[angle*2];
-			float shiftY = m_shift[angle*2+1];
+			float shiftX = m_shift.getAtIndex(angle*2);
+			float shiftY = m_shift.getAtIndex(angle*2+1);
 			//System.out.println(angle+1 + " of "+ m_data.getSize()[2]);
 			for(int u = 0; u < m_2dFourierTransposed.getSize()[1]; u++){
 				//complex number representing shift in x-direction
 				//Complex expShiftX = new Complex(Math.cos(shiftFreqX[u]*shiftX/*xShiftNormFactor/*+0.001*/),Math.sin(shiftFreqX[u]*shiftX/*xShiftNormFactor/*+0.001*/));			
-				float angleX = shiftFreqX[u]*shiftX;
+				float angleX = shiftFreqX.getAtIndex(u)*shiftX;
 				//Complex expShiftX = shiftComplexFreqX.getAtIndex(u).power(shiftX);
 				for(int v = 0; v < m_2dFourierTransposed.getSize()[2]; v++){
 					// complex number representing shift in y-direction
@@ -144,7 +165,7 @@ public class MovementCorrection3D {
 					/*test */
 //					float angleY = shiftFreqY[v]*shiftY;
 //					System.out.println("Angle x: "+angleX+", Angle y: "+angleY);
-					float sumAngles = angleX + shiftFreqY[v]*shiftY;
+					float sumAngles = angleX + shiftFreqY.getAtIndex(v)*shiftY;
 					
 					//Complex expShiftY = shiftComplexFreqY.getAtIndex(v).power(shiftY);
 					// complex number representing both shifts
@@ -160,6 +181,83 @@ public class MovementCorrection3D {
 		}
 		time = System.currentTimeMillis()-time;
 		System.out.println("Time for complete shift:"+ time);
+	}
+	
+	
+	public void parallelizedApplyShift(){
+		long startTime = System.currentTimeMillis();
+		OpenCLGrid3D realPart = new OpenCLGrid3D(m_2dFourierTransposed.getRealGrid());
+		OpenCLGrid3D imagPart = new OpenCLGrid3D(m_2dFourierTransposed.getImagGrid());
+		OpenCLGrid1D freqU = new OpenCLGrid1D(m_conf.getShiftFreqX());
+		OpenCLGrid1D freqV = new OpenCLGrid1D(m_conf.getShiftFreqY());
+		OpenCLGrid1D shifts = new OpenCLGrid1D(m_shift);
+		
+		// read and write buffers
+		CLBuffer<FloatBuffer> bufferRealPart = realPart.getDelegate().getCLBuffer();
+		CLBuffer<FloatBuffer> bufferImagPart = imagPart.getDelegate().getCLBuffer();
+		
+		// only read buffer
+		CLBuffer<FloatBuffer> bufferFreqU = freqU.getDelegate().getCLBuffer();
+		CLBuffer<FloatBuffer> bufferFreqV = freqV.getDelegate().getCLBuffer();
+		CLBuffer<FloatBuffer> bufferShifts = shifts.getDelegate().getCLBuffer();
+		
+		
+		realPart.getDelegate().prepareForDeviceOperation();
+		imagPart.getDelegate().prepareForDeviceOperation();
+		
+		freqU.getDelegate().prepareForDeviceOperation();
+		freqV.getDelegate().prepareForDeviceOperation();
+		shifts.getDelegate().prepareForDeviceOperation();
+		
+		
+		// create Context
+		CLContext context = OpenCLUtil.getStaticContext();
+		// choose fastest device
+		CLDevice device = context.getMaxFlopsDevice();
+		CLProgram program = null;
+		try {
+		program = context.createProgram(MovementCorrection3D.class.getResourceAsStream("shiftInFourierSpace.cl"));
+		} catch (IOException e) {
+		e.printStackTrace();
+		}
+		program.build();
+		
+		CLKernel kernel = program.createCLKernel("shiftInFourierSpace");
+		kernel.putArg(bufferRealPart);
+		kernel.putArg(bufferImagPart);
+		kernel.putArg(bufferFreqU);
+		kernel.putArg(bufferFreqV);
+		kernel.putArg(bufferShifts);
+		kernel.putArg(m_2dFourierTransposed.getSize()[0]);
+		kernel.putArg(m_2dFourierTransposed.getSize()[1]);
+		kernel.putArg(m_2dFourierTransposed.getSize()[2]);
+
+		int localWorksize = 8;
+		long globalWorksizeAngle = OpenCLUtil.roundUp(localWorksize, m_2dFourierTransposed.getSize()[0]);
+		long globalWorksizeU = OpenCLUtil.roundUp(localWorksize, m_2dFourierTransposed.getSize()[1]);
+		long globalWorksizeV = OpenCLUtil.roundUp(localWorksize, m_2dFourierTransposed.getSize()[2]);
+
+		CLCommandQueue commandQueue = device.createCommandQueue();
+		commandQueue.put3DRangeKernel(kernel, 0, 0, 0, globalWorksizeAngle, globalWorksizeU, globalWorksizeV, localWorksize, localWorksize, localWorksize).finish();
+		
+		realPart.getDelegate().notifyDeviceChange();
+		imagPart.getDelegate().notifyDeviceChange();
+		
+		long timeAfterFunction = System.currentTimeMillis();
+		long diff1 = timeAfterFunction - startTime;
+		System.out.println("time for applying shift parallel: "+ diff1);
+		Grid3D realCPU = new Grid3D(realPart);
+		Grid3D imagCPU = new Grid3D(imagPart);
+		
+		m_2dFourierTransposed = new ComplexGrid3D(realCPU, imagCPU);
+		m_2dFourierTransposed.setOrigin(0,0,0);
+		m_2dFourierTransposed.setSpacing(m_conf.getAngleIncrement() ,m_conf.getUSpacing(), m_conf.getVSpacing());
+		
+		long diff2 = System.currentTimeMillis() - timeAfterFunction;
+		long diff3 = System.currentTimeMillis() - startTime;
+		System.out.println("time getting back to cpu: "+ diff2);
+		System.out.println("complete time applying shift on graphics card" + diff3);
+		
 	}
 	
 	public void doiFFT2(){
@@ -184,8 +282,8 @@ public class MovementCorrection3D {
 	public ComplexGrid3D get2dFourierTransposedData(){
 		return m_2dFourierTransposed;
 	}
-	public void setShiftVector(float[]shift){
-		if(shift.length != 2* m_conf.getNumberOfProjections()){
+	public void setShiftVector(Grid1D shift){
+		if(shift.getSize()[0] != 2* m_conf.getNumberOfProjections()){
 			return;
 		}
 		m_shift = shift;
@@ -197,5 +295,66 @@ public class MovementCorrection3D {
 		float im = (float)(Math.sin(angle));
 		return new Complex(re,im);//result;
 	}
+	
+	
+	
+	
+	private class EnergyToBeMinimized implements GradientOptimizableFunction{
+		
+		/**
+		 * Sets the number of parallel processing blocks. This number should optimally equal to the number of available processors in the current machine. 
+		 * Default value should be 1. 
+		 * @param number
+		 */
+		Grid1D m_oldGuess = new Grid1D(2*m_conf.getNumberOfProjections());
+		public void setNumberOfProcessingBlocks(int number){
+			
+		}
+
+		/**
+		 * returns the number of parallel processing blocks.
+		 * @return
+		 */
+		public int getNumberOfProcessingBlocks(){
+			
+			return 1;
+		}
+		
+		/**
+		 * Evaluates the function at position x.<BR> 
+		 * (Note that x is a Fortran Array which starts at 1.)
+		 * @param x the position
+		 * @param block the block identifier. First block is 0. block is < getNumberOfProcessingBlocks().
+		 * @return the function value at x
+		 */
+		public double evaluate(double[] x, int block){
+			for(int i = 0; i < x.length; i++){
+				m_oldGuess.setAtIndex(i, (float)(x[i]) - m_oldGuess.getAtIndex(i)); 
+			}
+			
+			setShiftVector(m_oldGuess);
+			applyShift();
+			doFFTAngle();
+			double sum = 0;
+			for(int proj = 0; proj < m_mask.getSize()[0]; proj++ ){
+				for(int u = 0; u < m_mask.getSize()[1]; u++){
+					if(m_mask.getAtIndex(proj, u) == 1){
+						for(int v = 0; v < m_2dFourierTransposed.getSize()[2]; v++){
+							sum += Math.pow(m_2dFourierTransposed.getAtIndex(proj, u, v).getMagn(),2.0);
+						}
+					}
+				}
+			}
+			doiFFTAngle();
+			return sum;
+		}
+		
+		public double [] gradient(double[] x, int block){
+			return null;
+		}
+		
+	}
 }
+
+
 
