@@ -46,14 +46,15 @@ public class Test3DMovementCorrection {
 		Config conf = new Config(xmlFilename, 7);
 		conf.getMask().show("mask");
 		Grid1D testShift = new Grid1D(conf.getNumberOfProjections()*2);
-		for(int i = 0; i < testShift.getSize()[0]; i++){
-			if(i%2 == 0){
-				testShift.setAtIndex(i, 0);
-			}
-			else{
-				testShift.setAtIndex(i, 0);
-			}
-		}
+		//testShift.setAtIndex(0, 1.0f);
+//		for(int i = 0; i < testShift.getSize()[0]; i++){
+//			if(i%2 == 0){
+//				testShift.setAtIndex(i, 1.0f);
+//			}
+//			else{
+//				testShift.setAtIndex(i, 1.0f);
+//			}
+//		}
 		
 //		
 		MovementCorrection3D mc = new MovementCorrection3D(projections, conf);
@@ -62,13 +63,24 @@ public class Test3DMovementCorrection {
 		//mc.getData().show("2D-Fouriertransformed");
 		mc.transposeData();
 		
+		mc.computeOptimalShift();
 		//mc.applyShift();
-		mc.parallelizedApplyShift();
-		//mc.getData().show();
-//		mc.get2dFourierTransposedData().show("Before angle fft");
+//		long time = System.currentTimeMillis();
+//		for(int i = 0; i < 50; i++){
+//			mc.parallelizedApplyShift2D();
+//		}
+//		time = System.currentTimeMillis() - time;
+//		System.out.println("complete time for 50 shifts: " + time);
+//		time /= 50;
+//		System.out.println("average time per shift:" + time);
+//		//mc.getData().show();
+////		mc.get2dFourierTransposedData().show("Before angle fft");
+//		time = System.currentTimeMillis();
 //		mc.doFFTAngle();
-//			
+////			
 //		mc.doiFFTAngle();
+//		time = System.currentTimeMillis();
+//		System.out.println("time for fft on angles and back: " + time);
 //		mc.get2dFourierTransposedData().show("After angle ifft");
 		mc.backTransposeData();
 		

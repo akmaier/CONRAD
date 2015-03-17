@@ -9,9 +9,11 @@ kernel void shiftInFourierSpace(global float *real, global float *imag, global f
 	float angle = freqU[iGIDU]*shifts[2*iGIDProj] + freqV[iGIDV]*shifts[2*iGIDProj + 1];
 	float realShift = cos(angle);
 	float imagShift = sin(angle);
-	float realVal = real[iGIDProj*numElementsU*numElementsV + iGIDU*numElementsV + iGIDV];
-	float imagVal = imag[iGIDProj*numElementsU*numElementsV + iGIDU*numElementsV + iGIDV];
+	float realVal = real[iGIDV*numElementsProj*numElementsU + iGIDU*numElementsProj + iGIDProj];
+	float imagVal = imag[iGIDV*numElementsProj*numElementsU + iGIDU*numElementsProj + iGIDProj];
+//	float realVal = real[iGIDProj*numElementsU*numElementsV + iGIDU*numElementsV + iGIDV];
+//	float imagVal = imag[iGIDProj*numElementsU*numElementsV + iGIDU*numElementsV + iGIDV];
 	
-	real[iGIDProj*numElementsU*numElementsV + iGIDU*numElementsV + iGIDV] = (realShift*realVal) - (imagShift *imagVal);
-	imag[iGIDProj*numElementsU*numElementsV + iGIDU*numElementsV + iGIDV] = (realShift*imagVal) + (imagShift *realVal);
+	real[iGIDV*numElementsProj*numElementsU + iGIDU*numElementsProj + iGIDProj] = (realShift*realVal) - (imagShift *imagVal);
+	imag[iGIDV*numElementsProj*numElementsU + iGIDU*numElementsProj + iGIDProj] = (realShift*imagVal) + (imagShift *realVal);
 }

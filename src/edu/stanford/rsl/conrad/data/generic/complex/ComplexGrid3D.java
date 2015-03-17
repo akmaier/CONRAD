@@ -63,8 +63,7 @@ public class ComplexGrid3D extends ComplexGrid {
 		for(int k = 0; k < realInput.getSize()[2]; k++){
 			for(int j = 0; j < realInput.getSize()[1]; j++){
 				for(int i = 0; i < realInput.getSize()[0]; i++ ){
-					this.setRealAtIndex(realInput.getAtIndex(i, j, k), i,j,k);
-					this.setImagAtIndex(imagInput.getAtIndex(i, j, k), i,j,k);
+					this.setAtIndex(i, j, k, realInput.getAtIndex(i, j, k), imagInput.getAtIndex(i, j, k));
 				}
 			}
 		}
