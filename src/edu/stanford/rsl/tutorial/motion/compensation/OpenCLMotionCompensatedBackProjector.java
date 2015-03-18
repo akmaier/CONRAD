@@ -27,9 +27,9 @@ public class OpenCLMotionCompensatedBackProjector extends OpenCLBackProjector {
 	 * 
 	 */
 	private static final long serialVersionUID = 3263500016065695870L;
-	private MotionField motion = null;
-	private double referenceTime = 0;
-	private CLBuffer<FloatBuffer> motionParameters = null;
+	protected MotionField motion = null;
+	protected double referenceTime = 0;
+	protected CLBuffer<FloatBuffer> motionParameters = null;
 
 	/**
 	 * @return the motion
@@ -47,7 +47,7 @@ public class OpenCLMotionCompensatedBackProjector extends OpenCLBackProjector {
 
 
 
-	private String readCompleteRessourceAsString(String resource) throws IOException{
+	protected String readCompleteRessourceAsString(String resource) throws IOException{
 		InputStream inStream = OpenCLMotionCompensatedBackProjector.class.getResourceAsStream(resource);
 		BufferedReader br = new BufferedReader(new InputStreamReader(inStream));
 		String content = "";
@@ -72,7 +72,7 @@ public class OpenCLMotionCompensatedBackProjector extends OpenCLBackProjector {
 		}
 	}
 
-	private void initMotionParameters(double referenceTime, double currentTime){
+	protected void initMotionParameters(double referenceTime, double currentTime){
 		Configuration config = Configuration.getGlobalConfiguration();
 		if (motion instanceof ParzenWindowMotionField){
 			if (motionParameters != null) {
@@ -176,6 +176,13 @@ public class OpenCLMotionCompensatedBackProjector extends OpenCLBackProjector {
 	 */
 	public void setReferenceTime(double referenceTime) {
 		this.referenceTime = referenceTime;
+	}
+	
+	@Override
+	protected synchronized void unload() {
+		if(motionParameters!=null && !motionParameters.isReleased())
+			motionParameters.release();
+		super.unload();
 	}
 
 }
