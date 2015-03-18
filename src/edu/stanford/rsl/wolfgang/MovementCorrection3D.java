@@ -42,12 +42,16 @@ public class MovementCorrection3D {
 	private Grid2D m_mask;
 	
 	// opencl members
+	private CLContext context;
+	private CLDevice device;
+	private CLProgram program;
 	
 	// are initialized after transposing the data
 	private OpenCLGrid3D realPart;
 	private OpenCLGrid3D imagPart;
 	private OpenCLGrid1D freqU;
 	private OpenCLGrid1D freqV;
+	
 	
 	public MovementCorrection3D(Grid3D data, Config conf){
 		m_conf = conf;
@@ -56,6 +60,9 @@ public class MovementCorrection3D {
 		m_mask = conf.getMask();
 		freqU = new OpenCLGrid1D(conf.getShiftFreqX());
 		freqV = new OpenCLGrid1D(conf.getShiftFreqY());
+		context = OpenCLUtil.getStaticContext();
+		device = context.getMaxFlopsDevice();
+		program = null;
 	}
 	
 	public void doFFT2(){
@@ -89,9 +96,10 @@ public class MovementCorrection3D {
 		m_2dFourierTransposed.setSpacing(m_conf.getAngleIncrement() ,m_conf.getUSpacing(), m_conf.getVSpacing());
 		m_2dFourierTransposed.setOrigin(0,0,0);
 		
-		realPart = new OpenCLGrid3D(m_2dFourierTransposed.getRealGrid());
-		imagPart = new OpenCLGrid3D(m_2dFourierTransposed.getImagGrid());
-		
+		m_2dFourierTransposed.activateCL();
+//		realPart = new OpenCLGrid3D(m_2dFourierTransposed.getRealGrid());
+//		imagPart = new OpenCLGrid3D(m_2dFourierTransposed.getImagGrid());
+
 		System.out.println("Transposing done");
 		double[] spacings = m_2dFourierTransposed.getSpacing();
 		for(int i = 0; i <spacings.length; i++){
@@ -234,6 +242,9 @@ public class MovementCorrection3D {
 		realPart.getDelegate().prepareForDeviceOperation();
 		imagPart.getDelegate().prepareForDeviceOperation();
 		
+		//m_2dFourierTransposed.activateCL();
+		//m_2dFourierTransposed.getDelegate().prepareForDeviceOperation();
+		
 		freqU.getDelegate().prepareForDeviceOperation();
 		freqV.getDelegate().prepareForDeviceOperation();
 		shifts.getDelegate().prepareForDeviceOperation();
@@ -322,9 +333,11 @@ public class MovementCorrection3D {
 	public void parallelizedApplyShift2D(){
 		long time1 = System.currentTimeMillis();
 		long timeComplete = time1;
-
+//		int counterZeroExact = 0;
+//		int counterZeroAlmost = 0;
 		for(int shiftc = 0; shiftc < m_shift.getNumberOfElements(); shiftc = shiftc + 2){
 			if(m_shift.getAtIndex(shiftc) != 0 || m_shift.getAtIndex(shiftc +1) != 0 ){
+				
 				
 				Grid2D realSlice2Shift = new Grid2D(m_2dFourierTransposed.getSize()[1], m_2dFourierTransposed.getSize()[2]);
 				Grid2D imagSlice2Shift = new Grid2D(m_2dFourierTransposed.getSize()[1], m_2dFourierTransposed.getSize()[2]);
@@ -372,6 +385,7 @@ public class MovementCorrection3D {
 				
 				CLKernel kernel = program.createCLKernel("shiftInFourierSpace2D");
 				
+				kernel.rewind();
 				kernel.putArg(bufferRealPart);
 				kernel.putArg(bufferImagPart);
 				kernel.putArg(bufferFreqU);
@@ -414,6 +428,50 @@ public class MovementCorrection3D {
 		
 	}
 	
+	public void parallelShiftOptimized(){
+		CLBuffer<FloatBuffer> bufferFourierTransposedCL = m_2dFourierTransposed.getDelegate().getCLBuffer();
+		m_2dFourierTransposed.getDelegate().prepareForDeviceOperation();
+		OpenCLGrid1D shiftCL = new OpenCLGrid1D(m_shift);
+		
+		CLBuffer<FloatBuffer> bufferShifts = shiftCL.getDelegate().getCLBuffer();
+		CLBuffer<FloatBuffer> bufferFreqU = freqU.getDelegate().getCLBuffer();
+		CLBuffer<FloatBuffer> bufferFreqV = freqV.getDelegate().getCLBuffer();
+		
+		
+		freqU.getDelegate().prepareForDeviceOperation();
+		freqV.getDelegate().prepareForDeviceOperation();
+		
+		if(program == null){
+			try {
+				program = context.createProgram(MovementCorrection3D.class.getResourceAsStream("shiftInFourierSpace2D.cl"));
+				} catch (IOException e) {
+				e.printStackTrace();
+				}
+				program.build();			
+		}
+		CLKernel kernel = program.createCLKernel("shift");
+		
+		kernel.rewind();
+		kernel.putArg(bufferFourierTransposedCL);
+		kernel.putArg(bufferFreqU);
+		kernel.putArg(bufferFreqV);
+		kernel.putArg(bufferShifts);
+		kernel.putArg(m_2dFourierTransposed.getSize()[0]);
+		kernel.putArg(m_2dFourierTransposed.getSize()[1]);
+		kernel.putArg(m_2dFourierTransposed.getSize()[2]);
+		
+		
+		int localWorksize = 32;
+		long globalWorksizeU = OpenCLUtil.roundUp(localWorksize, m_2dFourierTransposed.getSize()[1]);
+		long globalWorksizeV = OpenCLUtil.roundUp(localWorksize, m_2dFourierTransposed.getSize()[2]);
+		
+		CLCommandQueue commandQueue = device.createCommandQueue();
+		commandQueue.put2DRangeKernel(kernel, 0, 0, globalWorksizeU, globalWorksizeV, localWorksize, localWorksize).finish();
+		
+		m_2dFourierTransposed.getDelegate().notifyDeviceChange();
+		
+		
+	}
 	public void doiFFT2(){
 		Fourier ft = new Fourier();
 		ft.ifft2(m_data);
