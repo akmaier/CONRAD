@@ -1,6 +1,8 @@
 package edu.stanford.rsl.wolfgang;
 
 import edu.stanford.rsl.conrad.data.generic.complex.ComplexGrid1D;
+import edu.stanford.rsl.conrad.data.generic.complex.ComplexGrid2D;
+import edu.stanford.rsl.conrad.data.generic.datatypes.Complex;
 import edu.stanford.rsl.conrad.data.numeric.Grid1D;
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
 import edu.stanford.rsl.conrad.data.numeric.Grid3D;
@@ -9,6 +11,7 @@ import edu.stanford.rsl.conrad.utils.Configuration;
 
 public class Config {
 	
+	private int m_scalingFactor;
 	// dimensions projections
 	private int N; // horizontal
 	private int M; // vertical
@@ -39,14 +42,14 @@ public class Config {
 	private Grid1D shiftFreqY;
 	
 	
-	// translation-grid
-	private int[] translation;
-	
 	private int m_erosionFactor;
 	private Grid2D mask;
+	
+	private ComplexGrid2D dftMatrix;
+	private ComplexGrid2D idftMatrix;
 
 	
-	public Config(String xmlFilename, int erosionFactor){
+	public Config(String xmlFilename, int erosionFactor, int scalingFactor){
 		/*int[] dims = data.getSize();
 		N = dims[0];
 		M = dims[1];
@@ -54,6 +57,7 @@ public class Config {
 		
 		//hard coded
 		m_erosionFactor = erosionFactor;
+		m_scalingFactor = scalingFactor;
 		rp = 125.0f;
 		getGeometry(xmlFilename);
 		wuSpacing = 1.0/(N*spacingX);
@@ -67,6 +71,8 @@ public class Config {
 		shiftFreqX = constructShiftFreq(wuSpacingVec, spacingX);
 		shiftFreqY = constructShiftFreq(wvSpacingVec, spacingY);
 		fillMask();
+		createDFTMatrix();
+		createIDFTMatrix();
 //		createShift(0.0f);
 		
 			
@@ -76,13 +82,15 @@ public class Config {
 		Configuration config = Configuration.loadConfiguration(filename);
 		Trajectory geom = config.getGeometry();
 		// convert angle to radians
-		angleInc = geom.getAverageAngularIncrement()*Math.PI/180.0;
-		spacingX = geom.getPixelDimensionX();
-		spacingY = geom.getPixelDimensionY();
+		angleInc = geom.getAverageAngularIncrement()*Math.PI/180.0 * m_scalingFactor;
 		
-		N = geom.getDetectorWidth();
-		M = geom.getDetectorHeight();
-		K = geom.getProjectionStackSize();
+		//TODO return back to regular, factor 2 only test with smaller database
+		spacingX = geom.getPixelDimensionX() * m_scalingFactor;
+		spacingY = geom.getPixelDimensionY() * m_scalingFactor;
+		
+		N = geom.getDetectorWidth()/m_scalingFactor;
+		M = geom.getDetectorHeight()/m_scalingFactor;
+		K = geom.getProjectionStackSize()/m_scalingFactor;
 		
 		
 		D = geom.getSourceToDetectorDistance() - geom.getSourceToAxisDistance();
@@ -154,6 +162,13 @@ public class Config {
 		return mask;
 	}
 	
+	public ComplexGrid2D getDFTMatrix(){
+		return dftMatrix;
+	}
+	public ComplexGrid2D getIDFTMatrix(){
+		return idftMatrix;
+	}
+	
 	
 	private Grid1D createFrequArray(int dim, float freqSpacing){
 		Grid1D frequArray = new Grid1D(dim);
@@ -170,10 +185,6 @@ public class Config {
 	
 	
 	
-	public void setTrans(int[] t){
-		translation = t;
-	}
-	
 	private Grid1D constructShiftFreq(Grid1D spacingVec, double spacingLocal){
 		int dim = spacingVec.getSize()[0];
 		Grid1D frequencies = new Grid1D(dim);
@@ -187,14 +198,19 @@ public class Config {
 		mask = new Grid2D(K,N);
 		Grid2D helpMask = new Grid2D(K,N);
 		// filling mask according to formula
+		int counter = 0;
 		for(int proj = 0; proj < helpMask.getSize()[0]; proj++){
 			for(int uPixel = 0; uPixel < helpMask.getSize()[1]; uPixel++){
 				if(Math.abs(kSpacingVec.getAtIndex(proj)/(kSpacingVec.getAtIndex(proj)-wuSpacingVec.getAtIndex(uPixel)*(L+D))) > rp/(float)(L)){
 					helpMask.setAtIndex(proj, uPixel, 1);
+					counter++;
 				}
 			}
 			
 		}
+		
+		System.out.println("Anzahl 1 in Maske" + counter);
+		
 		// using erosion
 		int shift = (int)(m_erosionFactor/2);
 		for(int proj = 0; proj < mask.getSize()[0]; proj++){
@@ -243,6 +259,39 @@ public class Config {
 				}
 				foundZero = false;
 				
+			}
+		}
+	}
+	
+	
+	private void createDFTMatrix(){
+		dftMatrix = new ComplexGrid2D(K,K);
+		float angle = (float)(-2*Math.PI/K);
+		double normalFactor = 1.0f;//Math.sqrt(K);
+		// dft matrix is symmetric which allows simplifications
+		for(int horz = 0; horz < K; horz++){
+			for(int vert = 0; vert <= horz; vert++){
+				float tmpAngle = angle*horz*vert;
+				Complex tmp = Complex.fromPolar(1.0f, tmpAngle);
+				tmp = tmp.mul(normalFactor);
+				dftMatrix.setAtIndex(horz, vert, tmp);
+				dftMatrix.setAtIndex(vert, horz, tmp);
+			}
+		}
+	}
+	private void createIDFTMatrix(){
+		idftMatrix = new ComplexGrid2D(K,K);
+		float angle = (float)(2*Math.PI/K);
+		double normalFactor = 1.0;///Math.sqrt(K);
+		// dft matrix is symmetric which allows simplifications
+		for(int horz = 0; horz < K; horz++){
+			for(int vert = 0; vert <= horz; vert++){
+				
+				float tmpAngle = angle*horz*vert;
+				Complex tmp = Complex.fromPolar(1.0f, tmpAngle);
+				tmp = tmp.mul(normalFactor);
+				idftMatrix.setAtIndex(horz, vert, tmp);
+				idftMatrix.setAtIndex(vert, horz, tmp);
 			}
 		}
 	}

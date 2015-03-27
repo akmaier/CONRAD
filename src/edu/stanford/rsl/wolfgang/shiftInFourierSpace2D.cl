@@ -6,7 +6,7 @@ inline cfloat  cmult(cfloat a, cfloat b){
     return (cfloat)( a.x*b.x - a.y*b.y, a.x*b.y + a.y*b.x);
 }
 
-
+// old version
 kernel void shiftInFourierSpace2D(global float *real, global float *imag, global float *freqU, global float *freqV, float shiftX, float shiftY, int const numElementsU, int const numElementsV) {
 	int iGIDU = get_global_id(0);
 	int iGIDV = get_global_id(1);
@@ -26,15 +26,17 @@ kernel void shiftInFourierSpace2D(global float *real, global float *imag, global
 	imag[iGIDV*numElementsU + iGIDU] = (realShift*imagVal) + (imagShift *realVal);
 }
 
+// new version
 kernel void shift(global float2 *data, global float *freqU, global float *freqV, global float *shifts, int const numProj, int const numElementsU, int const numElementsV) {
 	int iGIDU = get_global_id(0);
 	int iGIDV = get_global_id(1);
 	if (iGIDU >= numElementsU || iGIDV >= numElementsV) {
 		return;
 	}
-
-	for(int iProj = 0; iProj < lengthProjToShift; iProj++){
-	  if(shifts[2*i] != 0 || shifts[2*i+1] != 0){
+	// for loop over all projections (simple implementation, later vector with shifts and position and iteration over this vector)
+	for(int iProj = 0; iProj < numProj; iProj++){
+	  // hard coded threshold: if shift vector is zero, if case should never be reached
+	  if(fabs(shifts[2*iProj]) >  0.1 || fabs(shifts[2*iProj+1]) > 0.1){
 	    float angle = freqU[iGIDU]*shifts[2*iProj] + freqV[iGIDV]*shifts[2*iProj+1];
 	    float2 cshift = (float2)(cos(angle), sin(angle));
 	    float2 orig = data[iGIDV*numElementsU*numProj + iGIDU*numProj + iProj];
