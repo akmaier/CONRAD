@@ -98,8 +98,7 @@ public class Triangle extends Plane3D {
 		return evaluate(cUcoord, cVcoord);
 	}
 
-	@Override
-	public PointND intersect(StraightLine other) {
+	public PointND intersectWithHitOrientation(StraightLine other) {
 		PointND revan = super.intersect(other);
 		//System.out.println(revan);
 		if (isInTriangle(revan)){
@@ -121,6 +120,17 @@ public class Triangle extends Plane3D {
 			return null;
 		}
 	}
+	
+	@Override
+	public PointND intersect(StraightLine other) {
+		PointND revan = super.intersect(other);
+		//System.out.println(revan);
+		if (isInTriangle(revan)){
+			return revan;
+		} else {
+			return null;
+		}
+	}
 
 	@Override
 	public ArrayList<PointND> intersect(AbstractCurve other) {
@@ -128,6 +138,39 @@ public class Triangle extends Plane3D {
 			try {
 				ArrayList<PointND> list = new ArrayList<PointND>();
 				PointND p = intersect((StraightLine) other);
+				if (p!= null) list.add(p);
+				return list;
+			} catch (RuntimeException e){
+				if (e.getLocalizedMessage().equals("Line is parallel to plane")){
+					ArrayList<PointND> list = new ArrayList<PointND>();
+					Edge one = new Edge(getA(), getB());
+					PointND p = one.intersect((StraightLine) other);
+					if (p != null) list.add(p);
+					one = new Edge(getB(), getC());
+					p = one.intersect((StraightLine) other);
+					if (p != null) list.add(p);
+					one = new Edge(getA(), getC());
+					p = one.intersect((StraightLine) other);
+					if (p != null) list.add(p);
+					return list;
+				} else {
+					throw(e);
+				}
+			}
+		} else {
+			throw new RuntimeException("Not implemented yet!");
+		}
+	}
+	
+	/**
+	 * Copy of intersect method which calls intersectWithHitOrientation instead of intersect
+	 */
+	@Override
+	public ArrayList<PointND> intersectWithHitOrientation(AbstractCurve other) {
+		if (other instanceof StraightLine) {
+			try {
+				ArrayList<PointND> list = new ArrayList<PointND>();
+				PointND p = intersectWithHitOrientation((StraightLine) other);
 				if (p!= null) list.add(p);
 				return list;
 			} catch (RuntimeException e){

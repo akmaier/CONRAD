@@ -199,8 +199,8 @@ public abstract class AbstractRayTracer {
 		SimpleVector smallIncrementAlongRay = SimpleOperators.subtract(ray.evaluate(CONRAD.SMALL_VALUE).getAbstractVector(), ray.evaluate(0).getAbstractVector());
 		// compute ray intersections:
 		for (PhysicalObject shape: scene) {
-			if (shape.getShape().getHitsOnBoundingBox(ray).size()>0) {
-				ArrayList<PointND> intersection = shape.intersect(ray);
+			if (shape.getShape().getHitsOnBoundingBox(ray).size() > 0) {
+				ArrayList<PointND> intersection = shape.intersectWithHitOrientation(ray);
 				
 				if (intersection != null && intersection.size() > 0){ 
 					for (PointND p : intersection){
