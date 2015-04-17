@@ -71,6 +71,10 @@ public class PhysicalObject implements Serializable{
 		return shape.intersect(curve);
 	}
 	
+	public ArrayList<PointND> intersectWithHitOrientation(AbstractCurve curve){
+		return shape.intersectWithHitOrientation(curve);
+	}
+	
 	public void applyTransform(Transform t){
 		shape.applyTransform(t);
 	}
