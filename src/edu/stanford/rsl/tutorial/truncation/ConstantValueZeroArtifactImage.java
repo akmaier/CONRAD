@@ -56,12 +56,12 @@ public class ConstantValueZeroArtifactImage extends Phantom implements Citeable 
 		for (int i = 0; i<sizeX; i++){
 			double j = Math.sqrt(-Math.pow(i-sizeX/2.0, 2)+Math.pow((truncationDiameter+1)-sizeX/2.0, 2));
 			if (Double.isNaN(j)) continue;
-			InterpolationOperators.addInterpolateLinear(this, (sizeX/2.0 - j), i, -value);
-			InterpolationOperators.addInterpolateLinear(this, (sizeX/2.0 + j), i, -value);
+			InterpolationOperators.addInterpolateLinear(this, i, (sizeX/2.0 - j), -value);
+			InterpolationOperators.addInterpolateLinear(this, i, (sizeX/2.0 + j), -value);
 			j = Math.sqrt(-Math.pow(i-sizeX/2.0, 2)+Math.pow(truncationDiameter-sizeX/2.0, 2));
 			if (Double.isNaN(j)) continue;
-			InterpolationOperators.addInterpolateLinear(this, (sizeX/2.0 - j), i, value);
-			InterpolationOperators.addInterpolateLinear(this, (sizeX/2.0 + j), i, value);
+			InterpolationOperators.addInterpolateLinear(this, i, (sizeX/2.0 - j), value);
+			InterpolationOperators.addInterpolateLinear(this, i, (sizeX/2.0 + j), value);
 		}
 	}
 	

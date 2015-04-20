@@ -144,8 +144,7 @@ public class XRayDetector extends PhysicalObject implements GUIConfigurable, Ser
 			//pixel outside of the grid
 			//System.err.println("XRayDetector: pixel outside: " + pixel.getElement(0) + ", " +  pixel.getElement(1));
 		} else {
-			//TODO addInterpolateLinear() rows and columns are inverted
-			InterpolationOperators.addInterpolateLinear(grid, (int)pixel.getElement(1), (int)pixel.getElement(0), (float)energy);
+			InterpolationOperators.addInterpolateLinear(grid, (int)pixel.getElement(0), (int)pixel.getElement(1), (float)energy);
 		}
 			
 	}
