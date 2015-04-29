@@ -68,3 +68,8 @@ public class SimpleGridsForTruncationCorrection extends Phantom {
 	}
 
 }
+
+/*
+ * Copyright (C) 2015 Jennifer Maier, jennifer.maier@fau.de
+ * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
+ */
