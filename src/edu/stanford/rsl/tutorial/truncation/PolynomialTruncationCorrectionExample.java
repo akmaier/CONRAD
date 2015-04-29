@@ -143,7 +143,7 @@ public class PolynomialTruncationCorrectionExample {
 	// add black on the sides of the corrected sinogram (for reconstruction)
 	private Grid2D addBlackOnSides(Grid2D correctedSinogram, Grid2D originalSinogram) {
 		
-		Grid2D result = new Grid2D(correctedSinogram.getWidth() + 40, correctedSinogram.getHeight());
+		Grid2D result = new Grid2D(correctedSinogram.getWidth() + 30, correctedSinogram.getHeight());
 		
 		for (int row = 0; row < result.getHeight(); row ++) {
 			for (int col = 0; col < result.getWidth(); col++) {
