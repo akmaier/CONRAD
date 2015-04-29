@@ -5,7 +5,7 @@ import edu.stanford.rsl.conrad.data.numeric.Grid1DComplex;
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
 import edu.stanford.rsl.tutorial.parallel.ParallelBackprojector2D;
 import edu.stanford.rsl.tutorial.parallel.ParallelProjector2D;
-import edu.stanford.rsl.tutorial.phantoms.UniformCircleGrid2D;
+import edu.stanford.rsl.tutorial.phantoms.SimpleGridsForTruncationCorrection;
 import ij.ImageJ;
 
 //Name, was macht Klasse
@@ -26,7 +26,7 @@ public class TruncationCorrection {
 		double deltaS = 1.0;
 		int numTheta = 180;
 		int truncationSize = 40;
-		UniformCircleGrid2D cylinder = new UniformCircleGrid2D(imageSize, imageSize);
+		SimpleGridsForTruncationCorrection cylinder = new SimpleGridsForTruncationCorrection(imageSize, imageSize, 2);
 		cylinder.show("original image");
 
 		// get Sinogram
