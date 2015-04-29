@@ -8,72 +8,67 @@ import edu.stanford.rsl.tutorial.parallel.ParallelProjector2D;
 import edu.stanford.rsl.tutorial.phantoms.SimpleGridsForTruncationCorrection;
 import ij.ImageJ;
 
-//Name, was macht Klasse
+/* Jennifer Maier
+ * 
+ * This class creates the sinogram of a simple grid, which is afterwards truncated.
+ * The truncated sinogram is then corrected by extrapolating with a polynomial for each row.
+ * 
+ */
 
-public class TruncationCorrection {
+public class PolynomialTruncationCorrectionExample {
 
-	public TruncationCorrection(){}
+	public PolynomialTruncationCorrectionExample(){}
 	
 	public static void main(String[] args) {
 
 		new ImageJ();
-
-		TruncationCorrection T = new TruncationCorrection();
+		PolynomialTruncationCorrectionExample T = new PolynomialTruncationCorrectionExample();
 		
 		// create Phantom
 		int imageSize = 200;
 		double maxS = 200.0;
 		double deltaS = 1.0;
-		int numTheta = 180;
+		int numTheta = 360;
 		int truncationSize = 40;
-		SimpleGridsForTruncationCorrection cylinder = new SimpleGridsForTruncationCorrection(imageSize, imageSize, 2);
+		// third parameter:
+		// 0: circle, 1: ellipse, 2: sqaure
+		SimpleGridsForTruncationCorrection cylinder = new SimpleGridsForTruncationCorrection(imageSize, imageSize, 1);
 		cylinder.show("original image");
 
-		// get Sinogram
+		// get and show Sinogram of the cylinder
 		ParallelProjector2D projector2d = new ParallelProjector2D(Math.PI, Math.PI/(numTheta-1), maxS, deltaS);
 		Grid2D sinogram = projector2d.projectRayDrivenCL(cylinder);
 		sinogram.show("original sinogram");
 
 		// apply ramlak filter to sinogram 
 		Grid2D origSino = new Grid2D(sinogram);		
-		T.ramlak(origSino);		
-		origSino.show("filtered original sinogram");
-		
+		T.ramlak(origSino);				
 		
 		// backproject original
 		ParallelBackprojector2D backprojector = new ParallelBackprojector2D(imageSize, imageSize, 1, 1);
 		Grid2D backproj = backprojector.backprojectRayDriven(origSino);
-		backproj.show("filtered original backprojected");
-		
+		backproj.show("original backprojected (ramlak filtered)");
 
 		// truncate Sinogram
 		Grid2D truncatedSinogram = T.getTruncatedSinogram(sinogram, truncationSize);
-		truncatedSinogram.show("Truncated Sinogram");
-		// backproject truncated sinogram
-//		Grid2D truncBackproj = backprojector.backprojectRayDriven(truncatedSinogram);
-//		truncBackproj.show("truncated backprojected");
+		truncatedSinogram.show("truncated sinogram");
 		
+		// correct truncation using polynomials
 		Grid2D correctedSinogram = T.polynomialTruncationCorrection(truncatedSinogram);
 		correctedSinogram.setSpacing(sinogram.getSpacing());
-		correctedSinogram.show("corrected Sinogram");
 		
+		// add black regions on each side to ensure correct reconstruction
 		Grid2D broaderCorrectedSinogram = T.addBlackOnSides(correctedSinogram, sinogram);
 		broaderCorrectedSinogram.setSpacing(sinogram.getSpacing());
-		broaderCorrectedSinogram.show("corrected sinogram, black added on sides");
+		broaderCorrectedSinogram.show("corrected sinogram");
 		
+		// apply ramlak filter to corrected sinogram
 		T.ramlak(broaderCorrectedSinogram);
-//		RamLakKernel ramLak = new RamLakKernel((int) maxS, deltaS);
-////		
-//		for (int theta = 0; theta < origSino.getHeight(); ++theta) {
-//			ramLak.applyToGrid(broaderCorrectedSinogram.getSubGrid(theta));
-//		}
-			
-		broaderCorrectedSinogram.show("broader Corrected after RamLak");
-		broaderCorrectedSinogram.setSpacing(sinogram.getSpacing());
 		
+		// backproject corrected sinogram
 		ParallelBackprojector2D backprojector2 = new ParallelBackprojector2D(imageSize, imageSize, 1, 1);
 		Grid2D correctedBackproj = backprojector2.backprojectRayDriven(broaderCorrectedSinogram);
-		correctedBackproj.show("filtered corrected Reconstructed");
+		correctedBackproj.show("corrected backprojected (ramlak filtered)");
 
 	}
 
@@ -124,14 +119,13 @@ public class TruncationCorrection {
 			for (int col = 0; col < truncatedSinogramWidth; col++) {
 				correctedSinogram.setAtIndex(maxL-truncatedSinogramWidth/2 + col, sinoRow, truncatedSinogram.getAtIndex(posDerivative+col, sinoRow));
 			}
-
-
+			
 		}
 
 		return correctedSinogram;
 	}
 	
-	// truncate sinogram: add zero values starting at left and right side
+	// truncate sinogram: delete values at left and right side
 	private Grid2D getTruncatedSinogram(Grid2D sinogram, int truncationWidth) {
 
 		Grid2D truncatedSinogram = new Grid2D(sinogram);
@@ -146,11 +140,9 @@ public class TruncationCorrection {
 		return truncatedSinogram;
 	}
 
-	// add black on the sides of the corrected sinogram to acheive the same width as in the original
+	// add black on the sides of the corrected sinogram (for reconstruction)
 	private Grid2D addBlackOnSides(Grid2D correctedSinogram, Grid2D originalSinogram) {
 		
-//		Grid2D result = new Grid2D(originalSinogram.getWidth(), correctedSinogram.getHeight());
-
 		Grid2D result = new Grid2D(correctedSinogram.getWidth() + 40, correctedSinogram.getHeight());
 		
 		for (int row = 0; row < result.getHeight(); row ++) {
@@ -198,22 +190,7 @@ public class TruncationCorrection {
 				if (rowStartFound && rowEndFound) break;
 			}
 		}
-//		int start = 0;
-//		int end = 0;
-//		for (int i = 0; i < truncatedSinogram.getWidth(); i++) {
-//			if (start == 0
-//					&& truncatedSinogram.getAtIndex(i, 0) != 0.0f
-//					&& !Double.isNaN(truncatedSinogram.getAtIndex(i, 0))
-//					) {
-//				start = i;
-//			}
-//			if (end == 0
-//					&& truncatedSinogram.getAtIndex(truncatedSinogram.getWidth()-i, 0) != 0.0f
-//					&& !Double.isNaN(truncatedSinogram.getAtIndex(truncatedSinogram.getWidth()-i, 0))
-//					) {
-//				end = truncatedSinogram.getWidth()-i;
-//			}
-//		}
+
 		return end-start;
 	}
 
@@ -240,78 +217,6 @@ public class TruncationCorrection {
 	// get width L of polynomial for each row
 	private int[] getL(Grid2D sinogram) {
 
-//		// calculate average mu
-//		double muSum = 0.0f;
-//		double nonNullEntries = 0.0f;
-//		for (int col = 0; col < sinogram.getWidth(); col++) {
-//			for (int row = 0; row < sinogram.getHeight(); row++) {
-//				muSum += sinogram.getAtIndex(col, row);
-//				if (sinogram.getAtIndex(col, row) != 0.0) {
-//					nonNullEntries++;
-//				}
-//			}
-//		}
-//		double mu_average = 1.0f;// muSum/(sinogram.getWidth()*sinogram.getHeight());//(nonNullEntries);
-//		// 1.0f fuer wasserzylinder Mitte
-//		// 1.7f fuer mickey
-//		// 0.5f fuer wasserzylinder verschoben
-//		
-//		
-//		// calculate l-vector
-//		double[] l_double = new double[sinogram.getHeight()];
-//		int[] l = new int[sinogram.getHeight()];
-//		for (int theta = 0; theta < sinogram.getHeight(); theta++) {
-//
-//			double maximum = 0.0f;
-//			for (int thetaPrime = theta-90; thetaPrime < theta+90; thetaPrime++) {
-//				if (thetaPrime < 0) {
-//					thetaPrime +=360;
-//					for (int s = 0;  s < sinogram.getWidth(); s++) {
-//						double val = sinogram.getAtIndex(thetaPrime, s) * Math.sin(Math.abs(theta - thetaPrime)) / mu_average;
-//						if (val > maximum) {
-//							maximum = val;
-//						}
-//					}
-//					thetaPrime -= 360;
-//				} else if (thetaPrime >= 360) {
-//					thetaPrime -=360;
-//					for (int s = 0;  s < sinogram.getWidth(); s++) {
-//						double val = sinogram.getAtIndex(thetaPrime, s) * Math.sin(Math.abs(theta - thetaPrime)) / mu_average;
-//						if (val > maximum) {
-//							maximum = val;
-//						}
-//					}
-//					thetaPrime += 360;
-//				} else {
-//					for (int s = 0;  s < sinogram.getWidth(); s++) {
-//						double val = sinogram.getAtIndex(thetaPrime, s) * Math.sin(Math.abs(theta - thetaPrime)) / mu_average;
-//						if (val > maximum) {
-//							maximum = val;
-//						}
-//					}
-//				}
-//
-//			}
-//			l_double[theta] = maximum*0.5;
-//			l[theta] = (int) Math.round(maximum*0.5);
-//		}			
-		
-		
-//		int[] l = new int[sinogram.getHeight()];
-//		
-//		for (int i = 0; i < 75; i++) {
-//			l[i] = 0;
-//		}
-//		for (int i = 75; i < 180; i++) {
-//			l[i] = (int) Math.round(61 + (i-75) * 0.18);
-//		}
-//		for (int i = 180; i < 285; i++) {
-//			l[i] = l[i] = (int) Math.round(80- (i-180) * 0.18);;
-//		}
-//		for (int i = 286; i < sinogram.getHeight(); i++) {
-//			l[i] = 0;
-//		}
-		
 		double deltaTheta = 180.0f/sinogram.getHeight();
 		
 		int[] L = new int[sinogram.getHeight()];
@@ -361,28 +266,11 @@ public class TruncationCorrection {
 			L[row] = (int) max/2;
 			
 		}
-		
-		
-//		double[] x = new double[sinogram.getHeight()];
-//		double[] Ldouble = new double[L.length];
-//		for (int i = 0; i < x.length; i++) {
-//			x[i] = i;
-//			Ldouble[i] = L[i];
-//		}
-//
-//		Plot2DPanel panel = new Plot2DPanel();
-//		panel.addLinePlot("Line", x, Ldouble);
-//		
-//		JFrame  frame= new JFrame("Histogram");
-//		frame.setContentPane(panel);
-//		frame.setSize(500, 600);
-//		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//		frame.setVisible(true);
-
 
 		return L;
 	}
 	
+	// ramlak filter
 	public void ramlak(Grid2D sinogram) {
 		
 		Grid1DComplex[] sinogramTransform = new Grid1DComplex[(sinogram.getHeight())];
@@ -422,3 +310,7 @@ public class TruncationCorrection {
 	}
 }
 
+/*
+ * Copyright (C) 2015 Jennifer Maier, jennifer.maier@fau.de
+ * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
+ */
