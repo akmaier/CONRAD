@@ -28,6 +28,7 @@ public abstract class InterpolationOperators {
 		if (grid == null) return 0;
 		if (x < 0 || x > grid.getSize()[0]-1 || y < 0 || y > grid.getSize()[1]-1)
 			return 0;
+		
 		int lower = (int) Math.floor(y);
 		double d = y - lower; // d is in [0, 1)
 
@@ -55,29 +56,27 @@ public abstract class InterpolationOperators {
 	///////////////////////////////////////////////////////////////////////
 
 	/** Linear extrapolation into a 1D Grid */
-	public static void addInterpolateLinear(final Grid1D grid, double i, float val) {
-		int lower = (int) Math.floor(i);
-		double d = i - lower;
+	public static void addInterpolateLinear(final Grid1D grid, double x, float val) {
+		int lower = (int) Math.floor(x);
+		double d = x - lower;
 		grid.setAtIndex(lower, grid.getAtIndex(lower) + (float) ((1.0-d)*val));
 		if (d != 0.0) grid.setAtIndex(lower+1, grid.getAtIndex(lower+1) + (float) (d*val));
 	}
 
 	/** Linear extrapolation into a 2D Grid */
-	public static void addInterpolateLinear(final Grid2D grid, double i, double j, float val) {
-		int lower = (int) Math.floor(i);
-		double d = i - lower;
-		addInterpolateLinear(grid.getSubGrid(lower), j, (float) ((1.0-d)*val));
-		if (d != 0.0) addInterpolateLinear(grid.getSubGrid(lower+1), j, (float) (d*val));
+	public static void addInterpolateLinear(final Grid2D grid, double x, double y, float val) {
+		int lower = (int) Math.floor(y);
+		double d = y - lower;
+		addInterpolateLinear(grid.getSubGrid(lower), x, (float) ((1.0-d)*val));
+		if (d != 0.0) addInterpolateLinear(grid.getSubGrid(lower+1), x, (float) (d*val));
 	}
-
+	
 	/** Linear extrapolation into a 3D Grid */
-	public static void addInterpolateLinear(final Grid3D grid, double i, double j, double k, float val) {
-		int lower = (int) Math.floor(i);
-		double d = i - lower;
-		addInterpolateLinear(grid.getSubGrid(lower), j, k, (float) ((1.0-d)*val));
-		if (d != 0.0) addInterpolateLinear(grid.getSubGrid(lower+1), j, k, (float) (d*val));
+	public static void addInterpolateLinear(final Grid3D grid, double x, double y, double z, float val) {
+		int lower = (int) Math.floor(z);
+		double d = z - lower;
+		addInterpolateLinear(grid.getSubGrid(lower), x, y, (float) ((1.0-d)*val));
+		if (d != 0.0) addInterpolateLinear(grid.getSubGrid(lower+1), x, y, (float) (d*val));
 	}
-
-
 }
 

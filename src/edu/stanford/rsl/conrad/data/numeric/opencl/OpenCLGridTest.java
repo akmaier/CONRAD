@@ -478,7 +478,7 @@ public class OpenCLGridTest {
 	private String formatMethodName(Method method) {
 		
 		String name = method.getName();
-		int parameterCount = method.getParameterCount();
+		int parameterCount = method.getParameterTypes().length;
 		Class<?>[] parameters = method.getParameterTypes();
 		
 		String parameterString = parameters[0].getSimpleName();
