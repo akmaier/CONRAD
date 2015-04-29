@@ -271,6 +271,14 @@ public abstract class RegKeys {
 	 * 
 	 */
 	public static final String MSL_DATA_LOCATION = "MSL_DATA_LOCATION";
+	
+	/**
+	 * Entry to define a small accuracy tolerance when deciding whether the point of intersection between ray and triangle lies within the triangle.
+	 * The <b>value</b> is a <b>Double</b> defining the tolerance.
+	 * 
+	 * @see edu.stanford.rsl.conrad.geometry.shapes.simple.Triangle
+	 */
+	public static final String PHANTOM_PROJECTOR_RAYTRACING_EPSILON = "PHANTOM_PROJECTOR_RAYTRACING_EPSILON";
 		
 	public static final HashMap<String,String> defaultValues;
 

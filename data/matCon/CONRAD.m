@@ -41,19 +41,28 @@ classdef CONRAD < hgsetget
                 clear java;
             end
             p = cd;
-            lib = [obj.ConradPath '\CONRAD\lib'];
+            lib = [obj.ConradPath filesep 'CONRAD' filesep 'lib'];
             cd(lib);
             list = cellstr(ls);
-            for i=3:size(list,1)
+            if ispc
+                list = list(3:end);
+            elseif isunix
+                list = textscan(list{:},'%s');
+                list = list{:};
+            else
+                list = cellstr(ls);
+                list = list(3:end);
+            end
+            for i=1:size(list,1)
                 if (isempty([strfind(list{i},'gluegen'), strfind(list{i},'jocl'), strfind(list{i},'joal'), strfind(list{i},'jogl')]) && ~isempty(strfind(list{i},'.jar')))
-                    javaaddpath([lib '\' list{i}]);
+                    javaaddpath([lib filesep list{i}]);
                 end
             end
             cd(p);
-            javaaddpath([obj.ConradPath '\CONRAD\src']);
-            addpath([obj.ConradPath '\CONRAD\src']);
-            javaaddpath([obj.ConradPath '\CONRAD']);
-            addpath([obj.ConradPath '\CONRAD']);
+            javaaddpath([obj.ConradPath filesep 'CONRAD' filesep 'src']);
+            addpath([obj.ConradPath filesep 'CONRAD' filesep 'src']);
+            javaaddpath([obj.ConradPath filesep 'CONRAD']);
+            addpath([obj.ConradPath filesep 'CONRAD']);
             obj.isInitialized = 1;
         end
         

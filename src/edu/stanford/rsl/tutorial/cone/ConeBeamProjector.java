@@ -68,21 +68,16 @@ public class ConeBeamProjector {
 			for (int y = 0; y < imgSizeY - 1; y++) {
 				double yTrans = y * spacingY - originY;
 				for (int z = 0; z < imgSizeZ - 1; z++) {
-					SimpleVector point3d = new SimpleVector(xTrans, yTrans, z
-							* spacingZ - originZ, 1);
+					SimpleVector point3d = new SimpleVector(xTrans, yTrans, z * spacingZ - originZ, 1);
 					// for(int p = 0; p < maxProjs; p++) {
 					int p = projIdx; //
-					SimpleVector point2d = SimpleOperators.multiply(
-							projMats[p].computeP(), point3d);
-					double coordU = point2d.getElement(0)
-							/ point2d.getElement(2);
-					double coordV = point2d.getElement(1)
-							/ point2d.getElement(2);
-					if (coordU >= maxU - 1 || coordV >= maxV - 1 || coordU <= 0
-							|| coordV <= 0)
+					SimpleVector point2d = SimpleOperators.multiply(projMats[p].computeP(), point3d);
+					double coordU = point2d.getElement(0) / point2d.getElement(2);
+					double coordV = point2d.getElement(1) / point2d.getElement(2);
+					if (coordU >= maxU - 1 || coordV >= maxV - 1 || coordU <= 0 || coordV <= 0)
 						continue;
 					float val = grid.getAtIndex(x, y, z);
-					InterpolationOperators.addInterpolateLinear(sino, coordV, coordU, val); //
+					InterpolationOperators.addInterpolateLinear(sino, coordU, coordV, val); //
 					// }
 				}
 			}
@@ -122,7 +117,7 @@ public class ConeBeamProjector {
 						if (coordU >= maxU-1 || coordV>= maxV -1 || coordU <=0 || coordV <= 0)
 							continue;
 						float val = grid.getAtIndex(x, y, z);
-						InterpolationOperators.addInterpolateLinear(sino, p, coordV, coordU,  val);
+						InterpolationOperators.addInterpolateLinear(sino, coordU, coordV, p, val);
 					}
 				}
 			}

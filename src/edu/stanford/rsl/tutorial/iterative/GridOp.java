@@ -176,7 +176,7 @@ public final class GridOp {
 	 * @param a
 	 * @return minimum value of grid a
 	 */
-	public static float min(Grid3D a) {
+	public static double min(Grid3D a) {
 		return a.getGridOperator().min(a);
 	}
 
@@ -184,7 +184,7 @@ public final class GridOp {
 	 * @param a
 	 * @return maximum value of grid a
 	 */
-	public static float max(Grid3D a) {
+	public static double max(Grid3D a) {
 		return a.getGridOperator().min(a);
 	}
 
