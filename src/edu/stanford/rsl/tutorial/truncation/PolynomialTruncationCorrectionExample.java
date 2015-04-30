@@ -8,7 +8,7 @@ import edu.stanford.rsl.tutorial.parallel.ParallelProjector2D;
 import edu.stanford.rsl.tutorial.phantoms.SimpleGridsForTruncationCorrection;
 import ij.ImageJ;
 
-/* Jennifer Maier
+/** Jennifer Maier
  * 
  * This class creates the sinogram of a simple grid, which is afterwards truncated.
  * The truncated sinogram is then corrected by extrapolating with a polynomial for each row.
@@ -32,12 +32,12 @@ public class PolynomialTruncationCorrectionExample {
 		int truncationSize = 40;
 		// third parameter:
 		// 0: circle, 1: ellipse, 2: sqaure
-		SimpleGridsForTruncationCorrection cylinder = new SimpleGridsForTruncationCorrection(imageSize, imageSize, 1);
-		cylinder.show("original image");
+		SimpleGridsForTruncationCorrection original = new SimpleGridsForTruncationCorrection(imageSize, imageSize, 2);
+		original.show("original image");
 
 		// get and show Sinogram of the cylinder
 		ParallelProjector2D projector2d = new ParallelProjector2D(Math.PI, Math.PI/(numTheta-1), maxS, deltaS);
-		Grid2D sinogram = projector2d.projectRayDrivenCL(cylinder);
+		Grid2D sinogram = projector2d.projectRayDrivenCL(original);
 		sinogram.show("original sinogram");
 
 		// apply ramlak filter to sinogram 
@@ -51,7 +51,13 @@ public class PolynomialTruncationCorrectionExample {
 
 		// truncate Sinogram
 		Grid2D truncatedSinogram = T.getTruncatedSinogram(sinogram, truncationSize);
+		truncatedSinogram.setSpacing(sinogram.getSpacing());
 		truncatedSinogram.show("truncated sinogram");
+		
+		Grid2D truncatedSinogramCopy = new Grid2D(truncatedSinogram);
+		T.ramlak(truncatedSinogramCopy);
+		Grid2D truncatedBackprojected = backprojector.backprojectRayDriven(truncatedSinogramCopy);
+		truncatedBackprojected.show("truncated backprojected (ramlak filtered)");
 		
 		// correct truncation using polynomials
 		Grid2D correctedSinogram = T.polynomialTruncationCorrection(truncatedSinogram);
@@ -72,7 +78,11 @@ public class PolynomialTruncationCorrectionExample {
 
 	}
 
-	// correct truncation with a polynomial in each row
+	/**
+	 * correct truncation with a polynomial in each row
+	 * 
+	 * @param truncatedSinogram truncated sinogram that has to be corrected
+	 */
 	private Grid2D polynomialTruncationCorrection(Grid2D truncatedSinogram) {
 		
 		// get L for each angle
@@ -125,7 +135,13 @@ public class PolynomialTruncationCorrectionExample {
 		return correctedSinogram;
 	}
 	
-	// truncate sinogram: delete values at left and right side
+	/**
+	 * truncate sinogram: delete values at left and right side
+	 * 
+	 * @param sinogram sinogram that will be truncated
+	 * @param truncationWidth number of pixels that are deleted in each row
+	 * 			starting from left and right image boarder
+	 */
 	private Grid2D getTruncatedSinogram(Grid2D sinogram, int truncationWidth) {
 
 		Grid2D truncatedSinogram = new Grid2D(sinogram);
@@ -140,10 +156,15 @@ public class PolynomialTruncationCorrectionExample {
 		return truncatedSinogram;
 	}
 
-	// add black on the sides of the corrected sinogram (for reconstruction)
+	/**
+	 * add black on the sides of the corrected sinogram (for reconstruction)
+	 * 
+	 * @param correctedSinogram sinogram to which black will be added
+	 * @param originalSinogram the resulting sinogram will have the same width as this Grid2D
+	 */
 	private Grid2D addBlackOnSides(Grid2D correctedSinogram, Grid2D originalSinogram) {
 		
-		Grid2D result = new Grid2D(correctedSinogram.getWidth() + 30, correctedSinogram.getHeight());
+		Grid2D result = new Grid2D(originalSinogram.getWidth(), correctedSinogram.getHeight());
 		
 		for (int row = 0; row < result.getHeight(); row ++) {
 			for (int col = 0; col < result.getWidth(); col++) {
@@ -161,7 +182,11 @@ public class PolynomialTruncationCorrectionExample {
 		return result;
 	}
 
-	// get actual width of sinogram (from first to last non-zero value)
+	/**
+	 * get actual width of sinogram (from first to last non-zero value)
+	 * 
+	 * @param truncatedSinogram
+	 */
 	private int getSinogramWidth(Grid2D truncatedSinogram) {
 		int start = truncatedSinogram.getWidth();
 		int end = 0;
@@ -180,7 +205,7 @@ public class PolynomialTruncationCorrectionExample {
 				}
 				if (rowEndFound == false
 						&& truncatedSinogram.getAtIndex(truncatedSinogram.getWidth()-1-col, row) != 0.0f
-						&& !Double.isNaN(truncatedSinogram.getAtIndex(truncatedSinogram.getWidth()-col, row))
+						&& !Double.isNaN(truncatedSinogram.getAtIndex(truncatedSinogram.getWidth()-1-col, row))
 						){
 					if (truncatedSinogram.getWidth()-col > end) {
 						end = truncatedSinogram.getWidth()-col;
@@ -194,6 +219,11 @@ public class PolynomialTruncationCorrectionExample {
 		return end-start;
 	}
 
+	/**
+	 * get derivative along rows
+	 * 
+	 * @param sinogram
+	 */
 	private Grid2D derive(Grid2D sinogram) {
 		Grid2D firstDerivative = new Grid2D(sinogram.getWidth()-1, sinogram.getHeight());
 		for (int row = 0; row < sinogram.getHeight(); row++) {
@@ -204,6 +234,11 @@ public class PolynomialTruncationCorrectionExample {
 		return firstDerivative;
 	}
 
+	/**
+	 * find maximum of an positive integer array
+	 * 
+	 * @param l
+	 */
 	private int max(int[] l) {
 		int curr_max = 0;
 		for (int i = 0; i < l.length; i++) {
@@ -214,7 +249,11 @@ public class PolynomialTruncationCorrectionExample {
 		return curr_max;
 	}
 
-	// get width L of polynomial for each row
+	/**
+	 * get width L of polynomial for each row in the polynomial truncation correction
+	 * 
+	 * @param sinogram
+	 */
 	private int[] getL(Grid2D sinogram) {
 
 		double deltaTheta = 180.0f/sinogram.getHeight();
@@ -270,7 +309,11 @@ public class PolynomialTruncationCorrectionExample {
 		return L;
 	}
 	
-	// ramlak filter
+	/**
+	 * RamLak filtering of the input sinogram
+	 * 
+	 * @param sinogram
+	 */
 	public void ramlak(Grid2D sinogram) {
 		
 		Grid1DComplex[] sinogramTransform = new Grid1DComplex[(sinogram.getHeight())];
