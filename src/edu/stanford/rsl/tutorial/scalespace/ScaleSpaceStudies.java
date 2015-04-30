@@ -163,7 +163,7 @@ public class ScaleSpaceStudies extends Grid2D {
 	}
 	
 	/**
-	 * create phantom
+	 * create own phantom
 	 */
 	public ScaleSpaceStudies(int width, int height){
 		super(width, height);
@@ -299,6 +299,6 @@ public class ScaleSpaceStudies extends Grid2D {
 }
 
 /*
- * Copyright (C) 2010-2015 Andreas Maier
+ * Copyright (C) 2010-2015 Markus Wolf
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
  */
