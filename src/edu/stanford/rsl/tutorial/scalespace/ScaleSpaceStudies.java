@@ -1,5 +1,3 @@
-// author: Markus Wolf
-
 package edu.stanford.rsl.tutorial.scalespace;
 
 import edu.stanford.rsl.conrad.data.numeric.Grid1DComplex;
@@ -18,6 +16,7 @@ import ij.ImageJ;
  * Class to convolve projection images of a phantom with either a Gaussian or a Laplacian of Gaussian.
  * Different values for sigma are used to show the impact of their size.
  * 
+ * @author Markus Wolf
  */
 
 public class ScaleSpaceStudies extends Grid2D {
@@ -163,8 +162,9 @@ public class ScaleSpaceStudies extends Grid2D {
 		}
 	}
 	
-	
-	// create phantom
+	/**
+	 * create phantom
+	 */
 	public ScaleSpaceStudies(int width, int height){
 		super(width, height);
 		
@@ -202,8 +202,9 @@ public class ScaleSpaceStudies extends Grid2D {
 		}
 	}
 
-	
-	// convolution of sinogram and Gaussian -> multiplication in Fourier Space
+	/**
+	 * convolution of sinogram and Gaussian -> multiplication in Fourier Space
+	 */
 	public static Grid2D gaussianSinogram(Grid2D sinogram, double sigma) {
 		Grid2D gausSinogram = new Grid2D(sinogram);
 		
@@ -237,8 +238,9 @@ public class ScaleSpaceStudies extends Grid2D {
 		return gausSinogram;
 	}
 
-	
-	// convolution of sinogram and Laplacian of Gaussian
+	/**
+	 * convolution of sinogram and Laplacian of Gaussian
+	 */
 	public static Grid2D laplacianOfGaussianSinogram(Grid2D sinogram, int kernelsize, double sigma) {
 		
 		Grid2D sinogramLoG = new Grid2D(sinogram);
@@ -257,8 +259,9 @@ public class ScaleSpaceStudies extends Grid2D {
 		return sinogramLoG;	
 	}
 
-	
-	// compute convolution with Laplacian of Gaussian
+	/**
+	 * compute convolution with Laplacian of Gaussian
+	 */
 	public static Grid1DComplex convolutionLoG(Grid1DComplex signal, int kernelsize, double sigma) {
 
 		int N = signal.getSize()[0];
@@ -283,8 +286,9 @@ public class ScaleSpaceStudies extends Grid2D {
 		return result;
 	}
 	
-	
-	// Laplacian of Gaussian -> second derivative of Gaussian distribution
+	/**
+	 * Laplacian of Gaussian -> second derivative of Gaussian distribution
+	 */
 	public static double laplacianOfGaussian(int index, double sigma) {
 		
 		double value = (-1/(Math.pow(sigma, 3) * Math.sqrt(2*Math.PI))) * (1 - (Math.pow(index, 2) / Math.pow(sigma, 2))) * Math.exp(-(Math.pow(index, 2) / (2*Math.pow(sigma, 2))));
@@ -293,3 +297,8 @@ public class ScaleSpaceStudies extends Grid2D {
 	}
 
 }
+
+/*
+ * Copyright (C) 2010-2015 Andreas Maier
+ * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
+ */
