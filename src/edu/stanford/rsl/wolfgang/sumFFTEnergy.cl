@@ -87,13 +87,13 @@ void sumFFTEnergy(
 		for(int k = 0; k < n0; k++){
 		  int offSetA = (proj * n0 + k)*2;
 		  float2 elementA = (float2)(dftMat[offSetA], dftMat[offSetA + 1]);
-    
-		  int offSetB = (v*n0*n1 + u*n1 + k)*2;
+    	  
+    	  // ERROR HAPPENS SOMEWHERE HERE
+		  int offSetB = (v*n0*n1 + u*n0 + k)*2;
 		  float2 elementB = (float2)(x[offSetB], x[offSetB + 1]);
-
 		  value = add(value, cmult(elementA, elementB));
 		}
-	       
+	     
 		float pixEnergy = getMagnitude( value);
 		
 		priv_val = pixEnergy; // read the global memory

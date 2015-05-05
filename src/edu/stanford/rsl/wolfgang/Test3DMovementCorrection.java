@@ -35,67 +35,6 @@ public class Test3DMovementCorrection {
 	public static void main(String[] args) {
 
 		
-//		int wA = 2;
-//		int hA = 3;
-//		int wB = 4;
-//		int hB = 2;
-//		
-//		
-//		
-//		
-//		ComplexGrid2D matrixA = new ComplexGrid2D(wA,hA);
-//		ComplexGrid2D matrixB = new ComplexGrid2D(wB,hB);
-//		matrixA.activateCL();
-//		matrixB.activateCL();
-//		
-//		for(int i = 0;-9.0295021E8 i < wA; i++){
-//			for(int j = 0; j < hA; j++){
-//				matrixA.setImagAtIndex(1.0f, i, j);
-//			}
-//		}
-//		
-//		for(int i = 0; i < wB; i++){
-//			for(int j = 0; j < hB; j++){
-//				matrixB.setImagAtIndex(1.0f, i, j);
-//			}
-//		}
-//		
-//		
-//		System.out.println("\n Matrix A");
-//		for(int i = 0; i < matrixA.getSize()[1]; i++){
-//			for(int j =0; j < matrixA.getSize()[0]; j++){
-//				System.out.print(matrixA.getRealAtIndex(j, i) + " + " + matrixA.getImagAtIndex(j,i) + "i,  ");
-//			}
-//			System.out.println("");
-//		}
-//		
-//		System.out.println("\n Matrix B");
-//		for(int i = 0; i < matrixB.getSize()[1]; i++){
-//			for(int j =0; j < matrixB.getSize()[0]; j++){
-//				System.out.print(matrixB.getRealAtIndex(j, i) + " + " + matrixA.getImagAtIndex(j,i) + "i,  ");
-//			}
-//			System.out.println("");
-//		}
-//		
-//		
-//		
-//		ComplexGrid2D result = matMulComplex(matrixA, matrixB);
-//		
-//		//System.out.println(result.getAtIndex(0, 0));
-//
-//		System.out.println("\n result matrix");
-//		for(int i = 0; i < result.getSize()[1]; i++){
-//			for(int j =0; j < result.getSize()[0]; j++){
-//				System.out.print(result.getRealAtIndex(j, i) + " + " + result.getImagAtIndex(j,i) + "i,  ");
-//			}
-//			System.out.println("");
-//		}
-//		System.out.println("ready");
-//		
-		
-		
-		
-		
 		new ImageJ();
 		
 		// read in projection data
@@ -117,32 +56,39 @@ public class Test3DMovementCorrection {
 			e.printStackTrace();
 		}
 		
-		NumericPointwiseOperators.fill(projections,0f);
-		projections.setAtIndex(0, 0, 0, 1);
-		//projections.show("Data from file");
+		//NumericPointwiseOperators.fill(projections,0f);
+		//projections.setAtIndex(0, 0, 0, 1);
+		projections.show("Data from file");
+		
 		// get configuration
 		String xmlFilename = "/proj/ciptmp/co98jaha/workspace/data/ConradSettingsForbild3D.xml";
-		Config conf = new Config(xmlFilename,0, 2);
+		Config conf = new Config(xmlFilename,15, 2);
 		conf.getMask().show("mask");
 		System.out.println("N: "+ conf.getHorizontalDim() + " M: " + conf.getVerticalDim() + " K: "+  conf.getNumberOfProjections());
 		Grid1D testShift = new Grid1D(conf.getNumberOfProjections()*2);
-		//testShift.setAtIndex(0, 50.0f);
-//		for(int i = 0; i < testShift.getSize()[0]; i++){
-//			if(i%2 == 0){
-//				testShift.setAtIndex(i, 1.0f);
-//			}
-//			else{
-//				testShift.setAtIndex(i, 1.0f);
-//			}
-//		}
+
+		// Test shifting of 1 pixel each projection, both dimensions
+		
+		// 
+		for(int i = 0; i < testShift.getSize()[0]; i++){
+			if(i%2 == 0){
+				testShift.setAtIndex(i, 1.0f);
+			}
+			else{
+				testShift.setAtIndex(i, 1.0f);
+			}
+		}
 
 		
-		MovementCorrection3D mc = new MovementCorrection3D(projections, conf, false);
+		MovementCorrection3D mc = new MovementCorrection3D(projections, conf,true);
 		mc.setShiftVector(testShift);
 		mc.doFFT2();
 		//mc.getData().show("2D-Fouriertransformed before transposing");
 		mc.transposeData();
-		
+		for(int i = 0; i < 10000; i++){
+			mc.parallelShiftOptimized();
+			System.out.println("Runde:" + i);
+		}
 		//ComplexGrid3D nextGrid = (ComplexGrid3D) mc.get2dFourierTransposedData().clone();
 
 
@@ -158,12 +104,12 @@ public class Test3DMovementCorrection {
 
 		//mc.doiFFTAngleCL();
 		
-		Grid1D result = mc.computeOptimalShift();
-		for(int i = 0; i < result.getNumberOfElements(); i++){
-			float val = result.getAtIndex(i);
-			System.out.println(i + ": " + val);
-		}
-		result.show("Result shift vector");
+//		Grid1D result = mc.computeOptimalShift();
+//		for(int i = 0; i < result.getNumberOfElements(); i++){
+//			float val = result.getAtIndex(i);
+//			System.out.println(i + ": " + val);
+//		}
+//		result.show("Result shift vector");
 		
 //		for(int i = 0; i < 2; i++){
 //			
@@ -225,168 +171,6 @@ public class Test3DMovementCorrection {
 		mc.getData().getRealGrid().show("Real Data");
 		mc.getData().getImagGrid().show("Imag Data");
 		mc.getData().show("After pipeline");
-	
-//		
-		
-		
-		
-		
-//		//mc.getData().show();
-////		mc.get2dFourierTransposedData().show("Before angle fft");
-//		time = System.currentTimeMillis();
-//		mc.doFFTAngle();
-////			
-//		mc.doiFFTAngle();
-//		time = System.currentTimeMillis();
-//		System.out.println("time for fft on angles and back: " + time);
-//		mc.get2dFourierTransposedData().show("After angle ifft");
-//		mc.get2dFourierTransposedData().show("3d fft");
-		
-//		
-//		mc.doiFFT2();
-//	
-//		mc.getData().show("After pipeline");
-//
-		
-		
-//		mc.getData().getRealGrid().show("backtransformed, real part");
-//		mc.getData().getImagGrid().show("backtransformed, imag part");
-//		double[] sbt = mc.getData().getSpacing();
-//		System.out.println(sbt[0]+", "+sbt[1]+", "+sbt[2]);
-//		
-		
-//		Grid1D uSpacingVec = conf.getUSpacingVec();
-//		Grid1D vSpacingVec = conf.getVSpacingVec();
-//		Grid1D kSpacingVec = conf.getKSpacingVec();
-//		
-//		uSpacingVec.show();
-//		vSpacingVec.show();
-//		kSpacingVec.show();
-		
-
-//		
-		
-
-//		try {
-//			String fileSaveString = FileUtil.myFileChoose("proj/ciptmp/co98jaha/workspace/data/FinalProjections80kev/FORBILD_Head_80kev_1DFourier","tif", true);
-//			ImageUtil.saveAs(projNewOrder, fileSaveString);
-//		} catch (Exception e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-
-
-//		
-		
-//		System.out.println("N: "+ conf.getHorizontalDim() + " M: " + conf.getVerticalDim() + " K: "+  conf.getNumberOfProjections());
-		
-
-	}
-	public static Grid2D matmul(Grid2D grid1, Grid2D grid2){
-		Grid2D result = new Grid2D(grid2.getWidth(),grid1.getHeight());
-		
-		OpenCLGrid2D clGrid1= new OpenCLGrid2D(grid1);
-		OpenCLGrid2D clGrid2 = new OpenCLGrid2D(grid2);
-		OpenCLGrid2D clGridResult = new OpenCLGrid2D(result);
-
-		
-		CLBuffer<FloatBuffer> buffGrid1 = clGrid1.getDelegate().getCLBuffer();
-		CLBuffer<FloatBuffer> buffGrid2 = clGrid2.getDelegate().getCLBuffer();
-		CLBuffer<FloatBuffer> buffGridResult = clGridResult.getDelegate().getCLBuffer();
-		
-		clGrid1.getDelegate().prepareForDeviceOperation();
-		clGrid2.getDelegate().prepareForDeviceOperation();
-		clGridResult.getDelegate().prepareForDeviceOperation();
-		
-		// create Context
-		CLContext context = OpenCLUtil.getStaticContext();
-		// choose fastest device
-		CLDevice device = context.getMaxFlopsDevice();
-		CLProgram program = null;
-		try {
-		program = context.createProgram(Test3DMovementCorrection.class.getResourceAsStream("matrixMul.cl"));
-		} catch (IOException e) {
-		e.printStackTrace();
-		}
-		program.build();
-		
-		
-		CLKernel kernel = program.createCLKernel("matrixMul");
-		kernel.putArg(buffGridResult);
-		kernel.putArg(buffGrid1);
-		kernel.putArg(buffGrid2);
-		kernel.putArg(grid1.getWidth());
-		kernel.putArg(grid1.getHeight());
-		kernel.putArg(grid2.getWidth());
-		kernel.putArg(grid2.getHeight());	
-		
-		int localWorksize = 2;
-		long globalWorksizeA = OpenCLUtil.roundUp(localWorksize, result.getWidth());
-		long globalWorksizeB = OpenCLUtil.roundUp(localWorksize, result.getHeight());
-		
-		CLCommandQueue commandQueue = device.createCommandQueue();
-		commandQueue.put2DRangeKernel(kernel, 0, 0, globalWorksizeA, globalWorksizeB, localWorksize, localWorksize).finish();
-		
-		clGrid1.getDelegate().notifyDeviceChange();
-		clGrid2.getDelegate().notifyDeviceChange();
-		clGridResult.getDelegate().notifyDeviceChange();
-		
-		result = clGridResult;
-		
-		
-		
-
-		return result;
 	}
 	
-	public static ComplexGrid2D matMulComplex(ComplexGrid2D grid1, ComplexGrid2D grid2){
-		ComplexGrid2D result = new ComplexGrid2D(grid2.getSize()[0],grid1.getSize()[1]);
-		result.activateCL();
-		CLBuffer<FloatBuffer> bufferRes = result.getDelegate().getCLBuffer();
-		CLBuffer<FloatBuffer> bufferA  = grid1.getDelegate().getCLBuffer();
-		CLBuffer<FloatBuffer> bufferB = grid2.getDelegate().getCLBuffer();
-		
-		result.getDelegate().prepareForDeviceOperation();
-		grid1.getDelegate().prepareForDeviceOperation();
-		grid2.getDelegate().prepareForDeviceOperation();
-		
-		// create Context
-		CLContext context = OpenCLUtil.getStaticContext();
-		// choose fastest device
-		CLDevice device = context.getMaxFlopsDevice();
-		CLProgram program = null;
-		try {
-		program = context.createProgram(Test3DMovementCorrection.class.getResourceAsStream("matrixMul.cl"));
-		} catch (IOException e) {
-		e.printStackTrace();
-		}
-		program.build();
-		
-		CLKernel kernel = program.createCLKernel("complexMatrixMul");
-		kernel.putArg(bufferRes);
-		kernel.putArg(bufferA);
-		kernel.putArg(bufferB);
-		kernel.putArg(grid1.getSize()[0]);
-		kernel.putArg(grid1.getSize()[1]);
-		kernel.putArg(grid2.getSize()[0]);
-		kernel.putArg(grid2.getSize()[1]);	
-		
-		int localWorksize = 2;
-		long globalWorksizeA = OpenCLUtil.roundUp(localWorksize, result.getSize()[0]);
-		long globalWorksizeB = OpenCLUtil.roundUp(localWorksize, result.getSize()[1]);
-		
-		CLCommandQueue commandQueue = device.createCommandQueue();
-		commandQueue.put2DRangeKernel(kernel, 0, 0, globalWorksizeA, globalWorksizeB, localWorksize, localWorksize).finish();
-		
-		grid1.getDelegate().notifyDeviceChange();
-		grid2.getDelegate().notifyDeviceChange();
-		result.getDelegate().notifyDeviceChange();		
-		
-		return result;
-	}
-	
-
-	
-
-
 }

@@ -11,6 +11,7 @@ import edu.stanford.rsl.conrad.utils.Configuration;
 
 public class Config {
 	
+	// scaling factor indicating smaller data than original for testing purposes
 	private int m_scalingFactor;
 	// dimensions projections
 	private int N; // horizontal
@@ -23,11 +24,12 @@ public class Config {
 	private double D;
 	// max object distance to center of rotation
 	private double rp;
-	
+	// spacing in spatial domain
 	private double spacingX;
 	private double spacingY;
 	private double angleInc;
 	
+	//spacing in frequency domain
 	private double wuSpacing;
 	private double wvSpacing;
 	private double kSpacing;
@@ -37,14 +39,16 @@ public class Config {
 	private Grid1D wvSpacingVec;
 	private Grid1D kSpacingVec;
 	
-	
+	// precomputed arrays to perform shift in frequencydomain
 	private Grid1D shiftFreqX;
 	private Grid1D shiftFreqY;
 	
-	
+	// Size of mask used for erosion
 	private int m_erosionFactor;
+	// contains a one for all positions which should be zero in ideal fouriertransformed sinogram
 	private Grid2D mask;
 	
+	// matrices to perform a dft and idft for use on graphicscard
 	private ComplexGrid2D dftMatrix;
 	private ComplexGrid2D idftMatrix;
 
@@ -77,7 +81,10 @@ public class Config {
 		
 			
 	}
-	
+	/**
+	 * loads all data from a configfile, uses scalingfactor if original data is smaller for testing purpose
+	 * @param filename
+	 */
 	private void getGeometry(String filename){
 		Configuration config = Configuration.loadConfiguration(filename);
 		Trajectory geom = config.getGeometry();
@@ -169,10 +176,14 @@ public class Config {
 		return idftMatrix;
 	}
 	
-	
+	/**
+	 * 
+	 * @param dim: size of array
+	 * @param freqSpacing: the spacing
+	 * @return equally spaced array using freqSpacing 
+	 */
 	private Grid1D createFrequArray(int dim, float freqSpacing){
 		Grid1D frequArray = new Grid1D(dim);
-//		freqSpacing = 1.0f;//(dim*spacing);
 		for(int i = 0; i <= (dim -1)/2; i++){
 			frequArray.setAtIndex(i, i*freqSpacing);
 		}
@@ -189,14 +200,18 @@ public class Config {
 		int dim = spacingVec.getSize()[0];
 		Grid1D frequencies = new Grid1D(dim);
 		for(int i = 0; i < frequencies.getSize()[0]; i++){
-			frequencies.setAtIndex(i, (float)(-2*Math.PI*spacingVec.getAtIndex(i)*spacingLocal/*/(dim*spacingLocal)*/));
+			frequencies.setAtIndex(i, (float)(-2*Math.PI*spacingVec.getAtIndex(i)*spacingLocal));
 		}
 		return frequencies;
 	}
 	
+	/**
+	 * computes ideal mask according to equation (paper M. Berger), than filtering with erosion mask
+	 */
 	private void fillMask(){
 		mask = new Grid2D(K,N);
 		Grid2D helpMask = new Grid2D(K,N);
+		
 		// filling mask according to formula
 		int counter = 0;
 		for(int proj = 0; proj < helpMask.getSize()[0]; proj++){
@@ -295,16 +310,7 @@ public class Config {
 			}
 		}
 	}
-//	private void createShift(float shift){
-//		frequencyShift = new ComplexGrid1D(frequencies.length);
-//		for(int i = 0; i < frequencyShift.getSize()[0]; i++){
-//			float angle =  (float)(frequencies[i]*Math.PI/2);
-//			frequencyShift.setRealAtIndex((float)(Math.cos(angle)), i);
-//			frequencyShift.setImagAtIndex((float)(Math.sin(angle)), i);
-//			
-//		}
-//	}
-	
+
 	
 
 }
