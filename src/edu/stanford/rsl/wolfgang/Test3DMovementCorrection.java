@@ -62,7 +62,7 @@ public class Test3DMovementCorrection {
 		
 		// get configuration
 		String xmlFilename = "/proj/ciptmp/co98jaha/workspace/data/ConradSettingsForbild3D.xml";
-		Config conf = new Config(xmlFilename,15, 2);
+		Config conf = new Config(xmlFilename,15, 1);
 		conf.getMask().show("mask");
 		System.out.println("N: "+ conf.getHorizontalDim() + " M: " + conf.getVerticalDim() + " K: "+  conf.getNumberOfProjections());
 		Grid1D testShift = new Grid1D(conf.getNumberOfProjections()*2);
@@ -80,15 +80,15 @@ public class Test3DMovementCorrection {
 		}
 
 		
-		MovementCorrection3D mc = new MovementCorrection3D(projections, conf,true);
+		MovementCorrection3D mc = new MovementCorrection3D(projections, conf,false);
 		mc.setShiftVector(testShift);
 		mc.doFFT2();
 		//mc.getData().show("2D-Fouriertransformed before transposing");
 		mc.transposeData();
-		for(int i = 0; i < 10000; i++){
-			mc.parallelShiftOptimized();
-			System.out.println("Runde:" + i);
-		}
+//		for(int i = 0; i < 10000; i++){
+//			mc.parallelShiftOptimized();
+//			System.out.println("Runde:" + i);
+//		}
 		//ComplexGrid3D nextGrid = (ComplexGrid3D) mc.get2dFourierTransposedData().clone();
 
 
@@ -104,12 +104,12 @@ public class Test3DMovementCorrection {
 
 		//mc.doiFFTAngleCL();
 		
-//		Grid1D result = mc.computeOptimalShift();
-//		for(int i = 0; i < result.getNumberOfElements(); i++){
-//			float val = result.getAtIndex(i);
-//			System.out.println(i + ": " + val);
-//		}
-//		result.show("Result shift vector");
+		Grid1D result = mc.computeOptimalShift();
+		for(int i = 0; i < result.getNumberOfElements(); i++){
+			float val = result.getAtIndex(i);
+			System.out.println(i + ": " + val);
+		}
+		result.show("Result shift vector");
 		
 //		for(int i = 0; i < 2; i++){
 //			

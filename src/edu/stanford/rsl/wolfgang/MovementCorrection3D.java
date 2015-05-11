@@ -246,7 +246,7 @@ public class MovementCorrection3D {
 
 		CLCommandQueue commandQueue = device.createCommandQueue();
 		commandQueue.put3DRangeKernel(kernelFFT, 0, 0, 0, globalWorksizeA, globalWorksizeB, globalWorksizeC, localWorksize,localWorksize,localWorksize).finish();
-
+		commandQueue.release();
 		m_3dFourier.getDelegate().notifyDeviceChange();
 	}
 	
@@ -306,6 +306,7 @@ public class MovementCorrection3D {
 		commandqueue.put1DRangeKernel(kernelSumFFTEnergy, 0, globalWorkSize, localWorkSize)
 		.putReadBuffer(resultBuffer, true)
 		.finish();
+		commandqueue.release();
 		long time3 = System.currentTimeMillis();
 		difftime =time3 - time2;
 		System.out.println("Complete time on GPU = " + difftime);
@@ -497,7 +498,7 @@ public class MovementCorrection3D {
 
 		CLCommandQueue commandQueue = device.createCommandQueue();
 		commandQueue.put2DRangeKernel(kernel, 0, 0, globalWorksizeU, globalWorksizeV, localWorksize, localWorksize).finish();
-
+		commandQueue.release();
 		m_2dFourierTransposed.getDelegate().notifyDeviceChange();		
 	}
 	
