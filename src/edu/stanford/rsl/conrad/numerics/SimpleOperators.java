@@ -125,7 +125,7 @@ public abstract class SimpleOperators {
 		assert rows >= 1 : new IllegalArgumentException("Vectors have to contain at least one element each!");
 		SimpleMatrix result = new SimpleMatrix(rows, cols);
 		for (int c = 0; c < cols; ++c)
-			result.setRowValue(c, columns[c]);
+			result.setColValue(c, columns[c]);
 		return result;
 	}
 
