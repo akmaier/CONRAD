@@ -1,5 +1,7 @@
 package edu.stanford.rsl.conrad.utils;
 
+import java.awt.Color;
+
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
 import edu.stanford.rsl.conrad.data.numeric.Grid3D;
 import edu.stanford.rsl.conrad.data.numeric.MultiChannelGrid2D;
@@ -10,6 +12,8 @@ import edu.stanford.rsl.conrad.geometry.splines.BSpline;
 import ij.ImageJ;
 import ij.ImagePlus;
 import ij.ImageStack;
+import ij.gui.Line;
+import ij.gui.Overlay;
 import ij.gui.Plot;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
@@ -44,7 +48,7 @@ public abstract class VisualizationUtil {
 		double [] y = new double[length];
 		for (int i = 0; i< length; i++){
 			PointND p = spline.evaluate(((double) i) / (length));
-			x[i] = p.get(0);
+			x[i] = ((double) i) / (length);
 			y[i] = p.get(1);
 		}
 		
@@ -224,6 +228,31 @@ public abstract class VisualizationUtil {
 		return showGrid3DZ( image,  "Untitled Image");
 	}
 	
+	/**
+	 * Takes an image overlay for Image Plus images and draws a cross at the 2D position defined by pos.
+	 * @param ov the overlay to draw on
+	 * @param pos the position where the cross is to be drawn
+	 * @param slice the slice number where the point should be drawn
+	 * @param crossSize half the width of the cross' bounding box 
+	 * @param col the color of the cross
+	 */
+	public static void printCrossAtPoint(Overlay ov, PointND pos, int slice, double crossSize, Color col){
+		double pos0 = pos.get(0)+0.5;
+		double pos1 = pos.get(1)+0.5;
+		Line line = new Line(pos0, pos1-crossSize, pos0, pos1+crossSize);
+		line.setStrokeWidth(1);
+		line.setStrokeColor(col);
+		line.setPosition(slice+1);
+		line.setStrokeWidth(0.5);
+		ov.add(line);
+
+		line = new Line(pos0-crossSize, pos1, pos0+crossSize, pos1);
+		line.setStrokeWidth(1);
+		line.setStrokeColor(col);
+		line.setPosition(slice+1);
+		line.setStrokeWidth(0.5);
+		ov.add(line);
+	}
 	
 
 	public static Plot plotCompareGrayValues(ImageProcessor before, ImageProcessor after, Function func){
