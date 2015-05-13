@@ -1,12 +1,16 @@
 package edu.stanford.rsl.conrad.geometry.shapes.simple;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import edu.stanford.rsl.conrad.geometry.AbstractCurve;
 import edu.stanford.rsl.conrad.geometry.AbstractShape;
+import edu.stanford.rsl.conrad.geometry.General;
 import edu.stanford.rsl.conrad.geometry.transforms.Transform;
 import edu.stanford.rsl.conrad.numerics.SimpleOperators;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
+import edu.stanford.rsl.conrad.utils.Configuration;
+import edu.stanford.rsl.conrad.utils.RegKeys;
 
 /**
  * Class to describe a triangle in 3D.
@@ -22,6 +26,7 @@ public class Triangle extends Plane3D {
 	private static final long serialVersionUID = 3360323076084779150L;
 	protected double bUcoord, bVcoord;
 	protected double cUcoord, cVcoord;
+	protected double raytracingEpsilon;	// used to allow a certain tolerance on the decision whether the intersection point of a ray with the 3-D plane lies within the triangle 
 
 	/**
 	 * Creates a new Triangle from the Points a, b, and c
@@ -36,6 +41,8 @@ public class Triangle extends Plane3D {
 		cUcoord = 0;
 		cVcoord = 1;
 		updateBounds(a, b, c);
+		setRaytracingEpsilonFromRegistry();
+		 
 	}
 
 	public Triangle(Triangle shape){
@@ -44,6 +51,22 @@ public class Triangle extends Plane3D {
 		bVcoord = shape.bVcoord;
 		cUcoord = shape.cUcoord;
 		cVcoord = shape.cVcoord;
+		setRaytracingEpsilonFromRegistry();
+	}
+	
+	
+	/**
+	 * Retrieve the raytracing epsilon from global registry.
+	 * If there is no such entry, set the raytracing epsilon to zero.
+	 */
+	private void setRaytracingEpsilonFromRegistry() {
+		HashMap<String, String> registry = Configuration.getGlobalConfiguration().getRegistry();
+		if (registry.containsKey(RegKeys.PHANTOM_PROJECTOR_RAYTRACING_EPSILON)) {
+			raytracingEpsilon = Double.valueOf(Configuration.getGlobalConfiguration().getRegistry().get(RegKeys.PHANTOM_PROJECTOR_RAYTRACING_EPSILON));
+		} else {
+			raytracingEpsilon = 0.d;
+		}
+		
 	}
 
 	@Override
@@ -75,6 +98,29 @@ public class Triangle extends Plane3D {
 		return evaluate(cUcoord, cVcoord);
 	}
 
+	public PointND intersectWithHitOrientation(StraightLine other) {
+		PointND revan = super.intersect(other);
+		//System.out.println(revan);
+		if (isInTriangle(revan)){
+			
+			// Compute the signum between the ray hitting the triangle and the triangle's orientation
+			double hitOrientation = SimpleOperators.multiplyInnerProd(normalN, other.direction);
+			// If the result is smaller than 0, the normal of the triangle is pointing into direction opposed to the ray's direction. It's likely that we enter the object
+			// If the result is greater than 0, the normal of the triangle is pointing into the same direction as the ray. It's likely that we just left the object.
+			
+			// We put the computed orientation as another coordinate into the point of intersection
+			double[] coordinates = revan.getCoordinates();
+			double[] coordinatesHit = new double[coordinates.length + 1];
+			System.arraycopy(coordinates, 0, coordinatesHit, 0, coordinates.length);
+			coordinatesHit[coordinatesHit.length - 1] = hitOrientation;
+			
+			revan = new PointND(coordinatesHit); 
+			return revan;
+		} else {
+			return null;
+		}
+	}
+	
 	@Override
 	public PointND intersect(StraightLine other) {
 		PointND revan = super.intersect(other);
@@ -115,9 +161,43 @@ public class Triangle extends Plane3D {
 			throw new RuntimeException("Not implemented yet!");
 		}
 	}
+	
+	/**
+	 * Copy of intersect method which calls intersectWithHitOrientation instead of intersect
+	 */
+	@Override
+	public ArrayList<PointND> intersectWithHitOrientation(AbstractCurve other) {
+		if (other instanceof StraightLine) {
+			try {
+				ArrayList<PointND> list = new ArrayList<PointND>();
+				PointND p = intersectWithHitOrientation((StraightLine) other);
+				if (p!= null) list.add(p);
+				return list;
+			} catch (RuntimeException e){
+				if (e.getLocalizedMessage().equals("Line is parallel to plane")){
+					ArrayList<PointND> list = new ArrayList<PointND>();
+					Edge one = new Edge(getA(), getB());
+					PointND p = one.intersect((StraightLine) other);
+					if (p != null) list.add(p);
+					one = new Edge(getB(), getC());
+					p = one.intersect((StraightLine) other);
+					if (p != null) list.add(p);
+					one = new Edge(getA(), getC());
+					p = one.intersect((StraightLine) other);
+					if (p != null) list.add(p);
+					return list;
+				} else {
+					throw(e);
+				}
+			}
+		} else {
+			throw new RuntimeException("Not implemented yet!");
+		}
+	}
 
 	/**
 	 * Computes whether the given point is inside of the triangle. Implementation is based on barycentric coordinates.
+	 * Allows a certain tolerance which is defined in the registry and retrieved in the triangle's constructor.
 	 *  
 	 * @param p the point
 	 * @return true if it is inside of the triangle.
@@ -139,8 +219,9 @@ public class Triangle extends Plane3D {
 		double invDenom = 1.0 / ((dot00 * dot11) - (dot01 * dot01));
 		double u = ((dot11 * dot02) - (dot01 * dot12)) * invDenom;
 		double v = ((dot00 * dot12) - (dot01 * dot02)) * invDenom;
-		return (u >= 0) && (v >= 0) && (u + v <= 1);
+		return (u >= 0 - raytracingEpsilon) && (v >= 0 - raytracingEpsilon) && (u + v <= 1 + raytracingEpsilon);
 	}
+	
 
 	public PointND[] getRasterPoints(int number){
 		Edge one = new Edge (getA(), getB());

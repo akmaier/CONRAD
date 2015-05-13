@@ -13,6 +13,9 @@ import java.util.Set;
 
 
 
+
+
+import edu.stanford.rsl.apps.gui.GUIConfigurable;
 import edu.stanford.rsl.conrad.data.numeric.Grid3D;
 import edu.stanford.rsl.conrad.filtering.FastRadialSymmetryTool;
 import edu.stanford.rsl.conrad.filtering.ImageFilteringTool;
@@ -30,6 +33,7 @@ import edu.stanford.rsl.conrad.pipeline.ParallelImageFilterPipeliner;
 import edu.stanford.rsl.conrad.utils.Configuration;
 import edu.stanford.rsl.conrad.utils.FileUtil;
 import edu.stanford.rsl.conrad.utils.ImageUtil;
+import edu.stanford.rsl.conrad.utils.VisualizationUtil;
 import edu.stanford.rsl.conrad.utils.XmlUtils;
 
 
@@ -40,7 +44,7 @@ import ij.gui.Overlay;
 import ij.measure.Calibration;
 import ij.process.StackStatistics;
 
-public class MarkerDetectionWorker {
+public class MarkerDetectionWorker implements GUIConfigurable{
 
 	/**
 	 * Marker detection tool based on manually annotated initial marker positions.
@@ -236,7 +240,7 @@ public class MarkerDetectionWorker {
 					double[] coords = allDetectedBeads.get(slice).get(thresh).get(det).getCoordinates();
 					twoDPosReal.get(ref).set(slice, new double[] {coords[0], coords[1], slice});
 					twoDPosMerged.get(ref).set(slice, new double[] {coords[0], coords[1], slice});
-					printCrossAtPoint(ov, new PointND(twoDPosReal.get(ref).get(slice)), slice, 4, Color.red);
+					VisualizationUtil.printCrossAtPoint(ov, new PointND(twoDPosReal.get(ref).get(slice)), slice, 4, Color.red);
 					System.out.println("Slice: " + slice + "\t" + "Bead: " + ref + "\t\t" + twoDPosReal.get(ref).get(slice)[0] + "\t" + twoDPosReal.get(ref).get(slice)[1] + "\t");
 				}
 			}
@@ -248,7 +252,7 @@ public class MarkerDetectionWorker {
 					int bead = beadNrIt.next();
 					if (!refSet.contains(bead)){
 						twoDPosMerged.get(bead).set(slice, new double[]{innerMap.get(bead).get(0), innerMap.get(bead).get(1), slice});
-						printCrossAtPoint(ov, innerMap.get(bead), slice, 4, Color.blue);
+						VisualizationUtil.printCrossAtPoint(ov, innerMap.get(bead), slice, 4, Color.blue);
 					}
 				}
 			}
@@ -291,39 +295,8 @@ public class MarkerDetectionWorker {
 	}
 	
 
-	protected void printXAtPoint(Overlay ov, PointND pos, int slice, double crossSize){
-		double posA = pos.get(0)+0.5;
-		double posB = pos.get(1)+0.5;
-		Line line = new Line(posA-crossSize, posB-crossSize, posA+crossSize, posB+crossSize);
-		line.setStrokeWidth(0.5);
-		line.setStrokeColor(Color.green);
-		line.setPosition(slice+1);
-		ov.add(line);
-
-		line = new Line(posA-crossSize, posB+crossSize, posA+crossSize, posB-crossSize);
-		line.setStrokeWidth(0.5);
-		line.setStrokeColor(Color.green);
-		line.setPosition(slice+1);
-		ov.add(line);
-	}
-
-
-	protected void printCrossAtPoint(Overlay ov, PointND pos, int slice, double crossSize, Color col){
-		double pos0 = pos.get(0)+0.5;
-		double pos1 = pos.get(1)+0.5;
-		Line line = new Line(pos0, pos1-crossSize, pos0, pos1+crossSize);
-		line.setStrokeWidth(1);
-		line.setStrokeColor(col);
-		line.setPosition(slice+1);
-		line.setStrokeWidth(0.5);
-		ov.add(line);
-
-		line = new Line(pos0-crossSize, pos1, pos0+crossSize, pos1);
-		line.setStrokeWidth(1);
-		line.setStrokeColor(col);
-		line.setPosition(slice+1);
-		line.setStrokeWidth(0.5);
-		ov.add(line);
+	public void printXAtPoint(Overlay ov, PointND pos, int slice, double crossSize){
+		VisualizationUtil.printCrossAtPoint(ov, pos, slice, crossSize, Color.green);
 	}
 
 
@@ -585,6 +558,15 @@ public class MarkerDetectionWorker {
 
 	public double[] getRadii(){
 		return radiusOfBeads;
+	}
+
+	@Override
+	public boolean isConfigured() {
+		return configured;
+	}
+	
+	public void setConfigured(boolean config) {
+		configured = config;
 	}
 
 

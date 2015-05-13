@@ -1,21 +1,20 @@
-To use the CONRAD package within Matlab, the following steps are necessary:
+To use the CONRAD package within Matlab, the following steps are necessary (MATLAB Version 2013b or greater recommended):
 
 1) Copy library files from CONRAD to the Matlab directory:
-	 a) 	Copy all files that contain "gluegen", "joal", "jocl", "jogl" from "...\CONRAD\lib" to "...\MATLAB\R2014b\java\jarext"
+	 a) Copy all files that contain "gluegen", "joal", "jocl", "jogl" from "...\CONRAD\lib" to "...\MATLAB\R2014b\java\jarext"
 	 	(NOTE: There will be some file conflicts, please save the old files from the Matlab distribution to some new directory, e.g. "OriginalMatlabLibraries" and use the CONRAD files)
 	 b)	Adjust the file "...\MATLAB\toolbox\local\classpath.txt" (static java classpath file)
 		Make sure that the file contains the following lines (search for them):
 		
 		"$matlabroot/java/jarext/gluegen-rt.jar"
 		"$matlabroot/java/jarext/jogl-all.jar"
-		"$matlabroot/java/jarext/joal.jar"
 		"$matlabroot/java/jarext/jocl.jar"
 		
-		If one line is missing please add it to the file and save it.
+		If some of the lines are missing please add them to the file and save it.
 	
 2)  Add the Matlab m-files shiped with this zip file to your Matlab path.
 
-3)	Before you can use CONRAD you need to load all the libraries to Matlab
+3)  Before you can use CONRAD you need to load all the libraries to Matlab
 
 	% Do this by the following Matlab commands:
 	% (It is recomended to put this initial call into a Matlab startup file "startup.m". An example is given in the documentation directory of this zip file.)
@@ -42,3 +41,5 @@ NOTE 2: Please verify that the Java version of your Matlab JVM is at least as ne
 			1) Open Eclipse with the CONRAD workspace
 			2) Goto: Project -> Properties -> Java Compiler
 			3) Set the JDK Compliance level to your Matlab's Java version
+		-> A little less-documented but also working is a Matlab JVM upgrade as explained here (Matlab Upgrade to Java 8 seemed fine for Matlab 2013b or greater / no guarantee given):
+		   http://www.mathworks.com/matlabcentral/answers/130359-how-do-i-change-the-java-virtual-machine-jvm-that-matlab-is-using-on-windows

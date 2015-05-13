@@ -83,6 +83,21 @@ public class CompoundShape extends AbstractShape implements Collection<AbstractS
 		}
 		return pts;
 	}
+	
+	protected static ArrayList<PointND> intersectWithHitOrientation(AbstractShape t, AbstractCurve other){
+		ArrayList<PointND> pts = null;
+		if (t instanceof CompoundShape){
+			CompoundShape compound = (CompoundShape) t;
+			if (compound.getHitsOnBoundingBox(other).size() > 0){
+				pts = compound.intersectWithHitOrientation(other);
+			} else {
+				pts = new ArrayList<PointND>();
+			}
+		} else {
+			 pts = t.intersectWithHitOrientation(other);
+		}
+		return pts;
+	}
 
 	@Override
 	public ArrayList<PointND> intersect(AbstractCurve other) {
@@ -92,6 +107,20 @@ public class CompoundShape extends AbstractShape implements Collection<AbstractS
 		ArrayList <PointND> hits = new ArrayList<PointND>();
 		for(AbstractShape t: list){
 			hits.addAll(intersect(t,other));
+		}
+		return hits;
+	}
+	
+	
+
+	@Override
+	public ArrayList<PointND> intersectWithHitOrientation(AbstractCurve other) {
+		if (dirty){
+			init();
+		}
+		ArrayList <PointND> hits = new ArrayList<PointND>();
+		for(AbstractShape t: list){
+			hits.addAll(intersectWithHitOrientation(t, other));
 		}
 		return hits;
 	}

@@ -3,6 +3,7 @@ package edu.stanford.rsl.apps.gui.blobdetection;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
+import ij.gui.Roi;
 import ij.io.Opener;
 import ij.measure.Calibration;
 import ij.process.AutoThresholder;
@@ -42,6 +43,10 @@ public class AutomaticMarkerDetectionWorker extends MarkerDetectionWorker{
 
 	int nrOfBeads = -1;
 
+	boolean showRefBeadsReconstruction = false;
+	
+	Roi cropRoi = null;
+
 	public AutomaticMarkerDetectionWorker(){
 		super();
 	}
@@ -50,7 +55,8 @@ public class AutomaticMarkerDetectionWorker extends MarkerDetectionWorker{
 	@Override
 	public void configure() {
 		config = Configuration.getGlobalConfiguration();
-		image = IJ.getImage();
+		if (image==null)
+			image = IJ.getImage();
 		configured = true;
 		if (nrOfBeads > 0){
 			initializeMarkerPositions(nrOfBeads);
@@ -66,24 +72,29 @@ public class AutomaticMarkerDetectionWorker extends MarkerDetectionWorker{
 
 
 	public void blankOutMarkerPositions(Grid3D frst){
-			//remove markers from FRST result
-			for (int i = 0; i < twoDPosReal.size(); i++) {
-				for (int j = 0; j < twoDPosReal.get(i).size(); j++) {
-					double uv[] = twoDPosReal.get(i).get(j);
-					int blankRadius = (int)Math.ceil(DoubleArrayUtil.minAndMaxOfArray(radiusOfBeads)[1]);
-					for (int u = (int)Math.floor(uv[0])-blankRadius; u < (int)Math.ceil(uv[0])+blankRadius; ++u){
-						for (int v = (int)Math.floor(uv[1])-blankRadius; v < (int)Math.ceil(uv[1])+blankRadius; ++v){
-							if (u >= 0 && v >= 0 && u <= frst.getSize()[0] && v <= frst.getSize()[1])
-								frst.setAtIndex(u, v, (int)uv[2], 0f);
-						}
+		//remove markers from FRST result
+		for (int i = 0; i < twoDPosReal.size(); i++) {
+			for (int j = 0; j < twoDPosReal.get(i).size(); j++) {
+				double uv[] = twoDPosReal.get(i).get(j);
+				int blankRadius = (int)Math.ceil(DoubleArrayUtil.minAndMaxOfArray(radiusOfBeads)[1]);
+				for (int u = (int)Math.floor(uv[0])-blankRadius; u < (int)Math.ceil(uv[0])+blankRadius; ++u){
+					for (int v = (int)Math.floor(uv[1])-blankRadius; v < (int)Math.ceil(uv[1])+blankRadius; ++v){
+						if (u >= 0 && v >= 0 && u <= frst.getSize()[0] && v <= frst.getSize()[1])
+							frst.setAtIndex(u, v, (int)uv[2], 0f);
 					}
 				}
 			}
+		}
 	}
 
 
 	private void initializeMarkerPositions(int nrOfMarkers){
 		fastRadialSymmetrySpace = FRST();
+		if (cropRoi!=null){
+			ImagePlus ip = ImageUtil.wrapGrid3D(fastRadialSymmetrySpace, "");
+			ip.setRoi(cropRoi);
+			IJ.run(ip, "Multiply...", "value=0 stack");
+		}
 		Grid3D frst = new Grid3D(fastRadialSymmetrySpace);
 		initializeMarkerPositions(frst, false);
 		update2Dreference();
@@ -163,8 +174,9 @@ public class AutomaticMarkerDetectionWorker extends MarkerDetectionWorker{
 
 		// Use Maximum Entropy thresholding technique in 3D to find a suitable threshold
 		ImagePlus ip = ImageUtil.wrapGrid3D(tmp, "Bead Reconstruction");
-		ip.show();
-		IJ.run(ip, "Gaussian Blur 3D...", "x=2 y=2 z=2");
+		if (showRefBeadsReconstruction)
+			ip.show();
+		IJ.run(ip, "Gaussian Blur 3D...", "x=5 y=5 z=5");
 
 		//ip.getProcessor().setAutoThreshold("MaxEntropy dark stack");
 		//IJ.run("Convert to Mask", "method=MaxEntropy background=Default black");
@@ -227,7 +239,7 @@ public class AutomaticMarkerDetectionWorker extends MarkerDetectionWorker{
 			}
 			SimpleVector sub = new SimpleVector(config.getGeometry().getReconVoxelSizes());
 			sub.multiplyElementWiseBy(new SimpleVector(config.getGeometry().getOriginInPixelsX(),config.getGeometry().getOriginInPixelsY(),config.getGeometry().getOriginInPixelsZ()));
-			
+
 			int[] pos = findMaximumOfStack(tmp);
 			SimpleVector center = new SimpleVector(pos[0],pos[1],pos[2]);
 			center.multiplyElementWiseBy(new SimpleVector(config.getGeometry().getReconVoxelSizes()));
@@ -287,7 +299,7 @@ public class AutomaticMarkerDetectionWorker extends MarkerDetectionWorker{
 
 	public void setParameters(double binThresh, double circularity, double lowGradThresh, double distance, String radii, boolean refinementActive, int nrOfBeads){
 		super.setParameters(binThresh, circularity, lowGradThresh, distance, radii);
-		
+
 		if (refinementActive == false && this.nrOfBeads != -1){
 			this.nrOfBeads = -1;
 			configured = false;
@@ -306,6 +318,19 @@ public class AutomaticMarkerDetectionWorker extends MarkerDetectionWorker{
 		}
 	}
 
+	public void setShowRefBeadsReconstruction(boolean showRefBeadsReconstruction) {
+		this.showRefBeadsReconstruction = showRefBeadsReconstruction;
+	}
+	
+	public void setCropRoi(Roi cropRoi) {
+		this.cropRoi = cropRoi;
+	}
+	
+	public Roi getCropRoi() {
+		return cropRoi;
+	}
+	
+	
 	public static void main(String[] args) {
 		CONRAD.setup();
 
@@ -396,4 +421,4 @@ public class AutomaticMarkerDetectionWorker extends MarkerDetectionWorker{
 /*
  * Copyright (C) 2010-2014 - Martin Berger 
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
-*/
+ */

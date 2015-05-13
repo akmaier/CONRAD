@@ -217,7 +217,7 @@ public class OpenCLBackProjector extends VOIBasedReconstructionFilter implements
 
 	}
 
-	private synchronized void unload(){
+	protected synchronized void unload(){
 		if (initialized) {
 
 			if ((projectionVolume != null) && (!largeVolumeMode)) {

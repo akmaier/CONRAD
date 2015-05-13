@@ -61,7 +61,7 @@ public abstract class ComplexGrid extends GenericGrid<Complex> {
 	
 	@Override
 	public ComplexGridOperatorInterface selectGridOperator(boolean useOpenCLOperator) {
-		return (useOpenCLOperator) ? new OpenCLComplexGridOperator() : ComplexGridOperator.getInstance();
+		return (useOpenCLOperator) ? OpenCLComplexGridOperator.getInstance() : ComplexGridOperator.getInstance();
 	}
 
 }
