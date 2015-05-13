@@ -1,4 +1,4 @@
-package edu.stanford.rsl.wolfgang;
+package edu.stanford.rsl.tutorial.fourierConsistency.coneBeam;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;

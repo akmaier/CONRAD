@@ -1,4 +1,4 @@
-package edu.stanford.rsl.wolfgang;
+package edu.stanford.rsl.tutorial.fourierConsistency.coneBeam;
 
 import edu.stanford.rsl.conrad.data.generic.complex.ComplexGrid1D;
 import edu.stanford.rsl.conrad.data.generic.complex.ComplexGrid2D;
