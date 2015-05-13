@@ -31,6 +31,7 @@ public class Fourier {
 			for (int i = 0; i < input.getNumberOfElements()/input.getSize()[dim]; i++) {
 				fftInstance.complexForward(input.getAslinearMemory(), i*input.getSize()[dim]*2);
 			}
+			input.notifyAfterWrite();
 		}
 		else if(input.getSize().length==2){
 			// Only FFT over columns are possible - Otherwise dim would be 0 and row-wise would be selected.
@@ -78,6 +79,7 @@ public class Fourier {
 			for (int i = 0; i < input.getNumberOfElements()/input.getSize()[dim]; i++) {
 				fftInstance.complexInverse(input.getAslinearMemory(), i*input.getSize()[dim]*2,true);
 			}
+			input.notifyAfterWrite();
 		}
 		else if(input.getSize().length==2){
 			// Only FFT over columns are possible - Otherwise dim would be 0 and row-wise would be selected.
@@ -122,6 +124,7 @@ public class Fourier {
 		if (input.getSize().length == 2){
 			FloatFFT_2D fftInstance = new FloatFFT_2D(input.getSize()[1], input.getSize()[0]);
 			fftInstance.complexForward(input.getAslinearMemory());
+			input.notifyAfterWrite();
 		}else{ // 3D case
 
 			FloatFFT_2D fftInstance=null;
@@ -134,6 +137,7 @@ public class Fourier {
 					fftInstance.complexForward(cplx);
 					System.arraycopy(cplx, 0, input.getAslinearMemory(), k*cplx.length, cplx.length);
 				}
+				input.notifyAfterWrite();
 				break;
 			case 1: // FFT along x/z planes
 				fftInstance = new FloatFFT_2D(input.getSize()[2], input.getSize()[0]);
@@ -170,6 +174,7 @@ public class Fourier {
 		if (input.getSize().length == 2){
 			FloatFFT_2D fftInstance = new FloatFFT_2D(input.getSize()[1], input.getSize()[0]);
 			fftInstance.complexInverse(input.getAslinearMemory(),true);
+			input.notifyAfterWrite();
 		}else{ // 3D case
 
 			FloatFFT_2D fftInstance=null;
@@ -182,6 +187,7 @@ public class Fourier {
 					fftInstance.complexInverse(cplx,true);
 					System.arraycopy(cplx, 0, input.getAslinearMemory(), k*cplx.length, cplx.length);
 				}
+				input.notifyAfterWrite();
 				break;
 			case 1: // FFT along x/z planes
 				fftInstance = new FloatFFT_2D(input.getSize()[2], input.getSize()[0]);
@@ -208,11 +214,13 @@ public class Fourier {
 	public void fft3(ComplexGrid input){
 			FloatFFT_3D fftInstance = new FloatFFT_3D(input.getSize()[2], input.getSize()[1], input.getSize()[0]);
 			fftInstance.complexForward(input.getAslinearMemory());
+			input.notifyAfterWrite();
 	}
 
 	public void ifft3(ComplexGrid input){
 			FloatFFT_3D fftInstance = new FloatFFT_3D(input.getSize()[2], input.getSize()[1], input.getSize()[0]);
-			fftInstance.complexInverse(input.getAslinearMemory(),true);		
+			fftInstance.complexInverse(input.getAslinearMemory(),true);
+			input.notifyAfterWrite();
 	}
 	
 	
@@ -265,6 +273,7 @@ public class Fourier {
 				//System.arraycopy(grid.getAslinearMemory(), (k*grid.getSize()[0]*grid.getSize()[1]+startPos)*2, out, k*grid.getSize()[0], grid.getSize()[0]);
 				System.arraycopy(cplx, k*grid.getSize()[0]*2, grid.getAslinearMemory(), (k*grid.getSize()[0]*grid.getSize()[1]+startPos)*2, grid.getSize()[0]*2);
 			}
+			grid.notifyAfterWrite();
 			break;
 		case 2: //over y/z planes
 			for (int k = 0; k < grid.getSize()[2]; k++) {
@@ -273,6 +282,7 @@ public class Fourier {
 					grid.getAslinearMemory()[2*(startPos+j*grid.getSize()[0]+k*grid.getSize()[0]*grid.getSize()[1])+1]=cplx[(k*grid.getSize()[1]+j)*2+1];
 				}
 			}
+			grid.notifyAfterWrite();
 			break;
 		default:
 			break;
