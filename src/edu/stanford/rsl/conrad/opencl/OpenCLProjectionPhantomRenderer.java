@@ -327,7 +327,12 @@ public class OpenCLProjectionPhantomRenderer extends StreamingPhantomRenderer {
 
 	@Override
 	public void configure() throws Exception{
-		AnalyticPhantom phantom = AnalyticPhantom.getCurrentPhantom();
+		AnalyticPhantom phantom;
+		if(this.phantom != null){
+			phantom = this.phantom;
+		}else{
+			phantom = AnalyticPhantom.getCurrentPhantom();
+		}
 
 		CLContext context = OpenCLUtil.createContext();
 		CLDevice device = context.getMaxFlopsDevice();

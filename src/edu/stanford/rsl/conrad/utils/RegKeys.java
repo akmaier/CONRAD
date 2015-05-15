@@ -119,8 +119,11 @@ public abstract class RegKeys {
 	 */
 	public static final String XCAT_HEART_ROTATION = "XCAT_HEART_ROTATION";
 	
-
-	
+	/**
+	 * Entry to allow simulation of contrasted coronary angiography where only the left artery tree is contrasted.
+	 * The value is either "true" or "false". 
+	 */
+	public static final String XCAT_ONLY_LEFT_ARTERY_TREE_CONTRASTED = "XCAT_ONLY_LEFT_ARTERY_TREE_CONTRASTED"; 
 
 	/**
 	 * This key can be used to DISABLE the automatic centering of 4D phantoms which is applied by default during projection rendering for each projection.
