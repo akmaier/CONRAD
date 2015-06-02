@@ -116,6 +116,55 @@ public abstract class Rotations {
 		else throw new RuntimeException("Unknown axis!");
 	}
 	
+	public static SimpleMatrix createBasicRotationMatrixDerivative(final BasicAxis axis, double angle) {
+		final double s = Math.sin(angle); 
+		final double c = Math.cos(angle); 
+		if (axis == BasicAxis.X_AXIS) return new SimpleMatrix(new double[][] {
+				{0.0, 0.0, 0.0},
+				{0.0,  -s , -c },
+				{0.0,  c ,  -s }
+		});
+		else if (axis == BasicAxis.Y_AXIS) return new SimpleMatrix(new double[][] {
+				{ -s , 0.0,  c },
+				{0.0, 0.0, 0.0},
+				{-c , 0.0,  -s }
+		});
+		else if (axis == BasicAxis.Z_AXIS) return new SimpleMatrix(new double[][] {
+				{ -s , -c , 0.0},
+				{ c ,  -s , 0.0},
+				{0.0, 0.0, 0.0}
+		});
+		else throw new RuntimeException("Unknown axis!");
+	}
+	
+	/**
+	 * Creates a rotation matrix derivative w.r.t. the given basic axis and given angles
+	 * 
+	 * @param axis the axis to derive for
+	 * @param angleX the angle in X
+	 * @param angleY the angle in Y
+	 * @param angleZ the angle in Z
+	 * @return the matrix
+	 */
+	public static SimpleMatrix createRotationMatrixDerivative(BasicAxis axis, double angleX, double angleY, double angleZ){
+		if (axis == BasicAxis.X_AXIS){
+			SimpleMatrix xrot = createBasicRotationMatrixDerivative(axis, angleX);
+			SimpleMatrix xyrot = SimpleOperators.multiplyMatrixProd(xrot, createBasicYRotationMatrix(angleY));
+			return SimpleOperators.multiplyMatrixProd(xyrot, createBasicZRotationMatrix(angleZ));
+		}
+		else if (axis == BasicAxis.Y_AXIS){
+			SimpleMatrix xrot = createBasicXRotationMatrix(angleX);
+			SimpleMatrix xyrot = SimpleOperators.multiplyMatrixProd(xrot, createBasicRotationMatrixDerivative(axis, angleY));
+			return SimpleOperators.multiplyMatrixProd(xyrot, createBasicZRotationMatrix(angleZ));
+		}
+		else if (axis == BasicAxis.Z_AXIS){
+			SimpleMatrix xrot = createBasicXRotationMatrix(angleX);
+			SimpleMatrix xyrot = SimpleOperators.multiplyMatrixProd(xrot, createBasicYRotationMatrix(angleY));
+			return SimpleOperators.multiplyMatrixProd(xyrot, createBasicRotationMatrixDerivative(axis,angleZ));
+		}
+		else throw new RuntimeException("Unknown axis!");	
+	}
+	
 	/**
 	 * Creates a rotation matrix as the product of 
 	 * RotationMatrixX * RotationMatrixY * RotationMatrixZ

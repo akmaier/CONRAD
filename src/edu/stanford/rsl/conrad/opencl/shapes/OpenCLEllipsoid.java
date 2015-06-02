@@ -66,7 +66,7 @@ public class OpenCLEllipsoid extends Ellipsoid implements OpenCLEvaluatable {
 	 * @param e
 	 */
 	public OpenCLEllipsoid(Ellipsoid e, CLDevice device) {
-		super(e.dx, e.dy, e.dz);
+		super(e.dx, e.dy, e.dz, e.getTransform());
 		// TODO Auto-generated constructor stub
 		this.context = device.getContext();
 		this.device = device;
