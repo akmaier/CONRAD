@@ -38,7 +38,7 @@ public class Ellipsoid extends QuadricSurface {
 	 * @param dz
 	 * @param transform
 	 */
-	public Ellipsoid(double dx, double dy, double dz,AffineTransform transform){
+	public Ellipsoid(double dx, double dy, double dz,Transform transform){
 		init(dx, dy, dz, transform);
 	}
 	

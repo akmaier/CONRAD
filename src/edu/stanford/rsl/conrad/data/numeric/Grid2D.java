@@ -243,6 +243,7 @@ public class Grid2D extends NumericGrid implements Transformable {
 	
 	/**
 	 * Get the pixel value at position (x,y)
+	 * This method uses linear indices to access the buffer and does not perform range checking!
 	 * @param x The value's x position
 	 * @param y The value's y position
 	 * @return the value of the pixel
