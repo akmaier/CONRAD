@@ -19,7 +19,7 @@ import edu.stanford.rsl.tutorial.fan.redundancy.ParkerWeights;
 import edu.stanford.rsl.tutorial.fan.redundancy.SilverWeights;
 import edu.stanford.rsl.tutorial.filters.RamLakKernel;
 import edu.stanford.rsl.tutorial.filters.SheppLoganKernel;
-import edu.stanford.rsl.tutorial.wedgefilter.DoubleWedgeFilterFanES;
+import edu.stanford.rsl.tutorial.fourierConsistency.wedgefilter.DoubleWedgeFilterFanES;
 
 
 /**

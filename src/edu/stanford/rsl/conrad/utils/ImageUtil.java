@@ -899,7 +899,6 @@ public abstract class ImageUtil {
 		return out;
 	}
 
-
 	/**
 	 * 
 	 * @param inputStack the input stack
@@ -908,10 +907,21 @@ public abstract class ImageUtil {
 	 */
 	public static Grid3D applyFilterInParallel(Grid3D inputStack, ImageFilteringTool filter){
 		// run all the filters in parallel on the slices
-		return applyFiltersInParallel(inputStack, new ImageFilteringTool[] {filter});
+		return applyFilterInParallel(inputStack, filter, false);
 
 	}
 
+	/**
+	 * 
+	 * @param inputStack the input stack
+	 * @param filter the tool to apply
+	 * @return Grid3D the output of the parallel processing
+	 */
+	public static Grid3D applyFilterInParallel(Grid3D inputStack, ImageFilteringTool filter, boolean showStatus){
+		// run all the filters in parallel on the slices
+		return applyFiltersInParallel(inputStack, new ImageFilteringTool[] {filter}, showStatus);
+
+	}
 
 	/**
 	 * 
@@ -920,6 +930,16 @@ public abstract class ImageUtil {
 	 * @return Grid3D the output of the parallel processing
 	 */
 	public static Grid3D applyFiltersInParallel(Grid3D inputStack, ImageFilteringTool[] filters){
+		return applyFiltersInParallel(inputStack, filters, false);
+	}
+
+	/**
+	 * 
+	 * @param inputStack
+	 * @param filters
+	 * @return Grid3D the output of the parallel processing
+	 */
+	public static Grid3D applyFiltersInParallel(Grid3D inputStack, ImageFilteringTool[] filters, boolean showStatus){
 		// run all the filters in parallel on the slices
 		Grid3D outputStack=null;
 		try {
@@ -928,7 +948,7 @@ public abstract class ImageUtil {
 			ImagePlusProjectionDataSource pSource = new ImagePlusProjectionDataSource();
 			pSource.setImage(inputStack);
 			ParallelImageFilterPipeliner filteringPipeline = new ParallelImageFilterPipeliner(pSource, filters, sink);
-			filteringPipeline.project();
+			filteringPipeline.project(showStatus);
 			outputStack = sink.getResult();
 		} catch (Exception e1) {
 			// TODO Auto-generated catch block
