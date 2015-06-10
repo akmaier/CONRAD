@@ -31,6 +31,8 @@ public class AnalyticalAffineMotionFieldEuler extends AnalyticalAffineMotionFiel
 	private static final long serialVersionUID = -2928748290559062947L;
 	
 
+	public AnalyticalAffineMotionFieldEuler() {
+	}
 
 	DoubleFunction[] transformationCenter;
 	DoubleFunction[] eulerAngles;
@@ -125,6 +127,31 @@ public class AnalyticalAffineMotionFieldEuler extends AnalyticalAffineMotionFiel
 	public SimpleVector getTranslation(double initialTime, double time) {
 		return evaluateFunctionArray(translation, time);
 	}
+
+	public DoubleFunction[] getTransformationCenter() {
+		return transformationCenter;
+	}
+
+	public void setTransformationCenter(DoubleFunction[] transformationCenter) {
+		this.transformationCenter = transformationCenter;
+	}
+
+	public DoubleFunction[] getEulerAngles() {
+		return eulerAngles;
+	}
+
+	public void setEulerAngles(DoubleFunction[] eulerAngles) {
+		this.eulerAngles = eulerAngles;
+	}
+
+	public DoubleFunction[] getTranslation() {
+		return translation;
+	}
+
+	public void setTranslation(DoubleFunction[] translation) {
+		this.translation = translation;
+	}
+
 
 
 

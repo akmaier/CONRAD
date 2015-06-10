@@ -2,7 +2,7 @@
  * Copyright (C) 2014 Marcel Pohlmann
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
 */
-package edu.stanford.rsl.tutorial.wedgefilter;
+package edu.stanford.rsl.tutorial.fourierConsistency.wedgefilter;
 
 /**
  * This class creates a binary representation of the double wedge region of the Fourier transform
