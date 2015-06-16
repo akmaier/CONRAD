@@ -60,6 +60,7 @@ public class ConeBeamBackprojector {
 			System.err.println("ConeBeamBackprojector: Invalid projection index");
 			return null;
 		}
+		
 		double spacingX = geo.getVoxelSpacingX();
 		double spacingY = geo.getVoxelSpacingY();
 		double spacingZ = geo.getVoxelSpacingZ();

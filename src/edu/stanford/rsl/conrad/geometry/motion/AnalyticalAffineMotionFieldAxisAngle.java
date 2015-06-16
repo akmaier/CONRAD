@@ -41,6 +41,9 @@ public class AnalyticalAffineMotionFieldAxisAngle extends AnalyticalAffineMotion
 	 * @param angle
 	 */
 
+	public AnalyticalAffineMotionFieldAxisAngle() {
+	}
+	
 	DoubleFunction[] transformationCenter;
 	DoubleFunction[] axis;
 	DoubleFunction angle;
@@ -92,6 +95,53 @@ public class AnalyticalAffineMotionFieldAxisAngle extends AnalyticalAffineMotion
 		out.setSubColValue(0, out.getCols()-1, curTranslation);
 		return out;
 	}
+	
+	public DoubleFunction[] getTransformationCenter() {
+		return transformationCenter;
+	}
+
+
+
+	public void setTransformationCenter(DoubleFunction[] transformationCenter) {
+		this.transformationCenter = transformationCenter;
+	}
+
+
+
+	public DoubleFunction[] getAxis() {
+		return axis;
+	}
+
+
+
+	public void setAxis(DoubleFunction[] axis) {
+		this.axis = axis;
+	}
+
+
+
+	public DoubleFunction getAngle() {
+		return angle;
+	}
+
+
+
+	public void setAngle(DoubleFunction angle) {
+		this.angle = angle;
+	}
+
+
+
+	public DoubleFunction[] getTranslation() {
+		return translation;
+	}
+
+
+
+	public void setTranslation(DoubleFunction[] translation) {
+		this.translation = translation;
+	}
+
 }
 /*
  * Copyright (C) 2010-2014 Martin Berger 

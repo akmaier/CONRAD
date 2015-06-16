@@ -66,7 +66,7 @@
 	<classpathentry kind="lib" path="lib/trainablesegmentation.jar" sourcepath="lib/trainablesegmentation.zip"/>
 	<classpathentry kind="lib" path="lib/simpleitk-0.8.0.jar"/>
 	<classpathentry kind="lib" path="lib/jmathplot.jar"/>
-	<classpathentry kind="lib" path="lib/jpop.0.7.3.jar"/>
 	<classpathentry kind="lib" path="lib/wekaBRF_1.jar"/>
+	<classpathentry kind="lib" path="lib/jpop.0.7.5.jar"/>
 	<classpathentry kind="output" path="src"/>
 </classpath>
