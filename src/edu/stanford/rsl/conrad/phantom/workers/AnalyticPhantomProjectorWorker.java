@@ -7,8 +7,6 @@ package edu.stanford.rsl.conrad.phantom.workers;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import com.labun.surf.Detector;
-
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
 import edu.stanford.rsl.conrad.geometry.Projection;
 import edu.stanford.rsl.conrad.geometry.shapes.simple.Edge;
@@ -24,6 +22,7 @@ import edu.stanford.rsl.conrad.physics.PhysicalObject;
 import edu.stanford.rsl.conrad.physics.detector.XRayDetector;
 import edu.stanford.rsl.conrad.physics.materials.Material;
 import edu.stanford.rsl.conrad.physics.materials.database.MaterialsDB;
+import edu.stanford.rsl.conrad.rendering.AbstractRayTracer;
 import edu.stanford.rsl.conrad.rendering.PrioritizableScene;
 import edu.stanford.rsl.conrad.rendering.PriorityRayTracer;
 import edu.stanford.rsl.conrad.utils.CONRAD;
@@ -45,7 +44,7 @@ public class AnalyticPhantomProjectorWorker extends SliceWorker {
 
 	protected AnalyticPhantom phantom;
 	protected Trajectory trajectory = Configuration.getGlobalConfiguration().getGeometry();
-	private XRayDetector detector;
+	protected XRayDetector detector;
 	private PriorityRayTracer rayTracer = new PriorityRayTracer();
 	private static boolean accurate = false;
 
@@ -55,12 +54,21 @@ public class AnalyticPhantomProjectorWorker extends SliceWorker {
 	//private StraightLine castLine = new StraightLine(new PointND(0,0,0),new SimpleVector(0,0,0));
 	//private SimpleVector pixel = new SimpleVector(0, 0);
 	//private ArrayList<PhysicalObject> segmentsBuff = new ArrayList<PhysicalObject> (1);
-	private PhysicalObject environment = new PhysicalObject();
+	protected PhysicalObject environment = new PhysicalObject();
 	//private PointND startPoint = new PointND(0,0);
 	//private PointND endPoint = new PointND(0,0);
 	//private Edge environmentEdge = new Edge(startPoint, endPoint);
 	//private PointND raySource = new PointND(0,0,0);
 	//End for speed up
+	
+	/**
+	 * Allow deriving classes to change the ray tracer
+	 * @return instance of a ray tracer
+	 */
+	protected AbstractRayTracer getRayTracer() {
+		return rayTracer;
+	}
+	
 
 	@Override
 	public void workOnSlice(int sliceNumber) {
@@ -109,7 +117,7 @@ public class AnalyticPhantomProjectorWorker extends SliceWorker {
 		Trajectory geom = Configuration.getGlobalConfiguration().getGeometry();
 		//Grid2D slice = new Grid2D(geom.getDetectorWidth(), geom.getDetectorHeight());
 		Grid2D slice = detector.createDetectorGrid(geom.getDetectorWidth(), geom.getDetectorHeight(), projection);
-		rayTracer.setScene(phantomScene);
+		getRayTracer().setScene(phantomScene);
 		// Second rule of optimization is: Optimize later.
 		PointND raySource = new PointND(0,0,0);
 		raySource.setCoordinates(projection.computeCameraCenter());
@@ -151,8 +159,8 @@ public class AnalyticPhantomProjectorWorker extends SliceWorker {
 				}
 				if (negate) dir.negate();
 				castLine.setDirection(dir);
-
-				ArrayList<PhysicalObject> segments = rayTracer.castRay(castLine);
+				
+				ArrayList<PhysicalObject> segments = getRayTracer().castRay(castLine);
 				if (accurate){
 					double dirCosine = SimpleOperators.multiplyInnerProd(centerPixDir,dir);
 					length = trajectory.getSourceToDetectorDistance()/dirCosine;					
@@ -168,12 +176,12 @@ public class AnalyticPhantomProjectorWorker extends SliceWorker {
 				}
 				environment.setShape(environmentEdge);
 				segments.add(environment);
-				/* old code:
-				double integral = absorptionModel.evaluateLineIntegral(segments);
-
-				slice.putPixelValue(x, y, integral);
-				 */
+				// old code:
+				// double integral = absorptionModel.evaluateLineIntegral(segments);
+				// slice.putPixelValue(x, y, integral);
+				
 				detector.writeToDetector(slice, x, y, segments);
+				
 			}
 		}
 		return slice;
@@ -222,7 +230,7 @@ public class AnalyticPhantomProjectorWorker extends SliceWorker {
 		phantom.setBackground(mat);
 		phantom.configure();
 
-		rayTracer.setScene((PrioritizableScene)phantom);
+		getRayTracer().setScene((PrioritizableScene)phantom);
 		environment.setMaterial(phantom.getBackgroundMaterial());
 		super.configure();
 	}
@@ -237,7 +245,7 @@ public class AnalyticPhantomProjectorWorker extends SliceWorker {
 			mat = MaterialsDB.getMaterialWithName(materialstr);
 			phantom.setBackground(mat);
 		}
-		rayTracer.setScene((PrioritizableScene)phantom);
+		getRayTracer().setScene((PrioritizableScene)phantom);
 		environment.setMaterial(phantom.getBackgroundMaterial());
 		super.configure();
 	}
