@@ -66,6 +66,11 @@ public abstract class AbstractRayTracer {
 	 */
 	public ArrayList<PhysicalObject> castRay(AbstractCurve ray) {
 		ArrayList<PhysicalPoint> rayList = intersectWithScene(ray);
+		
+		if (rayList == null || rayList.size() == 0) {
+			return null;
+		}
+		
 		boolean doubles = false;
 		// Filter double hits
 		while (doubles){
@@ -101,6 +106,7 @@ public abstract class AbstractRayTracer {
 			
 			
 			if (inconsistentDataCorrection){
+				// Count hits per object
 				ArrayList<PhysicalObject> objects = new ArrayList<PhysicalObject>();
 				ArrayList<Integer> count = new ArrayList<Integer>();
 				for (int i = 0; i < points.length; i++){
@@ -119,8 +125,9 @@ public abstract class AbstractRayTracer {
 				}
 				boolean rewrite = false;
 				for (int i = 0; i < objects.size(); i++){
-					if (count.get(i) %2 == 1){
+					if (count.get(i) % 2 == 1){
 						boolean resolved = false;
+						// Iterate over hits to find all hits on object i
 						for (int j = 0; j < points.length; j++){
 							if (!resolved) {
 								if (points[j].getObject().equals(objects.get(i))){
@@ -132,6 +139,7 @@ public abstract class AbstractRayTracer {
 									}
 									// three hits in a row of the same object. no problem.
 									if (j > 0 && j < points.length-1) {
+										// If we have three hits in a row on an object, remove the center hit (j)
 										if (points[j-1].getObject().equals(objects.get(i)) && (points[j+1].getObject().equals(objects.get(i)))){
 											points[j] = null;
 											rewrite = true;
@@ -180,6 +188,7 @@ public abstract class AbstractRayTracer {
 		} else {
 			return null;
 		}
+
 	}
 
 	/**
@@ -329,7 +338,7 @@ public abstract class AbstractRayTracer {
 	 * @param rayList list of points where the ray intersects with an object
 	 * @return
 	 */
-	private ArrayList<PhysicalPoint> filterDoubles(ArrayList<PhysicalPoint> rayList) {
+	protected ArrayList<PhysicalPoint> filterDoubles(ArrayList<PhysicalPoint> rayList) {
 		ArrayList<PhysicalPoint> filtered = new ArrayList<>();
 		
 		// First intersection enters the object
@@ -361,6 +370,7 @@ public abstract class AbstractRayTracer {
 			}
 			else if (p.getHitOrientation() == 0) {
 				// Ray is parallel to the triangle's surface
+				// Or the hit orientation attribute was not set by the intersection test
 				filtered.add(p);
 			}
 			
