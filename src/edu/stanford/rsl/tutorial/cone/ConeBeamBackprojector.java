@@ -69,7 +69,12 @@ public class ConeBeamBackprojector {
 			System.err.println("ConeBeamBackprojector: Invalid projection index");
 			return null;
 		}
-
+		double spacingX = geometry.getVoxelSpacingX();
+		double spacingY = geometry.getVoxelSpacingY();
+		double spacingZ = geometry.getVoxelSpacingZ();
+		double originX = -geometry.getOriginX();
+		double originY = -geometry.getOriginY();
+		double originZ = -geometry.getOriginZ();
 		Grid3D grid = new Grid3D(imgSizeX,imgSizeY,imgSizeZ);
 		grid.setOrigin(-originX, -originY, -originZ);
 		grid.setSpacing(spacingX, spacingY, spacingZ);
@@ -98,7 +103,20 @@ public class ConeBeamBackprojector {
 	}
 	
 	public Grid3D backprojectPixelDriven(final Grid3D sino) {
-
+		Configuration conf = Configuration.getGlobalConfiguration();
+		Trajectory geo = conf.getGeometry();
+		final int imgSizeX = geo.getReconDimensionX();
+		final int imgSizeY = geo.getReconDimensionY();
+		final int imgSizeZ = geo.getReconDimensionZ();
+		final Projection[] projMats = conf.getGeometry().getProjectionMatrices();
+		final int maxProjs = conf.getGeometry().getProjectionStackSize();
+		final Grid3D grid = new Grid3D(imgSizeX,imgSizeY,imgSizeZ);
+		final double spacingX = geo.getVoxelSpacingX();
+		final double spacingY = geo.getVoxelSpacingY();
+		final double spacingZ = geo.getVoxelSpacingZ();
+		final double originX = -geo.getOriginX();
+		final double originY = -geo.getOriginY();
+		final double originZ = -geo.getOriginZ();
 		int nThreads = Integer.valueOf(Configuration.getGlobalConfiguration().getRegistryEntry(RegKeys.MAX_THREADS));
 		// TODO Error-Checking for thread number
 		ExecutorService executorService = Executors.newFixedThreadPool(nThreads);
