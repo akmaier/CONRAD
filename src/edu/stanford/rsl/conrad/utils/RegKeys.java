@@ -119,8 +119,11 @@ public abstract class RegKeys {
 	 */
 	public static final String XCAT_HEART_ROTATION = "XCAT_HEART_ROTATION";
 	
-
-	
+	/**
+	 * Entry to allow simulation of contrasted coronary angiography where only the left artery tree is contrasted.
+	 * The value is either "true" or "false". 
+	 */
+	public static final String XCAT_ONLY_LEFT_ARTERY_TREE_CONTRASTED = "XCAT_ONLY_LEFT_ARTERY_TREE_CONTRASTED"; 
 
 	/**
 	 * This key can be used to DISABLE the automatic centering of 4D phantoms which is applied by default during projection rendering for each projection.
@@ -271,6 +274,14 @@ public abstract class RegKeys {
 	 * 
 	 */
 	public static final String MSL_DATA_LOCATION = "MSL_DATA_LOCATION";
+	
+	/**
+	 * Entry to define a small accuracy tolerance when deciding whether the point of intersection between ray and triangle lies within the triangle.
+	 * The <b>value</b> is a <b>Double</b> defining the tolerance.
+	 * 
+	 * @see edu.stanford.rsl.conrad.geometry.shapes.simple.Triangle
+	 */
+	public static final String PHANTOM_PROJECTOR_RAYTRACING_EPSILON = "PHANTOM_PROJECTOR_RAYTRACING_EPSILON";
 		
 	public static final HashMap<String,String> defaultValues;
 

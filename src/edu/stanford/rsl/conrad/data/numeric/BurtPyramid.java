@@ -71,6 +71,9 @@ public class BurtPyramid{
 	public BurtPyramid(Grid2D img, int lvlPerOctave){
 		init(0, lvlPerOctave, img);
 	}
+	public BurtPyramid(ImagePlus img, int lvlPerOctave){
+		init(0, lvlPerOctave, img);
+	}
 	/**
 	 * Constructor that does not pre-compute the octaves and levels. 
 	 * @param img
@@ -89,6 +92,17 @@ public class BurtPyramid{
 		this.nOctaves = nOctaves;
 		this.lvlPerOctave = lvlPerOctave;
 		this.level0 = ImageUtil.wrapGrid(img, "");
+	}
+	/**
+	 * Initializes class members.
+	 * @param nOctaves
+	 * @param lvlPerOctave
+	 * @param img
+	 */
+	private void init(int nOctaves, int lvlPerOctave, ImagePlus img){
+		this.nOctaves = nOctaves;
+		this.lvlPerOctave = lvlPerOctave;
+		this.level0 = img;
 	}
 	
 	/**
@@ -134,5 +148,8 @@ public class BurtPyramid{
 		return ImageUtil.wrapImageProcessor(blurred);		
 	}
 	
+	public ArrayList<Grid2D[]> getPrecomputedPyramid(){
+		return this.precomp;
+	}
 
 }

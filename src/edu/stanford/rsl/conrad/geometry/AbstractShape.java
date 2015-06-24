@@ -202,6 +202,18 @@ public abstract class AbstractShape implements Serializable, Transformable {
 	 * @return the intersection points.
 	 */
 	abstract public ArrayList<PointND> intersect(AbstractCurve other);
+	
+	
+	/**
+	 * For most objects this method simply calls intersect(other);
+	 * For triangles the orientation of the hit (scalar product of ray and triangle's normal vectors) is stored as an additional coordinate
+	 * 
+	 * @param other
+	 * @return the intersection points
+	 */
+	public ArrayList<PointND> intersectWithHitOrientation(AbstractCurve other) {
+		return intersect(other);
+	}
 
 	/**
 	 * Rasters the shape with a given number of points or less. If the shape is not bounded null is returned.

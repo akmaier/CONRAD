@@ -13,6 +13,7 @@ import java.io.IOException;
 
 import edu.stanford.rsl.conrad.geometry.AbstractShape;
 import edu.stanford.rsl.conrad.geometry.shapes.compound.CompoundShape;
+import edu.stanford.rsl.conrad.geometry.shapes.compound.TriangleMesh;
 import edu.stanford.rsl.conrad.geometry.shapes.simple.PointND;
 import edu.stanford.rsl.conrad.geometry.shapes.simple.Triangle;
 import edu.stanford.rsl.conrad.numerics.SimpleOperators;
@@ -111,7 +112,7 @@ public class STLFileUtil {
 	public static CompoundShape readSTLMesh(String filename, int subCompoundStep) throws IOException{
 		BufferedReader br = new BufferedReader(new FileReader(filename));
 		String lineString = br.readLine();
-		CompoundShape mesh = new CompoundShape();
+		CompoundShape mesh = new TriangleMesh();
 		if (lineString.startsWith("solid")){
 			int currentCount = 0;
 			CompoundShape currentShape = new CompoundShape();

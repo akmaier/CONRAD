@@ -32,7 +32,12 @@ public abstract class XCatMaterialGenerator {
 		// using custom contrast agent from tutorial code.
 		// in this material the density is already set correctly.
 		if (name.contains("Coronary Artery")) {
-			material = MaterialsDB.getMaterialWithName("Ultravist370");
+			if (Configuration.getGlobalConfiguration().getRegistry().get(RegKeys.XCAT_ONLY_LEFT_ARTERY_TREE_CONTRASTED)!= null) {
+				if (Configuration.getGlobalConfiguration().getRegistry().get(RegKeys.XCAT_ONLY_LEFT_ARTERY_TREE_CONTRASTED).equals("true")) {
+				}
+			}else{
+				material = MaterialsDB.getMaterialWithName("Ultravist370");
+			}
 		}
 		
 		return material;
