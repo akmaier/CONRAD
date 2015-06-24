@@ -15,7 +15,7 @@ import edu.stanford.rsl.conrad.opencl.OpenCLUtil;
 
 public class OpenCLGrid3D extends Grid3D implements OpenCLGridInterface {
 	
-	OpenCLMemoryDelegate delegate;
+	protected OpenCLMemoryDelegate delegate;
 	
 	// ****************************************************************************************	
 	// ************************ Constructors and copying  *************************************

@@ -17,16 +17,6 @@ import com.jogamp.opencl.CLProgram;
 import com.jogamp.opencl.CLImageFormat.ChannelOrder;
 import com.jogamp.opencl.CLImageFormat.ChannelType;
 import com.jogamp.opencl.CLMemory.Mem;
-//import com.sun.tools.javac.resources.javac;
-
-
-
-
-
-
-
-
-
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
 import edu.stanford.rsl.conrad.data.numeric.Grid3D;
 import edu.stanford.rsl.conrad.data.numeric.InterpolationOperators;
@@ -58,8 +48,11 @@ public class ConeBeamBackprojector {
 		geometry = Configuration.getGlobalConfiguration().getGeometry();
 	}
 
+	public void configure(Trajectory geom){
+		geometry = geom;
+	}
+	
 	public Grid3D backprojectPixelDriven(Grid2D sino, int projIdx) {
-		geometry = Configuration.getGlobalConfiguration().getGeometry();
 		int imgSizeX = geometry.getReconDimensionX();
 		int imgSizeY = geometry.getReconDimensionY();
 		int imgSizeZ = geometry.getReconDimensionZ();
@@ -103,13 +96,12 @@ public class ConeBeamBackprojector {
 	}
 	
 	public Grid3D backprojectPixelDriven(final Grid3D sino) {
-		Configuration conf = Configuration.getGlobalConfiguration();
-		Trajectory geo = conf.getGeometry();
+		Trajectory geo = geometry;
 		final int imgSizeX = geo.getReconDimensionX();
 		final int imgSizeY = geo.getReconDimensionY();
 		final int imgSizeZ = geo.getReconDimensionZ();
-		final Projection[] projMats = conf.getGeometry().getProjectionMatrices();
-		final int maxProjs = conf.getGeometry().getProjectionStackSize();
+		final Projection[] projMats = geo.getProjectionMatrices();
+		final int maxProjs = geo.getProjectionStackSize();
 		final Grid3D grid = new Grid3D(imgSizeX,imgSizeY,imgSizeZ);
 		final double spacingX = geo.getVoxelSpacingX();
 		final double spacingY = geo.getVoxelSpacingY();
@@ -176,9 +168,6 @@ public class ConeBeamBackprojector {
 	
 	public void backprojectPixelDrivenCL(OpenCLGrid3D volume, OpenCLGrid2D[] sino) {
 		
-		geometry = Configuration.getGlobalConfiguration().getGeometry();
-		int maxV = geometry.getDetectorHeight();
-		int maxU = geometry.getDetectorWidth();
 		int imgSizeX = geometry.getReconDimensionX();
 		int imgSizeY = geometry.getReconDimensionY();
 		int imgSizeZ = geometry.getReconDimensionZ();
@@ -405,9 +394,6 @@ public class ConeBeamBackprojector {
 	
 	public void backprojectPixelDrivenCL(OpenCLGrid3D volume, OpenCLGrid2D sino, int projIdx) {
 		
-		geometry = Configuration.getGlobalConfiguration().getGeometry();
-		int maxV = geometry.getDetectorHeight();
-		int maxU = geometry.getDetectorWidth();
 		int imgSizeX = geometry.getReconDimensionX();
 		int imgSizeY = geometry.getReconDimensionY();
 		int imgSizeZ = geometry.getReconDimensionZ();
