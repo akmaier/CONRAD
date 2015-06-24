@@ -16,7 +16,7 @@ public abstract class OpenCLMemoryDelegate implements AutoCloseable{
 	protected boolean hostChanged;
 	protected boolean deviceChanged;
 	
-	boolean debug = true;
+	boolean debug = false;
 	
 	
 	/**
@@ -57,6 +57,7 @@ public abstract class OpenCLMemoryDelegate implements AutoCloseable{
 	 * This method sends the current data from the host memory to the device memory.
 	 */
 	public void push() {
+		if (debug) System.out.println("writing to device");
 		copyToLinearHostMemory();
 		fBuffer.getBuffer().put(linearHostMemory);
 		fBuffer.getBuffer().rewind();
@@ -70,6 +71,7 @@ public abstract class OpenCLMemoryDelegate implements AutoCloseable{
 	 * This method fetches the current data from the device memory to the host memory.
 	 */
 	public void pull() {
+		if (debug) System.out.println("writing to host");
 		fBuffer.getBuffer().rewind();
 		CLCommandQueue queue = device.createCommandQueue();
 		queue.putReadBuffer(fBuffer, true).finish();

@@ -21,7 +21,7 @@ public class OpenCLGrid1D extends Grid1D implements OpenCLGridInterface{
 	// ************************ Constructors and copying  *************************************
 	// ****************************************************************************************
 	
-	public OpenCLGrid1D(Grid1D input, CLContext context, CLDevice device) {
+	public OpenCLGrid1D(Grid1D input, CLContext context, CLDevice device){
 		super(input);
 		this.initializeDelegate(context, device);
 		this.numericGridOperator = OpenCLGridOperators.getInstance();
@@ -32,7 +32,7 @@ public class OpenCLGrid1D extends Grid1D implements OpenCLGridInterface{
 	}
 	
 	@Override
-	public OpenCLGrid1D clone() {
+	public OpenCLGrid1D clone(){
 		notifyBeforeRead();
 		return new OpenCLGrid1D(this, delegate.getCLContext(), delegate.getCLDevice());
 	}

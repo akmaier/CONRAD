@@ -49,7 +49,7 @@ kernel void backProjectPixelDrivenCL(
 		float proj_val = read_imagef(sino, linearSampler, posUV).x;   // <--- correct for non-padded detector
 
 		// compute volume index for x,y,z
-		int idx = x*imgSizeZ*imgSizeY + y * imgSizeZ + z;
+		int idx = z*imgSizeX*imgSizeY + y * imgSizeX + x;
 		
 		// add value to imageGrid
 		imgGrid[idx] += proj_val*denom*denom;
