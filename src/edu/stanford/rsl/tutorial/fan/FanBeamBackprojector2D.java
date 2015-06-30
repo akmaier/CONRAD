@@ -228,12 +228,12 @@ public class FanBeamBackprojector2D {
 					float valtemp = (float) (val / (dWeight*dWeight));
 
 					//grid.addAtIndex((int)Math.floor(current.get(0)), (int)Math.floor(current.get(1)), valtemp);
-					InterpolationOperators.addInterpolateLinear(grid, current.get(0), current.get(1), valtemp);
+					InterpolationOperators.addInterpolateLinear(grid, current.get(1), current.get(0), valtemp);//FIXME
 				}
 			}
 		}
 		float normalizationFactor = (float) ((float) samplingRate * maxBetaIndex / deltaT / Math.PI);
-		NumericPointwiseOperators.multiplyBy(grid, normalizationFactor);
+		NumericPointwiseOperators.divideBy(grid, normalizationFactor);//FIXME
 
 		return grid;
 	}
@@ -381,6 +381,8 @@ public class FanBeamBackprojector2D {
 							detectorPixel.getAbstractVector(), p0.getAbstractVector()
 							);
 						double len = p.normL2();
+						if((p.getElement(0)*dirDetector.getElement(0)+p.getElement(1)*dirDetector.getElement(1))<0)
+							len=-len;//Dealing with truncation data
 						double t = (len-0.5d)/deltaT;
 
 						if (subSino.getSize()[0] <= t + 1 ||  t < 0)

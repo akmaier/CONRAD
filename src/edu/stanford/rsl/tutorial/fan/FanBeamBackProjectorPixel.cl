@@ -64,6 +64,9 @@ kernel void backprojectPixelDriven2DCL(
 	 		continue;
 		float2 p = detectorPixel -p0;
 		float len = length(p);
+		if((p.x*p0.x+p.y*p0.y)>0)//truncation, wrong direction//FIXME
+		//len=-len;
+			continue;
 		float t = len/deltaT -0.5f;
 		float2 bt = {t+0.5f, b+0.5f};
 		float val = read_imagef(sino, linearSampler, bt).x;
