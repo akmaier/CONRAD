@@ -17,16 +17,12 @@ import com.jogamp.opencl.CLProgram;
 import com.jogamp.opencl.CLImageFormat.ChannelOrder;
 import com.jogamp.opencl.CLImageFormat.ChannelType;
 import com.jogamp.opencl.CLMemory.Mem;
-//import com.sun.tools.javac.resources.javac;
-
-
-
-
-
-
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
 import edu.stanford.rsl.conrad.data.numeric.Grid3D;
 import edu.stanford.rsl.conrad.data.numeric.InterpolationOperators;
+import edu.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators;
+import edu.stanford.rsl.conrad.data.numeric.opencl.OpenCLGrid2D;
+import edu.stanford.rsl.conrad.data.numeric.opencl.OpenCLGrid3D;
 import edu.stanford.rsl.conrad.geometry.Projection;
 import edu.stanford.rsl.conrad.geometry.trajectories.Trajectory;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
@@ -41,32 +37,37 @@ public class ConeBeamBackprojector {
 	final boolean debug = false;
 	final boolean verbose = false;
 
+	private static Trajectory geometry;
+	
 	public ConeBeamBackprojector() {
-
 		Configuration.loadConfiguration();
-
+		geometry = Configuration.getGlobalConfiguration().getGeometry();
+	}
+	
+	public void configure(){
+		geometry = Configuration.getGlobalConfiguration().getGeometry();
 	}
 
+	public void configure(Trajectory geom){
+		geometry = geom;
+	}
+	
 	public Grid3D backprojectPixelDriven(Grid2D sino, int projIdx) {
-
-		Configuration conf = Configuration.getGlobalConfiguration();
-		Trajectory geo = conf.getGeometry();
-		int imgSizeX = geo.getReconDimensionX();
-		int imgSizeY = geo.getReconDimensionY();
-		int imgSizeZ = geo.getReconDimensionZ();
-		Projection[] projMats = conf.getGeometry().getProjectionMatrices();
-		int maxProjs = conf.getGeometry().getProjectionStackSize();
+		int imgSizeX = geometry.getReconDimensionX();
+		int imgSizeY = geometry.getReconDimensionY();
+		int imgSizeZ = geometry.getReconDimensionZ();
+		Projection[] projMats = geometry.getProjectionMatrices();
+		int maxProjs = geometry.getProjectionStackSize();
 		if(projIdx >= maxProjs || 0 > projIdx){
 			System.err.println("ConeBeamBackprojector: Invalid projection index");
 			return null;
 		}
-		
-		double spacingX = geo.getVoxelSpacingX();
-		double spacingY = geo.getVoxelSpacingY();
-		double spacingZ = geo.getVoxelSpacingZ();
-		double originX = -geo.getOriginX();
-		double originY = -geo.getOriginY();
-		double originZ = -geo.getOriginZ();
+		double spacingX = geometry.getVoxelSpacingX();
+		double spacingY = geometry.getVoxelSpacingY();
+		double spacingZ = geometry.getVoxelSpacingZ();
+		double originX = -geometry.getOriginX();
+		double originY = -geometry.getOriginY();
+		double originZ = -geometry.getOriginZ();
 		Grid3D grid = new Grid3D(imgSizeX,imgSizeY,imgSizeZ);
 		grid.setOrigin(-originX, -originY, -originZ);
 		grid.setSpacing(spacingX, spacingY, spacingZ);
@@ -95,13 +96,12 @@ public class ConeBeamBackprojector {
 	}
 	
 	public Grid3D backprojectPixelDriven(final Grid3D sino) {
-		Configuration conf = Configuration.getGlobalConfiguration();
-		Trajectory geo = conf.getGeometry();
+		Trajectory geo = geometry;
 		final int imgSizeX = geo.getReconDimensionX();
 		final int imgSizeY = geo.getReconDimensionY();
 		final int imgSizeZ = geo.getReconDimensionZ();
-		final Projection[] projMats = conf.getGeometry().getProjectionMatrices();
-		final int maxProjs = conf.getGeometry().getProjectionStackSize();
+		final Projection[] projMats = geo.getProjectionMatrices();
+		final int maxProjs = geo.getProjectionStackSize();
 		final Grid3D grid = new Grid3D(imgSizeX,imgSizeY,imgSizeZ);
 		final double spacingX = geo.getVoxelSpacingX();
 		final double spacingY = geo.getVoxelSpacingY();
@@ -109,8 +109,7 @@ public class ConeBeamBackprojector {
 		final double originX = -geo.getOriginX();
 		final double originY = -geo.getOriginY();
 		final double originZ = -geo.getOriginZ();
-		
-		int nThreads = Integer.valueOf(conf.getRegistryEntry(RegKeys.MAX_THREADS));
+		int nThreads = Integer.valueOf(Configuration.getGlobalConfiguration().getRegistryEntry(RegKeys.MAX_THREADS));
 		// TODO Error-Checking for thread number
 		ExecutorService executorService = Executors.newFixedThreadPool(nThreads);
 		for(int i = 0; i < imgSizeX; i++) {
@@ -166,33 +165,26 @@ public class ConeBeamBackprojector {
 
 		return grid;
 	}
-
-	public Grid3D backprojectPixelDrivenCL(Grid3D sino){
-		Configuration conf = Configuration.getGlobalConfiguration();
-		return backprojectPixelDrivenCL(sino, conf);
-	}
 	
-	public Grid3D backprojectPixelDrivenCL(Grid3D sino, Configuration conf) {
-		Trajectory geo = conf.getGeometry();
-		int maxV = geo.getDetectorHeight();
-		int maxU = geo.getDetectorWidth();
-		int imgSizeX = geo.getReconDimensionX();
-		int imgSizeY = geo.getReconDimensionY();
-		int imgSizeZ = geo.getReconDimensionZ();
-		Projection[] projMats = conf.getGeometry().getProjectionMatrices();
-		int maxProjs = conf.getGeometry().getProjectionStackSize();
-		Grid3D grid = new Grid3D(imgSizeX,imgSizeY,imgSizeZ);
-		double spacingX = geo.getVoxelSpacingX();
-		double spacingY = geo.getVoxelSpacingY();
-		double spacingZ = geo.getVoxelSpacingZ();
-		double originX = -geo.getOriginX();
-		double originY = -geo.getOriginY();
-		double originZ = -geo.getOriginZ();
+	public void backprojectPixelDrivenCL(OpenCLGrid3D volume, OpenCLGrid2D[] sino) {
+		
+		int imgSizeX = geometry.getReconDimensionX();
+		int imgSizeY = geometry.getReconDimensionY();
+		int imgSizeZ = geometry.getReconDimensionZ();
+		Projection[] projMats = geometry.getProjectionMatrices();
+		int maxProjs = geometry.getProjectionStackSize();
+		
+		double spacingX = geometry.getVoxelSpacingX();
+		double spacingY = geometry.getVoxelSpacingY();
+		double spacingZ = geometry.getVoxelSpacingZ();
+		double originX = -geometry.getOriginX();
+		double originY = -geometry.getOriginY();
+		double originZ = -geometry.getOriginZ();
 		
 		if (debug)
 			System.out.println("Backprojecting...");
 		// create context
-		CLContext context = OpenCLUtil.createContext();
+		CLContext context = OpenCLUtil.getStaticContext();
 		if (debug){
 			System.out.println("Context: " + context);
 			//show OpenCL devices in System
@@ -264,8 +256,8 @@ public class ConeBeamBackprojector {
 		*/
 		
 		// create memory for image
-		CLBuffer<FloatBuffer> imgBuffer = context.createFloatBuffer(imgSizeX*imgSizeY*imgSizeZ, Mem.WRITE_ONLY);
-		imgBuffer.getBuffer().rewind();
+		CLBuffer<FloatBuffer> imgBuffer = volume.getDelegate().getCLBuffer();//context.createFloatBuffer(imgSizeX*imgSizeY*imgSizeZ, Mem.WRITE_ONLY);
+		
 		CLBuffer<FloatBuffer> projMatrices = context.createFloatBuffer(maxProjs*3*4, Mem.READ_ONLY);
 		for(int p = 0; p < maxProjs; p++) {
 			for(int row = 0; row < 3; row++) {
@@ -276,26 +268,27 @@ public class ConeBeamBackprojector {
 		}
 				
 		projMatrices.getBuffer().rewind();
-		CLCommandQueue queue = device.createCommandQueue().putWriteBuffer(imgBuffer, false);
+		CLCommandQueue queue = device.createCommandQueue();//.putWriteBuffer(imgBuffer, false);
 		queue.putWriteBuffer(projMatrices, true).finish();
 
 		// copy params
 		CLKernel kernel =  program.createCLKernel("backProjectPixelDrivenCL");
 		for(int p = 0; p < maxProjs; p++) {
 			
-			CLBuffer<FloatBuffer> sinoBuffer = context.createFloatBuffer(maxU*maxV, Mem.READ_ONLY);
-			for (int v=0;v<sino.getSize()[1];++v) {			//TODO MOEGLICHE FEHLERQUELLE
+			CLBuffer<FloatBuffer> sinoBuffer = sino[p].getDelegate().getCLBuffer();
+			/*for (int v=0;v<sino.getSize()[1];++v) {			//TODO MOEGLICHE FEHLERQUELLE
 				for(int u = 0; u <sino.getSize()[0]; u++) {
 					sinoBuffer.getBuffer().put(sino.getAtIndex(u,v,p));
 				}
 			}
-			sinoBuffer.getBuffer().rewind();
-			CLImage2d<FloatBuffer> sinoGrid = context.createImage2d(
-					sinoBuffer.getBuffer(), sino.getSize()[0], sino.getSize()[1],	//TODO MOEGLICHE FEHLERQUELLE
-					format);
-			sinoBuffer.release();
+			sinoBuffer.getBuffer().rewind();*/
+			//TODO MOEGLICHE FEHLERQUELLE
+			CLImage2d<FloatBuffer> sinoGrid = context.createImage2d(sinoBuffer.getBuffer(), sino[p].getSize()[0], sino[p].getSize()[1],format,Mem.READ_ONLY);
+			//sinoBuffer.release();
 
-			kernel.putArg(sinoGrid).putArg(imgBuffer).putArg(projMatrices)
+			kernel.putArg(sinoGrid)
+			    .putArg(imgBuffer)
+			    .putArg(projMatrices)
 				.putArg(p)
 				.putArg(imgSizeX).putArg(imgSizeY).putArg(imgSizeZ)
 				.putArg((float)originX).putArg((float)originY).putArg((float)originZ)
@@ -305,14 +298,18 @@ public class ConeBeamBackprojector {
 				.putWriteImage(sinoGrid, true)
 				.put2DRangeKernel(kernel, 0, 0, globalWorkSizeX, globalWorkSizeY,
 						localWorkSize, localWorkSize).putBarrier()
-				.putReadBuffer(imgBuffer, true)
+				//.putReadBuffer(imgBuffer, true)
 				.finish();
 
 			kernel.rewind();
-			sinoGrid.release();
+			//sinoGrid.release();
 		}
 
-		imgBuffer.getBuffer().rewind();
+		float D = (float) geometry.getSourceToDetectorDistance();
+		float scal = (float)(geometry.getSourceToAxisDistance() / geometry.getSourceToDetectorDistance());
+		NumericPointwiseOperators.multiplyBy(volume, (float) (D * D	* Math.PI*scal / geometry.getNumProjectionMatrices()));
+		
+		/*imgBuffer.getBuffer().rewind();
 		for (int x=0; x < imgSizeX;++x) {	
 			for (int y=0; y < imgSizeY;++y) {
 				for(int z = 0; z< imgSizeZ; z++){
@@ -324,54 +321,100 @@ public class ConeBeamBackprojector {
 
 
 		// clean up
-		imgBuffer.release();
+		imgBuffer.release();*/
 		projMatrices.release();
 		queue.release();
 		kernel.release();
 		program.release();
-		context.release();
-		
-		grid.setOrigin(-originX, -originY, -originZ);
-		grid.setSpacing(spacingX, spacingY, spacingZ);
+		//context.release();
 		
 		if (debug || verbose)
 			System.out.println("Backprojection done.");
+
+		
+	}
+	
+	public Grid3D backprojectPixelDrivenCL(Grid3D sino) {
+		
+		int imgSizeX = geometry.getReconDimensionX();
+		int imgSizeY = geometry.getReconDimensionY();
+		int imgSizeZ = geometry.getReconDimensionZ();
+		double spacingX = geometry.getVoxelSpacingX();
+		double spacingY = geometry.getVoxelSpacingY();
+		double spacingZ = geometry.getVoxelSpacingZ();
+		double originX = -geometry.getOriginX();
+		double originY = -geometry.getOriginY();
+		double originZ = -geometry.getOriginZ();
+		
+		OpenCLGrid2D [] sinoCL = new OpenCLGrid2D[sino.getSize()[2]];
+		for (int i=0; i < sinoCL.length; i++) 
+			sinoCL[i] = new OpenCLGrid2D(sino.getSubGrid(i));
+		
+		Grid3D grid = new Grid3D(imgSizeX,imgSizeY,imgSizeZ);
+		OpenCLGrid3D gridCL = new OpenCLGrid3D(grid);
+		gridCL.getDelegate().prepareForDeviceOperation();
+		
+		backprojectPixelDrivenCL(gridCL, sinoCL);
+		gridCL.setOrigin(-originX, -originY, -originZ);
+		gridCL.setSpacing(spacingX, spacingY, spacingZ);
+		for (int i=0; i < sinoCL.length; i++) sinoCL[i].release();
+		grid = new Grid3D(gridCL);
+		gridCL.release();
 		return grid;
 	}
 	
-	public Grid3D backprojectPixelDrivenCL(Grid2D sino, int projIdx) {
-		Configuration conf = Configuration.getGlobalConfiguration();
-		Trajectory geo = conf.getGeometry();
-		int maxV = geo.getDetectorHeight();
-		int maxU = geo.getDetectorWidth();
-		int imgSizeX = geo.getReconDimensionX();
-		int imgSizeY = geo.getReconDimensionY();
-		int imgSizeZ = geo.getReconDimensionZ();
-		Projection[] projMats = conf.getGeometry().getProjectionMatrices();
-		int maxProjs = conf.getGeometry().getProjectionStackSize();
-		if(projIdx >= maxProjs || 0 > projIdx){
-			System.err.println("ConeBeamBackprojector: Invalid projection index");
-			return null;
-		}
+	public Grid3D backprojectPixelDrivenCL(Grid2D sino , int projIdx) {
+		
+		int imgSizeX = geometry.getReconDimensionX();
+		int imgSizeY = geometry.getReconDimensionY();
+		int imgSizeZ = geometry.getReconDimensionZ();
+		double spacingX = geometry.getVoxelSpacingX();
+		double spacingY = geometry.getVoxelSpacingY();
+		double spacingZ = geometry.getVoxelSpacingZ();
+		double originX = -geometry.getOriginX();
+		double originY = -geometry.getOriginY();
+		double originZ = -geometry.getOriginZ();
+		
+		OpenCLGrid2D sinoCL = new OpenCLGrid2D(sino);
+		
 		Grid3D grid = new Grid3D(imgSizeX,imgSizeY,imgSizeZ);
-		double spacingX = geo.getVoxelSpacingX();
-		double spacingY = geo.getVoxelSpacingY();
-		double spacingZ = geo.getVoxelSpacingZ();
-		double originX = -geo.getOriginX();
-		double originY = -geo.getOriginY();
-		double originZ = -geo.getOriginZ();
-		grid.setOrigin(-originX, -originY, -originZ);
-		grid.setSpacing(spacingX, spacingY, spacingZ);
+		OpenCLGrid3D gridCL = new OpenCLGrid3D(grid);
+		gridCL.getDelegate().prepareForDeviceOperation();
+		
+		backprojectPixelDrivenCL(gridCL, sinoCL, projIdx);
+		
+		gridCL.setOrigin(-originX, -originY, -originZ);
+		gridCL.setSpacing(spacingX, spacingY, spacingZ);
+		
+		sinoCL.release();
+		grid = new Grid3D(gridCL);
+		gridCL.release();
+		return grid;
+	}
+	
+	public void backprojectPixelDrivenCL(OpenCLGrid3D volume, OpenCLGrid2D sino, int projIdx) {
+		
+		int imgSizeX = geometry.getReconDimensionX();
+		int imgSizeY = geometry.getReconDimensionY();
+		int imgSizeZ = geometry.getReconDimensionZ();
+		Projection[] projMats = geometry.getProjectionMatrices();
+		int maxProjs = geometry.getProjectionStackSize();
+		
+		double spacingX = geometry.getVoxelSpacingX();
+		double spacingY = geometry.getVoxelSpacingY();
+		double spacingZ = geometry.getVoxelSpacingZ();
+		double originX = -geometry.getOriginX();
+		double originY = -geometry.getOriginY();
+		double originZ = -geometry.getOriginZ();
 		
 		if (debug)
 			System.out.println("Backprojecting...");
 		// create context
-		CLContext context = OpenCLUtil.createContext();
-		if (debug)
-			System.out.println("Context: " + context);
-		//show OpenCL devices in System
-		CLDevice[] devices = context.getDevices();
+		CLContext context = OpenCLUtil.getStaticContext();
 		if (debug){
+			System.out.println("Context: " + context);
+			//show OpenCL devices in System
+			CLDevice[] devices = context.getDevices();
 			for (CLDevice dev: devices)
 				System.out.println(dev);
 		}
@@ -383,8 +426,8 @@ public class ConeBeamBackprojector {
 
 		// Length of arrays to process
 		int localWorkSize = Math.min(device.getMaxWorkGroupSize(), 8); // Local work size dimensions
+		int globalWorkSizeX = OpenCLUtil.roundUp(localWorkSize, imgSizeX); // rounded up to the nearest multiple of localWorkSize
 		int globalWorkSizeY = OpenCLUtil.roundUp(localWorkSize, imgSizeY); // rounded up to the nearest multiple of localWorkSize
-		int globalWorkSizeZ = OpenCLUtil.roundUp(localWorkSize, imgSizeZ); // rounded up to the nearest multiple of localWorkSize
 
 		// load sources, create and build program
 		CLProgram program = null;
@@ -420,6 +463,145 @@ public class ConeBeamBackprojector {
 		sinoBuffer.release();
 		*/
 
+		/* optimization regarding number of function calls
+		// create memory for image
+		CLBuffer<FloatBuffer> imgBuffer = context.createFloatBuffer(imgSizeX*imgSizeY*imgSizeZ, Mem.WRITE_ONLY);
+		imgBuffer.getBuffer().rewind();
+		CLBuffer<FloatBuffer> projMatrices = context.createFloatBuffer(maxProjs*3*4, Mem.READ_ONLY);
+		final FloatBuffer projMatricesBuffer = projMatrices.getBuffer();
+		for(int p = 0; p < maxProjs; p++) {
+			final SimpleMatrix currentProjMatrix = projMats[p].computeP();
+			for(int row = 0; row < 3; row++) {
+				for(int col = 0; col < 4; col++) {
+					projMatricesBuffer.put((float)currentProjMatrix.getElement(row, col));
+					// one line version:
+					//projMatrices.getBuffer().put((float)projMats[p].computeP().getElement(row, col));
+				}
+			}
+		}
+		*/
+		
+		// create memory for image
+		CLBuffer<FloatBuffer> imgBuffer = volume.getDelegate().getCLBuffer();//context.createFloatBuffer(imgSizeX*imgSizeY*imgSizeZ, Mem.WRITE_ONLY);
+		
+		CLBuffer<FloatBuffer> projMatrices = context.createFloatBuffer(maxProjs*3*4, Mem.READ_ONLY);
+		for(int p = 0; p < maxProjs; p++) {
+			for(int row = 0; row < 3; row++) {
+				for(int col = 0; col < 4; col++) {
+					projMatrices.getBuffer().put((float)projMats[p].computeP().getElement(row, col));
+				}
+			}
+		}
+				
+		projMatrices.getBuffer().rewind();
+		CLCommandQueue queue = device.createCommandQueue();//.putWriteBuffer(imgBuffer, false);
+		queue.putWriteBuffer(projMatrices, true).finish();
+
+		// copy params
+		CLKernel kernel =  program.createCLKernel("backProjectPixelDrivenCL");
+		
+			
+			CLBuffer<FloatBuffer> sinoBuffer = sino.getDelegate().getCLBuffer();
+			/*for (int v=0;v<sino.getSize()[1];++v) {			//TODO MOEGLICHE FEHLERQUELLE
+				for(int u = 0; u <sino.getSize()[0]; u++) {
+					sinoBuffer.getBuffer().put(sino.getAtIndex(u,v,p));
+				}
+			}
+			sinoBuffer.getBuffer().rewind();*/
+			//TODO MOEGLICHE FEHLERQUELLE
+			CLImage2d<FloatBuffer> sinoGrid = context.createImage2d(sinoBuffer.getBuffer(), sino.getSize()[0], sino.getSize()[1],format,Mem.READ_ONLY);
+			//sinoBuffer.release();
+
+			kernel.putArg(sinoGrid)
+			    .putArg(imgBuffer)
+			    .putArg(projMatrices)
+				.putArg(projIdx)
+				.putArg(imgSizeX).putArg(imgSizeY).putArg(imgSizeZ)
+				.putArg((float)originX).putArg((float)originY).putArg((float)originZ)
+				.putArg((float)spacingX).putArg((float)spacingY).putArg((float)spacingZ); 
+
+			queue
+				.putWriteImage(sinoGrid, true)
+				.put2DRangeKernel(kernel, 0, 0, globalWorkSizeX, globalWorkSizeY,
+						localWorkSize, localWorkSize).putBarrier()
+				//.putReadBuffer(imgBuffer, true)
+				.finish();
+
+			kernel.rewind();
+			//sinoGrid.release();
+
+
+		float D = (float) geometry.getSourceToDetectorDistance();
+		float scal = (float)(geometry.getSourceToAxisDistance() / geometry.getSourceToDetectorDistance());
+		NumericPointwiseOperators.multiplyBy(volume, (float) (D * D	* Math.PI*scal / geometry.getNumProjectionMatrices()));
+	
+		projMatrices.release();
+		queue.release();
+		kernel.release();
+		program.release();
+		
+	}
+	
+	/*public Grid3D backprojectPixelDrivenCL(Grid2D sino, int projIdx) {
+		geometry = Configuration.getGlobalConfiguration().getGeometry();
+		int maxV = geometry.getDetectorHeight();
+		int maxU = geometry.getDetectorWidth();
+		int imgSizeX = geometry.getReconDimensionX();
+		int imgSizeY = geometry.getReconDimensionY();
+		int imgSizeZ = geometry.getReconDimensionZ();
+		Projection[] projMats = geometry.getProjectionMatrices();
+		int maxProjs = geometry.getProjectionStackSize();
+		if(projIdx >= maxProjs || 0 > projIdx){
+			System.err.println("ConeBeamBackprojector: Invalid projection index");
+			return null;
+		}
+		Grid3D grid = new Grid3D(imgSizeX,imgSizeY,imgSizeZ);
+		double spacingX = geometry.getVoxelSpacingX();
+		double spacingY = geometry.getVoxelSpacingY();
+		double spacingZ = geometry.getVoxelSpacingZ();
+		double originX = -geometry.getOriginX();
+		double originY = -geometry.getOriginY();
+		double originZ = -geometry.getOriginZ();
+		grid.setOrigin(-originX, -originY, -originZ);
+		grid.setSpacing(spacingX, spacingY, spacingZ);
+		
+		if (debug)
+			System.out.println("Backprojecting...");
+		// create context
+		CLContext context = OpenCLUtil.getStaticContext();
+		if (debug)
+			System.out.println("Context: " + context);
+		//show OpenCL devices in System
+		CLDevice[] devices = context.getDevices();
+		if (debug){
+			for (CLDevice dev: devices)
+				System.out.println(dev);
+		}
+
+		// select device
+		CLDevice device = context.getMaxFlopsDevice();
+		if (debug)
+			System.out.println("Device: " + device);
+
+		// Length of arrays to process
+		int localWorkSize = Math.min(device.getMaxWorkGroupSize(), 8); // Local work size dimensions
+		int globalWorkSizeY = OpenCLUtil.roundUp(localWorkSize, imgSizeY); // rounded up to the nearest multiple of localWorkSize
+		int globalWorkSizeZ = OpenCLUtil.roundUp(localWorkSize, imgSizeZ); // rounded up to the nearest multiple of localWorkSize
+
+		// load sources, create and build program
+		CLProgram program = null;
+		try {
+			program = context.createProgram(this.getClass().getResourceAsStream("ConeBeamBackProjector.cl"))
+					.build();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.exit(-1);
+		}
+
+		// create image from input grid
+		CLImageFormat format = new CLImageFormat(ChannelOrder.INTENSITY, ChannelType.FLOAT);
+
 		// create memory for image
 		CLBuffer<FloatBuffer> imgBuffer = context.createFloatBuffer(imgSizeX*imgSizeY*imgSizeZ, Mem.WRITE_ONLY);
 		imgBuffer.getBuffer().rewind();
@@ -438,8 +620,7 @@ public class ConeBeamBackprojector {
 
 		// copy params
 		CLKernel kernel =  program.createCLKernel("backProjectPixelDrivenCL");
-		//for(int p = 0; p < maxProjs; p++) {
-			// create sinogram texture
+
 			CLBuffer<FloatBuffer> sinoBuffer = context.createFloatBuffer(maxU*maxV, Mem.READ_ONLY);
 			for (int v=0; v<sino.getSize()[1]; ++v) {			//TODO MOEGLICHE FEHLERQUELLE
 				for(int u=0; u<sino.getSize()[0]; ++u) {
@@ -449,7 +630,7 @@ public class ConeBeamBackprojector {
 			sinoBuffer.getBuffer().rewind();
 			CLImage2d<FloatBuffer> sinoGrid = context.createImage2d(
 					sinoBuffer.getBuffer(), sino.getSize()[0], sino.getSize()[1],	//TODO MOEGLICHE FEHLERQUELLE
-					format);
+					format, Mem.READ_ONLY);
 			sinoBuffer.release();
 
 			kernel.putArg(sinoGrid).putArg(imgBuffer).putArg(projMatrix)
@@ -467,7 +648,7 @@ public class ConeBeamBackprojector {
 
 			kernel.rewind();
 			sinoGrid.release();
-		//}
+
 
 		imgBuffer.getBuffer().rewind();
 		for (int x=0; x<imgSizeX; ++x) {	
@@ -478,7 +659,6 @@ public class ConeBeamBackprojector {
 			}
 		}
 		imgBuffer.getBuffer().rewind();
-
 
 		// clean up
 		imgBuffer.release();
@@ -492,7 +672,7 @@ public class ConeBeamBackprojector {
 			System.out.println("Backprojection done.");
 		return grid;
 	}
-	
+	*/
 }
 /*
  * Copyright (C) 2010-2014 Andreas Maier
