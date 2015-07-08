@@ -97,10 +97,10 @@ public abstract class AnalyticPhantom extends PrioritizableScene implements Cite
 	
 	public PrioritizableScene tessellatePhantom(double accuracy){
 		PrioritizableScene scene = new PrioritizableScene();
-		
 		for (PhysicalObject o : this){
 			PhysicalObject o2 = new PhysicalObject(o);
 			o2.setShape(((AbstractSurface)o.getShape()).tessellate(accuracy));
+			o2.setMaterial(o.getMaterial());
 			scene.add(o2);
 		}
 		
