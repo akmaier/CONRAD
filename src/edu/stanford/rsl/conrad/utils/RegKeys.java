@@ -282,7 +282,22 @@ public abstract class RegKeys {
 	 * @see edu.stanford.rsl.conrad.geometry.shapes.simple.Triangle
 	 */
 	public static final String PHANTOM_PROJECTOR_RAYTRACING_EPSILON = "PHANTOM_PROJECTOR_RAYTRACING_EPSILON";
-		
+	
+	/**
+	 * Global configuration of the ED Phantom (CRIS M062 Phantom).
+	 * Entry to define a special buffer diameter for the central element.
+	 * The <b>value</b> is a <b>Double</b> defining the diameter in [mm].
+	 */
+	public static final String ED_PHANTOM_CENTERAL_BUFFER_DIAMETER = "ED_PHANTOM_CENTERAL_BUFFER_DIAMETER";
+	
+	/**
+	 * Global configuration of the ED Phantom (CRIS M062 Phantom).
+	 * To configure presence of the bone ring around the central disk
+	 * The <b>value</b> is a <b>boolean</b> which is true to activate the bone ring.
+	 */
+	public static final String ED_PHANTOM_BONE_RING = "ED_PHANTOM_BONE_RING";
+	
+	
 	public static final HashMap<String,String> defaultValues;
 
 	/**
@@ -299,6 +314,8 @@ public abstract class RegKeys {
 		defaultValues = new HashMap<String, String>();
 		defaultValues.put(SLOW_DOWN_MS, "10");
 		defaultValues.put(SPLINE_SUBSAMPLING_FACTOR, "4");
+		defaultValues.put(ED_PHANTOM_BONE_RING, "false");
+		defaultValues.put(ED_PHANTOM_CENTERAL_BUFFER_DIAMETER, "15");
 	}
 	
 }
