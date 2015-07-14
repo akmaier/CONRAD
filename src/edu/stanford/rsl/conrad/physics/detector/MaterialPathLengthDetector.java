@@ -68,7 +68,7 @@ public class MaterialPathLengthDetector extends XRayDetector {
 				channel = materialChannelMap.get(mat);
 			}
 			if (channel < numberOfMaterials) {
-				mGrid.putPixelValue(x, y, channel, localMap.get(mat) * mat.getDensity());
+				mGrid.putPixelValue(x, y, channel, localMap.get(mat));
 			} else {
 				if (!doesNotFit ){
 					System.out.println("MaterialPathLengthAbsorptionModel: MultiChannelGrid does not fit " + mat);
