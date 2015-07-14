@@ -90,7 +90,7 @@ public class WatertightRayTracer extends AbstractRayTracer {
 		for (int i=0; i<rayList.length; i++) {
 			PhysicalPoint p = rayList[i];
 			if (!hitMap.containsKey(p.getObject().getMaterial())) {
-				hitMap.put(p.getObject().getMaterial(), new LinkedList<>());
+				hitMap.put(p.getObject().getMaterial(), new LinkedList<PhysicalPoint>());
 			}
 			hitMap.get(p.getObject().getMaterial()).add(p);
 		}
