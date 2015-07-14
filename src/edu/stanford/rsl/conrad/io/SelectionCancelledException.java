@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2015 Benedikt Lorch
+ * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
+ */
 package edu.stanford.rsl.conrad.io;
 
 import java.io.IOException;

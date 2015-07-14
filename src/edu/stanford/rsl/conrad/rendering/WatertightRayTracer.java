@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2015 Benedikt Lorch
+ * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
+ */
 package edu.stanford.rsl.conrad.rendering;
 
 import java.util.ArrayList;
@@ -27,6 +31,7 @@ import edu.stanford.rsl.conrad.utils.Configuration;
 
 public class WatertightRayTracer extends AbstractRayTracer {
 
+	
 	protected int debug = 1;
 	
 	public WatertightRayTracer() {
@@ -38,6 +43,7 @@ public class WatertightRayTracer extends AbstractRayTracer {
 
 	
 	// Copied from SimpleRayTracer
+	@Override
 	protected ArrayList<PhysicalObject> computeMaterialIntersectionSegments(PhysicalPoint [] rayList){
 		if (Configuration.getGlobalConfiguration().getDetector() instanceof MaterialPathLengthDetector) {
 			return computeMaterialIntersectionSegmentsMatPathLen(rayList);
