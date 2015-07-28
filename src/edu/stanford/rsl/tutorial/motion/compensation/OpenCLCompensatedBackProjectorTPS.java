@@ -1,6 +1,7 @@
 package edu.stanford.rsl.tutorial.motion.compensation;
 
 import ij.IJ;
+import ij.plugin.Memory;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;
@@ -83,13 +84,20 @@ public class OpenCLCompensatedBackProjectorTPS extends VOIBasedReconstructionFil
 	 */
 	protected float h_volume[];
 
+	/**
+	 * An initial rigid transform applied before the non-linear motion
+	 * If null this is given to the GPU as identity matrix
+	 * The linear memory holds a 4x4 matrix in column first order
+	 */
+	private CLBuffer<FloatBuffer> d_initialRigidTransform = null;
+
+	private float[] initialRigidTransform = null;
 
 	/**
 	 * The global variable of the module which stores the
 	 * view matrix.
 	 */
 	private CLBuffer<FloatBuffer> projectionMatrix = null;
-	private CLBuffer<IntBuffer> volStride = null;
 	private CLBuffer<FloatBuffer> volumePointer = null;
 	private CLBuffer<FloatBuffer> projectionArray = null;
 
@@ -120,7 +128,6 @@ public class OpenCLCompensatedBackProjectorTPS extends VOIBasedReconstructionFil
 	public void prepareForSerialization(){
 		super.prepareForSerialization();
 		projectionMatrix = null;
-		volStride = null;
 		volumePointer = null;
 		projectionArray = null;
 		projections = null;
@@ -146,6 +153,8 @@ public class OpenCLCompensatedBackProjectorTPS extends VOIBasedReconstructionFil
 	protected void init(){
 		if (!initialized) {
 			largeVolumeMode = false;
+
+
 
 			int reconDimensionX = getGeometry().getReconDimensionX();
 			int reconDimensionY = getGeometry().getReconDimensionY();
@@ -176,7 +185,23 @@ public class OpenCLCompensatedBackProjectorTPS extends VOIBasedReconstructionFil
 					kernelFunction.release();
 				if (program != null)
 					program.release();
+				e.printStackTrace();
 			}
+
+			d_initialRigidTransform = context.createFloatBuffer(12, Mem.READ_ONLY);
+			if (initialRigidTransform==null){
+				while(d_initialRigidTransform.getBuffer().hasRemaining())
+					d_initialRigidTransform.getBuffer().put(0);
+				d_initialRigidTransform.getBuffer().put(0, 1);
+				d_initialRigidTransform.getBuffer().put(4, 1);
+				d_initialRigidTransform.getBuffer().put(8, 1);
+			}
+			else{
+				for (int i = 0; i < initialRigidTransform.length; i++) {
+					d_initialRigidTransform.getBuffer().put(initialRigidTransform[i]);
+				}
+			}
+			d_initialRigidTransform.getBuffer().rewind();
 
 			// check space on device:
 			long memory = device.getMaxMemAllocSize();
@@ -192,14 +217,6 @@ public class OpenCLCompensatedBackProjectorTPS extends VOIBasedReconstructionFil
 				nSteps = (int)OpenCLUtil.iDivUp (requiredMemory, availableMemory);
 				if (debug) System.out.println("Switching to large volume mode with nSteps = " + nSteps);
 				largeVolumeMode = true;
-			}
-			if (debug) {
-				//TODO replace
-				/*
-				CUdevprop prop = new CUdevprop();
-				JCudaDriver.cuDeviceGetProperties(prop, dev);
-				System.out.println(prop.toFormattedString());
-				 */
 			}
 
 			// create the computing kernel
@@ -220,40 +237,14 @@ public class OpenCLCompensatedBackProjectorTPS extends VOIBasedReconstructionFil
 				h_volume = new float[reconDimensionX * reconDimensionY * reconDimensionZ];	
 			}
 
-			// compute adapted volume size 
-			//    volume size in x = multiple of bpBlockSize[0]
-			//    volume size in y = multiple of bpBlockSize[1]
-
-			int adaptedVolSize[] = new int[3];
-			if ((reconDimensionX % bpBlockSize[0] ) == 0){
-				adaptedVolSize[0] = reconDimensionX;
-			} else {
-				adaptedVolSize[0] = ((reconDimensionX / bpBlockSize[0]) + 1) * bpBlockSize[0];
-			}
-			if ((reconDimensionY % bpBlockSize[1] ) == 0){
-				adaptedVolSize[1] = reconDimensionY;
-			} else {
-				adaptedVolSize[1] = ((reconDimensionY / bpBlockSize[1]) + 1) * bpBlockSize[1];
-			}
-			adaptedVolSize[2] = reconDimensionZ;
-			int volStrideHost [] = new int[2];
-			// compute volstride and copy it to constant memory
-			volStrideHost[0] = adaptedVolSize[0];
-			volStrideHost[1] = adaptedVolSize[0] * adaptedVolSize[1];
-
 			// copy volume to device
 			volumePointer = context.createFloatBuffer(h_volume.length, Mem.WRITE_ONLY);
 			volumePointer.getBuffer().put(h_volume);
 			volumePointer.getBuffer().rewind();
 
-			// copy volume stride to device
-			volStride = context.createIntBuffer(volStrideHost.length, Mem.READ_ONLY);
-			volStride.getBuffer().put(volStrideHost);
-			volStride.getBuffer().rewind();
-
 			commandQueue.
 			putWriteBuffer(volumePointer, true).
-			putWriteBuffer(volStride, true).
+			putWriteBuffer(d_initialRigidTransform,true).
 			finish();
 
 			initialized = true;
@@ -312,12 +303,12 @@ public class OpenCLCompensatedBackProjectorTPS extends VOIBasedReconstructionFil
 				projectionTex.release();
 			if (projectionMatrix != null)
 				projectionMatrix.release();
-			if (volStride != null)
-				volStride.release();
 			if (projectionArray != null)
 				projectionArray.release();
 			if (volumePointer != null)
 				volumePointer.release();
+			if (d_initialRigidTransform != null)
+				d_initialRigidTransform.release();
 
 			kernelFunction.release();
 			program.release();
@@ -327,7 +318,6 @@ public class OpenCLCompensatedBackProjectorTPS extends VOIBasedReconstructionFil
 			projectionArray = null;
 			projectionMatrix = null;
 			projectionTex = null;
-			volStride = null;
 			volumePointer = null;
 			kernelFunction = null;
 			program = null;
@@ -379,6 +369,10 @@ public class OpenCLCompensatedBackProjectorTPS extends VOIBasedReconstructionFil
 			// Copy the projection data to the array 
 			projectionArray.getBuffer().put(proj);
 			projectionArray.getBuffer().rewind();
+			
+			if(projectionTex != null && !projectionTex.isReleased()){			
+				projectionTex.release();
+			}
 
 			// set the texture
 			CLImageFormat format = new CLImageFormat(ChannelOrder.INTENSITY, ChannelType.FLOAT);
@@ -432,7 +426,7 @@ public class OpenCLCompensatedBackProjectorTPS extends VOIBasedReconstructionFil
 		// load projection
 		Grid2D projection = projections.get(projectionNumber); 
 		initProjectionData(projection);
-		
+
 		// Correct for constant part of distance weighting + For angular sampling
 		double D =  getGeometry().getSourceToDetectorDistance();
 		float projectionMultiplier = (float)(10 * D*D * 2* Math.PI * getGeometry().getPixelDimensionX() / getGeometry().getNumProjectionMatrices());
@@ -500,8 +494,8 @@ public class OpenCLCompensatedBackProjectorTPS extends VOIBasedReconstructionFil
 		.putArg((float) offsetY)
 		.putArg((float) offsetZ)
 		.putArg(projectionTex)
-		.putArg(volStride)
 		.putArg(projectionMatrix)
+		.putArg(d_initialRigidTransform)
 		.putArg(projectionMultiplier);
 
 		if (debug){
@@ -510,9 +504,18 @@ public class OpenCLCompensatedBackProjectorTPS extends VOIBasedReconstructionFil
 			.putArg(zdeform.getDelegate().getCLBuffer());
 		}
 
-		int[] realLocalSize = {Math.min(device.getMaxWorkGroupSize(),bpBlockSize[0]), Math.min(device.getMaxWorkGroupSize(),bpBlockSize[1])};
+		int[] realLocalSize = new int[2];
+		realLocalSize[0] = Math.min(device.getMaxWorkGroupSize(),bpBlockSize[0]);
+		realLocalSize[1] = Math.max(1, Math.min(device.getMaxWorkGroupSize()/realLocalSize[0], bpBlockSize[1]));
+		
 		// rounded up to the nearest multiple of localWorkSize
 		int[] globalWorkSize = {getGeometry().getReconDimensionX(), getGeometry().getReconDimensionY()}; 
+		if ((globalWorkSize[0] % realLocalSize[0] ) != 0){
+			globalWorkSize[0] = ((globalWorkSize[0] / realLocalSize[0]) + 1) * realLocalSize[0];
+		}
+		if ((globalWorkSize[1] % realLocalSize[1] ) != 0){
+			globalWorkSize[1] = ((globalWorkSize[1] / realLocalSize[1]) + 1) * realLocalSize[1];
+		}
 
 		// Call the OpenCL kernel, writing the results into the volume which is pointed at
 		commandQueue
@@ -727,6 +730,29 @@ public class OpenCLCompensatedBackProjectorTPS extends VOIBasedReconstructionFil
 
 	public void setB(float[][] b) {
 		this.b = b;
+	}
+
+	public SimpleMatrix getInitialRigidTransform() {
+		if (initialRigidTransform != null){
+			SimpleMatrix out = SimpleMatrix.I_4.clone();
+			for (int j = 0; j < 4; j++) {
+				for (int i = 0; i < 3; i++) {
+					out.setElementValue(i, j, initialRigidTransform[j*3+i]);
+				}
+			}
+			return out;
+		}else
+			return null;
+	}
+
+	public void setInitialRigidTransform(SimpleMatrix initTform) {
+		if (initialRigidTransform == null)
+			initialRigidTransform = new float[12]; // no scaling is taken into account!! 6 parameter rigid only
+		for (int j = 0; j < 4; j++) {
+			for (int i = 0; i < 3; i++) {
+				initialRigidTransform[j*3+i] = (float)initTform.getElement(i, j);
+			}
+		}
 	}
 
 

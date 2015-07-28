@@ -1,5 +1,6 @@
 import java.io.File;
 
+import edu.stanford.rsl.conrad.io.NrrdFileReader;
 import edu.stanford.rsl.conrad.utils.Configuration;
 import ij.plugin.PlugIn;
 
@@ -13,10 +14,10 @@ public class Load_Recent implements PlugIn {
 	@Override
 	public void run(String arg) {
 		Configuration.loadConfiguration();
-		Nrrd_Reader reader = new Nrrd_Reader();
+		NrrdFileReader reader = new NrrdFileReader();
 		File file = new File(Configuration.getGlobalConfiguration().getRecentFileOne());
 		reader.load(file.getParentFile().getAbsolutePath(), file.getName()).show();
-		reader = new Nrrd_Reader();
+		reader = new NrrdFileReader();
 		file = new File(Configuration.getGlobalConfiguration().getRecentFileTwo());
 		reader.load(file.getParentFile().getAbsolutePath(), file.getName()).show();
 	}
