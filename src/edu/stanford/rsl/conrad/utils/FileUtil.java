@@ -4,6 +4,8 @@ import java.io.File;
 
 import javax.swing.JFileChooser;
 
+import edu.stanford.rsl.conrad.io.SelectionCancelledException;
+
 
 public abstract class FileUtil {
 
@@ -47,7 +49,7 @@ public abstract class FileUtil {
 			result = FC.showSaveDialog(null);
 		} else result = FC.showOpenDialog(null);
 		if (result == JFileChooser.CANCEL_OPTION) {
-			throw new Exception("Cancelled");
+			throw new SelectionCancelledException("Cancelled");
 		}
 		String filename = FC.getSelectedFile().getAbsolutePath();
 		if (save){
