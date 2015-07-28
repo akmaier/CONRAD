@@ -1,3 +1,4 @@
+package edu.stanford.rsl.conrad.io;
 // Nrrd_Writer
 // -----------
 // ImageJ plugin to save a file in Gordon Kindlmann's NRRD 
@@ -32,14 +33,16 @@ import ij.io.FileInfo;
 import ij.io.ImageWriter;
 import ij.io.SaveDialog;
 import ij.measure.Calibration;
-import ij.plugin.PlugIn;
 
 import java.io.*;
 import java.util.Date;
 import java.util.zip.GZIPOutputStream;
 
+import edu.stanford.rsl.conrad.utils.CONRAD;
+
+
                           
-public class Nrrd_Writer implements PlugIn {
+public class NrrdFileWriter {
 
 	private static final String plugInName = "Nrrd Writer";
 	private static final String noImages = plugInName+"...\n"+ "No images are open.";
@@ -187,7 +190,7 @@ public class Nrrd_Writer implements PlugIn {
 		String units;
 		if(cal!=null) units=cal.getUnit();
 		else units=fi.unit;
-		if(units.equals("µm")) units="microns";
+		if(units.equals("ï¿½m")) units="microns";
 		if(!units.equals("")) out.write(dimmedQuotedLine("units",dimension,units,units,units));		
 
 		// Only write axis mins if origin info has at least one non-zero
@@ -195,7 +198,6 @@ public class Nrrd_Writer implements PlugIn {
 		if(cal!=null && (cal.xOrigin!=0 || cal.yOrigin!=0 || cal.zOrigin!=0) ) {
 			out.write(dimmedLine("axis mins",dimension,(-cal.xOrigin*cal.pixelWidth)+"",
 								 (-cal.yOrigin*cal.pixelHeight)+"",(-cal.zOrigin*cal.pixelDepth)+""));
-			System.out.println(" ");
 		}
 		return out.toString();
 	}
@@ -224,11 +226,11 @@ public class Nrrd_Writer implements PlugIn {
 	public static String getEncoding(FileInfo fi) {
 		NrrdFileInfo nfi;
 		
-		if (IJ.debugMode) IJ.log("fi :"+fi);
+		if (IJ.debugMode) CONRAD.log("fi :"+fi);
 		
 		try {
 			nfi=(NrrdFileInfo) fi;
-			if (IJ.debugMode) IJ.log("nfi :"+nfi);
+			if (IJ.debugMode) CONRAD.log("nfi :"+nfi);
 			if(nfi.encoding!=null && !nfi.encoding.equals("")) return (nfi.encoding);
 		} catch (Exception e) { }
 		
@@ -265,20 +267,4 @@ public class Nrrd_Writer implements PlugIn {
 	}	
 }
 
-class NrrdFileInfo extends FileInfo {
-	public int dimension=0;
-	public int[] sizes;
-	public String encoding="";
-	public String[] centers=null;
-	
-	// Additional compression modes for fi.compression
-	public static final int GZIP = 1001;
-	public static final int ZLIB = 1002;
-	public static final int BZIP2 = 1003;
-	
-	// Additional file formats for fi.fileFormat
-	public static final int NRRD = 1001;
-	public static final int NRRD_TEXT = 1002;
-	public static final int NRRD_HEX = 1003;
 
-}

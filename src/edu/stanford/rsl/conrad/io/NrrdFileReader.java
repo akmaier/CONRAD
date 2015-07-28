@@ -26,7 +26,6 @@ import ij.io.FileInfo;
 import ij.io.FileOpener;
 import ij.io.OpenDialog;
 import ij.measure.Calibration;
-import ij.plugin.PlugIn;
 
 import java.io.File;
 import java.io.IOException;
@@ -45,7 +44,7 @@ import edu.stanford.rsl.conrad.utils.CONRAD;
  * and <A HREF="http://flybrain.stanford.edu/nrrd">http://flybrain.stanford.edu/nrrd</A>
  */
 
-public class Nrrd_Reader extends ImagePlus implements PlugIn 
+public class NrrdFileReader extends ImagePlus
 {
 	public final String uint8Types="uchar, unsigned char, uint8, uint8_t";
 	public final String int16Types="short, short int, signed short, signed short int, int16, int16_t";
@@ -329,9 +328,9 @@ public class Nrrd_Reader extends ImagePlus implements PlugIn
 		// Fix axis mins, converting them to pixels
 		// if clause is to guard against cases where there is no spatial
 		// calibration info leading to Inf
-		if(spatialCal.pixelWidth!=0) spatialCal.xOrigin=spatialCal.xOrigin/spatialCal.pixelWidth;
-		if(spatialCal.pixelHeight!=0) spatialCal.yOrigin=spatialCal.yOrigin/spatialCal.pixelHeight;
-		if(spatialCal.pixelDepth!=0) spatialCal.zOrigin=spatialCal.zOrigin/spatialCal.pixelDepth;
+		if(spatialCal.pixelWidth!=0) spatialCal.xOrigin=-spatialCal.xOrigin/spatialCal.pixelWidth;
+		if(spatialCal.pixelHeight!=0) spatialCal.yOrigin=-spatialCal.yOrigin/spatialCal.pixelHeight;
+		if(spatialCal.pixelDepth!=0) spatialCal.zOrigin=-spatialCal.zOrigin/spatialCal.pixelDepth;
 
 		// Axis min will be the centre of the first pixel if this a "cell" nrrd
 		// or at the (top, front, left) if this is a "node" nrrd.
