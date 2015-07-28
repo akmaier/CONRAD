@@ -40,7 +40,6 @@ __kernel void backprojectKernel_returnMotion(
 		float offsetY, 
 		float offsetZ,
 		__read_only image2d_t gTex2D,
-		__global int* gVolStride,
 		__global Tcoord_dev* gProjMatrix,
 		float projMultiplier,
 		__global TvoxelValue* deformationOutX,
@@ -63,6 +62,9 @@ __kernel void backprojectKernel_returnMotion(
 	
 	if (x >= reconDimX || y >= reconDimY)
 		return;
+		
+	unsigned int zStride = reconDimX*reconDimY;
+	unsigned int yStride = reconDimX;
 		
 	int ptsFloatLength = mul24(ptsNr,3);
 	int nrOfLocalThreads = mul24(locSizex,locSizey);
@@ -129,7 +131,7 @@ __kernel void backprojectKernel_returnMotion(
 
 		float proj_val = read_imagef(gTex2D, sampler, (float2)(fu + 0.5f + lineOffset, fv + 0.5f)).x;
 
-		unsigned long idx = z*gVolStride[1] + y*gVolStride[0] + x;
+		unsigned long idx = z*zStride + y*yStride + x;
 		// Because of dx/s and dy/s, the value itself is scaled by 1/s^2
 		pVolume[idx] += proj_val * denom * denom * projMultiplier;
 		deformationOutX[idx] = xi;
@@ -167,8 +169,8 @@ __kernel void backprojectKernel(
 		float offsetY, 
 		float offsetZ,
 		__read_only image2d_t gTex2D,
-		__global int* gVolStride,
 		__global Tcoord_dev* gProjMatrix,
+		__global Tcoord_dev* initialRigid,
 		float projMultiplier)
 {
 	int gidx = get_group_id(0);
@@ -187,6 +189,9 @@ __kernel void backprojectKernel(
 	
 	if (x >= reconDimX || y >= reconDimY)
 		return;
+		
+	unsigned int zStride = reconDimX*reconDimY;
+	unsigned int yStride = reconDimX;
 		
 	int ptsFloatLength = mul24(ptsNr,3);
 	int nrOfLocalThreads = mul24(locSizex,locSizey);
@@ -207,11 +212,21 @@ __kernel void backprojectKernel(
 	// x and y will be constant in this thread;
     float xcoord = (x * voxelSpacingX) - offsetX;
     float ycoord = (y * voxelSpacingY) - offsetY;
+	
+	// apply initial rigid transform
+    
+	float4 twoDpoint = (float4)(xcoord,ycoord,0.f,1.f);
+	float4 coordPreComp;
+	coordPreComp.x = dot((float4)(initialRigid[0],initialRigid[3],0.f,initialRigid[9]) ,twoDpoint);
+	coordPreComp.y = dot((float4)(initialRigid[1],initialRigid[4],0.f,initialRigid[10]),twoDpoint);
+	coordPreComp.z = dot((float4)(initialRigid[2],initialRigid[5],0.f,initialRigid[11]),twoDpoint);
+	coordPreComp.w = 0.f;
 
 	
 	for (int z = 0; z < reconDimZ; z++){
 
-		float4 coord = (float4)(xcoord, ycoord,(z * voxelSpacingZ)- offsetZ, 0.f);
+		float zcoord = (z * voxelSpacingZ)- offsetZ;
+		float4 coord = coordPreComp + ((float4)(initialRigid[6], initialRigid[7], initialRigid[8], 0.f))*zcoord;
 		
 		float xi = 0;
 		float yi = 0;
@@ -253,7 +268,8 @@ __kernel void backprojectKernel(
 
 		float proj_val = read_imagef(gTex2D, sampler, (float2)(fu + 0.5f + lineOffset, fv + 0.5f)).x;
 
-		unsigned long idx = z*gVolStride[1] + y*gVolStride[0] + x;
+		// compute volume index for x,y,z
+		unsigned long idx = z*zStride + y*yStride + x;
 		// Because of dx/s and dy/s, the value itself is scaled by 1/s^2
 		pVolume[idx] += proj_val * denom * denom * projMultiplier;
 	}
