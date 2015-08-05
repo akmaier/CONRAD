@@ -33,6 +33,7 @@ public class CrisEDPhantomM062 extends AnalyticPhantom {
 	private boolean useOuterDisk = true;
 	private boolean useBoneRing = true;
 	private double centralInsertDiameter;
+	private double insertOneDiameter;
 	private EDInnerDisk inner = new EDInnerDisk();
 	private EDOuterDisk outer = new EDOuterDisk();
 
@@ -47,6 +48,7 @@ public class CrisEDPhantomM062 extends AnalyticPhantom {
 		super.configure();
 		useBoneRing = Boolean.parseBoolean(Configuration.getGlobalConfiguration().getRegistryEntry(RegKeys.ED_PHANTOM_BONE_RING));
 		centralInsertDiameter = Double.parseDouble(Configuration.getGlobalConfiguration().getRegistryEntry(RegKeys.ED_PHANTOM_CENTERAL_BUFFER_DIAMETER));
+		insertOneDiameter = Double.parseDouble(Configuration.getGlobalConfiguration().getRegistryEntry(RegKeys.ED_PHANTOM_INSERT_1_BUFFER_DIAMETER));
 		for(int i = 0; i < 9; i++){
 			innerDiskIns[i] = new Insert( MaterialsDB.getMaterial("vacuum"), Insert.UNBUFFERED_INSERT);
 		}

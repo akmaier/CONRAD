@@ -297,6 +297,13 @@ public abstract class RegKeys {
 	 * The <b>value</b> is a <b>Double</b> defining the diameter in [mm].
 	 */
 	public static final String ED_PHANTOM_CENTERAL_BUFFER_DIAMETER = "ED_PHANTOM_CENTERAL_BUFFER_DIAMETER";
+
+	/**
+	 * Global configuration of the ED Phantom (CRIS M062 Phantom).
+	 * Entry to define a special buffer diameter for the Insert 1.
+	 * The <b>value</b> is a <b>Double</b> defining the diameter in [mm].
+	 */
+	public static final String ED_PHANTOM_INSERT_1_BUFFER_DIAMETER = "ED_PHANTOM_INSERT_1_BUFFER_DIAMETER";
 	
 	/**
 	 * Global configuration of the ED Phantom (CRIS M062 Phantom).
