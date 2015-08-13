@@ -317,6 +317,30 @@ public class NrrdFileReader extends ImagePlus
 					dir.setColValue(i, parseVector(sub, fi.dimension));
 				}
 				fi.setSpaceDirections(dir);
+				
+				// NRRD4 supports spacing information within the direction.
+				// Check if spacing was already set by the "spacing" case. If not, read it from space directions.
+				// If there is a spacings entry down the line, it will override this one.
+				if(fi.spacing == null) {
+					// Get spacing from direction vectors.
+					// TOFIX - only works for x-, y- and z-aligned vectors atm!
+					double[] spacings = new double[fi.dimension];
+					// Loop over columns.
+					for(int i = 0; i < fi.dimension; i++){
+						SimpleVector col = dir.getCol(i); 
+						// Loop over column entries.
+						for(int j = 0; j < col.getLen(); j++) {
+							if(col.getElement(j) != 0) {
+								spacings[j] = col.getElement(j);
+								// TOFIX - this order of allocations is not a given!
+								if(j==0) spatialCal.pixelWidth=spacings[0];
+								if(j==1) spatialCal.pixelHeight=spacings[1];
+								if(j==2) spatialCal.pixelDepth=spacings[2];
+							}	
+						}
+					}
+					fi.spacing = spacings;
+				}
 			}
 			
 			if(noteType.equals("space origin")){
