@@ -323,21 +323,18 @@ public class NrrdFileReader extends ImagePlus
 				// If there is a spacings entry down the line, it will override this one.
 				if(fi.spacing == null) {
 					// Get spacing from direction vectors.
-					// TOFIX - only works for x-, y- and z-aligned vectors atm!
 					double[] spacings = new double[fi.dimension];
 					// Loop over columns.
 					for(int i = 0; i < fi.dimension; i++){
 						SimpleVector col = dir.getCol(i); 
-						// Loop over column entries.
+						// Loop over column (i.e. vector) entries.
 						for(int j = 0; j < col.getLen(); j++) {
-							if(col.getElement(j) != 0) {
-								spacings[j] = col.getElement(j);
-								// TOFIX - this order of allocations is not a given!
-								if(j==0) spatialCal.pixelWidth=spacings[0];
-								if(j==1) spatialCal.pixelHeight=spacings[1];
-								if(j==2) spatialCal.pixelDepth=spacings[2];
-							}	
+							spacings[i] +=  col.getElement(j)*col.getElement(j);
 						}
+						// TOFIX - this order of allocations is not a given!
+						if(i==0) spatialCal.pixelWidth=Math.sqrt(spacings[0]);
+						if(i==1) spatialCal.pixelHeight=Math.sqrt(spacings[1]);
+						if(i==2) spatialCal.pixelDepth=Math.sqrt(spacings[2]);
 					}
 					fi.spacing = spacings;
 				}
