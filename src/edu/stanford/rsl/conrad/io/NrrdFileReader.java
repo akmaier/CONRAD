@@ -327,14 +327,13 @@ public class NrrdFileReader extends ImagePlus
 					// Loop over columns.
 					for(int i = 0; i < fi.dimension; i++){
 						SimpleVector col = dir.getCol(i); 
-						// Loop over column (i.e. vector) entries.
-						for(int j = 0; j < col.getLen(); j++) {
-							spacings[i] +=  col.getElement(j)*col.getElement(j);
-						}
+						// The spacing is given as the norm of the direction vector.
+						spacings[i] =  col.normL2();
+						
 						// TOFIX - this order of allocations is not a given!
-						if(i==0) spatialCal.pixelWidth=Math.sqrt(spacings[0]);
-						if(i==1) spatialCal.pixelHeight=Math.sqrt(spacings[1]);
-						if(i==2) spatialCal.pixelDepth=Math.sqrt(spacings[2]);
+						if(i==0) spatialCal.pixelWidth=spacings[0];
+						if(i==1) spatialCal.pixelHeight=spacings[1];
+						if(i==2) spatialCal.pixelDepth=spacings[2];
 					}
 					fi.spacing = spacings;
 				}
