@@ -117,7 +117,22 @@ public class PointCloudViewer extends OpenGLViewer {
 	 * @param points the points to set
 	 */
 	public void setPoints(ArrayList<PointND> points) {
-		this.points = points;
+		this.points = new ArrayList<PointND>();
+		PointND center = DoublePrecisionPointUtil.getGeometricCenter(points);
+		double max = 0;
+		for(PointND p: points){
+			PointND newP = new PointND(p.getAbstractVector().clone());
+			newP.getAbstractVector().subtract(center.getAbstractVector());
+			this.points.add(newP);
+			for (int i=0;i<3;i++){
+				if (Math.abs(newP.get(i)) > max){
+					max = Math.abs(newP.get(i));
+				}
+			}
+		}
+		for(PointND p: this.points){
+			p.getAbstractVector().divideBy(max);
+		}
 	}
 
 	/**
