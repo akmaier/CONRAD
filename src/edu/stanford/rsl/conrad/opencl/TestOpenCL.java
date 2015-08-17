@@ -1795,6 +1795,7 @@ public class TestOpenCL {
 
 	@Test
 	public void TestVectorAdd(){
+		System.out.println("Starting vector add.");
 		CLContext context = OpenCLUtil.createContext();
 		CLDevice device = context.getMaxFlopsDevice();
 		
