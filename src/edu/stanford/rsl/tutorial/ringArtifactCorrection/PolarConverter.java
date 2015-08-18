@@ -5,7 +5,6 @@ import edu.stanford.rsl.conrad.data.numeric.InterpolationOperators;
 
 /*
  * Helper class to converter from/to cartesian and polar coordinates. 
- * 
  */
 
 public class PolarConverter {
