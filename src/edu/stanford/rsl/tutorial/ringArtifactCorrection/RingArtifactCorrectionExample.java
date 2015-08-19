@@ -12,7 +12,7 @@ public class RingArtifactCorrectionExample {
 		OpenDialog od = new OpenDialog("Please select the reconstruction file.");
 		RingArtifactCorrector rac = new RingArtifactCorrector();
 		Grid3D reko = rac.loadReconstruction(od.getDirectory()+od.getFileName());
-		Grid2D rekoS = reko.getSubGrid(0); 
+		Grid2D rekoS = reko.getSubGrid(0); //extract single slice from 3D grid
 		rekoS.show("Original Image");
 		
 		//option examples
