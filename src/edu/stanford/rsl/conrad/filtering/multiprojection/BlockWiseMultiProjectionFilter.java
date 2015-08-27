@@ -10,6 +10,8 @@ import edu.stanford.rsl.conrad.data.numeric.Grid2D;
 import edu.stanford.rsl.conrad.data.numeric.Grid3D;
 import edu.stanford.rsl.conrad.filtering.multiprojection.blocks.ImageProcessingBlock;
 import edu.stanford.rsl.conrad.utils.CONRAD;
+import edu.stanford.rsl.conrad.utils.Configuration;
+import edu.stanford.rsl.conrad.utils.RegKeys;
 import edu.stanford.rsl.conrad.utils.UserUtil;
 
 
@@ -25,7 +27,7 @@ public abstract class BlockWiseMultiProjectionFilter extends MultiProjectionFilt
 
 	protected ImageProcessingBlock modelBlock;
 	protected ImageProcessingBlock [][][] blocks;
-	protected int numBlocks = CONRAD.getNumberOfThreads();
+	protected int numBlocks = 1;
 	protected int blocksX = 0;
 	protected int blocksY = 0;
 	protected int blocksZ = 0;
@@ -234,6 +236,11 @@ public abstract class BlockWiseMultiProjectionFilter extends MultiProjectionFilt
 
 	@Override
 	public void configure() throws Exception{
+		if(Configuration.getGlobalConfiguration() == null){
+			Configuration.loadConfiguration();
+		}
+		this.numBlocks = Integer.parseInt(Configuration.getGlobalConfiguration().getRegistryEntry(RegKeys.MAX_THREADS));
+		
 		numBlocks = UserUtil.queryInt("Number of simultaneous processing blocks: ", numBlocks);
 		
 		double[] overlap = { this.blockOverlap[0], this.blockOverlap[1], this.blockOverlap[2]};
