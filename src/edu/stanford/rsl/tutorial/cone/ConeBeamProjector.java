@@ -32,15 +32,17 @@ import edu.stanford.rsl.conrad.utils.CONRAD;
 import edu.stanford.rsl.conrad.utils.Configuration;
 
 public class ConeBeamProjector {
-	
+
 	final boolean debug = false;
 	final boolean verbose = false;
-	
+
 	static int bpBlockSize[] = {16, 16};
-	
+
+	//opencl variables
 	protected CLContext context;
+	protected CLDevice device;
 	private CLProgram program;
-	private CLKernel kernelFunction;
+	private CLImageFormat format;
 	private CLBuffer<FloatBuffer> gVolumeEdgeMaxPoint = null;
 	private CLBuffer<FloatBuffer> gVolumeEdgeMinPoint = null;
 	private CLBuffer<FloatBuffer> gVoxelElementSize = null;
@@ -49,11 +51,16 @@ public class ConeBeamProjector {
 	private CLBuffer<FloatBuffer> sinogram = null;
 	private CLImage3d<FloatBuffer> imageGrid = null;
 	protected CLCommandQueue queue = null;
-
+	private CLKernel kernelFunction;
+	// Length of arrays to process
+	int localWorkSize;
+	int globalWorkSizeU;
+	int globalWorkSizeV; 
+	
+	//imaging variables
 	private int width;
 	private int height;
 	protected Trajectory geometry;
-
 	private int currentStep = 0;
 	private float [] voxelSize = null;
 	private float [] volumeSize = null;
@@ -63,9 +70,49 @@ public class ConeBeamProjector {
 	private int subVolumeZ;
 
 	public ConeBeamProjector() {
-		geometry = Configuration.getGlobalConfiguration().getGeometry();
+		configure();
+		initCL();
 	}
 	
+	private void initCL(){
+		context = OpenCLUtil.getStaticContext();
+		device = context.getMaxFlopsDevice();
+		program = null;
+		// initialize the program
+		if (program==null || !program.getContext().equals(context)){
+			try {
+				program = context.createProgram(TestOpenCL.class.getResourceAsStream("projectCL.cl")).build();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+		// create image from input grid
+		format = new CLImageFormat(ChannelOrder.INTENSITY, ChannelType.FLOAT);
+		
+		// Length of arrays to process
+		localWorkSize = Math.min(device.getMaxWorkGroupSize(), 16); // Local work size dimensions
+		globalWorkSizeU = OpenCLUtil.roundUp(localWorkSize, width); // rounded up to the nearest multiple of localWorkSize
+		globalWorkSizeV = OpenCLUtil.roundUp(localWorkSize, height); // rounded up to the nearest multiple of localWorkSize
+		
+		queue = device.createCommandQueue();
+		kernelFunction = program.createCLKernel("projectKernel");
+		setEdgeMaxima();
+		prepareAllProjections();
+
+		gVoxelElementSize = context.createFloatBuffer(voxelSize.length, Mem.READ_ONLY);
+		gVoxelElementSize.getBuffer().put(voxelSize);
+		gVoxelElementSize.getBuffer().rewind();
+		
+		queue
+		.putWriteBuffer(gVoxelElementSize,true)
+		.putWriteBuffer(gVolumeEdgeMinPoint, true)
+		.putWriteBuffer(gVolumeEdgeMaxPoint, true)
+		.finish();
+		
+	}
+
 	public Grid2D projectPixelDriven(Grid3D grid, int projIdx) {
 		geometry = Configuration.getGlobalConfiguration().getGeometry();
 		int maxV = geometry.getDetectorHeight();
@@ -152,57 +199,54 @@ public class ConeBeamProjector {
 
 		return sino;
 	}
-	
 
-	private void setEdgeMaxima(CLContext context){
+
+	private void setEdgeMaxima(){
 
 		int test = currentStep;
 		volumeEdgeMaxPoint[2] = (float) ((test * subVolumeZ) + subVolumeZ -0.5 - CONRAD.SMALL_VALUE);
 		volumeEdgeMinPoint[2] = (float) ((test * subVolumeZ) -0.5 - CONRAD.SMALL_VALUE);
-		if (debug) System.out.println("New volume z min: " + volumeEdgeMinPoint[2] + " new volume z max: " + volumeEdgeMaxPoint[2]);
-
+		
 		gVolumeEdgeMaxPoint = context.createFloatBuffer(volumeEdgeMaxPoint.length, Mem.READ_ONLY);
 		gVolumeEdgeMinPoint = context.createFloatBuffer(volumeEdgeMinPoint.length, Mem.READ_ONLY);
 
-		//} else {
 		gVolumeEdgeMaxPoint.getBuffer().put(volumeEdgeMaxPoint);
 		gVolumeEdgeMinPoint.getBuffer().put(volumeEdgeMinPoint);
-		//}  
+
 		gVolumeEdgeMaxPoint.getBuffer().rewind();
 		gVolumeEdgeMinPoint.getBuffer().rewind();
-		
 	}
-	
-	protected void prepareAllProjections(CLContext context, CLCommandQueue queue){
+
+	protected void prepareAllProjections(){
 
 		float [] cann = new float[3*4];
 		float [] invAR = new float[3*3];
 		float [] srcP = new float[3];
-		
+
 		//if (gInvARmatrix == null)
-			gInvARmatrix = context.createFloatBuffer(invAR.length*geometry.getNumProjectionMatrices(), Mem.READ_ONLY);
+		gInvARmatrix = context.createFloatBuffer(invAR.length*geometry.getNumProjectionMatrices(), Mem.READ_ONLY);
 		//if (gSrcPoint == null)
-			gSrcPoint = context.createFloatBuffer(srcP.length*geometry.getNumProjectionMatrices(), Mem.READ_ONLY);
-		
+		gSrcPoint = context.createFloatBuffer(srcP.length*geometry.getNumProjectionMatrices(), Mem.READ_ONLY);
+
 		for (int i=0; i < geometry.getNumProjectionMatrices(); ++i){
 			SimpleMatrix projMat = geometry.getProjectionMatrix(i).computeP();
 			double [][] mat = new double [3][4];
 			projMat.copyTo(mat);
 			computeCanonicalProjectionMatrix(cann, invAR, srcP, new Jama.Matrix(mat));
-			
+
 			gInvARmatrix.getBuffer().put(invAR);
 			gSrcPoint.getBuffer().put(srcP);
 		}
-		
+
 		gInvARmatrix.getBuffer().rewind();
 		gSrcPoint.getBuffer().rewind();
-		
+
 		queue
 		.putWriteBuffer(gSrcPoint, true)
 		.putWriteBuffer(gInvARmatrix, true)
 		.finish();
 	}
-	
+
 	public void computeCanonicalProjectionMatrix(float [] canonicalProjMatrix, float [] invARmatrix, float [] srcPoint, Jama.Matrix projectionMatrix){
 
 		double [] du = {geometry.getPixelDimensionX(), 0};
@@ -300,15 +344,15 @@ public class ConeBeamProjector {
 		srcPoint[2] = (float) -(-0.5 * (volumeSize[2] -1.0) + invVoxelScale.get(2,2) * srcPtW.get(2, 0)); 
 
 	}
-	
+
 	public static Jama.Matrix computeSrcPt(Jama.Matrix projectionMatrix, Jama.Matrix invertedProjMatrix) {
 		Jama.Matrix at = projectionMatrix.getMatrix(0, 2, 3, 3);
 		//at = at.times(-1.0);
 		return invertedProjMatrix.times(at);
 	}
-	
-	public void configure() throws Exception {
-		
+
+	public void configure(){
+		Configuration.loadConfiguration();
 		geometry = Configuration.getGlobalConfiguration().getGeometry();
 		voxelSize = new float [3];
 		volumeSize = new float [3];
@@ -316,10 +360,11 @@ public class ConeBeamProjector {
 		voxelSize[0] = (float) geometry.getVoxelSpacingX();
 		voxelSize[1] = (float) geometry.getVoxelSpacingY();
 		voxelSize[2] = (float) geometry.getVoxelSpacingZ();
+
 		volumeSize[0] = geometry.getReconDimensionX();
 		volumeSize[1] = geometry.getReconDimensionY();
 		volumeSize[2] = geometry.getReconDimensionZ();
-		
+
 		volumeEdgeMinPoint = new float[3];
 		for (int i=0; i < 3; i ++){
 			volumeEdgeMinPoint[i] = (float) (-0.5 + CONRAD.SMALL_VALUE);
@@ -331,121 +376,36 @@ public class ConeBeamProjector {
 		width = geometry.getDetectorWidth();
 		height = geometry.getDetectorHeight();
 
+		subVolumeZ = (int) volumeSize[2];
+		
 		if (debug) System.out.println("Projection Matrices: " + geometry.getNumProjectionMatrices());
 	}
-	
+
 	public void unload(){
-		if(imageGrid != null && !imageGrid.isReleased())
-			imageGrid.release();
+
 		if(sinogram != null && !sinogram.isReleased())
 			sinogram.release();
-		if(queue != null && !queue.isReleased())
-			queue.release();
-		if(gVoxelElementSize != null && !gVoxelElementSize.isReleased())
-			gVoxelElementSize.release();
-		if(gVolumeEdgeMaxPoint != null && !gVolumeEdgeMaxPoint.isReleased())
-			gVolumeEdgeMaxPoint.release();
-		if(gVolumeEdgeMinPoint != null && !gVolumeEdgeMinPoint.isReleased())
-			gVolumeEdgeMinPoint.release();
-		if(kernelFunction != null && !kernelFunction.isReleased())
-			kernelFunction.release();
-		if(program != null && !program.isReleased())
-			program.release();
-		if(context != null && !context.isReleased())
-			context.release();
+		if(imageGrid != null && !imageGrid.isReleased())
+			imageGrid.release();
+
 	}
 
 	public int getMaxProjections() {
 		return geometry.getProjectionStackSize();
 	}
-	
-	public Grid3D projectRayDrivenCL(Grid3D grid) {
-		try {
-			configure();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return null;
-		}
 
-		OpenCLGrid3D gridCL = new OpenCLGrid3D(grid);
-		
-		OpenCLGrid2D [] sinoCL = new OpenCLGrid2D[geometry.getProjectionStackSize()];
-		for (int i=0; i < geometry.getProjectionStackSize(); i++) {
-			sinoCL[i] = new OpenCLGrid2D(new Grid2D(width,height));
-			sinoCL[i].getDelegate().prepareForDeviceOperation();
-		}
-		try {
-			projectionHelper(sinoCL, gridCL);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return null;
-		}
-	
-		gridCL.release();
-		
-		Grid3D sino = new Grid3D(width,height,geometry.getProjectionStackSize());
-		for(int i = 0; i<sinoCL.length; i++){
-			sino.setSubGrid(i, new Grid2D(sinoCL[i]));
-			sinoCL[i].release();
-		}
-		
-		unload();
-		return sino;
-	}
-	
-	public void projectionHelper(OpenCLGrid2D[] sinoCL, OpenCLGrid3D gridCL) throws IOException{
+	public void projectRayDrivenCL(OpenCLGrid2D[] sinoCL, OpenCLGrid3D gridCL){
 
-		CLContext contexthelp = OpenCLUtil.getStaticContext();
-		CLDevice devicehelp = contexthelp.getMaxFlopsDevice();
-		
-		CLProgram programhelp = null;
-		// initialize the program
-		if (programhelp==null || !programhelp.getContext().equals(contexthelp)){
-			programhelp = contexthelp.createProgram(TestOpenCL.class.getResourceAsStream("projectCL.cl")).build();
-		}
-		// create image from input grid
-		CLImageFormat format = new CLImageFormat(ChannelOrder.INTENSITY, ChannelType.FLOAT);
+		imageGrid = context.createImage3d(gridCL.getDelegate().getCLBuffer().getBuffer(), (int)volumeSize[0], (int)volumeSize[1], (int)volumeSize[2],format, Mem.READ_ONLY);
 
-		CLBuffer<FloatBuffer> imageBuffer = gridCL.getDelegate().getCLBuffer();
-		
-		imageGrid = contexthelp.createImage3d(imageBuffer.getBuffer(), (int)volumeSize[0], (int)volumeSize[1], (int)volumeSize[2],format, Mem.READ_ONLY);
-		imageBuffer.release();
-
-		CLCommandQueue queuehelp = devicehelp.createCommandQueue();
-		
-		CLKernel kernelFunctionhelp = programhelp.createCLKernel("projectKernel");
-
-		subVolumeZ = (int) volumeSize[2];
-		
-		setEdgeMaxima(contexthelp);
-		prepareAllProjections(contexthelp,queuehelp);
-		
-		gVoxelElementSize = contexthelp.createFloatBuffer(voxelSize.length, Mem.READ_ONLY);
-		gVoxelElementSize.getBuffer().put(voxelSize);
-		gVoxelElementSize.getBuffer().rewind();
-		
-		queuehelp
-		.putWriteImage(imageGrid, true)
-		.putWriteBuffer(gVoxelElementSize,true)
-		.putWriteBuffer(gVolumeEdgeMinPoint, true)
-		.putWriteBuffer(gVolumeEdgeMaxPoint, true)
+		queue
+		.putCopyBufferToImage(gridCL.getDelegate().getCLBuffer(), imageGrid)
 		.finish();
 
-		// Length of arrays to process
-		int localWorkSize = Math.min(devicehelp.getMaxWorkGroupSize(), 8); // Local work size dimensions
-		int globalWorkSizeU = OpenCLUtil.roundUp(localWorkSize, width); // rounded up to the nearest multiple of localWorkSize
-		int globalWorkSizeV = OpenCLUtil.roundUp(localWorkSize, height); // rounded up to the nearest multiple of localWorkSize
-
 		for(int p = 0; p < geometry.getProjectionStackSize(); p++) {
-			// create memory for sinogram
-			//CLBuffer<FloatBuffer> sinogrambuffer = contexthelp.createFloatBuffer(width*height, Mem.READ_ONLY);
-			//sinoCL[p].getDelegate().prepareForDeviceOperation();
-			CLBuffer<FloatBuffer> sinogrambuffer = sinoCL[p].getDelegate().getCLBuffer();
-			
-			kernelFunctionhelp
-			.putArg(sinogrambuffer)
+	
+			kernelFunction
+			.putArg(sinoCL[p].getDelegate().getCLBuffer())
 			.putArg(width)
 			.putArg(height)
 			.putArg(1.f)
@@ -456,16 +416,18 @@ public class ConeBeamProjector {
 			.putArg(gSrcPoint)
 			.putArg(gInvARmatrix)
 			.putArg(p);
-			
-			queuehelp
-			.put2DRangeKernel(kernelFunctionhelp, 0, 0, globalWorkSizeU, globalWorkSizeV,localWorkSize, localWorkSize).finish()
-			.putBarrier()
-			//.putReadBuffer(sinogrambuffer, true)
+
+			queue
+			.put2DRangeKernel(kernelFunction, 0, 0, globalWorkSizeU, globalWorkSizeV,localWorkSize, localWorkSize)
 			.finish();
-			
-			kernelFunctionhelp.rewind();
+
+			kernelFunction.rewind();
 			sinoCL[p].getDelegate().notifyDeviceChange();
+			sinoCL[p].getDelegate().prepareForHostOperation();
 		}
+		
+		kernelFunction.release();
+		queue.release();
 	}
 	//2d method
 	/**
@@ -474,99 +436,108 @@ public class ConeBeamProjector {
 	 * @return the image as image processor
 	 */
 
-	public void projectRayDrivenCL(OpenCLGrid2D sinoCL, OpenCLGrid3D gridCL, int projIdx) throws Exception {
+	public void projectRayDrivenCL(OpenCLGrid2D sinoCL, OpenCLGrid3D gridCL, int projIdx){
 		
-		CLContext contexthelp = OpenCLUtil.getStaticContext();
-		CLDevice devicehelp = contexthelp.getMaxFlopsDevice();
-		
-		CLProgram programhelp = null;
-		// initialize the program
-		if (programhelp==null || !programhelp.getContext().equals(contexthelp)){
-			programhelp = contexthelp.createProgram(TestOpenCL.class.getResourceAsStream("projectCL.cl")).build();
-		}
-		// create image from input grid
-		CLImageFormat format = new CLImageFormat(ChannelOrder.INTENSITY, ChannelType.FLOAT);
+		imageGrid = context.createImage3d(gridCL.getDelegate().getCLBuffer().getBuffer(), (int)gridCL.getSize()[0], (int)gridCL.getSize()[1], (int)gridCL.getSize()[2],format, Mem.READ_ONLY);
 
-		CLBuffer<FloatBuffer> imageBuffer = gridCL.getDelegate().getCLBuffer();
-		
-		imageGrid = contexthelp.createImage3d(imageBuffer.getBuffer(), (int)volumeSize[0], (int)volumeSize[1], (int)volumeSize[2],format, Mem.READ_ONLY);
-		imageBuffer.release();
-
-		CLCommandQueue queuehelp = devicehelp.createCommandQueue();
-
-		// create the computing kernel
-		CLKernel kernelFunctionhelp = programhelp.createCLKernel("projectKernel");
-
-		subVolumeZ = (int) volumeSize[2];
-		
-		setEdgeMaxima(contexthelp);
-		prepareAllProjections(contexthelp,queuehelp);
-		
-		gVoxelElementSize = contexthelp.createFloatBuffer(voxelSize.length, Mem.READ_ONLY);
-		gVoxelElementSize.getBuffer().put(voxelSize);
-		gVoxelElementSize.getBuffer().rewind();
-		
-		queuehelp
-		.putWriteImage(imageGrid, true)
-		.putWriteBuffer(gVoxelElementSize,true)
-		.putWriteBuffer(gVolumeEdgeMinPoint, true)
-		.putWriteBuffer(gVolumeEdgeMaxPoint, true)
+		queue
+		.putCopyBufferToImage(gridCL.getDelegate().getCLBuffer(), imageGrid)
 		.finish();
 
-		// Length of arrays to process
-		int localWorkSize = Math.min(devicehelp.getMaxWorkGroupSize(), 8); // Local work size dimensions
-		int globalWorkSizeU = OpenCLUtil.roundUp(localWorkSize, width); // rounded up to the nearest multiple of localWorkSize
-		int globalWorkSizeV = OpenCLUtil.roundUp(localWorkSize, height); // rounded up to the nearest multiple of localWorkSize
-
-			// create memory for sinogram
-			CLBuffer<FloatBuffer> sinogrambuffer = contexthelp.createFloatBuffer(width*height, Mem.READ_ONLY);
-			//CLBuffer<FloatBuffer> sinogrambuffer = sinoCL[p].getDelegate().getCLBuffer();
-			
-			kernelFunctionhelp
-			.putArg(sinogrambuffer)
-			.putArg(width)
-			.putArg(height)
-			.putArg(1.f)
-			.putArg(imageGrid)
-			.putArg(gVoxelElementSize)
-			.putArg(gVolumeEdgeMinPoint)
-			.putArg(gVolumeEdgeMaxPoint)
-			.putArg(gSrcPoint)
-			.putArg(gInvARmatrix)
-			.putArg(projIdx);
-			
-			queuehelp
-			.put2DRangeKernel(kernelFunctionhelp, 0, 0, globalWorkSizeU, globalWorkSizeV,localWorkSize, localWorkSize).finish()
-			.putBarrier()
-			.putReadBuffer(sinogrambuffer, true)
-			.finish();
-			
-			for(int i =0 ; i<height;i++)
-				for(int j =0 ; j<width;j++)
-					sinoCL.addAtIndex(j, i, sinogrambuffer.getBuffer().get());
-			sinogrambuffer.release();
-			kernelFunctionhelp.rewind();
-
-	}
+		kernelFunction
+		.putArg(sinoCL.getDelegate().getCLBuffer())
+		.putArg(width)
+		.putArg(height)
+		.putArg(1.f)
+		.putArg(imageGrid)
+		.putArg(gVoxelElementSize)
+		.putArg(gVolumeEdgeMinPoint)
+		.putArg(gVolumeEdgeMaxPoint)
+		.putArg(gSrcPoint)
+		.putArg(gInvARmatrix)
+		.putArg(projIdx);
 	
+		queue
+		.put2DRangeKernel(kernelFunction, 0, 0, globalWorkSizeU, globalWorkSizeV,localWorkSize, localWorkSize).finish();
+
+		kernelFunction.rewind();
+		sinoCL.getDelegate().notifyDeviceChange();
+	}
+
 	public Grid2D projectRayDrivenCL(Grid3D grid, int projIdx) throws Exception {
 		configure();
 
 		OpenCLGrid3D gridCL = new OpenCLGrid3D(grid);
-		
 		OpenCLGrid2D sinoCL = new OpenCLGrid2D(new Grid2D(width,height));
+		sinoCL.getDelegate().prepareForDeviceOperation();
 
 		projectRayDrivenCL(sinoCL, gridCL, projIdx);
-	
+
 		gridCL.release();
-		
+
 		Grid2D sino = new Grid2D(sinoCL);
 		unload();
 		return sino;
 	}
 	
+	public Grid3D projectRayDrivenCL(Grid3D grid) {
+
+		configure();
+
+		OpenCLGrid3D gridCL = new OpenCLGrid3D(grid);
+		OpenCLGrid2D [] sinoCL = new OpenCLGrid2D[geometry.getProjectionStackSize()];
+		for (int i=0; i < geometry.getProjectionStackSize(); i++) {
+			sinoCL[i] = new OpenCLGrid2D(new Grid2D(width,height));
+			sinoCL[i].getDelegate().prepareForDeviceOperation();
+		}
+		
+		projectRayDrivenCL(sinoCL, gridCL);
+		gridCL.release();
+
+		Grid3D sino = new Grid3D(width,height,geometry.getProjectionStackSize());
+		for(int i = 0; i<sinoCL.length; i++){
+			sino.setSubGrid(i, new Grid2D(sinoCL[i]));
+			sinoCL[i].release();
+		}
+
+		unload();
+		return sino;
+
+	}
+
+	// calculates the sinogram out of a volume grid at the projectionindex projIdx
+	public void fastProjectRayDrivenCL(OpenCLGrid2D sinoCL, OpenCLGrid3D grid, int projIdx) {
+		sinoCL.getDelegate().prepareForDeviceOperation();
+		grid.getDelegate().prepareForDeviceOperation();
+		
+		projectRayDrivenCL(sinoCL, grid, projIdx);
+
+		unload();
+	}
+	
+	// calculates the sinogram out of a volume grid at the projectionindex projIdx
+	public void fastProjectRayDrivenCL(OpenCLGrid3D sinoCL, OpenCLGrid3D grid) throws Exception {
+
+		OpenCLGrid2D sinoCLBuffer = new OpenCLGrid2D(new Grid2D(width,height));
+		sinoCLBuffer.setOrigin(0,0);
+		sinoCLBuffer.setSpacing(geometry.getPixelDimensionX(),geometry.getPixelDimensionY());
+		sinoCL.getDelegate().prepareForDeviceOperation();
+
+		for(int pIdx = 0; pIdx < geometry.getProjectionStackSize(); pIdx++){
+			sinoCLBuffer.getDelegate().prepareForDeviceOperation();
+			fastProjectRayDrivenCL(sinoCLBuffer,grid,pIdx);
+			sinoCLBuffer.getDelegate().notifyDeviceChange();
+			queue.putCopyBuffer(sinoCLBuffer.getDelegate().getCLBuffer(), sinoCL.getDelegate().getCLBuffer(),0,pIdx*(int)sinoCLBuffer.getDelegate().getCLBuffer().getCLSize(),sinoCLBuffer.getDelegate().getCLBuffer().getCLSize(),null).finish();
+		}
+
+		sinoCLBuffer.release();
+		sinoCL.getDelegate().notifyDeviceChange();
+
+		unload();
+	}
+
 }
 /*
  * Copyright (C) 2010-2014 Andreas Maier
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
-*/
+ */

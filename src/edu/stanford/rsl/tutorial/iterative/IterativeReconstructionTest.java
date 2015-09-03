@@ -1,9 +1,14 @@
 package edu.stanford.rsl.tutorial.iterative;
 
 import ij.ImageJ;
+import edu.stanford.rsl.conrad.data.numeric.Grid2D;
 import edu.stanford.rsl.conrad.data.numeric.Grid3D;
 import edu.stanford.rsl.conrad.data.numeric.NumericGridOperator;
 import edu.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators;
+import edu.stanford.rsl.conrad.data.numeric.opencl.OpenCLGrid2D;
+import edu.stanford.rsl.conrad.data.numeric.opencl.OpenCLGrid3D;
+import edu.stanford.rsl.conrad.filtering.TruncationCorrectionTool;
+import edu.stanford.rsl.conrad.filtering.redundancy.ParkerWeightingTool;
 import edu.stanford.rsl.conrad.geometry.trajectories.Trajectory;
 import edu.stanford.rsl.conrad.phantom.NumericalSheppLogan3D;
 import edu.stanford.rsl.conrad.utils.Configuration;
@@ -50,6 +55,8 @@ public class IterativeReconstructionTest {
 	private final static boolean computeSARTCLReco	= true;
 	private final static boolean computeSARTCPUReco	= false;
 	private final static boolean computeETVReco		= true;
+	
+	private static boolean truncationCorrection = true;
 	// -----------------------------------------
 	
 	public static void main(String[] args) {
@@ -80,10 +87,10 @@ public class IterativeReconstructionTest {
 		double originY = geo.getOriginY();
 		double originZ = geo.getOriginZ();
 		
-		Grid3D grid = getInput(phan, 
+		OpenCLGrid3D grid = new OpenCLGrid3D(getInput(phan, 
 				imgSizeX, imgSizeY, imgSizeZ, 
 				imgSpacingX, imgSpacingY, imgSpacingZ,
-				originX, originY, originZ);
+				originX, originY, originZ));
 		grid.show("object");
 		
 		NumericGridOperator gop = grid.getGridOperator();
@@ -255,7 +262,7 @@ public class IterativeReconstructionTest {
 		Etv reconEtv = null;
 		try {
 			reconEtv = new Etv(grid.getSize(), grid.getSpacing(),
-					grid.getOrigin(), sino, sartRelax, omega, gdIter, regul,
+					grid.getOrigin(), new OpenCLGrid3D(sino), sartRelax, omega, gdIter, regul,
 					initStepsize);
 			reconEtv.iterateETV(eTvIerations);
 		} catch (Exception e) {
@@ -279,7 +286,7 @@ public class IterativeReconstructionTest {
 		try {
 			if(USE_CL_SART)
 				reconSart = new SartCL(grid.getSize(), grid.getSpacing(),
-						grid.getOrigin(), sino, sartRelax);
+						grid.getOrigin(), new OpenCLGrid3D(sino), sartRelax);
 			else
 			reconSart = new SartCPU(grid.getSize(), grid.getSpacing(),
 					grid.getOrigin(), sino, sartRelax);
@@ -328,33 +335,78 @@ public class IterativeReconstructionTest {
 	}
 	*/
 	
-	private static Grid3D reconstructFBP(Grid3D grid, double focalLength,
+	private static Grid3D reconstructFBP(OpenCLGrid3D grid, double focalLength,
 			double maxU, double maxV, double deltaU, double deltaV,
 			int maxU_PX, int maxV_PX, Configuration conf, Trajectory geo) {
 
+		boolean shortScan = false;
+		
+		if(geo.getAverageAngularIncrement()*geo.getProjectionStackSize() <=200) 
+			shortScan = true ;
+		
 		ConeBeamProjector cbp = new ConeBeamProjector();
-		Grid3D sino = USE_CL_FP ? cbp.projectRayDrivenCL(grid) : cbp
-				.projectPixelDriven(grid);
-		sino.show("sinoCL");
-
-		ConeBeamCosineFilter cbFilter = new ConeBeamCosineFilter(focalLength,
-				maxV, maxU, deltaV, deltaU);
-		//cbFilter.show();
+		ConeBeamBackprojector cbbp = new ConeBeamBackprojector();
+		TruncationCorrectionTool truncCorr = new TruncationCorrectionTool();
+		ConeBeamCosineFilter cbFilter = new ConeBeamCosineFilter(focalLength,maxV, maxU, deltaV, deltaU);
 		RamLakKernel ramK = new RamLakKernel(maxU_PX, deltaU);
+		ParkerWeightingTool pWeights = new ParkerWeightingTool(geo);
+
+		OpenCLGrid3D recImage = new OpenCLGrid3D(new Grid3D(geo.getReconDimensionX(),geo.getReconDimensionY(),geo.getReconDimensionZ()));
+		recImage.setSpacing(geo.getVoxelSpacingX(),geo.getVoxelSpacingY(),geo.getVoxelSpacingZ());
+		recImage.setOrigin(geo.getOriginX(),geo.getOriginY(),geo.getOriginZ());
+		
+		OpenCLGrid2D sinoCL = new OpenCLGrid2D(new Grid2D((int)maxU_PX ,(int)maxV_PX));
+		sinoCL.setSpacing(geo.getPixelDimensionX(),geo.getPixelDimensionY());
+		sinoCL.setOrigin(0,0);
+
+		if(truncationCorrection)
+			truncCorr.configure();
+
+		if(shortScan){
+			//parker weighting
+			try {
+				pWeights.configure();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
 		for (int i = 0; i < geo.getProjectionStackSize(); ++i) {
-			cbFilter.applyToGrid(sino.getSubGrid(i));
+			//if short scan, do parker weighting
+			cbp.fastProjectRayDrivenCL(sinoCL, grid,i);
+			if(shortScan) {
+				pWeights.setImageIndex(i);
+				sinoCL =  new OpenCLGrid2D(pWeights.applyToolToImage(sinoCL));	
+			}
+
+			cbFilter.applyToGrid(sinoCL);
+			
+			if(truncationCorrection){
+				sinoCL = truncCorr.applyToolToImage(sinoCL);
+			}
+
+			if (i == 0)
+				 ramK = new RamLakKernel(sinoCL.getWidth(), deltaU);
+			
 			// ramp
 			for (int j = 0; j < maxV_PX; ++j)
-				ramK.applyToGrid(sino.getSubGrid(i).getSubGrid(j));
-			float D = (float) geo.getSourceToDetectorDistance();
-			NumericPointwiseOperators.multiplyBy(sino.getSubGrid(i), (float) (D * D
-					* Math.PI / geo.getNumProjectionMatrices()));
-		}
-		//sino.show("sinoFilt");
+				ramK.applyToGrid(sinoCL.getSubGrid(j));
 
-		ConeBeamBackprojector cbbp = new ConeBeamBackprojector();
-		Grid3D recImage = USE_CL_BP ? cbbp.backprojectPixelDrivenCL(sino) : cbbp
-				.backprojectPixelDriven(sino);
+			if(truncationCorrection){
+				int cutOffPixelSize = ((int)sinoCL.getSize()[0]-(int)maxU_PX)/2;
+				OpenCLGrid2D sinobuf = new OpenCLGrid2D(new Grid2D((int)maxU_PX,(int)maxV_PX));
+				for(int v= 0; v < maxV_PX; v++){
+					for(int u= 0; u < maxU_PX; u++){
+						sinobuf.setAtIndex(u, v, sinoCL.getValue(new int[]{u+cutOffPixelSize-1,v}));
+					}
+				}
+				sinoCL= new OpenCLGrid2D(sinobuf);
+			}
+
+			cbbp.fastBackprojectPixelDrivenCL(sinoCL,recImage,i);
+		}
+		
 		return recImage;
 	}
 }
