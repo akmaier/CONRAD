@@ -12,38 +12,25 @@ public class Main {
 	{
 		Model model = new Model(200,200);
 		
-		model.show();
+		// model.show();
 		
-		Grid2D[] testModels = model.CreateTestModels(10);
+		/*Grid2D[] testModels = model.CreateTestModels(10);
+		
+		Grid2D[] emptyImages = model.CreateEmptyImages(10);
 		
 		for(int i = 0; i < testModels.length; ++i)
 		{
 			testModels[i].show();
 		}
 		
-		/*Grid2D newModel = model.ModelVariation();
+		for(int i = 0; i < emptyImages.length; ++i)
+		{
+			emptyImages[i].show();
+		}*/
 		
-		newModel.show();
-		
-		Grid2D sinogram = model.CreateSinogram(newModel);
-		
-		NumericPointwiseOperators.divideBy(sinogram, 40);
-		
-		sinogram.show();
-		
-		Grid2D PoissonSinogram = model.PoissonNoise(sinogram);
-		
-		sinogram.show();
-		
-		NumericPointwiseOperators.multiplyBy(PoissonSinogram, 40);
-		
-		Grid2D filteredSinogram = Backproject.Filter(PoissonSinogram);
-		
-		Grid2D backprojection = Backproject.Backprojection(filteredSinogram);
-		
-		backprojection.show(); */
-		
-		//new ImageJ();
+		Channels.CreateLGChannelImage(500, 500, 3).show();
+				
+		new ImageJ();
 	}
 }
 

@@ -41,11 +41,26 @@ public class Model extends Grid2D
 		
 		Random rand = new Random();
 		
-		int random = rand.nextInt(5);
+		int random = rand.nextInt(10);
 			
 		DrawCircle(newModel, newModel.getWidth()/2 + random, newModel.getHeight()/2 + random, newModel.getWidth()/3, 1.0);
 		
 		return newModel;
+	}
+
+	public Grid2D EmptyImage()
+	{
+		Grid2D newImage = new Grid2D(this.getWidth(), this.getHeight());
+		
+		for(int i = 0; i < this.getHeight(); ++i)
+		{
+			for(int j = 0; j < this.getWidth(); ++j)
+			{
+				newImage.putPixelValue(j, i, 0.0);
+			}
+		}
+		
+		return newImage;
 	}
 	
 	public Grid2D PoissonNoise(Grid2D sinogram)
@@ -146,5 +161,43 @@ public class Model extends Grid2D
 		return resultArray;
 	}
 
-
+	public Grid2D[] CreateEmptyImages(int number)
+	{
+		Grid2D[] resultArray = new Grid2D[number];
+		
+		int i = 0;
+		
+		for(; i < number * 1/4; ++i)
+		{
+			resultArray[i] = this.EmptyImage();
+		}
+		
+		for(; i < number/2; ++i)
+		{
+			Grid2D poissonSinogram = this.PoissonNoise(this.CreateSinogram(this.EmptyImage()));
+			Grid2D filteredSinogram = Backproject.Filter(poissonSinogram);
+			
+			resultArray[i] = Backproject.Backprojection(filteredSinogram);
+		}
+		
+		for (; i < number * 3/4; ++i)
+		{
+			Grid2D sinogram = this.CreateSinogram(this.EmptyImage());
+			
+			resultArray[i] = Backproject.Backprojection(sinogram);
+		}
+		
+		for (; i < number; ++i)
+		{
+			Grid2D sinogram = this.CreateSinogram(this.EmptyImage());
+			NumericPointwiseOperators.divideBy(sinogram, 40);
+			Grid2D poissonSinogram = this.PoissonNoise(sinogram);
+			NumericPointwiseOperators.multiplyBy(poissonSinogram, 40);
+			Grid2D filteredSinogram = Backproject.Filter(poissonSinogram);
+			
+			resultArray[i] = Backproject.Backprojection(filteredSinogram);			
+		}
+		
+		return resultArray;
+	}
 }
