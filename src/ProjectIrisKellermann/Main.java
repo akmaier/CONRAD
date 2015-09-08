@@ -10,7 +10,7 @@ public class Main {
 
 	public static void main(String args[])
 	{
-		Model model = new Model(200,200);
+		Model model = new Model(500,500);
 		
 		// model.show();
 		
@@ -28,9 +28,20 @@ public class Main {
 			emptyImages[i].show();
 		}*/
 		
-		Channels.CreateLGChannelImage(500, 500, 3).show();
-				
-		new ImageJ();
+		Grid2D channelImage = Channels.CreateLGChannelImage(500, 500, 9);
+		
+		channelImage.show();
+		
+		try
+		{
+			System.out.println(Channels.MultiplyImages(model, channelImage));
+		}
+		catch(Exception e)
+		{
+			System.out.println("Exception");
+		}
+		
+		//new ImageJ();
 	}
 }
 
