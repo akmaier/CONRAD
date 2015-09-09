@@ -26,7 +26,6 @@ import ij.io.FileInfo;
 import ij.io.FileOpener;
 import ij.io.OpenDialog;
 import ij.measure.Calibration;
-import ij.plugin.PlugIn;
 
 import java.io.File;
 import java.io.IOException;
@@ -45,7 +44,7 @@ import edu.stanford.rsl.conrad.utils.CONRAD;
  * and <A HREF="http://flybrain.stanford.edu/nrrd">http://flybrain.stanford.edu/nrrd</A>
  */
 
-public class Nrrd_Reader extends ImagePlus implements PlugIn 
+public class NrrdFileReader extends ImagePlus
 {
 	public final String uint8Types="uchar, unsigned char, uint8, uint8_t";
 	public final String int16Types="short, short int, signed short, signed short int, int16, int16_t";
@@ -318,6 +317,26 @@ public class Nrrd_Reader extends ImagePlus implements PlugIn
 					dir.setColValue(i, parseVector(sub, fi.dimension));
 				}
 				fi.setSpaceDirections(dir);
+				
+				// NRRD4 supports spacing information within the direction.
+				// Check if spacing was already set by the "spacing" case. If not, read it from space directions.
+				// If there is a spacings entry down the line, it will override this one.
+				if(fi.spacing == null) {
+					// Get spacing from direction vectors.
+					double[] spacings = new double[fi.dimension];
+					// Loop over columns.
+					for(int i = 0; i < fi.dimension; i++){
+						SimpleVector col = dir.getCol(i); 
+						// The spacing is given as the norm of the direction vector.
+						spacings[i] =  col.normL2();
+						
+						// TOFIX - this order of allocations is not a given!
+						if(i==0) spatialCal.pixelWidth=spacings[0];
+						if(i==1) spatialCal.pixelHeight=spacings[1];
+						if(i==2) spatialCal.pixelDepth=spacings[2];
+					}
+					fi.spacing = spacings;
+				}
 			}
 			
 			if(noteType.equals("space origin")){
@@ -329,9 +348,9 @@ public class Nrrd_Reader extends ImagePlus implements PlugIn
 		// Fix axis mins, converting them to pixels
 		// if clause is to guard against cases where there is no spatial
 		// calibration info leading to Inf
-		if(spatialCal.pixelWidth!=0) spatialCal.xOrigin=spatialCal.xOrigin/spatialCal.pixelWidth;
-		if(spatialCal.pixelHeight!=0) spatialCal.yOrigin=spatialCal.yOrigin/spatialCal.pixelHeight;
-		if(spatialCal.pixelDepth!=0) spatialCal.zOrigin=spatialCal.zOrigin/spatialCal.pixelDepth;
+		if(spatialCal.pixelWidth!=0) spatialCal.xOrigin=-spatialCal.xOrigin/spatialCal.pixelWidth;
+		if(spatialCal.pixelHeight!=0) spatialCal.yOrigin=-spatialCal.yOrigin/spatialCal.pixelHeight;
+		if(spatialCal.pixelDepth!=0) spatialCal.zOrigin=-spatialCal.zOrigin/spatialCal.pixelDepth;
 
 		// Axis min will be the centre of the first pixel if this a "cell" nrrd
 		// or at the (top, front, left) if this is a "node" nrrd.

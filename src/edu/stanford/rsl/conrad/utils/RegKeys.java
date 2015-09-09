@@ -119,8 +119,11 @@ public abstract class RegKeys {
 	 */
 	public static final String XCAT_HEART_ROTATION = "XCAT_HEART_ROTATION";
 	
-
-	
+	/**
+	 * Entry to allow simulation of contrasted coronary angiography where only the left artery tree is contrasted.
+	 * The value is either "true" or "false". 
+	 */
+	public static final String XCAT_ONLY_LEFT_ARTERY_TREE_CONTRASTED = "XCAT_ONLY_LEFT_ARTERY_TREE_CONTRASTED"; 
 
 	/**
 	 * This key can be used to DISABLE the automatic centering of 4D phantoms which is applied by default during projection rendering for each projection.
@@ -271,7 +274,46 @@ public abstract class RegKeys {
 	 * 
 	 */
 	public static final String MSL_DATA_LOCATION = "MSL_DATA_LOCATION";
+	
+	/**
+	 * Entry to define a small accuracy tolerance when deciding whether the point of intersection between ray and triangle lies within the triangle.
+	 * The <b>value</b> is a <b>Double</b> defining the tolerance.
+	 * 
+	 * @see edu.stanford.rsl.conrad.geometry.shapes.simple.Triangle
+	 */
+	public static final String PHANTOM_PROJECTOR_RAYTRACING_EPSILON = "PHANTOM_PROJECTOR_RAYTRACING_EPSILON";
+	
+	
+	/**
+	 * For projecting triangle meshes, the watertight phantom projector is used by default. If this flag is set (true), the more established priority raytracer will be used.
+	 * The <b>value</b> is a <b>Boolean</b> indicating whether the priority or the watertight ray tracer should be used for generating projections of triangle meshes.
+	 */
+	public static final String PHANTOM_PROJECTOR_ENFORCE_PRIORITY_RAYTRACER = "PHANTOM_PROJECTOR_ENFORCE_PRIORITY_RAYTRACER";
 		
+	
+	/**
+	 * Global configuration of the ED Phantom (CRIS M062 Phantom).
+	 * Entry to define a special buffer diameter for the central element.
+	 * The <b>value</b> is a <b>Double</b> defining the diameter in [mm].
+	 */
+	public static final String ED_PHANTOM_CENTERAL_BUFFER_DIAMETER = "ED_PHANTOM_CENTERAL_BUFFER_DIAMETER";
+
+	/**
+	 * Global configuration of the ED Phantom (CRIS M062 Phantom).
+	 * Entry to define a special buffer diameter for the Insert 1.
+	 * The <b>value</b> is a <b>Double</b> defining the diameter in [mm].
+	 */
+	public static final String ED_PHANTOM_INSERT_1_BUFFER_DIAMETER = "ED_PHANTOM_INSERT_1_BUFFER_DIAMETER";
+	
+	/**
+	 * Global configuration of the ED Phantom (CRIS M062 Phantom).
+	 * To configure presence of the bone ring around the central disk
+	 * The <b>value</b> is a <b>boolean</b> which is true to activate the bone ring.
+	 */
+	public static final String ED_PHANTOM_BONE_RING = "ED_PHANTOM_BONE_RING";
+	
+	
+
 	public static final HashMap<String,String> defaultValues;
 
 	/**
@@ -288,6 +330,9 @@ public abstract class RegKeys {
 		defaultValues = new HashMap<String, String>();
 		defaultValues.put(SLOW_DOWN_MS, "10");
 		defaultValues.put(SPLINE_SUBSAMPLING_FACTOR, "4");
+		defaultValues.put(PHANTOM_PROJECTOR_ENFORCE_PRIORITY_RAYTRACER, "false");	
+		defaultValues.put(ED_PHANTOM_BONE_RING, "false");
+		defaultValues.put(ED_PHANTOM_CENTERAL_BUFFER_DIAMETER, "15");
 	}
 	
 }

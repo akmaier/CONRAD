@@ -11,6 +11,7 @@ public class PhysicalPoint extends SortablePoint {
 	 */
 	private static final long serialVersionUID = 1259588295137355141L;
 	private PhysicalObject object;
+	protected double hitOrientation;	// used to determine from which direction a triangle has hit the ray
 
 	public PhysicalPoint(PointND p) {
 		super(p);
@@ -39,9 +40,20 @@ public class PhysicalPoint extends SortablePoint {
 	}
 	
 	
+	public double getHitOrientation() {
+		return hitOrientation;
+	}
+
+	
+	public void setHitOrientation(double hitOrientation) {
+		this.hitOrientation = hitOrientation;
+	}
+
+	
 	public boolean equals(PhysicalPoint p){
 		return super.equals(p) && (object.equals(p.object));
-	}
+	}	
+	
 }
 /*
  * Copyright (C) 2010-2014 Andreas Maier

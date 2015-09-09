@@ -62,6 +62,10 @@ public class DennerleinProjectionSource extends FileProjectionSource {
 			fi.height = 3;
 			fi.fileType=FileInfo.GRAY64_FLOAT;
 		}
+		
+		if (fi.width == 4 && fi.height == 3){
+			fi.fileType=FileInfo.GRAY64_FLOAT;
+		}
 		fi.offset = 6;
 		fi.intelByteOrder = true;
 

@@ -1626,18 +1626,36 @@ public abstract class XCatScene extends AnalyticPhantom4D {
 			map.put("****Left-ventricle-chamber4*****", "Blood (LV)");
 		}
 		map.put("****Heartwall*********", "Heart");
-		map.put("/***RCA1***/", "Coronary Artery");
-		map.put("/***RCA2***/", "Coronary Artery");
-		map.put("/***LCA1***/", "Coronary Artery");
-		map.put("/***LCA2***/", "Coronary Artery");
-		map.put("/***LCA3***/", "Coronary Artery");
-		map.put("/***LCA4***/", "Coronary Artery");
-		map.put("/***LCA5***/", "Coronary Artery");
-		map.put("/***LCA6***/", "Coronary Artery");
-		map.put("/***LCA7***/", "Coronary Artery");
-		map.put("/***LCA8***/", "Coronary Artery");
-		map.put("/***LCA9***/", "Coronary Artery");
-		map.put("/***LCA10***/", "Coronary Artery");
+		if (Configuration.getGlobalConfiguration().getRegistry().get(RegKeys.XCAT_ONLY_LEFT_ARTERY_TREE_CONTRASTED)!= null) {
+			if (Configuration.getGlobalConfiguration().getRegistry().get(RegKeys.XCAT_ONLY_LEFT_ARTERY_TREE_CONTRASTED).equals("true")) {
+			map.put("/***RCA1***/", "Blood");
+			map.put("/***RCA2***/", "Blood");
+			map.put("/***LCA1***/", "Coronary Artery");
+			map.put("/***LCA2***/", "Coronary Artery");
+			map.put("/***LCA3***/", "Coronary Artery");
+			map.put("/***LCA4***/", "Coronary Artery");
+			map.put("/***LCA5***/", "Coronary Artery");
+			map.put("/***LCA6***/", "Coronary Artery");
+			map.put("/***LCA7***/", "Coronary Artery");
+			map.put("/***LCA8***/", "Coronary Artery");
+			map.put("/***LCA9***/", "Coronary Artery");
+			map.put("/***LCA10***/", "Coronary Artery");
+			}
+		}else{
+			map.put("/***RCA1***/", "Coronary Artery");
+			map.put("/***RCA2***/", "Coronary Artery");
+			map.put("/***LCA1***/", "Coronary Artery");
+			map.put("/***LCA2***/", "Coronary Artery");
+			map.put("/***LCA3***/", "Coronary Artery");
+			map.put("/***LCA4***/", "Coronary Artery");
+			map.put("/***LCA5***/", "Coronary Artery");
+			map.put("/***LCA6***/", "Coronary Artery");
+			map.put("/***LCA7***/", "Coronary Artery");
+			map.put("/***LCA8***/", "Coronary Artery");
+			map.put("/***LCA9***/", "Coronary Artery");
+			map.put("/***LCA10***/", "Coronary Artery");
+		}
+		
 		map.put("Heart Lesion", "Heart Lesion");
 		map.put("Heart Catheter", "Catheter Material");
 		return map;

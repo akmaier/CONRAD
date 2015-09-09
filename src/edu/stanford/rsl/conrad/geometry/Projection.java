@@ -903,6 +903,25 @@ public class Projection implements Serializable {
 	public SimpleMatrix computePMetric() {
 		return computePMetric(Configuration.getGlobalConfiguration().getGeometry().getSourceToAxisDistance());
 	}
+	
+	/**
+	 * Computes the 3x4 projection matrix
+	 * {@latex.inline $\\mathbf{P} = s \\cdot \\mathbf{K} \\cdot \\left(\\begin{array}{c|c} \\mathbf{R} & \\mathbf{t} \\end{array}\\right)$}
+	 * and returns it.
+	 * <BR>
+	 * Some calibration algorithms return a projection matrix with non unique scaling.<br>
+	 * Here a scaling is applied such that the homogeneous coordinate of the projected point contains the depth in [mm]<br>
+	 * <br>
+	 * @param Source to Axis distance
+	 *
+	 * @return The 3x4 projection matrix P defined by this object.
+	 *         See the class documentation for further details.
+	 *
+	 * @see #initFromP(SimpleMatrix P)
+	 */
+	public SimpleMatrix computePMetricKnownSourceToAxis(double sourceToAxisDistance) {
+		return computePMetric(sourceToAxisDistance);
+	}
 
 	/**
 	 * Compute the camera center in world coordinates.

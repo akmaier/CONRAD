@@ -4,6 +4,7 @@ import ij.ImageJ;
 
 import java.util.ArrayList;
 
+import Jama.Matrix;
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
 import edu.stanford.rsl.conrad.geometry.shapes.simple.PointND;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
@@ -43,7 +44,8 @@ public class ThinPlateSplineInterpolation {
 	 * Polynomial Ax+b
 	 */
 	private SimpleVector b;
-	
+	private boolean debug = false;
+
 	public float[] getAsFloatPoints() {
 		float[] pts = new float[gridPoints.size()*dim];
 		for(int i = 0; i < gridPoints.size(); i++) {
@@ -53,10 +55,10 @@ public class ThinPlateSplineInterpolation {
 		}
 		return pts;
 	}
-	
+
 	public float[] getAsFloatA() {
 		float[] Af = new float[A.getRows()*A.getCols()];
-		
+
 		for(int i = 0; i < A.getCols(); i++) {
 			for(int j = 0; j < A.getRows(); j++) {
 				Af[i*A.getRows()+j] = (float) A.getElement(j, i);
@@ -67,13 +69,13 @@ public class ThinPlateSplineInterpolation {
 
 	public float[] getAsFloatB() {
 		float [] Bf = new float[b.getLen()];
-		
+
 		for(int i = 0; i < b.getLen(); i++) {
 			Bf[i] = (float) b.getElement(i);
 		}
 		return Bf;
 	}
-	
+
 	public float[] getAsFloatCoeffs() {
 		float [] coeff = new float[coefficients.getCols()*coefficients.getRows()];
 		for(int i = 0; i < coefficients.getCols(); i++) {
@@ -117,59 +119,72 @@ public class ThinPlateSplineInterpolation {
 	 * polynomial)
 	 */
 	private void estimateCoefficients() {
+
+		long start = 0;
+		if (debug)
+			start = System.nanoTime();
+
 		int n = gridPoints.size();
 		int sizeL = dim * n + dim * dim + dim;
-		int sizePc = dim * dim + dim;
-		int sizePr = dim * n;
-		SimpleMatrix L = new SimpleMatrix(sizeL, sizeL);
-		SimpleMatrix P = new SimpleMatrix(sizePr, sizePc);
-		SimpleVector rhs = new SimpleVector(sizeL);
+
 		A = new SimpleMatrix(dim, dim);
 		b = new SimpleVector(dim);
-		L.zeros();
-		P.zeros();
-		rhs.zeros();
+		Matrix LJama = new Matrix(sizeL,sizeL);
+		Matrix rhsJama = new Matrix(sizeL, 1);
 
 		for (int i = 0; i < n; i++) {
-			rhs.setSubVecValue(i * dim, values.get(i).getAbstractVector());
-			for (int j = 0; j < n; j++) {
-				double val = kernel(gridPoints.get(i), gridPoints.get(j));
+			for (int j = 0; j < values.get(i).getDimension(); j++) {
+				rhsJama.set(i*dim+j, 0, values.get(i).getAbstractVector().getElement(j));
+			}
+			for (int j = i+1; j < n; j++) {
+				// symmetric matrix -- compute only upper triangle and write to both locations
+				double val = kernel(gridPoints.get(i), gridPoints.get(j)); 
 				for (int k = 0; k < dim; k++) {
-					L.setElementValue(i * dim + k, j * dim + k, val);
+					int currI = i * dim + k;
+					int currJ = j * dim + k;
+					LJama.set(currI, currJ, val);
+					LJama.set(currJ, currI, val);
 				}
-
 			}
 		}
 
+		int offset = n*dim;
 		for (int i = 0; i < n; i++) {
 			for (int j = 0; j < dim; j++) {
 				double val = gridPoints.get(i).get(j);
 				for (int k = 0; k < dim; k++) {
-					P.setElementValue(dim * i + k, dim * j + k, val);
+					// Symmetric matrix!
+					LJama.set(dim * i + k, offset + dim * j + k, val);
+					LJama.set(offset + dim * j + k, dim * i + k, val);
 				}
 			}
 			for (int k = 0; k < dim; k++) {
-				P.setElementValue(i * dim + k, dim * dim + k, 1.0);
+				// Symmetric matrix!
+				LJama.set(dim * i + k, offset + dim * dim + k, 1.0);
+				LJama.set(offset + dim * dim + k, dim * i + k, 1.0);
 			}
 		}
+		if (debug){
+			System.out.println("Time for reshaping : " + (System.nanoTime()-start)/1e6);
+			start = System.nanoTime();
+		}
+		Jama.LUDecomposition cd = new Jama.LUDecomposition(LJama);
+		Matrix parametersJama = cd.solve(rhsJama);
+		if(debug)
+			System.out.println("Time for inversion JAMA: " + (System.nanoTime()-start)/1e6);
 
-		L.setSubMatrixValue(0, dim * n, P);
-		L.setSubMatrixValue(dim * n, 0, P.transposed());
-
-		
-
-		SimpleMatrix Linv = L.inverse(SimpleMatrix.InversionType.INVERT_SVD);
-		SimpleVector parameters = SimpleOperators.multiply(Linv, rhs);
 		coefficients = new SimpleMatrix(dim, n);
 		for (int i = 0; i < n; i++) {
-			coefficients.setSubColValue(0, i,
-					parameters.getSubVec(i * dim, dim));
+			for (int j = 0; j < dim; j++) {
+				coefficients.setElementValue(j, i, parametersJama.get(i * dim + j, 0));
+			}
 		}
 		for (int i = 0; i < dim; i++) {
-			A.setSubColValue(0, i, parameters.getSubVec(dim * n + i * dim, dim));
+			for (int j = 0; j < dim; j++) {
+				A.setElementValue(j, i, parametersJama.get(dim * n + i * dim + j, 0));
+			}
+			b.setElementValue(i, parametersJama.get(dim * n + dim * dim + i, 0));
 		}
-		b.setSubVecValue(0, parameters.getSubVec(dim * n + dim * dim, dim));
-
 	}
 
 	/**
@@ -263,11 +278,11 @@ public class ThinPlateSplineInterpolation {
 			}
 		}
 		grid.show();
-		
+
 
 	}
 }
 /*
- * Copyright (C) 2010-2014 Marco Bögel
+ * Copyright (C) 2010-2014 Marco Bï¿½gel
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
-*/
+ */

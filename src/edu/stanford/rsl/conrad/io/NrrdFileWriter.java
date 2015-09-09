@@ -33,7 +33,6 @@ import ij.io.FileInfo;
 import ij.io.ImageWriter;
 import ij.io.SaveDialog;
 import ij.measure.Calibration;
-import ij.plugin.PlugIn;
 
 import java.io.*;
 import java.util.Date;
@@ -43,7 +42,7 @@ import edu.stanford.rsl.conrad.utils.CONRAD;
 
 
                           
-public class Nrrd_Writer implements PlugIn {
+public class NrrdFileWriter {
 
 	private static final String plugInName = "Nrrd Writer";
 	private static final String noImages = plugInName+"...\n"+ "No images are open.";

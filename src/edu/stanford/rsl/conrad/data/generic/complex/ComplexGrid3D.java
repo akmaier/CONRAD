@@ -54,6 +54,21 @@ public class ComplexGrid3D extends ComplexGrid {
 		
 	}
 
+	public ComplexGrid3D(Grid3D realInput, Grid3D imagInput){
+		this.spacing = new double[] {realInput.getSpacing()[0],realInput.getSpacing()[1], realInput.getSpacing()[2]};
+		this.origin = new double[] {realInput.getOrigin()[0],realInput.getOrigin()[1], realInput.getOrigin()[2]};
+		this.size = new int[] {realInput.getSize()[0], realInput.getSize()[1], realInput.getSize()[2]};
+		buffer = new float[realInput.getNumberOfElements()*2];
+		initialize(realInput.getSize()[0], realInput.getSize()[1], realInput.getSize()[2]);
+		for(int k = 0; k < realInput.getSize()[2]; k++){
+			for(int j = 0; j < realInput.getSize()[1]; j++){
+				for(int i = 0; i < realInput.getSize()[0]; i++ ){
+					this.setAtIndex(i, j, k, realInput.getAtIndex(i, j, k), imagInput.getAtIndex(i, j, k));
+				}
+			}
+		}
+		
+	}
 	protected void initialize(int width, int height, int depth)
 	{
 		subGrids = new ComplexGrid2D[depth];

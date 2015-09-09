@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2014 - Andreas Maier, Marco Bögel 
+ * Copyright (C) 2010-2014 - Andreas Maier, Marco Bï¿½gel 
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
  */
 package edu.stanford.rsl.apps.gui;
@@ -50,6 +50,7 @@ public class TrajectoryEditor extends JFrame {
 	private JButton jDeleteMatrix;
 	private JButton jDefineRotation;
 	private JButton jDefineNoise;
+	private JButton jFixPrimaryAngles;
 	private JTextField jB33;
 	private JTextField jB32;
 	private JTextField jB31;
@@ -82,7 +83,7 @@ public class TrajectoryEditor extends JFrame {
 				this.setBackground(Color.WHITE);
 				GridBagLayout thisLayout = new GridBagLayout();
 				thisLayout.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0 };
-				thisLayout.rowHeights = new int[] { 36, 12, 61, 65, 141 };
+				thisLayout.rowHeights = new int[] { 36, 12, 61, 65, 240 };
 				thisLayout.columnWeights = new double[] { 0.0, 0.0, 0.1 };
 				thisLayout.columnWidths = new int[] { 167, 201, 7 };
 				getContentPane().setLayout(thisLayout);
@@ -478,6 +479,33 @@ public class TrajectoryEditor extends JFrame {
 									GridBagConstraints.NONE, new Insets(insetY,
 											0, 0, 0), 0, 0));
 					jDefineNoise.setText("Define Trajectory Noise");
+					
+					jFixPrimaryAngles = new JButton();
+					jFixPrimaryAngles.addActionListener(new ActionListener() {
+
+						public void actionPerformed(ActionEvent e) {
+							if (e.getSource() != null) {
+								if (e.getSource().equals(jFixPrimaryAngles)) {
+									try {
+										fixPriamries();
+									} catch (Exception e1) {
+										// TODO Auto-generated catch block
+										e1.printStackTrace();
+									}
+								}
+							}
+						}
+					});
+					insetY += 40;
+
+					
+					getContentPane().add(
+							jFixPrimaryAngles,
+							new GridBagConstraints(1, 4, 1, 1, 0.0, 0.0,
+									GridBagConstraints.NORTH,
+									GridBagConstraints.NONE, new Insets(insetY,
+											0, 0, 0), 0, 0));
+					jFixPrimaryAngles.setText("Fix Primary Angles");
 				}
 			}
 			{
@@ -486,6 +514,31 @@ public class TrajectoryEditor extends JFrame {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	protected void fixPriamries() throws Exception {
+		double maxAngle = UserUtil.queryDouble("Enter Maximal Angular Range:", 200);
+		int numProj = Configuration.getGlobalConfiguration()
+				.getGeometry().getNumProjectionMatrices();
+		double angleStep = maxAngle / (numProj-1);
+		double[] newPrimaries = new double[numProj];
+		double[] secondaries = null;
+		if (Configuration.getGlobalConfiguration().getGeometry()
+				.getSecondaryAngles() != null)
+			secondaries = new double[numProj];
+		for (int i = 0; i < numProj; i++) {
+			if (Configuration.getGlobalConfiguration().getGeometry()
+					.getSecondaryAngles() != null) {
+				secondaries[i] = Configuration.getGlobalConfiguration()
+						.getGeometry().getSecondaryAngles()[i];
+			}
+			newPrimaries[i] = angleStep*i;
+		}
+		Configuration.getGlobalConfiguration().getGeometry()
+				.setPrimaryAngleArray(newPrimaries);
+		Configuration.getGlobalConfiguration().getGeometry()
+				.setSecondaryAngleArray(secondaries);
+		
 	}
 
 	private void deleteSome() throws Exception {
