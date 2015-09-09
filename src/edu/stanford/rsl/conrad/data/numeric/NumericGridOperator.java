@@ -51,7 +51,7 @@ public class NumericGridOperator {
 		return (float) sum;
 	}
 	
-	/** Get sum of all grid elements */
+	/** Get sum of all grid elements. Ignores nans and infinity */
 	public float sumSave(final NumericGrid grid) {
 		float sum = 0;
 		NumericPointwiseIteratorND it = new NumericPointwiseIteratorND(grid);
@@ -132,7 +132,7 @@ public class NumericGridOperator {
 		return max;
 	}
 
-	/** Copy data of a NumericGrid to another, not including boundaries */
+	/** Copy data of a NumericGrid to another, not including boundaries. Overwrites grid1 */
 	public void copy(NumericGrid grid1, NumericGrid grid2) {
 		NumericPointwiseIteratorND it1 = new NumericPointwiseIteratorND(grid1);
 		NumericPointwiseIteratorND it2 = new NumericPointwiseIteratorND(grid2);
@@ -193,7 +193,7 @@ public class NumericGridOperator {
 		return (float)Math.sqrt(sum/grid1.getNumberOfElements());
 	}
 	
-	/** Compute grid1 = grid1 + grid2 */
+	/** Compute grid1 = grid1 + grid2. Ignores nans and infinity */
 	public void addBySave(NumericGrid input, NumericGrid sum) {
 		NumericPointwiseIteratorND it_inout = new NumericPointwiseIteratorND(input);
 		NumericPointwiseIteratorND it_sum = new NumericPointwiseIteratorND(sum);
@@ -226,7 +226,7 @@ public class NumericGridOperator {
 		grid.notifyAfterWrite();
 	}
 	
-	/** Compute grid = grid + a */
+	/** Compute grid = grid + a. Ignores nans and infinity*/
 	public void addBySave(NumericGrid grid, float a) {
 		NumericPointwiseIteratorND it = new NumericPointwiseIteratorND(grid);
 		while (it.hasNext()){
@@ -238,7 +238,7 @@ public class NumericGridOperator {
 		grid.notifyAfterWrite();
 	}
 	
-	/** Compute grid1 = grid1 - grid2 */
+	/** Compute grid1 = grid1 - grid2. Ignores nans and infinity */
 	public void subtractBySave(NumericGrid input, NumericGrid sub) {
 		NumericPointwiseIteratorND it_inout = new NumericPointwiseIteratorND(input);
 		NumericPointwiseIteratorND it_sum = new NumericPointwiseIteratorND(sub);
@@ -254,7 +254,7 @@ public class NumericGridOperator {
 		input.notifyAfterWrite();
 	}
 	
-	/** Compute grid = grid - a */
+	/** Compute grid = grid - a. Ignores nans and infinity */
 	public void subtractBySave(NumericGrid grid, float a) {
 		NumericPointwiseIteratorND it = new NumericPointwiseIteratorND(grid);
 		while (it.hasNext()){
@@ -316,7 +316,7 @@ public class NumericGridOperator {
 		grid.notifyAfterWrite();
 	}
 	
-	/** Compute grid = grid / a */
+	/** Compute grid = grid / a. Ignores nans and infinity */
 	public void divideBySave(NumericGrid grid, float a) {
 		NumericPointwiseIteratorND it = new NumericPointwiseIteratorND(grid);
 		while (it.hasNext()){

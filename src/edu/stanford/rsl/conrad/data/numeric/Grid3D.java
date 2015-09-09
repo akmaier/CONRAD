@@ -4,7 +4,6 @@
 */
 package edu.stanford.rsl.conrad.data.numeric;
 
-import java.sql.PreparedStatement;
 import java.util.ArrayList;
 
 import edu.stanford.rsl.conrad.utils.ImageUtil;
