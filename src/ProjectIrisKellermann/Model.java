@@ -5,10 +5,7 @@ import java.util.Random;
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
 import edu.stanford.rsl.conrad.data.numeric.InterpolationOperators;
 import edu.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators;
-import edu.stanford.rsl.conrad.filtering.PoissonNoiseFilteringTool;
 import edu.stanford.rsl.conrad.filtering.LogPoissonNoiseFilteringTool;
-import edu.stanford.rsl.tutorial.parallel.ParallelProjector2D;
-import ij.ImageJ;
 
 public class Model extends Grid2D
 {
@@ -200,4 +197,7 @@ public class Model extends Grid2D
 		
 		return resultArray;
 	}
+
+	
+	
 }

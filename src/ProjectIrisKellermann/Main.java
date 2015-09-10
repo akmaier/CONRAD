@@ -2,44 +2,48 @@ package ProjectIrisKellermann;
 
 import ij.ImageJ;
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
-import edu.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators;
-import edu.stanford.rsl.conrad.filtering.LogPoissonNoiseFilteringTool;
 import ProjectIrisKellermann.Model;
 
 public class Main {
 
 	public static void main(String args[])
 	{
-		Model model = new Model(500,500);
+		int imageSize = 200;
+		int imageCount = 10;
+		int channelCount = 10;
 		
-		// model.show();
+		//the model
+		Model model = new Model(imageSize, imageSize);
 		
-		/*Grid2D[] testModels = model.CreateTestModels(10);
+		model.show();
 		
-		Grid2D[] emptyImages = model.CreateEmptyImages(10);
+		//the different object-present images
+		Grid2D[] testModels = model.CreateTestModels(imageCount);
 		
-		for(int i = 0; i < testModels.length; ++i)
+		//the different background images
+		Grid2D[] emptyImages = model.CreateEmptyImages(imageCount);
+		
+		//the channel images
+		Grid2D channelImages = new Grid2D(channelCount, imageSize * imageSize);
+				
+		for(int x = 0; x < channelCount; ++x)
 		{
-			testModels[i].show();
+			Grid2D channelImage = ImageHelper.ConvertImageToArray(Channels.CreateLGChannelImage(imageSize, imageSize, x));
+			
+			for(int y = 0; y < imageSize; ++y)
+			{
+				channelImages.putPixelValue(x, y, channelImage.getPixelValue(0, y));
+			}
 		}
 		
-		for(int i = 0; i < emptyImages.length; ++i)
-		{
-			emptyImages[i].show();
-		}*/
+		//creation of the template
+		Grid2D s_v;
+		Grid2D C_v;
 		
-		Grid2D channelImage = Channels.CreateLGChannelImage(500, 500, 9);
+		Grid2D v;
 		
-		channelImage.show();
 		
-		try
-		{
-			System.out.println(Channels.MultiplyImages(model, channelImage));
-		}
-		catch(Exception e)
-		{
-			System.out.println("Exception");
-		}
+		
 		
 		//new ImageJ();
 	}
