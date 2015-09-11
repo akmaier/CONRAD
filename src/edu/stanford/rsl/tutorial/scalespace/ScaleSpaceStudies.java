@@ -1,5 +1,6 @@
 package edu.stanford.rsl.tutorial.scalespace;
 
+import edu.stanford.rsl.conrad.data.numeric.Grid1D;
 import edu.stanford.rsl.conrad.data.numeric.Grid1DComplex;
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
 import edu.stanford.rsl.conrad.data.numeric.NumericGrid;
@@ -27,54 +28,33 @@ public class ScaleSpaceStudies extends Grid2D {
 		new ImageJ();
 		
 		// phantom respectively image parameters
-		int phantomType = 0; // 0 = own created phantom
+		int phantomType = 4; // 0 = custom phantom
 							 // 1 = SheppLogan
 							 // 2 = UniformCircleGrid2D
+							 // 3 = Ring
+							 // 4 = Dartboard
 		
-		int phantomWidth = 256,
+		int phantomWidth  = 256,
 			phantomHeight = 256;
 		
 		int imgSizeX = phantomWidth,
 			imgSizeY = phantomHeight;
 		
 		// parameters for Gaussian/Laplacian of Gaussian
-		int kernelsize = 10;
+		int kernelsize = 30;
 		
 		int method = 2; // 0 = Gaussian
 						// 2 = Laplacian of Gaussian
-			
-		// HINT: Since sigma is used differently in Gaussian and Laplacian of Gaussian, different values are necessary.
-		// 		 Too high sigma values for Gaussian (method 0) results in NaN in the resulted image!
-		double a, b, c, d;
 		
-		switch (method) {
-		case 0:			
-			a = 0.1;
-			b = 0.5;
-			c = 1.0;
-			d = 2.0;
-			break;
-		case 2:
-			a = 0.1;
-			b = 1.0;
-			c = 3.0;
-			d = 5.0;
-			break;
-		default:
-			a = 0.1;
-			b = 1.0;
-			c = 3.0;
-			d = 5.0;
-		}
-		double[] sigmaValue = {a, b, c, d};
+		double[] sigmaValue = {0.1, 1.0, 3.0, 5.0};
 		
 		// fan beam bp parameters
-		double gammaM = 11.768288932020647*Math.PI/180,
-			   maxT = (int)Math.round(Math.sqrt((phantomWidth*phantomWidth) + (phantomHeight*phantomHeight))),
-			   deltaT = 1.0, 
+		double gammaM      = 11.768288932020647*Math.PI/180,
+			   maxT        = (int)Math.round(Math.sqrt((phantomWidth*phantomWidth) + (phantomHeight*phantomHeight))),
+			   deltaT      = 1.0, 
 			   focalLength = (maxT/2.0-0.5)*deltaT/Math.tan(gammaM),
-		   	   maxBeta = 360*Math.PI/180,
-		       deltaBeta = maxBeta / 180;
+		   	   maxBeta     = 360*Math.PI/180,
+		       deltaBeta   = maxBeta / 180;
 		
 		// create phantom		
 		Grid2D phantom;
@@ -88,6 +68,15 @@ public class ScaleSpaceStudies extends Grid2D {
 			break;
 		case 2:
 			phantom = new UniformCircleGrid2D(phantomWidth, phantomHeight);
+			break;
+		case 3:
+			Grid2D outerCircle = new UniformCircleGrid2D(phantomWidth, phantomHeight, 0.4);
+			Grid2D innerCircle = new UniformCircleGrid2D(phantomWidth, phantomHeight, 0.37);
+			phantom = new Grid2D(outerCircle);
+			NumericPointwiseOperators.subtractBy(phantom, innerCircle);
+			break;
+		case 4:
+			phantom = phantomDartboard(phantomWidth, phantomHeight, 0.4);
 			break;
 		default:
 			phantom = new SheppLogan(phantomWidth,false);
@@ -108,7 +97,7 @@ public class ScaleSpaceStudies extends Grid2D {
 			Grid2D workingGrid;
 			
 			switch (method){
-			case 0:			
+			case 0:
 				workingGrid = gaussianSinogram(fanBeamSinoRay, sigmaValue[i]);
 				workingGrid.show("gaussian (sigma=" + sigmaValue[i] + ") sinogram");
 				break;
@@ -163,7 +152,11 @@ public class ScaleSpaceStudies extends Grid2D {
 	}
 	
 	/**
-	 * create own phantom
+	 * create own phantom consisting of
+	 * <ul><li>a big circle with the intensity 1.0,
+	 * <li>a small circle with the intensity 1.5,
+	 * <li>an ellipse with the intensity 0.9,
+	 * <li>a rectangle with the intensity 1.5
 	 */
 	public ScaleSpaceStudies(int width, int height){
 		super(width, height);
@@ -201,7 +194,31 @@ public class ScaleSpaceStudies extends Grid2D {
 			}
 		}
 	}
+	
+	/**
+	 * create phantom that looks like a dartboard with 9 rings
+	 */
+	public static Grid2D phantomDartboard(int width, int height, double r){
+			
+		Grid2D dartboard = new Grid2D(width, height);
+		
+		float[] val = {0.05f, 0.06f, 0.08f, 0.09f, 0.1f, 0.13f, 0.14f, 0.15f, 0.2f};
+		double[] radius = {r * width, (r-0.03)*width, (r-0.06)*width, (r-0.1)*width, (r-0.2)*width, (r-0.25)*width, (r-0.30)*width, (r-0.35)*width, (r-0.38)*width};
+		int xcenter = width / 2;
+		int ycenter = height / 2;
 
+		for (int k = 0; k < val.length; k++) {			
+			for (int i = 0; i < width; i++) {
+				for (int j = 0; j < height; j++) {
+					if (Math.pow(i - xcenter, 2) + Math.pow(j - ycenter, 2) <= (radius[k] * radius[k])) {
+						dartboard.addAtIndex(i, j, val[k]);
+					}
+				}
+			}
+		}
+		return dartboard; 
+	}
+	
 	/**
 	 * convolution of sinogram and Gaussian -> multiplication in Fourier Space
 	 */
@@ -214,12 +231,23 @@ public class ScaleSpaceStudies extends Grid2D {
 			// Fourier Transformation
 			sinoRows.transformForward();
 			
-			for(int j = 0; j < sinoRows.getSize()[0]; j++){
+			for(int j = 0; j < sinoRows.getSize()[0]/2; j++){
 				
-				double omega = (j - sinoRows.getSize()[0]/2)*(2*Math.PI/sinoRows.getSize()[0]);
+				double omega = j*(2*Math.PI/sinoRows.getSize()[0]);
 				
-				float gausValueReal = sinoRows.getRealAtIndex(j)*(float)Math.exp(0.5*Math.pow(sigma, 2)*Math.pow(omega, 2));
-				float gausValueImag = sinoRows.getImagAtIndex(j)*(float)Math.exp(0.5*Math.pow(sigma, 2)*Math.pow(omega, 2));
+				float gausValueReal = sinoRows.getRealAtIndex(j)*(float)Math.exp(-0.5*Math.pow(sigma, 2)*Math.pow(omega, 2));
+				float gausValueImag = sinoRows.getImagAtIndex(j)*(float)Math.exp(-0.5*Math.pow(sigma, 2)*Math.pow(omega, 2));
+				
+				sinoRows.setRealAtIndex(j, gausValueReal);
+				sinoRows.setImagAtIndex(j, gausValueImag);
+			}
+			
+			for(int j = sinoRows.getSize()[0]/2; j < sinoRows.getSize()[0]; j++){
+				
+				double omega = (j - sinoRows.getSize()[0])*(2*Math.PI/sinoRows.getSize()[0]);
+				
+				float gausValueReal = sinoRows.getRealAtIndex(j)*(float)Math.exp(-0.5*Math.pow(sigma, 2)*Math.pow(omega, 2));
+				float gausValueImag = sinoRows.getImagAtIndex(j)*(float)Math.exp(-0.5*Math.pow(sigma, 2)*Math.pow(omega, 2));
 				
 				sinoRows.setRealAtIndex(j, gausValueReal);
 				sinoRows.setImagAtIndex(j, gausValueImag);
@@ -246,9 +274,9 @@ public class ScaleSpaceStudies extends Grid2D {
 		Grid2D sinogramLoG = new Grid2D(sinogram);
 		
 		for(int i = 0; i < sinogram.getHeight(); i++) {
-			Grid1DComplex sinoRow = new Grid1DComplex(sinogram.getSubGrid(i));
+			Grid1D sinoRow = new Grid1D(sinogram.getSubGrid(i));
 
-			Grid1DComplex result = convolutionLoG(sinoRow, kernelsize, sigma);
+			Grid1D result = convolutionLoG(sinoRow, kernelsize, sigma);
 		
 			// copy again into sinogram
 			for(int k = 0; k < sinogram.getWidth(); k++){
@@ -262,24 +290,38 @@ public class ScaleSpaceStudies extends Grid2D {
 	/**
 	 * compute convolution with Laplacian of Gaussian
 	 */
-	public static Grid1DComplex convolutionLoG(Grid1DComplex signal, int kernelsize, double sigma) {
+	public static Grid1D convolutionLoG(Grid1D signal, int kernelsize, double sigma) {
 
 		int N = signal.getSize()[0];
-		Grid1DComplex result = new Grid1DComplex(N);
-		
+		Grid1D result = new Grid1D(N);
+
 		for (int n = 0; n < N; n++) { // n is number of signal element
-			int kmin, kmax;
-			float valueConvolved = 0.0f;
-			
+
+			float valueConvolved = 0.0f;			
 			result.setAtIndex(n, 0);
 
 			// borders for kernel window
-			kmin = (n >= kernelsize - 1) ? n - (kernelsize - 1) : 0;
-			kmax = (n < N - 1) ? n : N - 1;
-
-			for (int k = kmin; k <= kmax; k++) {
-				valueConvolved = (float) (valueConvolved + signal.getAtIndex(k) * laplacianOfGaussian(n-k, sigma));
+			int kmin, kmax;
+			int kernelrad = kernelsize/2;
+			kmin = (n > kernelrad) ? n - kernelrad : 0;
+			kmax = (n < N - kernelrad) ? n + kernelrad : N - 1;
+				
+			// local sampling
+			float deltaU;			// additional factor (between 0.0 and 0.9) for sampling rate
+			float v;				// sampling rate
+			float interpolSigVal;	// interpolated signal value
+			
+			for (int k = kmin; k < kmax; k++) {
+				for (int u = 0; u < 10; u++) {
+					
+					deltaU = 0.1f * u;
+					v = k + deltaU;
+					
+					interpolSigVal = (1-deltaU)*signal.getAtIndex(k) + deltaU*signal.getAtIndex(k+1);	// interpolation due to local sampling
+					valueConvolved += interpolSigVal * laplacianOfGaussian(n-v, sigma);					// actual convolution
+				}
 			}
+			
 			result.setAtIndex(n, valueConvolved);
 		}
 		
@@ -289,7 +331,7 @@ public class ScaleSpaceStudies extends Grid2D {
 	/**
 	 * Laplacian of Gaussian -> second derivative of Gaussian distribution
 	 */
-	public static double laplacianOfGaussian(int index, double sigma) {
+	public static double laplacianOfGaussian(double index, double sigma) {
 		
 		double value = (-1/(Math.pow(sigma, 3) * Math.sqrt(2*Math.PI))) * (1 - (Math.pow(index, 2) / Math.pow(sigma, 2))) * Math.exp(-(Math.pow(index, 2) / (2*Math.pow(sigma, 2))));
 	
