@@ -4,7 +4,6 @@
  */
 package edu.stanford.rsl.conrad.geometry.trajectories;
 
-import edu.stanford.rsl.apps.Conrad;
 import edu.stanford.rsl.conrad.geometry.General;
 import edu.stanford.rsl.conrad.geometry.Projection;
 import edu.stanford.rsl.conrad.geometry.Projection.CameraAxisDirection;
@@ -54,7 +53,7 @@ public class CircularTrajectory extends Trajectory {
 				detectorOffsetX, detectorOffsetY, uDirection, vDirection, rotationAxis, 
 				new PointND(0,0,0), 0);
 	}
-
+	
 	public void setTrajectory(int numProjectionMatrices, double sourceToAxisDistance, double averageAngularIncrement, 
 			double detectorOffsetX, double detectorOffsetY, CameraAxisDirection uDirection, 
 			CameraAxisDirection vDirection, SimpleVector rotationAxis, PointND rotationCenter, double angleFirstProjection) {
@@ -63,6 +62,8 @@ public class CircularTrajectory extends Trajectory {
 		this.numProjectionMatrices = numProjectionMatrices;
 		this.sourceToAxisDistance = sourceToAxisDistance;
 		this.averageAngularIncrement = averageAngularIncrement;
+		this.detectorOffsetU = detectorOffsetX;
+		this.detectorOffsetV = detectorOffsetY;
 
 		double cosPhi = Math.cos(General.toRadians(angleFirstProjection));
 		double sinPhi = Math.sin(General.toRadians(angleFirstProjection));

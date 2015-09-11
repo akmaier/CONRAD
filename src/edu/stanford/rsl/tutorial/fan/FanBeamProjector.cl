@@ -24,8 +24,9 @@ float4 CohenSutherlandLineClip(float x0, float y0, float x1, float y1, float xmi
 // IN  focalLength
 // IN  maxTIndex
 // IN  maxBetaIndex
+
 kernel void projectRayDriven2DCL(
-	global image2d_t grid,
+	image2d_t grid,
 	global float* sino, 
 	/* not yet... float2 gridSpacing, */
 	float maxT,
@@ -53,13 +54,13 @@ kernel void projectRayDriven2DCL(
 
 	// compute starting point & direction of ray
 	float2 a = {focalLength * cosBeta, focalLength * sinBeta};
-	float2 p0 = {-maxT/2.0 * sinBeta, maxT/2.0 * cosBeta};
+	float2 p0 = {-maxT/2.0f * sinBeta, maxT/2.0f * cosBeta};
 	float2 gridXH = {gridSizeX/2.f, gridSizeY/2.f};
 	
 	float2 dirDetector = normalize(- p0);
 	
 	p0 += (t+0.5f) * deltaT * dirDetector;
-	p0 = 2.0 * p0 - a;
+	p0 = 2.0f * p0 - a;
 	
 	//compute intersection between ray and object
 	float xmin = - gridSizeX / 2.f;
@@ -99,6 +100,77 @@ kernel void projectRayDriven2DCL(
 	return;
 }
 
+
+kernel void projectRayDriven1DCL(
+	image2d_t grid,
+	global float* sino,
+	/* not yet... float2 gridSpacing, */
+	float maxT,
+	float deltaT,
+	float maxBeta,
+	float deltaBeta,
+	float focalLength,
+	int maxTIndex,
+	int maxBetaIndex,
+	int index
+	) {
+	const unsigned int t = get_global_id(0);// t index
+
+	const float samplingRate = 3.0f; // # of samples per pixel
+	const float beta = deltaBeta * index;
+	const float cosBeta = cos(beta);
+	const float sinBeta = sin(beta);
+	
+	const int gridSizeX = get_image_width(grid);
+	const int gridSizeY = get_image_height(grid);
+
+	// compute starting point & direction of ray
+	float2 a = {focalLength * cosBeta, focalLength * sinBeta};
+	float2 p0 = {-maxT/2.0f * sinBeta, maxT/2.0f * cosBeta};
+	float2 gridXH = {gridSizeX/2.f, gridSizeY/2.f};
+
+	float2 dirDetector = normalize(- p0);
+
+	p0 += (t+0.5f) * deltaT * dirDetector;
+	p0 = 2.0f * p0 - a;
+
+	//compute intersection between ray and object
+	float xmin = - gridSizeX / 2.f;
+	float xmax = gridSizeX -1 - gridSizeX / 2.f;
+	float ymax = gridSizeY -1 - gridSizeY / 2.f;
+	float ymin = - gridSizeY / 2.f;
+	
+	float4 intersectionPoints = CohenSutherlandLineClip(a.x, a.y, p0.x, p0.y, xmin, ymin, xmax, ymax);
+	float2 start = {intersectionPoints.x + gridSizeX/2.f, intersectionPoints.y + gridSizeY/2.f};
+	float2 end   = {intersectionPoints.z + gridSizeX/2.f, intersectionPoints.w + gridSizeY/2.f};
+
+	if (isnan(intersectionPoints.x)) {
+		const int idx = t;
+		sino[idx] = 0.f;
+		return; // no intersection
+	}
+
+	// get the normalized increment
+	float2 increment = end - start;
+	float distance = length(increment);
+	increment /= (distance * samplingRate);
+
+	float sum = .0f;
+	// compute the integral along the line.
+	for (float tLine = 0.f; tLine < distance * samplingRate; tLine += 1.f) {
+		float2 tLine2 = {tLine,tLine};
+		float2 current = (start + increment * tLine2) / GRID_SPACING +0.5f;
+		sum += read_imagef(grid, linearSampler, current).x;
+	}
+
+	// normalize by the number of interpolation points
+	sum /= samplingRate;
+
+	// write integral value into the sinogram.
+	const int idx = t;
+	sino[idx] = sum;
+	return;
+}
 inline OutCode ComputeOutCode(float x, float y, float xmin, float ymin, float xmax, float ymax)
 {
         OutCode code;
