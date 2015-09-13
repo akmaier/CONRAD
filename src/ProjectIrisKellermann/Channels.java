@@ -4,7 +4,7 @@ import edu.stanford.rsl.conrad.data.numeric.Grid2D;
 
 public class Channels 
 {
-	public static double gaussValue = 20.0;
+	public static double gaussValue = 30.0;
 	
 	public static double GetLGFunctionValue(double r, int degree)
 	{

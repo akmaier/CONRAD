@@ -38,7 +38,7 @@ public class Observer {
 			
 			for(int i = 0; i < objectImages.length; ++i)
 			{
-				Grid2D differenceImageArray = ImageHelper.ConvertImageToArray(ImageHelper.SubstractImages(objectImages[i], meanObjectImage));
+				Grid2D differenceImageArray = ImageHelper.ConvertImageToColumn(ImageHelper.SubstractImages(objectImages[i], meanObjectImage));
 				
 				covarianceMatrixesObjects[i] = ImageHelper.MatrixMultiplication(differenceImageArray, ImageHelper.Transpose(differenceImageArray));
 			}
@@ -52,7 +52,7 @@ public class Observer {
 			
 			for(int i = 0; i < emptyImages.length; ++i)
 			{
-				Grid2D differenceImageArray = ImageHelper.ConvertImageToArray(ImageHelper.SubstractImages(emptyImages[i], meanEmptyImage));
+				Grid2D differenceImageArray = ImageHelper.ConvertImageToColumn(ImageHelper.SubstractImages(emptyImages[i], meanEmptyImage));
 				
 				covarianceMatrixesEmpty[i] = ImageHelper.MatrixMultiplication(differenceImageArray, ImageHelper.Transpose(differenceImageArray));
 			}

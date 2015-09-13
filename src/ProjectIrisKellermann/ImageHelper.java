@@ -1,10 +1,11 @@
 package ProjectIrisKellermann;
 
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
+import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
 
 public class ImageHelper {
 
-	public static Grid2D ConvertImageToArray(Grid2D image)
+	public static Grid2D ConvertImageToColumn(Grid2D image)
 	{
 		Grid2D array = new Grid2D(1, image.getWidth() * image.getHeight());
 		
@@ -53,7 +54,7 @@ public class ImageHelper {
 		
 		for(int x = 0; x < transposedImage.getWidth(); ++x)
 		{
-			for(int y = 0; y < image.getHeight(); ++y)
+			for(int y = 0; y < transposedImage.getHeight(); ++y)
 			{
 				transposedImage.putPixelValue(x, y, image.getPixelValue(y, x));
 			}
@@ -110,4 +111,22 @@ public class ImageHelper {
 		
 		return resultImage;
 	}
+
+	public static SimpleMatrix ConvertGrid2DToSimpleMatrix(Grid2D grid)
+	{
+		double[][] gridDouble = new double[grid.getHeight()][grid.getWidth()];
+		
+		for(int i = 0; i < grid.getWidth(); ++i)
+		{
+			for(int j = 0; j < grid.getHeight(); ++j)
+			{
+				gridDouble[j][i] = grid.getPixelValue(i, j);
+			}
+		}
+		
+		SimpleMatrix gridMatrix = new SimpleMatrix(gridDouble);
+		
+		return gridMatrix;
+	}
+
 }
