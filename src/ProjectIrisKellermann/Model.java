@@ -18,6 +18,14 @@ public class Model extends Grid2D
 		
 	}
 	
+	/**
+	 * Draws a circle into the given Grid2D with the given radius and the given intensity at the position x,y.  
+	 * @param grid The Grid2D to draw the circle in
+	 * @param x The x value of the position.
+	 * @param y The y value of the position.
+	 * @param radius The radius of the circle.
+	 * @param intensity The intensity for the circle.
+	 */
 	private void DrawCircle(Grid2D grid, int x, int y, int radius, double intensity)
 	{
 		for(int i = 0; i < this.getWidth(); ++i)
@@ -32,6 +40,10 @@ public class Model extends Grid2D
 		}
 	}
 	
+	/**
+	 * Creates a Grid2D of a variation of the model.
+	 * @return  The image of the model variation.
+	 */
 	public Grid2D ModelVariation()
 	{
 		Grid2D newModel = new Grid2D(this.getWidth(), this.getHeight());
@@ -45,6 +57,10 @@ public class Model extends Grid2D
 		return newModel;
 	}
 
+	/**
+	 * Creates a new empty image of the same size as the model.  
+	 * @return  The empty image.
+	 */
 	public Grid2D EmptyImage()
 	{
 		Grid2D newImage = new Grid2D(this.getWidth(), this.getHeight());
@@ -60,6 +76,11 @@ public class Model extends Grid2D
 		return newImage;
 	}
 	
+	/**
+	 * Applies poisson noise to the input sinogram.  
+	 * @param sinogram The sinogram to apply the poisson noise.
+	 * @return  The resulting sinogram.
+	 */
 	public Grid2D PoissonNoise(Grid2D sinogram)
 	{		
 		Grid2D filteredModel = null;
@@ -75,6 +96,11 @@ public class Model extends Grid2D
 		return filteredModel;
 	}
 	
+	/**
+	 * Calculates the sinogram of an image.  
+	 * @param model The image to calculate the sinogram of.
+	 * @return  The sinogram of the input image.
+	 */
 	public Grid2D CreateSinogram(Grid2D model)
 	{
 		Grid2D sinogram = new Grid2D(model.getWidth(), 180);
@@ -118,6 +144,11 @@ public class Model extends Grid2D
 
 	}
 
+	/**
+	 * Creates a number of different test images with the object present.  
+	 * @param number The number of images to create.
+	 * @return  The array of test images.
+	 */
 	public Grid2D[] CreateTestModels(int number)
 	{
 		Grid2D[] resultArray = new Grid2D[number];
@@ -158,6 +189,11 @@ public class Model extends Grid2D
 		return resultArray;
 	}
 
+	/**
+	 * Creates a number of different empty images.  
+	 * @param number The number of images to create.
+	 * @return  The array of empty images.
+	 */
 	public Grid2D[] CreateEmptyImages(int number)
 	{
 		Grid2D[] resultArray = new Grid2D[number];
@@ -197,7 +233,4 @@ public class Model extends Grid2D
 		
 		return resultArray;
 	}
-
-	
-	
 }

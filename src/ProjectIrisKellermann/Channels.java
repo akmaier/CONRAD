@@ -1,11 +1,19 @@
 package ProjectIrisKellermann;
 
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
+import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
+import edu.stanford.rsl.conrad.numerics.SimpleVector;
 
 public class Channels 
 {
-	public static double gaussValue = 30.0;
+	public static double gaussValue = 50.0;
 	
+	/**
+	 * Calculates the result of the Laguerre-Gauß function for the given input values.  
+	 * @param r The radial value.
+	 * @param degree The degree of the LG function.
+	 * @return  The result value.
+	 */
 	public static double GetLGFunctionValue(double r, int degree)
 	{
 		double result = (Math.sqrt(2) / gaussValue) * Math.exp( (- Math.PI * r * r ) / (gaussValue * gaussValue) ) * Laguerre( ( (2 * Math.PI * r * r) / ( gaussValue * gaussValue) ), degree );
@@ -13,6 +21,12 @@ public class Channels
 		return result;
 	}
 	
+	/**
+	 * Calculates the result of the Laguerre function for the given input values.  
+	 * @param value The input value.
+	 * @param degree The degree of the Laguerre function.
+	 * @return  The result value.
+	 */
 	public static double Laguerre(double value, int degree)
 	{
 		double result = 0.0;
@@ -25,6 +39,11 @@ public class Channels
 		return result;
 	}
 	
+	/**
+	 * Calculates the factorial of the input value.  
+	 * @param value The input value.
+	 * @return  The result value.
+	 */
 	public static double Factorial(int value)
 	{
 		if(value <= 1)
@@ -35,6 +54,13 @@ public class Channels
 		return value * Factorial(value - 1);
 	}
 	
+	/**
+	 * Creates a Laguerre-Gauß channel image.  
+	 * @param width The width of the image.
+	 * @param height The height of the image.
+	 * @param degree The degree of the LG function.
+	 * @return  The result image.
+	 */
 	public static Grid2D CreateLGChannelImage(int width, int height, int degree)
 	{
 		Grid2D resultImage = new Grid2D(width, height);
@@ -54,5 +80,28 @@ public class Channels
 		}
 		
 		return resultImage;
+	}
+
+	/**
+	 * Creates a matrix of concatenated channel image vectors.  
+	 * @param channelCount The number of channels.
+	 * @param imageSize The size of the images.
+	 * @return  The SimpleMatrix containing the channel image vectors.
+	 */
+	public static SimpleMatrix CreateChannelMatrix(int channelCount, int imageSize)
+	{		
+		SimpleVector[] channelColumns = new SimpleVector[channelCount];
+		for(int i = 0; i < channelCount; ++i)
+		{
+			channelColumns[i] = ImageHelper.ConvertSimpleMatrixToVector(ImageHelper.ConvertGrid2DToSimpleMatrix(Channels.CreateLGChannelImage(imageSize, imageSize, i)));
+		}
+		
+		//TODO - wrong operator?
+		//SimpleMatrix channelMatrix = SimpleOperators.concatenateHorizontally(channelColumns);
+		
+		SimpleMatrix channelMatrix = ImageHelper.concatenateHorizontally(channelColumns);
+		
+		return channelMatrix;
+		
 	}
 }
