@@ -7,6 +7,10 @@ import edu.stanford.rsl.conrad.data.numeric.InterpolationOperators;
 import edu.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators;
 import edu.stanford.rsl.conrad.filtering.LogPoissonNoiseFilteringTool;
 
+/**
+ * @author Iris Kellermann
+ */
+
 public class Model extends Grid2D
 {
 	
@@ -57,6 +61,27 @@ public class Model extends Grid2D
 		return newModel;
 	}
 
+	/**
+	 * Creates a new image with Salt noise of the same size as the model.
+	 * @return  The salt image.
+	 */
+	public Grid2D CreateSaltImage()
+	{
+		int width = this.getWidth();
+		int height = this.getHeight();
+		
+		Grid2D resultImage = new Grid2D(width, height);
+		
+		Random rand = new Random();
+		
+		for(int i = 0; i < width * height / 10; ++i)
+		{
+			resultImage.putPixelValue(rand.nextInt(width), rand.nextInt(height), 1);
+		}
+		
+		return resultImage;
+	}
+	
 	/**
 	 * Creates a new empty image of the same size as the model.  
 	 * @return  The empty image.
@@ -202,12 +227,12 @@ public class Model extends Grid2D
 		
 		for(; i < number * 1/4; ++i)
 		{
-			resultArray[i] = this.EmptyImage();
+			resultArray[i] = this.CreateSaltImage();
 		}
 		
 		for(; i < number/2; ++i)
 		{
-			Grid2D poissonSinogram = this.PoissonNoise(this.CreateSinogram(this.EmptyImage()));
+			Grid2D poissonSinogram = this.PoissonNoise(this.CreateSinogram(this.CreateSaltImage()));
 			Grid2D filteredSinogram = Backproject.Filter(poissonSinogram);
 			
 			resultArray[i] = Backproject.Backprojection(filteredSinogram);
@@ -215,14 +240,14 @@ public class Model extends Grid2D
 		
 		for (; i < number * 3/4; ++i)
 		{
-			Grid2D sinogram = this.CreateSinogram(this.EmptyImage());
+			Grid2D sinogram = this.CreateSinogram(this.CreateSaltImage());
 			
 			resultArray[i] = Backproject.Backprojection(sinogram);
 		}
 		
 		for (; i < number; ++i)
 		{
-			Grid2D sinogram = this.CreateSinogram(this.EmptyImage());
+			Grid2D sinogram = this.CreateSinogram(this.CreateSaltImage());
 			NumericPointwiseOperators.divideBy(sinogram, 40);
 			Grid2D poissonSinogram = this.PoissonNoise(sinogram);
 			NumericPointwiseOperators.multiplyBy(poissonSinogram, 40);

@@ -5,6 +5,10 @@ import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
 import edu.stanford.rsl.conrad.numerics.SimpleOperators;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
 
+/**
+ * @author Iris Kellermann
+ */
+
 public class ImageHelper {
 	/**
 	 * Calculates the mean image of the given image array.  

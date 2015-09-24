@@ -4,6 +4,10 @@ import edu.stanford.rsl.conrad.data.numeric.Grid2D;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
 
+/**
+ * @author Iris Kellermann
+ */
+
 public class Channels 
 {
 	public static double gaussValue = 50.0;

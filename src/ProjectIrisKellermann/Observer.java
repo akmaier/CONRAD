@@ -6,6 +6,10 @@ import edu.stanford.rsl.conrad.numerics.SimpleOperators;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix.InversionType;
 
+/**
+ * @author Iris Kellermann
+ */
+
 public class Observer {
 
 	/**
