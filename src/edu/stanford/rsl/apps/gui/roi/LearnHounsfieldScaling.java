@@ -55,7 +55,7 @@ public class LearnHounsfieldScaling extends EvaluateROI {
 			//double t = func.evaluate(0.0);
 			System.out.println("Learned: " + func.toString());
 			//func.setT(-t);
-			VisualizationUtil.createScatterPlot("Houndfield Mapping", x, y, new LinearFunction()).show();
+			VisualizationUtil.createScatterPlot("Hounsfield Mapping", x, y, new LinearFunction()).show();
 		}
 		return null;
 	}
