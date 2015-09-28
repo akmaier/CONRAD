@@ -68,5 +68,6 @@
 	<classpathentry kind="lib" path="lib/jmathplot.jar"/>
 	<classpathentry kind="lib" path="lib/wekaBRF_1.jar"/>
 	<classpathentry kind="lib" path="lib/jpop.0.7.5.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/jocl-demos"/>
 	<classpathentry kind="output" path="src"/>
 </classpath>

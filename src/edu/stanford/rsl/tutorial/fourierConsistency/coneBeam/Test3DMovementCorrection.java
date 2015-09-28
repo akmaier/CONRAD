@@ -44,9 +44,9 @@ public class Test3DMovementCorrection {
 			// here we only want to select files ending with ".bin". This will open them as "Dennerlein" format.
 			// Any other ImageJ compatible file type is also OK.
 			// new formats can be added to HandleExtraFileTypes.java
-			String filenameString = FileUtil.myFileChoose("proj/ciptmp/co98jaha/workspace/data/FinalProjections80kev/FORBILD_Head_80kev.tif",".tif", false);
+			//String filenameString = FileUtil.myFileChoose("proj/ciptmp/co98jaha/workspace/data/FinalProjections80kev/FORBILD_Head_80kev.tif",".tif", false);
 			// call the ImageJ routine to open the image:
-			ImagePlus imp = IJ.openImage(filenameString);
+			ImagePlus imp = IJ.openImage("D:/Data/ForbildHead3D/FinalProjections80kev/FORBILD_Head_80kev_Motion_rescaledToPowerOfTwo.tif");
 			// Convert from ImageJ to Grid3D. Note that no data is copied here. The ImageJ container is only wrapped. Changes to the Grid will also affect the ImageJ ImagePlus.
 			projections = ImageUtil.wrapImagePlus(imp);
 			// Display the data that was read from the file.
@@ -61,15 +61,15 @@ public class Test3DMovementCorrection {
 		projections.show("Data from file");
 		
 		// get configuration
-		String xmlFilename = "/proj/ciptmp/co98jaha/workspace/data/ConradSettingsForbild3D.xml";
-		Config conf = new Config(xmlFilename,15, 1);
+		String xmlFilename = "D:/Data/ForbildHead3D/ConradSettingsForbild3D_rescaledAngles.xml";
+		Config conf = new Config(xmlFilename, 15, 1);
 		conf.getMask().show("mask");
 		System.out.println("N: "+ conf.getHorizontalDim() + " M: " + conf.getVerticalDim() + " K: "+  conf.getNumberOfProjections());
-		Grid1D testShift = new Grid1D(conf.getNumberOfProjections()*2);
+		//Grid1D testShift = new Grid1D(conf.getNumberOfProjections()*2);
 
 		// Test shifting of 1 pixel each projection, both dimensions
 		
-		// 
+		/* 
 		for(int i = 0; i < testShift.getSize()[0]; i++){
 			if(i%2 == 0){
 				testShift.setAtIndex(i, 1.0f);
@@ -78,10 +78,10 @@ public class Test3DMovementCorrection {
 				testShift.setAtIndex(i, 1.0f);
 			}
 		}
-
+		*/
 		
-		MovementCorrection3D mc = new MovementCorrection3D(projections, conf,false);
-		mc.setShiftVector(testShift);
+		MovementCorrection3D mc = new MovementCorrection3D(projections, conf, false);
+		//mc.setShiftVector(testShift);
 		mc.doFFT2();
 		//mc.getData().show("2D-Fouriertransformed before transposing");
 		mc.transposeData();
@@ -168,9 +168,9 @@ public class Test3DMovementCorrection {
 		mc.backTransposeData();
 //		//mc.getData().show("2D-Fouriertransformed after transposing");
 		mc.doiFFT2();
-		mc.getData().getRealGrid().show("Real Data");
-		mc.getData().getImagGrid().show("Imag Data");
-		mc.getData().show("After pipeline");
+		mc.getData().getRealGrid().show("Output (corrected) - Real");
+		mc.getData().getImagGrid().show("Output (corrected) - Imaginary");
+		mc.getData().show("Output (corrected) - Magnitude");
 	}
 	
 }
