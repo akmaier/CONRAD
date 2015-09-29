@@ -9,16 +9,14 @@ import edu.stanford.rsl.conrad.numerics.SimpleVector;
  */
 
 public class Channels 
-{
-	public static double gaussValue = 50.0;
-	
+{	
 	/**
 	 * Calculates the result of the Laguerre-Gauß function for the given input values.  
 	 * @param r The radial value.
 	 * @param degree The degree of the LG function.
 	 * @return  The result value.
 	 */
-	public static double GetLGFunctionValue(double r, int degree)
+	public static double GetLGFunctionValue(double r, int degree, double gaussValue)
 	{
 		double result = (Math.sqrt(2) / gaussValue) * Math.exp( (- Math.PI * r * r ) / (gaussValue * gaussValue) ) * Laguerre( ( (2 * Math.PI * r * r) / ( gaussValue * gaussValue) ), degree );
 		
@@ -65,7 +63,7 @@ public class Channels
 	 * @param degree The degree of the LG function.
 	 * @return  The result image.
 	 */
-	public static Grid2D CreateLGChannelImage(int width, int height, int degree)
+	public static Grid2D CreateLGChannelImage(int width, int height, int degree, double gaussValue)
 	{
 		Grid2D resultImage = new Grid2D(width, height);
 		
@@ -79,7 +77,7 @@ public class Channels
 				
 				double r = Math.hypot(xValue, yValue);
 				
-				resultImage.putPixelValue(x, y, GetLGFunctionValue(r, degree));
+				resultImage.putPixelValue(x, y, GetLGFunctionValue(r, degree, gaussValue));
 			}
 		}
 		
@@ -92,15 +90,15 @@ public class Channels
 	 * @param imageSize The size of the images.
 	 * @return  The SimpleMatrix containing the channel image vectors.
 	 */
-	public static SimpleMatrix CreateChannelMatrix(int channelCount, int imageSize)
+	public static SimpleMatrix CreateChannelMatrix(int channelCount, int imageSize, double gaussValue)
 	{		
 		SimpleVector[] channelColumns = new SimpleVector[channelCount];
 		for(int i = 0; i < channelCount; ++i)
 		{
-			channelColumns[i] = ImageHelper.ConvertSimpleMatrixToVector(ImageHelper.ConvertGrid2DToSimpleMatrix(Channels.CreateLGChannelImage(imageSize, imageSize, i)));
+			channelColumns[i] = ImageHelper.ConvertSimpleMatrixToVector(ImageHelper.ConvertGrid2DToSimpleMatrix(Channels.CreateLGChannelImage(imageSize, imageSize, i, gaussValue)));
 		}
 		
-		//TODO - wrong operator?
+		//TODO - wrong operator in conrad/numerics/SimpleOperators?
 		//SimpleMatrix channelMatrix = SimpleOperators.concatenateHorizontally(channelColumns);
 		
 		SimpleMatrix channelMatrix = ImageHelper.concatenateHorizontally(channelColumns);
@@ -109,3 +107,8 @@ public class Channels
 		
 	}
 }
+
+/*
+ * Copyright (C) 2010-2014 - Iris Kellermann 
+ * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
+*/

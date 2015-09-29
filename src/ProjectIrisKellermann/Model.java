@@ -23,6 +23,23 @@ public class Model extends Grid2D
 	}
 	
 	/**
+	 * Set the type to be used for variation.
+	 */
+	public static enum VariationType
+	{
+		/** Shifts the object in the image/creates a random salt image */
+		SimpleVariation,
+		/** Projects and backprojects the image without using a filter */
+		ProjectionWOFilter,
+		/** Projects and backprojects the image and adds Poisson noise */
+		ProjectionPoisson,
+		/** Projects and backprojects the image, adds Poisson noise but without intensity shifting */
+		ProjectionWrongPoisson,
+		/** Shifts the object in the image and adds noise/creates a random salt image */
+		SimpleVariationNoise
+	}
+		
+	/**
 	 * Draws a circle into the given Grid2D with the given radius and the given intensity at the position x,y.  
 	 * @param grid The Grid2D to draw the circle in
 	 * @param x The x value of the position.
@@ -172,90 +189,124 @@ public class Model extends Grid2D
 	/**
 	 * Creates a number of different test images with the object present.  
 	 * @param number The number of images to create.
+	 * @param type The type of the Variation of the model.
 	 * @return  The array of test images.
 	 */
-	public Grid2D[] CreateTestModels(int number)
+	public Grid2D[] CreateTestModels(int number, VariationType type)
 	{
 		Grid2D[] resultArray = new Grid2D[number];
 		
-		int i = 0;
-		
-		for (; i < number/4; ++i)
+		switch(type)
 		{
-			resultArray[i] = this.ModelVariation();
+		case SimpleVariation:
+			for (int i = 0; i < number; ++i)
+			{
+				resultArray[i] = this.ModelVariation();
+			}
+			break;
+		case ProjectionWOFilter:
+			for (int i = 0; i < number; ++i)
+			{
+				Grid2D sinogram = this.CreateSinogram(this.ModelVariation());
+				
+				resultArray[i] = Backproject.Backprojection(sinogram);
+			}
+			break;
+		case ProjectionPoisson:
+			for (int i = 0; i < number; ++i)
+			{
+				Grid2D sinogram = this.CreateSinogram(this.ModelVariation());
+				NumericPointwiseOperators.divideBy(sinogram, 40);
+				Grid2D poissonSinogram = this.PoissonNoise(sinogram);
+				NumericPointwiseOperators.multiplyBy(poissonSinogram, 40);
+				Grid2D filteredSinogram = Backproject.Filter(poissonSinogram);
+				
+				resultArray[i] = Backproject.Backprojection(filteredSinogram);			
+			}
+			break;
+		case ProjectionWrongPoisson:
+			for (int i = 0; i < number; ++i)
+			{
+				Grid2D poissonSinogram = this.PoissonNoise(this.CreateSinogram(this.ModelVariation()));
+				Grid2D filteredSinogram = Backproject.Filter(poissonSinogram);
+				
+				resultArray[i] = Backproject.Backprojection(filteredSinogram);
+			}
+			break;
+		case SimpleVariationNoise:
+			for (int i = 0; i < number; ++i)
+			{
+				Grid2D result = this.ModelVariation();
+				NumericPointwiseOperators.addBy(result, this.CreateSaltImage());
+				resultArray[i] = result;
+			}
+			break;
+		default:
+			break;
 		}
-		
-		for (; i < number/2; ++i)
-		{
-			Grid2D poissonSinogram = this.PoissonNoise(this.CreateSinogram(this.ModelVariation()));
-			Grid2D filteredSinogram = Backproject.Filter(poissonSinogram);
-			
-			resultArray[i] = Backproject.Backprojection(filteredSinogram);
-		}
-		
-		for (; i < number * 3/4; ++i)
-		{
-			Grid2D sinogram = this.CreateSinogram(this.ModelVariation());
-			
-			resultArray[i] = Backproject.Backprojection(sinogram);
-		}
-		
-		for (; i < number; ++i)
-		{
-			Grid2D sinogram = this.CreateSinogram(this.ModelVariation());
-			NumericPointwiseOperators.divideBy(sinogram, 40);
-			Grid2D poissonSinogram = this.PoissonNoise(sinogram);
-			NumericPointwiseOperators.multiplyBy(poissonSinogram, 40);
-			Grid2D filteredSinogram = Backproject.Filter(poissonSinogram);
-			
-			resultArray[i] = Backproject.Backprojection(filteredSinogram);			
-		}
-		
 		return resultArray;
 	}
 
 	/**
-	 * Creates a number of different empty images.  
+	 * Creates a number of different empty salt images.  
 	 * @param number The number of images to create.
+	 * @param type The type of the variation.
 	 * @return  The array of empty images.
 	 */
-	public Grid2D[] CreateEmptyImages(int number)
+	public Grid2D[] CreateEmptyImages(int number, VariationType type)
 	{
 		Grid2D[] resultArray = new Grid2D[number];
 		
-		int i = 0;
-		
-		for(; i < number * 1/4; ++i)
+		switch(type)
 		{
-			resultArray[i] = this.CreateSaltImage();
-		}
-		
-		for(; i < number/2; ++i)
-		{
-			Grid2D poissonSinogram = this.PoissonNoise(this.CreateSinogram(this.CreateSaltImage()));
-			Grid2D filteredSinogram = Backproject.Filter(poissonSinogram);
+		case SimpleVariation:
+			for (int i = 0; i < number; ++i)
+			{
+				resultArray[i] = this.CreateSaltImage();
+			}
 			
-			resultArray[i] = Backproject.Backprojection(filteredSinogram);
-		}
-		
-		for (; i < number * 3/4; ++i)
-		{
-			Grid2D sinogram = this.CreateSinogram(this.CreateSaltImage());
+			break;
+		case ProjectionWOFilter:
+			for (int i = 0; i < number; ++i)
+			{
+				Grid2D sinogram = this.CreateSinogram(this.CreateSaltImage());
+				
+				resultArray[i] = Backproject.Backprojection(sinogram);
+			}
 			
-			resultArray[i] = Backproject.Backprojection(sinogram);
-		}
-		
-		for (; i < number; ++i)
-		{
-			Grid2D sinogram = this.CreateSinogram(this.CreateSaltImage());
-			NumericPointwiseOperators.divideBy(sinogram, 40);
-			Grid2D poissonSinogram = this.PoissonNoise(sinogram);
-			NumericPointwiseOperators.multiplyBy(poissonSinogram, 40);
-			Grid2D filteredSinogram = Backproject.Filter(poissonSinogram);
+			break;
+		case ProjectionPoisson:
+			for (int i = 0; i < number; ++i)
+			{
+				Grid2D sinogram = this.CreateSinogram(this.CreateSaltImage());
+				NumericPointwiseOperators.divideBy(sinogram, 40);
+				Grid2D poissonSinogram = this.PoissonNoise(sinogram);
+				NumericPointwiseOperators.multiplyBy(poissonSinogram, 40);
+				Grid2D filteredSinogram = Backproject.Filter(poissonSinogram);
+				
+				resultArray[i] = Backproject.Backprojection(filteredSinogram);			
+			}
 			
-			resultArray[i] = Backproject.Backprojection(filteredSinogram);			
+			break;
+		case ProjectionWrongPoisson:
+			for (int i = 0; i < number; ++i)
+			{
+				Grid2D poissonSinogram = this.PoissonNoise(this.CreateSinogram(this.CreateSaltImage()));
+				Grid2D filteredSinogram = Backproject.Filter(poissonSinogram);
+				
+				resultArray[i] = Backproject.Backprojection(filteredSinogram);
+			}
+			
+			break;
+		case SimpleVariationNoise:
+			return this.CreateEmptyImages(number, VariationType.SimpleVariation);
 		}
 		
 		return resultArray;
 	}
 }
+
+/*
+ * Copyright (C) 2010-2014 - Iris Kellermann 
+ * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
+*/

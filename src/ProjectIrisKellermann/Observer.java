@@ -79,18 +79,15 @@ public class Observer {
 	}
 
 	/**
-	 * Calculates the result of the observer.  
-	 * @param model The test model.  
-	 * @param objectImages The array of images with present object.
+	 * Creates the template for the observer.  
+	 * @param testModels The array of images with present object.
 	 * @param emptyImages The array of empty images.
-	 * @param channelImages The matrix containing the channel image vectors.
+	 * @param channelMatrix The matrix containing the channel image vectors.
 	 * @return  The result value.
 	 */
-	public static double GetResultValue(Grid2D model, Grid2D[] testModels, Grid2D[] emptyImages, SimpleMatrix channelMatrix)
+	public static SimpleVector CreateTemplate(Grid2D[] testModels, Grid2D[] emptyImages, SimpleMatrix channelMatrix)
 	{
 		//convert Grid2D images to SimpleMatrix
-		SimpleVector modelVector = ImageHelper.ConvertSimpleMatrixToVector(ImageHelper.ConvertGrid2DToSimpleMatrix(model));
-		
 		SimpleMatrix[] objectImagesMatrix = new SimpleMatrix[testModels.length];
 		SimpleMatrix[] emptyImagesMatrix = new SimpleMatrix[emptyImages.length];
 		
@@ -111,17 +108,38 @@ public class Observer {
 		//convert meanDifferenceImage to columns
 		SimpleVector meanDifferenceVector = ImageHelper.ConvertSimpleMatrixToVector(meanDifferenceImage);
 		
-		//calculate s_v and v
+		//calculate channelized mean-difference image s_v
 		SimpleVector s_v = SimpleOperators.multiply(channelMatrix.transposed(), meanDifferenceVector);
-		SimpleVector vVector = SimpleOperators.multiply(channelMatrix.transposed(), modelVector);
-	
+			
 		//create template
 		SimpleMatrix C_vInverted = covarianceMatrix.inverse(InversionType.INVERT_QR);
 		
 		SimpleVector templateVector = SimpleOperators.multiply(s_v, C_vInverted);
 		
-		double resultValue = SimpleOperators.multiplyInnerProd(templateVector, vVector);
+		return templateVector;
+	}
+	
+	/**
+	 * Calculates the result of the observer.  
+	 * @param model The test model.  
+	 * @param template The template of the observer.
+	 * @param channelMatrix The matrix containing the channel image vectors.
+	 * @return  The result value.
+	 */
+	public static double GetResultValue(Grid2D model, SimpleVector template, SimpleMatrix channelMatrix)
+	{
+		//convert Grid2D images to SimpleMatrix
+		SimpleVector modelVector = ImageHelper.ConvertSimpleMatrixToVector(ImageHelper.ConvertGrid2DToSimpleMatrix(model));
+				
+		SimpleVector vVector = SimpleOperators.multiply(channelMatrix.transposed(), modelVector);
+		
+		double resultValue = SimpleOperators.multiplyInnerProd(template, vVector);
 		
 		return resultValue;
 	}
 }
+
+/*
+ * Copyright (C) 2010-2014 - Iris Kellermann 
+ * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
+*/
