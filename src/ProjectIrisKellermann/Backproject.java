@@ -1,13 +1,21 @@
 package ProjectIrisKellermann;
 
-import ij.ImageJ;
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
 import edu.stanford.rsl.conrad.data.numeric.Grid1D;
 import edu.stanford.rsl.conrad.data.numeric.Grid1DComplex;
 import edu.stanford.rsl.conrad.data.numeric.InterpolationOperators;
 
+/**
+ * @author Iris Kellermann
+ */
+
 public class Backproject{
 
+	/**
+	 * Adds a filter to the sinogram.
+	 * @param sinogram The sinogram.
+	 * @return  The Grid2D containing the filtered sinogram.
+	 */
 	public static Grid2D Filter(Grid2D sinogram)
 	{
 		Grid1DComplex[] gridrows = new Grid1DComplex[sinogram.getHeight()];
@@ -62,7 +70,11 @@ public class Backproject{
 		return resultGrid;
 	}
 
-
+	/**
+	 * Adds a RamLak filter to the sinogram.
+	 * @param sinogram The sinogram.
+	 * @return  The Grid2D containing the filtered sinogram.
+	 */
 	public static Grid2D FilterRamLak(Grid2D sinogram)
 	{
 		Grid1DComplex[] gridrows = new Grid1DComplex[sinogram.getHeight()];
@@ -122,8 +134,11 @@ public class Backproject{
 
 	}
 
-
-
+	/**
+	 * Backprojects the given projection.
+	 * @param projection The projection to backproject.
+	 * @return  The result Grid2D.
+	 */
 	public static Grid2D Backprojection(Grid2D projection)
 	{
 		Grid2D resultImage = new Grid2D(projection.getWidth(), projection.getWidth());
@@ -149,5 +164,9 @@ public class Backproject{
 
 		return resultImage;
 	}
-
 }
+
+/*
+ * Copyright (C) 2010-2014 - Iris Kellermann 
+ * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
+*/
