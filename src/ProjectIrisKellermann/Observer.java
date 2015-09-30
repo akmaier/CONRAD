@@ -130,7 +130,8 @@ public class Observer {
 	{
 		//convert Grid2D images to SimpleMatrix
 		SimpleVector modelVector = ImageHelper.ConvertSimpleMatrixToVector(ImageHelper.ConvertGrid2DToSimpleMatrix(model));
-				
+		
+		//the channelized model image
 		SimpleVector vVector = SimpleOperators.multiply(channelMatrix.transposed(), modelVector);
 		
 		double resultValue = SimpleOperators.multiplyInnerProd(template, vVector);
