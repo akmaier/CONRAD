@@ -25,6 +25,7 @@ public class ROC {
 	{
 		SimpleVector vals = new SimpleVector(2 * Ntest); 
         
+		// get observer result values
         for(int i = 0; i < Ntest; ++i) 
         {   	
         	vals.setElementValue(i,Observer.GetResultValue(testImages[i], template, channelMatrix));

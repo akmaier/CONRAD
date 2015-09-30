@@ -15,8 +15,8 @@ public class ObserverPipeline {
 	public static void main(String args[])
 	{
 		int imageSize = 200;
-		int Ntrain = 20;
-		int Ntest = 10;
+		int Ntrain = 10;
+		int Ntest = 20;
 		int channelCount = 10;
 		double gaussValue = 50;
 		
@@ -24,24 +24,24 @@ public class ObserverPipeline {
 		Model model = new Model(imageSize, imageSize);
 		
 		//the different object-present images
-		Grid2D[] testModels = model.CreateTestModels(Ntrain, VariationType.ProjectionWOFilter);
+		Grid2D[] trainModels = model.CreateTestModels(Ntrain, VariationType.SimpleVariation);
 		
 		//the different background images
-		Grid2D[] emptyImages = model.CreateEmptyImages(Ntrain, VariationType.ProjectionWOFilter);
+		Grid2D[] emptyTrainImages = model.CreateEmptyImages(Ntrain, VariationType.SimpleVariation);
 				
 		//the channel images
 		SimpleMatrix channelMatrix = Channels.CreateChannelMatrix(channelCount, imageSize, gaussValue);
 		
 		
 		//create template
-		SimpleVector template = Observer.CreateTemplate(testModels, emptyImages, channelMatrix);
+		SimpleVector template = Observer.CreateTemplate(trainModels, emptyTrainImages, channelMatrix);
 	
 		
 		//test and create ROC curve
 		
-		Grid2D[] testImages = model.CreateTestModels(Ntest, VariationType.ProjectionWrongPoisson);
-        Grid2D[] emptyTestImages = model.CreateEmptyImages(Ntest, VariationType.ProjectionWrongPoisson);  
-		
+		Grid2D[] testImages = model.CreateTestModels(Ntest, VariationType.ProjectionWOFilter);
+        Grid2D[] emptyTestImages = model.CreateEmptyImages(Ntest, VariationType.ProjectionWOFilter); 
+        
 		ROC.ShowROC(testImages, emptyTestImages, Ntest, template, channelMatrix);		
 	}
 }

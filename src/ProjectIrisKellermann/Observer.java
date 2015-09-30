@@ -134,7 +134,7 @@ public class Observer {
 		SimpleVector vVector = SimpleOperators.multiply(channelMatrix.transposed(), modelVector);
 		
 		double resultValue = SimpleOperators.multiplyInnerProd(template, vVector);
-		
+				
 		return resultValue;
 	}
 }
