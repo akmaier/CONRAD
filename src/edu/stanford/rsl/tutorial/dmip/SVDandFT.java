@@ -22,7 +22,7 @@ import ij.ImageJ;
  *
  */
 public class SVDandFT {
-	
+/*	
 	public static void invertSVD(SimpleMatrix A)
 	{
 		
@@ -426,5 +426,5 @@ public class SVDandFT {
 		
 
 	}
-
+*/
 }

@@ -61,7 +61,7 @@ public class DMIP_FanBeamBackProjector2D {
 		this.detectorLength = detectorSpacing*detectorPixels;
 		
 		
-		//TODO
+		double halfFanAngle = 0;//TODO
 		System.out.println("Half fan angle: " + halfFanAngle*180.0/Math.PI);
 		//TODO
 		this.betaIncrement = maxBeta /(double) numProjs;
@@ -88,8 +88,8 @@ public class DMIP_FanBeamBackProjector2D {
 			float sinBeta = (float) Math.sin(beta);
 			
 			//Compute direction and normal of the detector at the current rotation angle
-			//TODO
-			//TODO
+			final PointND detBorder = new PointND();//TODO
+			final SimpleVector dirDet = new SimpleVector();//TODO
 			final StraightLine detLine = new StraightLine(detBorder, dirDet);
 			
 			//Compute rotated source point
@@ -102,17 +102,17 @@ public class DMIP_FanBeamBackProjector2D {
 			for(int x = 0; x < recoSize[0]; x++)
 			{
 				//transform the image pixel coordinates to world coordinates
-				float wx = //TODO
+				float wx =0; //TODO
 				
 				for(int y = 0; y < recoSize[1]; y++)
 				{
-					float wy = //TODO
+					float wy = 0;//TODO
 					
 					final PointND reconstructionPointWorld = new PointND(wx, wy, 0.d);
 
 					//intersect the projection ray with the detector
 					//TODO
-					//TODO
+					final PointND detPixel = new PointND();//TODO
 					
 					float valueTemp;
 					
@@ -138,7 +138,7 @@ public class DMIP_FanBeamBackProjector2D {
 						//see Fig 1a) exercise sheet
 						//TODO
 						//TODO
-						//TODO
+						float dWeight = 0;//TODO
 						valueTemp = (float) (value / (dWeight*dWeight));
 					}
 					else
@@ -173,7 +173,7 @@ public class DMIP_FanBeamBackProjector2D {
 		Grid1D cosineKernel = new Grid1D(detectorPixels);
 		for(int i=0; i<detectorPixels; ++i){
 			//TODO
-			cosineKernel.setAtIndex(i, );//TODO
+			cosineKernel.setAtIndex(i, 9999);//TODO
 		}
 		
 		//apply cosine weights to each projection
@@ -221,8 +221,7 @@ public class DMIP_FanBeamBackProjector2D {
 
 				// implement the conditions as described in Parker's paper
 				if (beta <= 2 * (delta - gamma)) {
-					//TODO
-					
+					float val = 0; //TODO
 					if (Double.isNaN(val)){
 						continue;
 					}
@@ -232,7 +231,7 @@ public class DMIP_FanBeamBackProjector2D {
 					parker.setAtIndex(t, b , 1);
 				}
 				else if (beta <= (Math.PI + 2.d * delta) + 1e-12) {
-					//TODO
+					float val = 0;//TODO
 					if (Double.isNaN(val)){
 						continue;
 					}

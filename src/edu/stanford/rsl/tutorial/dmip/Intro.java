@@ -51,13 +51,13 @@ public class Intro {
 		
 		//Copy an image
 		//TODO
-		copy.show("Copy of circle");
+		//copy.show("Copy of circle");
 		
 		
 		//Load an image from file
 		String filename = "D:/02_lectures/DMIP/exercises/2014/matlab_intro/mr12.dcm";
 		//TODO. Hint: Use IJ and ImageUtil
-		mrImage.show();
+		//mrImage.show();
 		
 		//convolution
 		//TODO
@@ -92,7 +92,6 @@ public class Intro {
 		for(int i = 0; i < y.length; i++)
 		{
 			//TODO
-			y[i] = val;
 			
 		}
 		
@@ -114,19 +113,20 @@ public class Intro {
 		
 		//create column vector
 		//TODO
-		System.out.println("v1 = " + v1.toString());
+		//System.out.println("v1 = " + v1.toString());
 		
 		//create a randomly initialized vector
 		SimpleVector vRand = new SimpleVector(3);
 		//TODO
-		System.out.println("vRand = " + vRand.toString());
+		//System.out.println("vRand = " + vRand.toString());
 		
 		//create matrix M 3x3  1 2 3; 4 5 6; 7 8 9
+		SimpleMatrix M = new SimpleMatrix();
 		//TODO
-		System.out.println("M = " + M.toString());
+		//System.out.println("M = " + M.toString());
 		
 		//determinant of M
-		System.out.println("Determinant of matrix m: " + TODO );
+		//System.out.println("Determinant of matrix m: " + TODO );
 		
 		//transpose M
 		//TODO
@@ -136,8 +136,9 @@ public class Intro {
 		//TODO
 		
 		//get size
-		int numRows = M.getRows();
-		int numCols = M.getCols();
+		int numRows = 0;
+		int numCols = 0;
+		//TODO
 		
 		//access elements of M
 		System.out.println("M: ");
@@ -146,7 +147,7 @@ public class Intro {
 			for(int j = 0; j < numCols; j++)
 			{
 				//TODO
-				System.out.print(element + " ");
+				//System.out.print(element + " ");
 			}
 			System.out.println();
 		}
@@ -163,23 +164,23 @@ public class Intro {
 		
 		//Matrix multiplication
 		//TODO
-		System.out.println("M^T * M = " + ResMat.toString());
+		//System.out.println("M^T * M = " + ResMat.toString());
 		
 
 		//Matrix vector multiplication
 		//TODO
-		System.out.println("M * v1 = " + resVec.toString());
+		//System.out.println("M * v1 = " + resVec.toString());
 		
 		
 		//Extract the last column vector from matrix M
-		SimpleVector colVector = M.getCol(2);
+		//SimpleVector colVector = M.getCol(2);
 		//Extract the 1x2 subvector from the last column of matrix M
 		//TODO
-		System.out.println("[m(0)(2); m(1)(2)] = " + subVector);
+		//System.out.println("[m(0)(2); m(1)(2)] = " + subVector);
 		
 		//Matrix elementwise multiplication
 		//TODO
-		System.out.println("M squared Elements: " + MsquaredElem.toString());
+		//System.out.println("M squared Elements: " + MsquaredElem.toString());
 		
 		//round vectors
 		SimpleVector vRandCopy = new SimpleVector(vRand);
@@ -192,9 +193,9 @@ public class Intro {
 		System.out.println("vRand.ceil()  = " + vRand.toString());
 		
 		//min, max, mean
-		double minV1 = v1.min();
-		double maxV1 = v1.max();
-		System.out.println("Min(v1) = " + minV1 + " Max(v1) = " + maxV1);
+		//double minV1 = v1.min();
+		//double maxV1 = v1.max();
+		//System.out.println("Min(v1) = " + minV1 + " Max(v1) = " + maxV1);
 		
 		//for matrices: iterate over row or column vectors
 		SimpleVector maxVec = new SimpleVector(M.getCols());
@@ -210,14 +211,14 @@ public class Intro {
 		//Norms
 		//TODO matrix L1
 		//TODO vector L2
-		System.out.println("||M||_F = " + matrixNormL1);
-		System.out.println("||colVec||_2 = " + vecNormL2);
+		//System.out.println("||M||_F = " + matrixNormL1);
+		//System.out.println("||colVec||_2 = " + vecNormL2);
 		
 		//get normalized vector
 		//TODO
 		//normalize vector in-place
 		//TODO
-		System.out.println("Normalized colVector: " + colVector.toString());
+		//System.out.println("Normalized colVector: " + colVector.toString());
 		
 		
 		//SVD
@@ -231,15 +232,15 @@ public class Intro {
 		//TODO SVD
 		
 		//print singular matrix
-		System.out.println(svd.getS().toString());
+		//System.out.println(svd.getS().toString());
 		
 		//get condition number
-		System.out.println("Condition number of A: " + TODO );
+		//System.out.println("Condition number of A: " + TODO );
 		
 		//Re-compute A = U * S * V^T
-		SimpleMatrix temp = SimpleOperators.multiplyMatrixProd(svd.getU(), svd.getS());
-		SimpleMatrix A2 = SimpleOperators.multiplyMatrixProd(temp, svd.getV().transposed());
-		System.out.println("U * S * V^T: " + A2.toString());
+		//SimpleMatrix temp = SimpleOperators.multiplyMatrixProd(svd.getU(), svd.getS());
+		//SimpleMatrix A2 = SimpleOperators.multiplyMatrixProd(temp, svd.getV().transposed());
+		//System.out.println("U * S * V^T: " + A2.toString());
 		
 	}
 
