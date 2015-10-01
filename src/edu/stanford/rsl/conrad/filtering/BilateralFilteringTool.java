@@ -120,6 +120,18 @@ public class BilateralFilteringTool extends IndividualImageFilteringTool {
 		return false;
 	}
 
+	/**
+	 * Allows changing of filter parameters without the need for calling the User-Query dialog. 
+	 * @param width The kernel width
+	 * @param domainSigma The domain standard deviation used for spatial filtering
+	 * @param photometricSigma The photometric standard deviation
+	 */
+	public void setParameters(int width, double domainSigma, double photometricSigma){
+		this.width = width;
+		this.sigma_d = domainSigma;
+		this.sigma_r = photometricSigma;
+	}
+	
 }
 
 /*

@@ -82,4 +82,5 @@ public class HelicalTrajectory extends CircularTrajectory {
 		
 		//System.out.println("Defined geometry with SDD " +sourceToDetectorDistance);
 	}
+
 }

@@ -122,7 +122,7 @@ if (true) {
 		if(lower.x > 1.0f*(gridSizeX-1) || lower.y > 1.0f*(gridSizeY -1))
 			continue;
 
-		int idxTL = lower.x + lower.y * gridSizeX;
+		int idxTL = mad24(lower.y,gridSizeX,lower.x);
 		int idxTR = idxTL + 1;
 		int idxBL = idxTL + gridSizeX;
 		int idxBR = idxTR + gridSizeX;

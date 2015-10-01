@@ -47,6 +47,7 @@ public class CrisEDPhantomGUI extends JPanel implements ActionListener,ItemListe
 	private JTextComponent insertNameField;
 	private JTextField materialField;
 	private JTextField densityField;
+	//private JTextField bufferedDiameterField;// define the diameter of buffer insert
 	private AbstractButton innerDiskActivator;
 	private AbstractButton outerDiskActivator;
 	private JLabel insertNameLabel;
@@ -55,6 +56,7 @@ public class CrisEDPhantomGUI extends JPanel implements ActionListener,ItemListe
 	private JLabel instructionLabel;
 	private JCheckBox bufferedMaterial;
 	private JLabel bufferedMaterialLabel;
+	//private JLabel bufferedDiameterLabel; // define the diameter of buffer insert
 	private JButton okButton;
 	private JRadioButton currButton;
 
@@ -124,6 +126,11 @@ public class CrisEDPhantomGUI extends JPanel implements ActionListener,ItemListe
 		bufferedMaterialLabel.setToolTipText("Check if material is buffered with water");
 		bufferedMaterial = new JCheckBox();
 		bufferedMaterial.setToolTipText("Check if material is buffered with water");
+		/*bufferedDiameterLabel = new JLabel("Diameter of buffer insert: ");
+		bufferedDiameterLabel.setName("bufferedDiameterLabel");  
+		bufferedDiameterField = new JTextField("5");
+		bufferedDiameterField.setName("materialField"); 
+		bufferedDiameterField.setMinimumSize(new Dimension(100,10));*/
 		//
 		okButton = new JButton("OK");
 		okButton.setName("okButton");
@@ -268,6 +275,7 @@ public class CrisEDPhantomGUI extends JPanel implements ActionListener,ItemListe
 																				.addComponent(insertNameLabel)
 																				.addComponent(materialLabel)
 																				.addComponent(densityLabel)
+																				//.addComponent(bufferedDiameterLabel)
 																				.addComponent(bufferedMaterialLabel))	                            
 																				.addGap(18, 18, 18)
 																				.addGroup(mainPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING, false)
@@ -379,7 +387,13 @@ public class CrisEDPhantomGUI extends JPanel implements ActionListener,ItemListe
 		if (index == 8){
 			double centralInsertDiameter = Double.parseDouble(Configuration.getGlobalConfiguration().getRegistryEntry(RegKeys.ED_PHANTOM_CENTERAL_BUFFER_DIAMETER));
 			ins = new Insert(MaterialsDB.getMaterial(material), buffered, centralInsertDiameter);
-		} else {
+		} 
+		//special modification for determining the buffer diameter of Insert1 to adapt Jang@Stanford's EDPhantom 
+		else if (index == 1){
+			double insertOneDiameter = Double.parseDouble(Configuration.getGlobalConfiguration().getRegistryEntry(RegKeys.ED_PHANTOM_INSERT_1_BUFFER_DIAMETER));
+			ins = new Insert(MaterialsDB.getMaterial(material), buffered, insertOneDiameter);
+		} 
+		else {
 			ins = new Insert(MaterialsDB.getMaterial(material), buffered);
 		}
 		if(ring.equals("I")){
