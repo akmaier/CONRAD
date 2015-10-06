@@ -1,6 +1,7 @@
 package edu.stanford.rsl.conrad.filtering;
 
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
+import edu.stanford.rsl.conrad.data.numeric.opencl.OpenCLGrid2D;
 
 /**
  * Class implements a simple truncation correction algorithm after 
@@ -18,7 +19,7 @@ public class TruncationCorrectionTool extends IndividualImageFilteringTool {
 	 * 
 	 */
 	private static final long serialVersionUID = 7424197576259159222L;
-	protected static int EXTENSION_FRACTION = 10;
+	protected static int EXTENSION_FRACTION = 3;
 	protected static int offset =3;
 	
 	@Override
@@ -87,6 +88,7 @@ public class TruncationCorrectionTool extends IndividualImageFilteringTool {
 	public Grid2D applyToolToImage(Grid2D imageProcessor) {
 		n_S = imageProcessor.getWidth()-offset-offset;
 		n_ext = (n_S / EXTENSION_FRACTION) + offset;
+		
 		Grid2D theFilteredProcessor = new Grid2D(n_S+ (2 * n_ext), imageProcessor.getHeight());
 		// Zero padding (Eq. (2))
 		for (int j = 0; j < theFilteredProcessor.getHeight(); j++){
@@ -137,6 +139,60 @@ public class TruncationCorrectionTool extends IndividualImageFilteringTool {
 		return theFilteredProcessor;
 	}
 
+	public OpenCLGrid2D applyToolToImage(OpenCLGrid2D imageProcessor) {
+		n_S = imageProcessor.getWidth()-offset-offset;
+		n_ext = (n_S / EXTENSION_FRACTION) + offset;
+		
+		OpenCLGrid2D theFilteredProcessor = new OpenCLGrid2D(new Grid2D(n_S+ (2 * n_ext), imageProcessor.getHeight()));
+		// Zero padding (Eq. (2))
+		for (int j = 0; j < theFilteredProcessor.getHeight(); j++){
+			for (int kprime = 0; kprime < theFilteredProcessor.getWidth(); kprime++){
+				if (kprime < n_ext) theFilteredProcessor.putPixelValue(kprime, j, 0);
+				if ((kprime >= n_ext) && (kprime < n_ext + n_S)) {
+					theFilteredProcessor.putPixelValue(kprime, j, imageProcessor.getPixelValue(kprime - n_ext+offset, j));
+				}
+				if ((kprime > n_ext + n_S -1)) theFilteredProcessor.putPixelValue(kprime, j, 0);
+			}
+			// values at the end of the detector
+			double s_A = imageProcessor.getPixelValue(offset, j);
+			double s_E = imageProcessor.getPixelValue(n_S - 1+offset, j);
+			// Compute k_SA (K_{S,A} in the paper)
+			k_SA = n_ext;
+			for (int i = 0; i < n_S; i++){
+				if (imageProcessor.getPixelValue(i+offset, j) > (2 * s_A)) {
+					k_SA = i - 1;
+					break;
+				}
+			}
+			// Compute k_SE (K_{S,E} in the paper)
+			k_SE =  n_S - n_ext - 1;
+			for (int i = n_S - 1; i > 0; i--){
+				if (imageProcessor.getPixelValue(i+offset, j) > (2 * s_E)) {
+					k_SE = i + 1;
+					break;
+				}
+			}
+			//System.out.println(k_SA + " " + n_ext + " " + k_SE);
+			// Mirror left Eq. (3a)
+			for (int k = 1; k < Math.min(k_SA, n_ext) + 1; k++){
+				theFilteredProcessor.putPixelValue(n_ext - k, j, (2 * s_A) - imageProcessor.getPixelValue(k+offset, j));
+			}
+			// Mirror right Eq. (3b)
+			for (int k = n_S - 2; k > Math.max(k_SE, n_S - n_ext - 1) + 1; k--){
+				theFilteredProcessor.putPixelValue((2 * n_S) + n_ext - 2 - k, j, (2 * s_E) - imageProcessor.getPixelValue(k+offset, j));
+			}
+			// Weight left side Eq. (4a)
+			for (int kprime = 0; kprime < n_ext; kprime++){
+				theFilteredProcessor.putPixelValue(kprime, j, theFilteredProcessor.getPixelValue(kprime, j) * w_K_SA(kprime));
+			}
+			// Weight right Eq. (4b)
+			for (int kprime = n_S + n_ext; kprime < n_S + (2 * n_ext); kprime++){
+				theFilteredProcessor.putPixelValue(kprime, j, theFilteredProcessor.getPixelValue(kprime, j) * w_K_SE(kprime));
+			}
+		}
+		return theFilteredProcessor;
+	}
+	
 	@Override
 	public void configure() {
 		setConfigured(true);

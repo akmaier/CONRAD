@@ -137,7 +137,16 @@ public class Grid3D extends NumericGrid {
 		return this.buffer.get(i);
 	}
 	
+	/*
+	 * Be careful when using this method. If the grid is larger than the old grid the size will be 
+	 * overwritten and the origin etc may change!
+	 */
 	public void setSubGrid(int i, Grid2D grid) {
+		if(grid.getWidth() != size[0] || grid.getHeight() != size[1]) {
+			size[0] = grid.getWidth();
+			size[1] = grid.getHeight();
+			System.out.println("Warning. Changing grid size! Be careful while setting the 2D subgrid!");
+		}
 		this.buffer.set(i, grid);
 		notifyAfterWrite();
 	}
@@ -179,6 +188,7 @@ public class Grid3D extends NumericGrid {
 
 	@Override
 	public String toString() {
+		this.notifyBeforeRead();
 		String result = new String();
 		result += "[";
 		for (int i = 0; i < this.buffer.size(); ++i) {

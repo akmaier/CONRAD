@@ -57,7 +57,7 @@ public class Insert extends PrioritizableScene {
 	}
 	
 	public Insert(Material material, int bufferState) {
-		this(material, bufferState, 5);
+		this(material, bufferState, 3);
 	}
 	
 	/**

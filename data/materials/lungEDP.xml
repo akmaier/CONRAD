@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<java version="1.6.0_20" class="java.beans.XMLDecoder"> 
+ <object class="edu.stanford.rsl.conrad.physics.materials.Mixture"> 
+  <void property="density"> 
+   <double>0.20</double> 
+  </void> 
+  <void property="name"> 
+   <string>lungEDP</string> 
+  </void> 
+  <void property="weightedAtomicComposition"> 
+   <object class="edu.stanford.rsl.conrad.physics.materials.utils.WeightedAtomicComposition"> 
+    <void property="compositionTable"> 
+     <void method="put"> 
+      <string>C</string> 
+      <double>1.26105</double> 
+     </void> 
+     <void method="put"> 
+      <string>Cl</string> 
+      <double>0.10635000000000001</double> 
+     </void> 
+     <void method="put"> 
+      <string>H</string> 
+      <double>0.10381782</double> 
+     </void> 
+     <void method="put"> 
+      <string>K</string> 
+      <double>0.078196</double> 
+     </void> 
+     <void method="put"> 
+      <string>N</string> 
+      <double>0.43431</double> 
+     </void> 
+     <void method="put"> 
+      <string>Na</string> 
+      <double>0.04598</double> 
+     </void> 
+     <void method="put"> 
+      <string>O</string> 
+      <double>11.984</double> 
+     </void> 
+     <void method="put"> 
+      <string>P</string> 
+      <double>0.06194</double> 
+     </void> 
+     <void method="put"> 
+      <string>S</string> 
+      <double>0.096198</double> 
+     </void> 
+    </void> 
+   </object> 
+  </void> 
+ </object> 
+</java> 
