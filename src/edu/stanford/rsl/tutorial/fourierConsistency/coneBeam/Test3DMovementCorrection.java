@@ -1,5 +1,6 @@
 package edu.stanford.rsl.tutorial.fourierConsistency.coneBeam;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 
@@ -23,7 +24,11 @@ import edu.stanford.rsl.conrad.data.numeric.Grid2D;
 import edu.stanford.rsl.conrad.data.numeric.Grid3D;
 import edu.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators;
 import edu.stanford.rsl.conrad.data.numeric.opencl.OpenCLGrid2D;
+import edu.stanford.rsl.conrad.geometry.trajectories.Trajectory;
+import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
+import edu.stanford.rsl.conrad.numerics.SimpleOperators;
 import edu.stanford.rsl.conrad.opencl.OpenCLUtil;
+import edu.stanford.rsl.conrad.utils.Configuration;
 import edu.stanford.rsl.conrad.utils.FileUtil;
 import edu.stanford.rsl.conrad.utils.ImageUtil;
 
@@ -36,9 +41,11 @@ public class Test3DMovementCorrection {
 
 		
 		new ImageJ();
-		
+		Configuration.loadConfiguration();
 		// read in projection data
 		Grid3D projections = null;
+		ApodizationImageFilter filt = new ApodizationImageFilter();
+		filt.setCustomSizes(new Integer[]{null, (int)(Configuration.getGlobalConfiguration().getGeometry().getDetectorHeight()-40)});
 		try {
 			// locate the file
 			// here we only want to select files ending with ".bin". This will open them as "Dennerlein" format.
@@ -46,9 +53,11 @@ public class Test3DMovementCorrection {
 			// new formats can be added to HandleExtraFileTypes.java
 			//String filenameString = FileUtil.myFileChoose("proj/ciptmp/co98jaha/workspace/data/FinalProjections80kev/FORBILD_Head_80kev.tif",".tif", false);
 			// call the ImageJ routine to open the image:
-			ImagePlus imp = IJ.openImage("D:/Data/ForbildHead3D/FinalProjections80kev/FORBILD_Head_80kev_Motion_rescaledToPowerOfTwo.tif");
+			//ImagePlus imp = IJ.openImage("D:/Data/ForbildHead3D/FinalProjections80kev/TestXCAT.tif");
+			ImagePlus imp = IJ.openImage("D:/Data/WeightBearing/PMB/XCatDynamicSquat_NoTruncation_256proj_620_480_MeadianRad2_80keVnoNoise.tif");
 			// Convert from ImageJ to Grid3D. Note that no data is copied here. The ImageJ container is only wrapped. Changes to the Grid will also affect the ImageJ ImagePlus.
 			projections = ImageUtil.wrapImagePlus(imp);
+			filt.configure();
 			// Display the data that was read from the file.
 			//projections.show("Data from file");
 		} catch (Exception e) {
@@ -58,119 +67,54 @@ public class Test3DMovementCorrection {
 		
 		//NumericPointwiseOperators.fill(projections,0f);
 		//projections.setAtIndex(0, 0, 0, 1);
-		projections.show("Data from file");
+		Grid3D projectionsWindowed = (Grid3D) ImageUtil.applyFilterInParallel((Grid3D) projections.clone(), filt).clone();
+		projectionsWindowed.show("Windowed Projections");
 		
 		// get configuration
-		String xmlFilename = "D:/Data/ForbildHead3D/ConradSettingsForbild3D_rescaledAngles.xml";
-		Config conf = new Config(xmlFilename, 15, 1);
+		String xmlFilename = "D:/Data/WeightBearing/PMB/XCAT motion correction_256proj_620_480_Subj2 Static60_fullView.xml";
+		String outXMLfile = xmlFilename;
+		outXMLfile = outXMLfile.substring(0, outXMLfile.length()-4);
+		outXMLfile += "corrected.xml";
+		
+		Config conf = new Config(xmlFilename, 2, 1);
 		conf.getMask().show("mask");
 		System.out.println("N: "+ conf.getHorizontalDim() + " M: " + conf.getVerticalDim() + " K: "+  conf.getNumberOfProjections());
-		//Grid1D testShift = new Grid1D(conf.getNumberOfProjections()*2);
-
-		// Test shifting of 1 pixel each projection, both dimensions
 		
-		/* 
-		for(int i = 0; i < testShift.getSize()[0]; i++){
-			if(i%2 == 0){
-				testShift.setAtIndex(i, 1.0f);
-			}
-			else{
-				testShift.setAtIndex(i, 1.0f);
-			}
-		}
-		*/
 		
-		MovementCorrection3D mc = new MovementCorrection3D(projections, conf, false);
-		//mc.setShiftVector(testShift);
+		MovementCorrection3D mc = new MotionCorrection3DFast(projectionsWindowed, conf, false);
 		mc.doFFT2();
-		//mc.getData().show("2D-Fouriertransformed before transposing");
 		mc.transposeData();
-//		for(int i = 0; i < 10000; i++){
-//			mc.parallelShiftOptimized();
-//			System.out.println("Runde:" + i);
-//		}
-		//ComplexGrid3D nextGrid = (ComplexGrid3D) mc.get2dFourierTransposedData().clone();
 
-
-//		mc.doFFTAngle();
-//		mc.get2dFourierTransposedData().show("fft before");
-//		mc.doiFFTAngle();
-//		
-//		mc.doFFTAngleCL();
-//		mc.get3dFourier().show("dft");
-//		mc.doiFFTAngleCL();
-//		
-		
-
-		//mc.doiFFTAngleCL();
-		
 		Grid1D result = mc.computeOptimalShift();
-		for(int i = 0; i < result.getNumberOfElements(); i++){
-			float val = result.getAtIndex(i);
-			System.out.println(i + ": " + val);
-		}
 		result.show("Result shift vector");
 		
-//		for(int i = 0; i < 2; i++){
-//			
-//			mc.doFFTAngleCL();
-//			//mc.get3dFourier().getRealGrid().show("Real Grid after forward " + i);
-//			//mc.get3dFourier().getImagGrid().show("Imag Grid after forward " + i);
-//			//mc.get3dFourier().getRealGrid().show();
-//			ComplexGrid3D  fftCLGrid = mc.get3dFourier();
-//	//		mc.doFFTAngle();
-//	//		ComplexGrid3D fftGrid = mc.get2dFourierTransposedData();
-//	//		mc.doiFFTAngle();
-//			Grid2D mask = conf.getMask();
-//			float sumCL = 0;
-//			float sumCPU = 0;
-//			int counter = 0;
-//			
-//			for(int proj = 0; proj < fftCLGrid.getSize()[0]; proj++){
-//				for(int u = 0; u < fftCLGrid.getSize()[1]; u++){
-//					if(mask.getAtIndex(proj, u) == 1){
-//						counter++;
-//						for(int v = 0; v < fftCLGrid.getSize()[2]; v++){
-//							sumCL += fftCLGrid.getAtIndex(proj, u, v).getReal();
-//	//						sumCPU += fftGrid.getAtIndex(proj, u, v).getReal();
-//						} 
-//					}
-//				}
-//			}
-//			System.out.println("Anzahl erkannte 1 in Maske: " + counter);
-//			System.out.println("Anzahl v: " + fftCLGrid.getSize()[2]);
-//			int numElCl = fftCLGrid.getNumberOfElements();
-//	//		int numEl = fftGrid.getNumberOfElements();
-//			System.out.println("CLGrid size: " + numElCl);// + ", cpuGrid size:" + numEl);
-//			//sumCL /= numElCl;
-//			//sumCPU /= numEl;
-//			System.out.println("normalized sum cl: "+ sumCL);// + ", sum cpu" + sumCPU);
-//			//mc.doFFTAngle();
-//			//mc.get2dFourierTransposedData().show("FFT");
-//			//mc.get3dFourier().show("DFT");
-//			mc.doiFFTAngleCL();
-//		}
+		Grid3D reconNoCorr = (Grid3D)ImageUtil.applyFiltersInParallel((Grid3D)projections.clone(), Configuration.getGlobalConfiguration().getFilterPipeline()).clone();
+		reconNoCorr.show("Non-corrected Reconstruction");
 		
-		//mc.get2dFourierTransposedData().show("after angle backtransform");
+		Trajectory geom = Configuration.getGlobalConfiguration().getGeometry();
+		for (int i = 0; i < geom.getProjectionMatrices().length; i++) {
+			int idx = i*2;
+			SimpleMatrix mat = SimpleMatrix.I_3.clone();
+			mat.setElementValue(0, 2, -result.getAtIndex(idx)/mc.getConfig().getPixelXSpace());
+			mat.setElementValue(1, 2, -result.getAtIndex(idx+1)/mc.getConfig().getPixelYSpace());
+			
+			geom.getProjectionMatrix(i).setKValue(
+					SimpleOperators.multiplyMatrixProd(mat, geom.getProjectionMatrix(i).getK()));
+		}
+		Configuration.getGlobalConfiguration().setGeometry(geom);
 		
-//		
-////		//mc.computeOptimalShift();
-		//mc.applyShift();
-//		long time = System.currentTimeMillis();
-//		for(int i = 0; i < 30; i++){
-//			mc.parallelShiftOptimized();
-//		}
-//		time = System.currentTimeMillis() - time;
-//		System.out.println("complete time for 30 shifts: " + time);
-//		time /= 30;
-//		System.out.println("average time per shift:" + time);
-////		
+		Grid3D recon = (Grid3D) ImageUtil.applyFiltersInParallel((Grid3D)projections.clone(), Configuration.getGlobalConfiguration().getFilterPipeline()).clone();
+		recon.show("Corrected Reconstruction");
+		
 		mc.backTransposeData();
 //		//mc.getData().show("2D-Fouriertransformed after transposing");
 		mc.doiFFT2();
 		mc.getData().getRealGrid().show("Output (corrected) - Real");
 		mc.getData().getImagGrid().show("Output (corrected) - Imaginary");
-		mc.getData().show("Output (corrected) - Magnitude");
+		//mc.getData().show("Output (corrected) - Magnitude");
+
+		Configuration.saveConfiguration(Configuration.getGlobalConfiguration(), outXMLfile);
+		
 	}
 	
 }

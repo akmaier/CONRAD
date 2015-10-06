@@ -153,73 +153,74 @@ kernel void shift(
 
 // new version
 kernel void shift(
-	global float *data, 
+	global float *data,
 	global float *freqU, 
 	__local float* freqULocal,	
 	global float *freqV,
 	__local float* freqVLocal,	
 	global float *shifts, 
-	__local float* shiftsLocal,	
-	int const numProj, 
-	int const numElementsU, 
-	int const numElementsV) 
+	__local float* shiftsLocal	
+	//uint const numProj, 
+	//uint const numElementsU, 
+	//uint const numElementsV
+	) 
 {
 
-	int iProjLoc = get_local_id(0);
-	int iProjGrp = get_group_id(0);
-	int locSizex = get_local_size(0);
-	int iProj = mad24(iProjGrp,locSizex,iProjLoc);
+	uint iProjLoc = get_local_id(0);
+	uint iProjGrp = get_group_id(0);
+	uint locSizex = get_local_size(0);
+	uint iProj = mad24(iProjGrp,locSizex,iProjLoc);
 	
-	int iGIDULoc = get_local_id(1);
-	int iGIDUGrp = get_group_id(1);
-	int locSizey = get_local_size(1);
-	int iGIDU = mad24(iGIDUGrp,locSizey,iGIDULoc);
+	uint iGIDVLoc = get_local_id(1);
+	uint iGIDVGrp = get_group_id(1);
+	uint locSizey = get_local_size(1);
+	uint iGIDV = mad24(iGIDVGrp,locSizey,iGIDVLoc);
 	
-	int nrOfLocalThreads = mul24(locSizex,locSizey);
-	int nrOfPtsReadInLoops = (numElementsV%nrOfLocalThreads) ? (numElementsV/nrOfLocalThreads + 1) : (numElementsV/nrOfLocalThreads);
+	uint nrOfLocalThreads = mul24(locSizex,locSizey);
+	uint nrOfPtsReadInLoops = (numElementsV%nrOfLocalThreads) ? (numElementsV/nrOfLocalThreads + 1) : (numElementsV/nrOfLocalThreads);
 	
-	for (int i = 0; i < nrOfPtsReadInLoops; i++){
-		int linOffset = mad24(i,nrOfLocalThreads,iProjLoc);
-		int ptsIdx = mad24(iGIDULoc,locSizex,linOffset);
+	for (uint i = 0; i < nrOfPtsReadInLoops; i++){
+		uint linOffset = mad24(i,nrOfLocalThreads,iProjLoc);
+		uint ptsIdx = mad24(iGIDVLoc,locSizex,linOffset);
 		if (ptsIdx >= numElementsV)
 			break;
 		freqVLocal[ptsIdx]=freqV[ptsIdx];
 	}
 	nrOfPtsReadInLoops = (numElementsU%nrOfLocalThreads) ? (numElementsU/nrOfLocalThreads + 1) : (numElementsU/nrOfLocalThreads);
-	for (int i = 0; i < nrOfPtsReadInLoops; i++){
-		int linOffset = mad24(i,nrOfLocalThreads,iProjLoc);
-		int ptsIdx = mad24(iGIDULoc,locSizex,linOffset);
+	for (uint i = 0; i < nrOfPtsReadInLoops; i++){
+		uint linOffset = mad24(i,nrOfLocalThreads,iProjLoc);
+		uint ptsIdx = mad24(iGIDVLoc,locSizex,linOffset);
 		if (ptsIdx >= numElementsU)
 			break;
 		freqULocal[ptsIdx]=freqU[ptsIdx];
 	}
-	int numProjTimes2 = numProj*2;
+	uint numProjTimes2 = numProj*2;
 	nrOfPtsReadInLoops = (numProjTimes2%nrOfLocalThreads) ? (numProjTimes2/nrOfLocalThreads + 1) : (numProjTimes2/nrOfLocalThreads);
-	for (int i = 0; i < nrOfPtsReadInLoops; i++){
-		int linOffset = mad24(i,nrOfLocalThreads,iProjLoc);
-		int ptsIdx = mad24(iGIDULoc,locSizex,linOffset);
+	for (uint i = 0; i < nrOfPtsReadInLoops; i++){
+		uint linOffset = mad24(i,nrOfLocalThreads,iProjLoc);
+		uint ptsIdx = mad24(iGIDVLoc,locSizex,linOffset);
 		if (ptsIdx >= numProjTimes2)
 			break;
 		shiftsLocal[ptsIdx]=shifts[ptsIdx];
 	}
 	barrier(CLK_LOCAL_MEM_FENCE); // make sure that all points are in local memory
 	
-	if (iProj >= numProj || iGIDU >= numElementsU) {
+	if (iProj >= numProj || iGIDV >= numElementsV) {
 		return;
 	}
 	// for loop over all projections (simple implementation, later vector with shifts and position and iteration over this vector)
 
 	// ((iGIDV*numElementsU+iGIDU) * numProj) + iProj = iGIDV*numElementsU*numProj + iGIDU*numProj + iProj
-	uint iGIDVPitch = mul24(numElementsU,numProj);
-	uint globalOffsetStatic = mad24(iGIDU, numProj, iProj);
-	int iProjTimes2 = iProj << 1; 
-	float preAngle = freqULocal[iGIDU]*shiftsLocal[iProjTimes2];
-	float preImagShift = shiftsLocal[iProjTimes2+1];
+	uint globalOffsetStatic = mad24(iGIDV, mul24(numElementsU,numProj), iProj);
+	uint iProjTimes2 = iProj << 1; 
+	float preUShift = shiftsLocal[iProjTimes2];
+	float preAngle = freqVLocal[iGIDV]*shiftsLocal[iProjTimes2+1];
 	
-	for(uint iGIDV = 0; iGIDV < numElementsV; iGIDV++){
-		uint globalOffset = mad24(iGIDV, iGIDVPitch, globalOffsetStatic);	
+	#pragma unroll 4
+	for(uint iGIDU = 0; iGIDU < numElementsU; iGIDU++){ 
+		uint globalOffset = mad24(iGIDU, numProj, globalOffsetStatic);	
 	    float2 orig = vload2(globalOffset, data);
-	    float angle = preAngle + freqVLocal[iGIDV]*preImagShift;
+	    float angle = mad(freqULocal[iGIDU],preUShift,preAngle);
 	    float2 cshift = (float2)(native_cos(angle), native_sin(angle));
 		float2 res = cmult(cshift, orig);
 		vstore2(res, globalOffset, data);
