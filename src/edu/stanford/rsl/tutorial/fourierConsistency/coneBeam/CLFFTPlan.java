@@ -1,4 +1,7 @@
-
+/*
+ * Copyright (C) 2015 Martin Berger
+ * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
+*/
 package edu.stanford.rsl.tutorial.fourierConsistency.coneBeam;
 
 import com.jogamp.opencl.CLBuffer;
