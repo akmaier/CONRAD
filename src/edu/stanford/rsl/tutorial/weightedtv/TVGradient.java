@@ -14,60 +14,78 @@ public class TVGradient {
 	public float weps=0.001f;
 	public float thresMax=0.1f;
 	public float thresMin=0.01f;
-	public Grid2D gradient;
+	public Grid2D imageGradient;
 	public Grid2D tvGradient;
-	public double max_Value=0.0;
-	public Grid2D wMatrix;//weights for weighted TV
+	public double maxValue=0.0;
+	public Grid2D weightMatrix;//weights for weighted TV
 
 	//Parameters for 2 level weighted TV
 	public int numK=1400;
 	public float rou=0.00001f;
 	
 	public OpenCLGrid2D imgGradientCL;
-	public OpenCLGrid2D tvGradientCL;
-	public OpenCLGrid2D wMatrixCL;
+	public OpenCLGrid2D TVGradientCL;
+	public OpenCLGrid2D weightMatrixCL;
 	TVOpenCLGridOperators tvOperators;
 	
-	//AwTV
+	//anisotropic weighted TV
 	public float a=1.0f;
 	public float b=1.0f;
 	
-	private Grid2D ones_Temp;
-	private Grid2D gradient_temp;
+	private Grid2D onesTemp;
+	private Grid2D gradientTemp;
+	
+	/**
+	 * constructor
+	 * @param img
+	 */
 public TVGradient(Grid2D img)
 {
-tvGradient=new Grid2D(img);
-this.gradient=new Grid2D(img);
-NumericPointwiseOperators.fill(tvGradient, 0);
-ones_Temp=new Grid2D(img);
-NumericPointwiseOperators.fill(ones_Temp, 1.0f);
-gradient_temp=new Grid2D(img);
+	tvGradient=new Grid2D(img);
+	this.imageGradient=new Grid2D(img);
+	NumericPointwiseOperators.fill(tvGradient, 0);
+	onesTemp=new Grid2D(img);
+	NumericPointwiseOperators.fill(onesTemp, 1.0f);
+	gradientTemp=new Grid2D(img);
 }
 
+/**
+ * constructor with OpenCL grids
+ * @param imgCL
+ */
 public TVGradient(OpenCLGrid2D imgCL){
-	this.tvGradientCL=new OpenCLGrid2D(imgCL);
-	tvGradientCL.getGridOperator().fill(tvGradientCL, 0);
+	this.TVGradientCL=new OpenCLGrid2D(imgCL);
+	TVGradientCL.getGridOperator().fill(TVGradientCL, 0);
 	imgGradientCL=new OpenCLGrid2D(imgCL);
-	tvGradientCL.getGridOperator().fill(imgGradientCL, 0);
+	TVGradientCL.getGridOperator().fill(imgGradientCL, 0);
 	tvOperators=new TVOpenCLGridOperators();
 }
 
-public void initialWmatrix(){
-	wMatrix=new Grid2D(tvGradient);
-	NumericPointwiseOperators.fill(wMatrix, 1.0f);
+/**
+ * initial weight matrix as 1
+ */
+public void initialWeightMatrix(){
+	weightMatrix=new Grid2D(tvGradient);
+	NumericPointwiseOperators.fill(weightMatrix, 1.0f);
 }
 
-public void initialWmatrixCL(){
-	wMatrixCL=new OpenCLGrid2D(tvGradientCL);
-	wMatrixCL.getGridOperator().fill(wMatrixCL, 1.0f);
+/**
+ * initial weight matrix as 1 with OpenCL
+ */
+public void initialWeightMatrixCL(){
+	weightMatrixCL=new OpenCLGrid2D(TVGradientCL);
+	weightMatrixCL.getGridOperator().fill(weightMatrixCL, 1.0f);
 }
 
-
-public void computeGradient(Grid2D img){//Compute the gradient of the img
+/**
+ * compute image gradient
+ * @param img
+ */
+public void computeImageGradient(Grid2D img){//Compute the gradient of the img
 
 	double Hdiff,Vdiff;
-	for (int i = 0; i < gradient.getSize()[0]; i++) {
-		for (int j = 0; j < gradient.getSize()[1]; j++) {
+	for (int i = 0; i < imageGradient.getSize()[0]; i++) {
+		for (int j = 0; j < imageGradient.getSize()[1]; j++) {
 			double fij = img.getAtIndex(i, j);
 			double fijl = fij;
 			double fiju = fij;
@@ -77,74 +95,105 @@ public void computeGradient(Grid2D img){//Compute the gradient of the img
 				fiju = img.getAtIndex(i, j - 1);
 			Hdiff=fij-fijl;
 			Vdiff=fij-fiju;
-			this.gradient.setAtIndex(i, j, (float)Math.sqrt(Hdiff*Hdiff+Vdiff*Vdiff));
+			this.imageGradient.setAtIndex(i, j, (float)Math.sqrt(Hdiff*Hdiff+Vdiff*Vdiff));
 		}
 	}
 }
 
-
-
-public void wMatrixUpdate(Grid2D img){//Update the weights for weighted TV
-	this.computeGradient(img);
-	gradient_temp=(Grid2D)this.gradient.clone();
-	NumericPointwiseOperators.addBy(gradient_temp, (float)this.weps);
-	wMatrix=(Grid2D)NumericPointwiseOperators.dividedBy(ones_Temp,gradient_temp );	
-}
-public void wMatrixUpdate(){//Update the weights for weighted TV
-	gradient_temp=(Grid2D)this.gradient.clone();
-	NumericPointwiseOperators.addBy(gradient_temp, (float)this.weps);
-	wMatrix=(Grid2D)NumericPointwiseOperators.dividedBy(ones_Temp,gradient_temp );	
+/**
+ * Update the weight matrix, don't need to compute image first
+ * @param img
+ */
+public void weightMatrixUpdate(Grid2D img){
+	this.computeImageGradient(img);
+	gradientTemp=(Grid2D)this.imageGradient.clone();
+	NumericPointwiseOperators.addBy(gradientTemp, (float)this.weps);
+	weightMatrix=(Grid2D)NumericPointwiseOperators.dividedBy(onesTemp,gradientTemp );	
 }
 
-public void wMatrixUpdate2(Grid2D img){//Update the weights for weighted TV
-	this.computeGradient(img);
-	Grid2D gradient_temp=new Grid2D(this.gradient);
+/**
+ *  Update the weight matrix, need to compute image first
+ */
+public void weightMatrixUpdate(){
+	gradientTemp=(Grid2D)this.imageGradient.clone();
+	NumericPointwiseOperators.addBy(gradientTemp, (float)this.weps);
+	weightMatrix=(Grid2D)NumericPointwiseOperators.dividedBy(onesTemp,gradientTemp );	
+}
+
+/**
+ * Update the weight matrix, here compute the image gradient only in XY plane, not in Z direction
+ * @param img
+ */
+public void weightMatrixUpdate2(Grid2D img){
+	this.computeImageGradient(img);
+	Grid2D gradient_temp=new Grid2D(this.imageGradient);
 	gradient_temp=SetThreshold(gradient_temp,0.01f);
-	wMatrix=(Grid2D)NumericPointwiseOperators.dividedBy(ones_Temp,gradient_temp );	
+	weightMatrix=(Grid2D)NumericPointwiseOperators.dividedBy(onesTemp,gradient_temp );	
 }
 
+/**
+ * set the image gradient values below the threshold as 1
+ * @param imgGradient
+ * @param thres
+ * @return
+ */
 private Grid2D SetThreshold(Grid2D imgGradient,float thres){
 	for(int i=0;i<imgGradient.getSize()[0];i++)
 		for(int j=0;j<imgGradient.getSize()[1];j++){
 			if(imgGradient.getAtIndex(i, j)<thres)
-				imgGradient.setAtIndex(i, j, 1);
-			
+				imgGradient.setAtIndex(i, j, 1);	
 		}
 	return imgGradient;
 }
 
-
+/**
+ * compute the non-weighted TV value
+ * @param img
+ * @return
+ */
 public double getTVvalue(Grid2D img)//Compute ComputeGradient(Grid2D img)
 {
 	double TV=0.0;
-
-	this.computeGradient(img);
-	TV=NumericPointwiseOperators.sum(this.gradient);
+	this.computeImageGradient(img);
+	TV=NumericPointwiseOperators.sum(this.imageGradient);
 	
 	return TV;
 }
 
-public double getwTVvalue(Grid2D img)//Compute ComputeGradient(Grid2D img)
+/**
+ * compute the weighted TV value
+ * @param img
+ * @return
+ */
+public double getWeightedTVvalue(Grid2D img)
 {
 	double wTV=0.0;
-	this.computeGradient(img);
-	wTV=NumericPointwiseOperators.sum(NumericPointwiseOperators.multipliedBy(wMatrix, gradient));
+	this.computeImageGradient(img);
+	wTV=NumericPointwiseOperators.sum(NumericPointwiseOperators.multipliedBy(weightMatrix, imageGradient));
 	return wTV;
 }
 
-
-public double getwTVvalue()//Compute ComputeGradient(Grid2D img)
+/**
+ * get the weighted TV value, need to compute the image gradient first
+ * @return
+ */
+public double getWeightedTVvalue()//Compute ComputeGradient(Grid2D img) first
 {
 	double wTV=0.0;
 	
-	wTV=NumericPointwiseOperators.sum(NumericPointwiseOperators.multipliedBy(wMatrix, gradient));
+	wTV=NumericPointwiseOperators.sum(NumericPointwiseOperators.multipliedBy(weightMatrix, imageGradient));
 	return wTV;
 }
 
+/**
+ * compute the non-weighted TV gradient
+ * @param img
+ * @return
+ */
 public Grid2D computeTVGradient(Grid2D img) {
 		//According to the paper:
 		//Accurate image reconstruction from few-views and limited-angle data in divergent-beam CT
-		this.max_Value=0.0f;
+		this.maxValue=0.0f;
 		for (int i = 0; i < tvGradient.getSize()[0]; i++) {
 			for (int j = 0; j < tvGradient.getSize()[1]; j++) {
 				double fij = img.getAtIndex(i, j);
@@ -175,8 +224,8 @@ public Grid2D computeTVGradient(Grid2D img) {
 						/ Math.sqrt(eps + (fijr - fij) * (fijr - fij)+ (fijr - fijru) * (fijr - fijru))
 						- 2* (fijd - fij)
 						/ Math.sqrt(eps + (fijd - fij) * (fijd - fij)+ (fijd - fijld)*(fijd - fijld));
-				if (Math.abs(vij)>max_Value)
-					max_Value=Math.abs(vij);
+				if (Math.abs(vij)>maxValue)
+					maxValue=Math.abs(vij);
 				tvGradient.setAtIndex(i, j, (float) vij);
 
 			}
@@ -184,11 +233,15 @@ public Grid2D computeTVGradient(Grid2D img) {
 		return tvGradient;
 	}
 	
-	
+	/**
+	 * compute the non-weighted TV gradient, in XY plane, not include the Z direction
+	 * @param img
+	 * @return
+	 */
 	public Grid2D computeTVGradient2(Grid2D img) {
 		//According to the paper:
 		//Accurate image reconstruction from few-views and limited-angle data in divergent-beam CT
-		this.max_Value=0;
+		this.maxValue=0;
 		for (int i = 0; i< tvGradient.getSize()[0]; i++) {
 			for (int j = 0; j < tvGradient.getSize()[1]; j++) {
 				double fij = img.getAtIndex(i, j);
@@ -218,8 +271,8 @@ public Grid2D computeTVGradient(Grid2D img) {
 						/ Math.sqrt(eps + (fijru - fiju) * (fijru - fiju)+ (fij - fiju) * (fij - fiju))
 						+  (fij - fijl)
 						/ Math.sqrt(eps + (fij - fijl) * (fij - fijl)+ (fijl - fijld)*(fijl - fijld));
-				if (Math.abs(vij)>max_Value)
-					max_Value=Math.abs(vij);
+				if (Math.abs(vij)>maxValue)
+					maxValue=Math.abs(vij);
 				tvGradient.setAtIndex(i, j, (float) vij);
 
 			}
@@ -227,12 +280,17 @@ public Grid2D computeTVGradient(Grid2D img) {
 		return tvGradient;
 	}
 
+	/**
+	 * compute weighted TV gradient
+	 * @param img
+	 * @return
+	 */
 	public Grid2D computewTVGradient(Grid2D img) {//weighted TV gradient
 		//According to the paper:
 		//Accurate image reconstruction from few-views and limited-angle data in divergent-beam CT
 		double vij;
 		double wr,wd;
-		this.max_Value=0;
+		this.maxValue=0;
 		for (int i = 0; i < img.getSize()[0]; i++) {
 			for (int j = 0; j < img.getSize()[1]; j++) {
 				double fij = img.getAtIndex(i, j);
@@ -248,7 +306,7 @@ public Grid2D computeTVGradient(Grid2D img) {
 					fijl = img.getAtIndex(i - 1, j);
 				if (i < tvGradient.getSize()[0] - 1){
 					fijr = img.getAtIndex(i + 1, j);
-				wr=this.wMatrix.getAtIndex(i+1, j);
+				wr=this.weightMatrix.getAtIndex(i+1, j);
 				}
 				else
 					wr=0.0f;
@@ -256,7 +314,7 @@ public Grid2D computeTVGradient(Grid2D img) {
 					fiju = img.getAtIndex(i, j - 1);
 				if (j < tvGradient.getSize()[1] - 1){
 					fijd = img.getAtIndex(i, j + 1);
-				wd=this.wMatrix.getAtIndex(i, j+1);}
+				wd=this.weightMatrix.getAtIndex(i, j+1);}
 				else
 					wd=0.0;
 				if (i > 0 & j < tvGradient.getSize()[1] - 1)
@@ -265,15 +323,15 @@ public Grid2D computeTVGradient(Grid2D img) {
 					fijru = img.getAtIndex(i + 1, j - 1);
 				
 			
-				vij = this.wMatrix.getAtIndex(i, j)*(4 * fij - 2 * fijl - 2 * fiju)
+				vij = this.weightMatrix.getAtIndex(i, j)*(4 * fij - 2 * fijl - 2 * fiju)
 						/ Math.sqrt(eps + (fij - fijl) * (fij - fijl)+ (fij - fiju) * (fij - fiju))
 						-wr* 2* (fijr - fij)
 						/ Math.sqrt(eps + (fijr - fij) * (fijr - fij)+ (fijr - fijru) * (fijr - fijru))
 						-wd* 2* (fijd - fij)
 						/ Math.sqrt(eps + (fijd - fij) * (fijd - fij)+ (fijd - fijld)*(fijd - fijld));
 				
-				if (Math.abs(vij)>max_Value)
-					max_Value=Math.abs(vij);
+				if (Math.abs(vij)>maxValue)
+					maxValue=Math.abs(vij);
 				tvGradient.setAtIndex(i, j, (float) vij);
 
 			}
@@ -282,75 +340,116 @@ public Grid2D computeTVGradient(Grid2D img) {
 	}
 	
 	//*****************************************************************************************************use OpenCL
-	public void computeGradientCL(OpenCLGrid2D imgCL){
+	/**
+	 * compute image gradient use OpenCL
+	 * @param imgCL
+	 */
+	public void computeImageGradientCL(OpenCLGrid2D imgCL){
 		//TVOpenCLGridOperators.getInstance().compute_img_gradient(imgCL, this.imgGradientCL);
-		tvOperators.compute_img_gradient2D(imgCL, imgGradientCL);
+		tvOperators.computeImageGradient2D(imgCL, imgGradientCL);
 	}
 	
-	public void wMatrixCLUpdate(OpenCLGrid2D imgCL){		
+	/**
+	 * weight matrix update with OpenCL
+	 * @param imgCL
+	 */
+	public void weightMatrixCLUpdate(OpenCLGrid2D imgCL){		
 		//this.ComputeGradientCL(imgCL);
-		TVOpenCLGridOperators.getInstance().compute_Wmatrix_Update2D(imgCL, wMatrixCL, weps);
+		TVOpenCLGridOperators.getInstance().computeWeightMatrixUpdate2D(imgCL, weightMatrixCL, weps);
 	}
 
-	public double getwTVvalue(OpenCLGrid2D imgCL)//Compute ComputeGradient(Grid2D img)
+	/**
+	 * 
+	 * @param imgCL
+	 * @return
+	 */
+	public double getWeightedTVvalue(OpenCLGrid2D imgCL)//Compute ComputeGradient(Grid2D img)
 	{
 		double wTV=0.0;
 		
-		this.computeGradientCL(imgCL);
-		wMatrixCL.getGridOperator().multiplyBy(imgGradientCL, wMatrixCL);
+		this.computeImageGradientCL(imgCL);
+		weightMatrixCL.getGridOperator().multiplyBy(imgGradientCL, weightMatrixCL);
 		wTV=imgGradientCL.getGridOperator().sum(imgGradientCL);
 		return wTV;
 	}
 	
-	public OpenCLGrid2D compute_wTV_Gradient(OpenCLGrid2D imgCL)
+	/**
+	 * compute weighted TV gradient
+	 * @param imgCL
+	 * @return
+	 */
+	public OpenCLGrid2D computeWeightedTVGradient(OpenCLGrid2D imgCL)
 	{
 		//TVOpenCLGridOperators.getInstance().compute_wTV_Gradient(imgCL, WmatrixCL, TVgradientCL);
-		tvOperators.compute_wTV_Gradient2D(imgCL, wMatrixCL, tvGradientCL);
+		tvOperators.computeWeightedTVGradient2D(imgCL, weightMatrixCL, TVGradientCL);
 	
-		return this.tvGradientCL;
+		return this.TVGradientCL;
 	}
 	
-	
-	public void computeGradientCL_X(OpenCLGrid2D imgCL){
+	/**
+	 * compute anisotropic image gradient along X direction
+	 * @param imgCL
+	 */
+	public void computeImageGradientCLX(OpenCLGrid2D imgCL){
 		//TVOpenCLGridOperators.getInstance().compute_img_gradient(imgCL, this.imgGradientCL);
-		tvOperators.compute_img_gradient2D_X(imgCL, imgGradientCL);
+		tvOperators.computeImageGradient2DX(imgCL, imgGradientCL);
 	}
 	
-	public void wMatrixCLUpdate_X(OpenCLGrid2D imgCL){		
+	/**
+	 * update weight matrix in anisotropic wTV along X direction
+	 * @param imgCL
+	 */
+	public void weightMatrixCLUpdateX(OpenCLGrid2D imgCL){		
 		//this.ComputeGradientCL(imgCL);
-		TVOpenCLGridOperators.getInstance().compute_Wmatrix_Update2D_X(imgCL, wMatrixCL, weps);
+		TVOpenCLGridOperators.getInstance().computeWeightMatrixUpdate2DX(imgCL, weightMatrixCL, weps);
 	}
 
-	public double getwTVvalue_X(OpenCLGrid2D imgCL)//Compute ComputeGradient(Grid2D img)
+	/**
+	 * get weighted TV value in anisotropic wTV along X direction
+	 * @param imgCL
+	 * @return
+	 */
+	public double getWeightedTVvalueX(OpenCLGrid2D imgCL)//Compute ComputeGradient(Grid2D img)
 	{
 		double wTV=0.0;
 		
-		this.computeGradientCL_X(imgCL);
-		wMatrixCL.getGridOperator().multiplyBy(imgGradientCL, wMatrixCL);
+		this.computeImageGradientCLX(imgCL);
+		weightMatrixCL.getGridOperator().multiplyBy(imgGradientCL, weightMatrixCL);
 		wTV=imgGradientCL.getGridOperator().sum(imgGradientCL);
 		return wTV;
 	}
 	
-	public OpenCLGrid2D compute_wTV_Gradient_X(OpenCLGrid2D imgCL)
+	/**
+	 * compute weighted TV gradient in anisotropic TV along X direction
+	 * @param imgCL
+	 * @return
+	 */
+	public OpenCLGrid2D computeWeightedTVGradientX(OpenCLGrid2D imgCL)
 	{
 		//TVOpenCLGridOperators.getInstance().compute_wTV_Gradient(imgCL, WmatrixCL, TVgradientCL);
-		tvOperators.compute_wTV_Gradient2D_X(imgCL, wMatrixCL, tvGradientCL);
+		tvOperators.computeWeightedTVGradient2DX(imgCL, weightMatrixCL, TVGradientCL);
 	
-		return this.tvGradientCL;
+		return this.TVGradientCL;
 	}
 	
-	
+	/**
+	 * get the max value in the TV gradient with OpenCL
+	 * @return
+	 */
 	public double getMaxTVGradientCLValue()
-	{ max_Value=0;
-	for(int i=0;i<tvGradientCL.getSize()[0];i++)
-		for(int j=0;j<tvGradientCL.getSize()[1];j++)
-			if(Math.abs(tvGradientCL.getAtIndex(i, j))>max_Value)
-				max_Value=Math.abs(tvGradientCL.getAtIndex(i, j));
+	{ maxValue=0;
+	for(int i=0;i<TVGradientCL.getSize()[0];i++)
+		for(int j=0;j<TVGradientCL.getSize()[1];j++)
+			if(Math.abs(TVGradientCL.getAtIndex(i, j))>maxValue)
+				maxValue=Math.abs(TVGradientCL.getAtIndex(i, j));
 	 
-	 return max_Value;
+	 return maxValue;
  }
 	
-	public void wMatrixUpdateL2(){//2Level 
+	/**
+	 * Xiaolin's 2 level weighted TV 
+	 */
+	public void weightMatrixUpdateL2(){//2Level 
 		int Masize=tvGradient.getSize()[0]*tvGradient.getSize()[1];
 			Grid1D tempGradient=new Grid1D(Masize);
 		 
@@ -360,9 +459,9 @@ public Grid2D computeTVGradient(Grid2D img) {
 
 		for( i=0;i<Masize;i++){
 			index[i]=i;
-			tempGradient.setAtIndex(i, gradient.getAtIndex(i/tvGradient.getSize()[1],i%tvGradient.getSize()[1]));
+			tempGradient.setAtIndex(i, imageGradient.getAtIndex(i/tvGradient.getSize()[1],i%tvGradient.getSize()[1]));
 		}
-		initialWmatrix();
+		initialWeightMatrix();
 		for( i=0;i<numK;i++){
 			for(int j=i+1;j<Masize;j++){
 			if(tempGradient.getAtIndex(j)>tempGradient.getAtIndex(i))
@@ -375,20 +474,22 @@ public Grid2D computeTVGradient(Grid2D img) {
 				index[j]=k;
 			}
 			}
-			wMatrix.setAtIndex(index[i]/tvGradient.getSize()[1], index[i]%tvGradient.getSize()[1], rou);
+			weightMatrix.setAtIndex(index[i]/tvGradient.getSize()[1], index[i]%tvGradient.getSize()[1], rou);
 		}
 		}
 	
-	
-	public void computeGradient_X(Grid2D img){//Compute the gradient of the img
+	/**
+	 * compute image gradient in anisotropic wTV along X direction
+	 */
+	public void computeImageGradientX(Grid2D img){//Compute the gradient of the img
 
 		double Hdiff,Vdiff;
-		for (int i = 0; i < gradient.getSize()[0]; i++) {
-			for (int j = 0; j < gradient.getSize()[1]; j++) {
+		for (int i = 0; i < imageGradient.getSize()[0]; i++) {
+			for (int j = 0; j < imageGradient.getSize()[1]; j++) {
 				double fij = img.getAtIndex(i, j);
 				double fl = fij,fl2=fij,fr=fij;
 				double fiju = fij;
-				if (i > 2&& i<gradient.getSize()[0]-2){
+				if (i > 2&& i<imageGradient.getSize()[0]-2){
 					fl = img.getAtIndex(i - 1, j);
 					fl2=img.getAtIndex(i-2, j);
 					fr=img.getAtIndex(i+1, j);
@@ -397,23 +498,32 @@ public Grid2D computeTVGradient(Grid2D img) {
 					fiju = img.getAtIndex(i, j - 1);
 				Hdiff=a*fr+b*fij-b*fl-a*fl2;
 				Vdiff=fij-fiju;
-				this.gradient.setAtIndex(i, j, (float)Math.sqrt(Hdiff*Hdiff+Vdiff*Vdiff));
+				this.imageGradient.setAtIndex(i, j, (float)Math.sqrt(Hdiff*Hdiff+Vdiff*Vdiff));
 			}
 		}
 	}
 	
-	public void wMatrixUpdate_X(Grid2D img){//Update the weights for weighted TV
-		this.computeGradient_X(img);
-		gradient_temp=(Grid2D)this.gradient.clone();
-		NumericPointwiseOperators.addBy(gradient_temp, (float)this.weps);
-		wMatrix=(Grid2D)NumericPointwiseOperators.dividedBy(ones_Temp,gradient_temp );	
+	/**
+	 * update the weight matrix in the anisotropic wTV along X
+	 * @param img
+	 */
+	public void weightedMatrixUpdateX(Grid2D img){//Update the weights for weighted TV
+		this.computeImageGradientX(img);
+		gradientTemp=(Grid2D)this.imageGradient.clone();
+		NumericPointwiseOperators.addBy(gradientTemp, (float)this.weps);
+		weightMatrix=(Grid2D)NumericPointwiseOperators.dividedBy(onesTemp,gradientTemp );	
 	}
 	
-	public double getwTVvalue_X(Grid2D img)//Compute ComputeGradient(Grid2D img)
+	/**
+	 * get weighted TV in anisotropic wTV along X
+	 * @param img
+	 * @return
+	 */
+	public double getWeightedTVvalueX(Grid2D img)//Compute ComputeGradient(Grid2D img)
 	{
 		double wTV=0.0;
-		this.computeGradient_X(img);
-		wTV=NumericPointwiseOperators.sum(NumericPointwiseOperators.multipliedBy(wMatrix, gradient));
+		this.computeImageGradientX(img);
+		wTV=NumericPointwiseOperators.sum(NumericPointwiseOperators.multipliedBy(weightMatrix, imageGradient));
 		return wTV;
 	}
 
