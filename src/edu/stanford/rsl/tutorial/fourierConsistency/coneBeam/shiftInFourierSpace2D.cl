@@ -1,3 +1,7 @@
+ /*
+ * Copyright (C) 2015 Wolfgang Aichinger, Martin Berger
+ * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
+*/
 typedef float2 cfloat;
 
 #define I ((cfloat)(0.0, 1.0))
