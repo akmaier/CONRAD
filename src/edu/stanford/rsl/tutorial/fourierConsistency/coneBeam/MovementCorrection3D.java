@@ -4,36 +4,24 @@ import ij.gui.Plot;
 import ij.gui.PlotWindow;
 
 import java.awt.Color;
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.TreeMap;
 import java.util.Map.Entry;
 
-import jogamp.opengl.util.pngj.chunks.ChunksListForWrite;
-import edu.mines.jtk.dsp.test.FftComplexTest;
-import edu.stanford.rsl.conrad.data.generic.GenericPointwiseOperators;
 import edu.stanford.rsl.conrad.data.generic.complex.ComplexGrid2D;
 import edu.stanford.rsl.conrad.data.generic.complex.ComplexGrid3D;
 import edu.stanford.rsl.conrad.data.generic.complex.ComplexPointwiseOperators;
 import edu.stanford.rsl.conrad.data.generic.complex.Fourier;
 import edu.stanford.rsl.conrad.data.generic.datatypes.Complex;
-import edu.stanford.rsl.conrad.data.generic.complex.ComplexGrid1D;
 import edu.stanford.rsl.conrad.data.numeric.Grid1D;
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
 import edu.stanford.rsl.conrad.data.numeric.Grid3D;
-import edu.stanford.rsl.conrad.data.numeric.NumericGrid;
-import edu.stanford.rsl.conrad.data.numeric.NumericGridOperator;
 import edu.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators;
 import edu.stanford.rsl.conrad.data.numeric.opencl.OpenCLGrid1D;
 import edu.stanford.rsl.conrad.data.numeric.opencl.OpenCLGrid2D;
-import edu.stanford.rsl.conrad.data.numeric.opencl.OpenCLGrid3D;
-import edu.stanford.rsl.conrad.geometry.shapes.simple.PointND;
 import edu.stanford.rsl.conrad.opencl.OpenCLUtil;
 import edu.stanford.rsl.conrad.utils.CONRAD;
 import edu.stanford.rsl.conrad.utils.VisualizationUtil;
@@ -41,20 +29,13 @@ import edu.stanford.rsl.jpop.FunctionOptimizer;
 import edu.stanford.rsl.jpop.GradientOptimizableFunction;
 import edu.stanford.rsl.jpop.FunctionOptimizer.OptimizationMode;
 import edu.stanford.rsl.jpop.OptimizationOutputFunction;
-import edu.stanford.rsl.tutorial.motion.compensation.OpenCLMotionCompensatedBackProjector;
-
 import com.jogamp.opencl.CLBuffer;
 import com.jogamp.opencl.CLCommandQueue;
 import com.jogamp.opencl.CLContext;
 import com.jogamp.opencl.CLDevice;
-import com.jogamp.opencl.CLImage2d;
 import com.jogamp.opencl.CLKernel;
 import com.jogamp.opencl.CLMemory.Mem;
 import com.jogamp.opencl.CLProgram;
-import com.jogamp.opencl.demos.fft.CLFFTPlan;
-import com.jogamp.opencl.demos.fft.CLFFTPlan.CLFFTDataFormat;
-import com.jogamp.opencl.demos.fft.CLFFTPlan.CLFFTDirection;
-import com.jogamp.opencl.demos.fft.CLFFTPlan.InvalidContextException;
 
 public class MovementCorrection3D {
 
@@ -67,8 +48,7 @@ public class MovementCorrection3D {
 	protected CLFFTPlan fft;
 	protected Config m_conf;
 	protected ComplexGrid3D m_data;
-	// length of all data
-	private int m_datasize;
+	
 	// stores transposed data (projection dimension becomes first dimension) after 2D-Fouriertransform
 	protected ComplexGrid3D m_2dFourierTransposed = null;
 	// stores data after fourier transformation on projection dimension
@@ -104,8 +84,7 @@ public class MovementCorrection3D {
 
 	// dft and idft mask used to perform 1d fouriertransform on graphics card
 	private ComplexGrid2D dftMatrix;
-	private ComplexGrid2D idftMatrix;
-
+	
 	// test parameter to see how often shift is performed during optimization
 	public int optimizeCounter = 0;
 
@@ -130,7 +109,6 @@ public class MovementCorrection3D {
 	public MovementCorrection3D(Grid3D data, Config conf, boolean naive){
 		m_conf = conf;
 		m_data = new ComplexGrid3D(data);
-		m_datasize = m_data.getNumberOfElements();
 		m_naive = naive;
 		m_shift = null;
 
@@ -602,8 +580,6 @@ public class MovementCorrection3D {
 		Grid1D m_oldGuessAbs = new Grid1D(2*m_conf.getNumberOfProjections());
 		// the newest shift to be performed
 		//OpenCLGrid1D m_guessRel = new OpenCLGrid1D(new Grid1D(2*m_conf.getNumberOfProjections()));
-
-		private Double maskNormalizer = null;
 
 		private TreeMap<Integer,Double> resultVisualizer;
 

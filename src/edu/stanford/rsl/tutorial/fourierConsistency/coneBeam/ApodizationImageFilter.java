@@ -68,20 +68,79 @@ public class ApodizationImageFilter extends IndividualImageFilteringTool {
 		int[] s = new int[]{U,V};
 		for (int i = 0; i < s.length; i++) {
 			int sin = s[i];
-			int N = (customSizes != null && customSizes[i] != null) ? customSizes[i] : sin;
-			int offset = (customSizes != null && customSizes[i] != null) ? (sin-customSizes[i])/2 : 0;
-			int blockSize = (customSizes != null && customSizes[i] != null) ? customSizes[i] : s[i];
-			DoubleFunction fn = (customSizes != null && customSizes[i] != null) ? nin -> (nin < offset) ? 0 : ( (nin >= (offset + blockSize) ) ? (blockSize -1) :  (nin - offset) ) : nin -> nin;
+			final int N = (customSizes != null && customSizes[i] != null) ? customSizes[i] : sin;
+			final int offset = (customSizes != null && customSizes[i] != null) ? (sin-customSizes[i])/2 : 0;
+			final int blockSize = (customSizes != null && customSizes[i] != null) ? customSizes[i] : s[i];
+			final int j = i;
+			final DoubleFunction fn = new DoubleFunction() {
+				@Override
+				public double f(double x) {
+					if(customSizes != null && customSizes[j] != null){
+						if(x < offset){
+							return 0;
+						}
+						else if(x >= (offset + blockSize)){
+							return (blockSize - 1);
+						}
+						else{
+							return x - offset;
+						}						
+					}
+					else{
+						return x;
+					}
+				}
+			};
 
+			// writing out lambda expressions to keep Java 1.7 support
 			DoubleFunction[] fcts = new DoubleFunction[windowType.values().length];
-			fcts[windowType.rect.getLabel()] = n -> Math.max(1, 0); // rect
-			fcts[windowType.triangular.getLabel()] = n -> Math.max(1-Math.abs((fn.f(n)-((N-1)/2))/(N/2)),0); // triangular
-			fcts[windowType.welch.getLabel()] = n -> Math.max(1-Math.pow((fn.f(n)-((N-1)/2))/((N-1)/2),2),0); // welch
-			fcts[windowType.hann.getLabel()] = n -> Math.max(0.5*(1-Math.cos(2*Math.PI*fn.f(n)/(N-1))),0); // hann
-			fcts[windowType.hamming.getLabel()] = n -> Math.max(0.54 - 0.46 * Math.cos(2*Math.PI*fn.f(n)/(N-1)),0); // hamming
-			fcts[windowType.blackman.getLabel()] = n -> Math.max(0.42 - 0.50 * Math.cos(2*Math.PI*fn.f(n)/(N-1)) + 0.08 * Math.cos(4*Math.PI*fn.f(n)/(N-1)),0); // blackman
-			fcts[windowType.blackmanHarris.getLabel()] = n -> Math.max(0.35875 - 0.48829 * Math.cos(2*Math.PI*fn.f(n)/(N-1)) + 0.14128 * Math.cos(4*Math.PI*fn.f(n)/(N-1)) - 0.01168 * Math.cos(6*Math.PI*fn.f(n)/(N-1)) ,0); // blackman-harris
-			fcts[windowType.cosine.getLabel()] = n -> Math.max(Math.sin(Math.PI*fn.f(n)/(N-1)),0); // cosine
+			fcts[windowType.rect.getLabel()] = new DoubleFunction() {
+				public double f(double x) {
+					return Math.max(1, 0);
+				}
+			};
+			fcts[windowType.triangular.getLabel()] =  new DoubleFunction() {
+				@Override
+				public double f(double x) {
+					return Math.max(1-Math.abs((fn.f(x)-((N-1)/2))/(N/2)),0); // triangular
+				}
+			};
+			fcts[windowType.welch.getLabel()] = new DoubleFunction() {
+				@Override
+				public double f(double x) {
+					return Math.max(1-Math.pow((fn.f(x)-((N-1)/2))/((N-1)/2),2),0); // welch
+				}
+			};
+			fcts[windowType.hann.getLabel()] = new DoubleFunction() {
+				@Override
+				public double f(double x) {
+					return Math.max(0.5*(1-Math.cos(2*Math.PI*fn.f(x)/(N-1))),0); // hann
+				}
+			};
+			fcts[windowType.hamming.getLabel()] = new DoubleFunction() {
+				@Override
+				public double f(double x) {
+					return Math.max(0.54 - 0.46 * Math.cos(2*Math.PI*fn.f(x)/(N-1)),0); // hamming
+				}
+			};
+			fcts[windowType.blackman.getLabel()] = new DoubleFunction() {
+				@Override
+				public double f(double x) {
+					return Math.max(0.42 - 0.50 * Math.cos(2*Math.PI*fn.f(x)/(N-1)) + 0.08 * Math.cos(4*Math.PI*fn.f(x)/(N-1)),0); // blackman
+				}
+			};
+			fcts[windowType.blackmanHarris.getLabel()] = new DoubleFunction() {
+				@Override
+				public double f(double x) {
+					return Math.max(0.35875 - 0.48829 * Math.cos(2*Math.PI*fn.f(x)/(N-1)) + 0.14128 * Math.cos(4*Math.PI*fn.f(x)/(N-1)) - 0.01168 * Math.cos(6*Math.PI*fn.f(x)/(N-1)) ,0); // blackman-harris
+				}
+			};
+			fcts[windowType.cosine.getLabel()] = new DoubleFunction() {
+				@Override
+				public double f(double x) {
+					return Math.max(Math.sin(Math.PI*fn.f(x)/(N-1)),0); // cosine
+				}
+			}; 
 
 			if(i==0)
 				apodFctsU = fcts;

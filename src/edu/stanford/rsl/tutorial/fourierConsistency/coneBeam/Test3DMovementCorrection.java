@@ -1,35 +1,14 @@
 package edu.stanford.rsl.tutorial.fourierConsistency.coneBeam;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.FloatBuffer;
-
-import com.jogamp.opencl.CLBuffer;
-import com.jogamp.opencl.CLCommandQueue;
-import com.jogamp.opencl.CLContext;
-import com.jogamp.opencl.CLDevice;
-import com.jogamp.opencl.CLKernel;
-import com.jogamp.opencl.CLProgram;
-
 import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
-import ij.io.FileInfo;
-import ij.io.FileOpener;
-import edu.stanford.rsl.conrad.data.generic.complex.ComplexGrid2D;
-import edu.stanford.rsl.conrad.data.generic.complex.ComplexGrid3D;
-import edu.stanford.rsl.conrad.data.generic.complex.Fourier;
 import edu.stanford.rsl.conrad.data.numeric.Grid1D;
-import edu.stanford.rsl.conrad.data.numeric.Grid2D;
 import edu.stanford.rsl.conrad.data.numeric.Grid3D;
-import edu.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators;
-import edu.stanford.rsl.conrad.data.numeric.opencl.OpenCLGrid2D;
 import edu.stanford.rsl.conrad.geometry.trajectories.Trajectory;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
 import edu.stanford.rsl.conrad.numerics.SimpleOperators;
-import edu.stanford.rsl.conrad.opencl.OpenCLUtil;
 import edu.stanford.rsl.conrad.utils.Configuration;
-import edu.stanford.rsl.conrad.utils.FileUtil;
 import edu.stanford.rsl.conrad.utils.ImageUtil;
 
 public class Test3DMovementCorrection {

@@ -10,15 +10,14 @@ import com.jogamp.opencl.CLBuffer;
 import com.jogamp.opencl.CLCommandQueue;
 import com.jogamp.opencl.CLKernel;
 import com.jogamp.opencl.CLProgram;
-import com.jogamp.opencl.demos.fft.CLFFTPlan;
-import com.jogamp.opencl.demos.fft.CLFFTPlan.CLFFTDataFormat;
-import com.jogamp.opencl.demos.fft.CLFFTPlan.CLFFTDirection;
-import com.jogamp.opencl.demos.fft.CLFFTPlan.InvalidContextException;
 
 import edu.stanford.rsl.conrad.data.generic.complex.ComplexGrid3D;
 import edu.stanford.rsl.conrad.data.numeric.Grid3D;
 import edu.stanford.rsl.conrad.opencl.OpenCLUtil;
 import edu.stanford.rsl.conrad.utils.CONRAD;
+import edu.stanford.rsl.tutorial.fourierConsistency.coneBeam.CLFFTPlan.CLFFTDataFormat;
+import edu.stanford.rsl.tutorial.fourierConsistency.coneBeam.CLFFTPlan.CLFFTDirection;
+import edu.stanford.rsl.tutorial.fourierConsistency.coneBeam.CLFFTPlan.InvalidContextException;
 
 public class MotionCorrection3DFast extends MovementCorrection3D{
 

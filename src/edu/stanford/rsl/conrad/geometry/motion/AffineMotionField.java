@@ -1,6 +1,5 @@
 package edu.stanford.rsl.conrad.geometry.motion;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import Jama.EigenvalueDecomposition;
 import edu.stanford.rsl.conrad.geometry.Axis;
 import edu.stanford.rsl.conrad.geometry.Rotations;
@@ -105,7 +104,11 @@ public class AffineMotionField extends AbstractAffineMotionField {
 		}
 		else{
 			// TODO: add support for rotation matrices (Use axis/angle representation)
-			throw new NotImplementedException();
+			try {
+				throw new Exception("Support for rotation matrices not yet implemented");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 		affine = new ComboTransform(toCenter,affine,back);
 		return affine;

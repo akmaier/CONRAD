@@ -60,7 +60,7 @@
 	<classpathentry kind="lib" path="plugins/Input-Output/ome_tools.jar"/>
 	<classpathentry kind="lib" path="plugins/Input-Output/QuickTime_Plugins.jar"/>
 	<classpathentry kind="lib" path="plugins/VolumeJ/bij.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
 	<classpathentry kind="lib" path="lib/weka.jar"/>
 	<classpathentry kind="lib" path="lib/weka-src.jar"/>
 	<classpathentry kind="lib" path="lib/trainablesegmentation.jar" sourcepath="lib/trainablesegmentation.zip"/>
@@ -68,6 +68,5 @@
 	<classpathentry kind="lib" path="lib/jmathplot.jar"/>
 	<classpathentry kind="lib" path="lib/wekaBRF_1.jar"/>
 	<classpathentry kind="lib" path="lib/jpop.0.7.5.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/jocl-demos"/>
 	<classpathentry kind="output" path="src"/>
 </classpath>
