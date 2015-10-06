@@ -1,3 +1,7 @@
+ /*
+ * Copyright (C) 2015 Wolfgang Aichinger, Martin Berger
+ * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
+*/
 kernel void shiftInFourierSpace(global float *real, global float *imag, global float *freqU, global float *freqV, global float *shifts, int const numElementsProj, int const numElementsU, int const numElementsV) {
 	int iGIDProj = get_global_id(0);
 	int iGIDU = get_global_id(1);

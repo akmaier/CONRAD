@@ -1,19 +1,8 @@
 package edu.stanford.rsl.conrad.geometry.motion;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-import Jama.EigenvalueDecomposition;
-import edu.stanford.rsl.conrad.geometry.Axis;
-import edu.stanford.rsl.conrad.geometry.Rotations;
-import edu.stanford.rsl.conrad.geometry.motion.timewarp.IdentityTimeWarper;
 import edu.stanford.rsl.conrad.geometry.shapes.simple.PointND;
-import edu.stanford.rsl.conrad.geometry.transforms.AffineTransform;
-import edu.stanford.rsl.conrad.geometry.transforms.ComboTransform;
-import edu.stanford.rsl.conrad.geometry.transforms.ScaleRotate;
 import edu.stanford.rsl.conrad.geometry.transforms.Transform;
-import edu.stanford.rsl.conrad.geometry.transforms.Translation;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
-import edu.stanford.rsl.conrad.numerics.SimpleOperators;
-import edu.stanford.rsl.conrad.numerics.SimpleVector;
 
 /**
  * MotionField to handle affine rotation and translational motion.

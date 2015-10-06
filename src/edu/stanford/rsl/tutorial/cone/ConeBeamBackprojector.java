@@ -170,10 +170,10 @@ public class ConeBeamBackprojector {
 		return grid;
 	}
 
-	public Grid3D backprojectPixelDriven(Grid3D sino) {
+	public Grid3D backprojectPixelDriven(final Grid3D sino) {
 		configure();
 			
-		Grid3D grid = new Grid3D(imgSizeX,imgSizeY,imgSizeZ);
+		final Grid3D grid = new Grid3D(imgSizeX,imgSizeY,imgSizeZ);
 
 		int nThreads = Integer.valueOf(Configuration.getGlobalConfiguration().getRegistryEntry(RegKeys.MAX_THREADS));
 		// TODO Error-Checking for thread number

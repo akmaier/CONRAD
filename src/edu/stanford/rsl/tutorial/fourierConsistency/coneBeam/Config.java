@@ -1,23 +1,26 @@
+/*
+ * Copyright (C) 2015 Wolfgang Aichinger, Martin Berger
+ * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
+*/
 package edu.stanford.rsl.tutorial.fourierConsistency.coneBeam;
 
-import edu.stanford.rsl.conrad.data.generic.complex.ComplexGrid1D;
 import edu.stanford.rsl.conrad.data.generic.complex.ComplexGrid2D;
 import edu.stanford.rsl.conrad.data.generic.datatypes.Complex;
 import edu.stanford.rsl.conrad.data.numeric.Grid1D;
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
-import edu.stanford.rsl.conrad.data.numeric.Grid3D;
+import edu.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators;
 import edu.stanford.rsl.conrad.geometry.trajectories.Trajectory;
 import edu.stanford.rsl.conrad.utils.Configuration;
 
 public class Config {
-	
+
 	// scaling factor indicating smaller data than original for testing purposes
 	private int m_scalingFactor;
 	// dimensions projections
 	private int N; // horizontal
 	private int M; // vertical
 	private int K; // angles
-	
+
 	// source to patient
 	private double L;
 	// detector to patient
@@ -28,41 +31,41 @@ public class Config {
 	private double spacingX;
 	private double spacingY;
 	private double angleInc;
-	
+
 	//spacing in frequency domain
 	private double wuSpacing;
 	private double wvSpacing;
 	private double kSpacing;
-	
+
 	// spacing arrays in frequency space
 	private Grid1D wuSpacingVec;
 	private Grid1D wvSpacingVec;
 	private Grid1D kSpacingVec;
-	
+
 	// precomputed arrays to perform shift in frequencydomain
 	private Grid1D shiftFreqX;
 	private Grid1D shiftFreqY;
-	
+
 	// Size of mask used for erosion
 	private int m_erosionFactor;
 	// contains a one for all positions which should be zero in ideal fouriertransformed sinogram
 	private Grid2D mask;
-	
+
 	// matrices to perform a dft and idft for use on graphicscard
 	private ComplexGrid2D dftMatrix;
 	private ComplexGrid2D idftMatrix;
 
-	
+
 	public Config(String xmlFilename, int erosionFactor, int scalingFactor){
 		/*int[] dims = data.getSize();
 		N = dims[0];
 		M = dims[1];
 		K = dims[2];*/
-		
+
 		//hard coded
 		m_erosionFactor = erosionFactor;
 		m_scalingFactor = scalingFactor;
-		rp = 125.0f;
+		rp = 133.0f;
 		getGeometry(xmlFilename);
 		wuSpacing = 1.0/(N*spacingX);
 		wvSpacing = 1.0/(M*spacingY);
@@ -70,16 +73,16 @@ public class Config {
 		wuSpacingVec = createFrequArray(N, (float)(wuSpacing));
 		wvSpacingVec = createFrequArray(M, (float)(wvSpacing));
 		kSpacingVec = createFrequArray(K, (float)(kSpacing));
-		
+
 		// construct a shift vector
-		shiftFreqX = constructShiftFreq(wuSpacingVec, spacingX);
-		shiftFreqY = constructShiftFreq(wvSpacingVec, spacingY);
+		shiftFreqX = constructShiftFreq(wuSpacingVec);
+		shiftFreqY = constructShiftFreq(wvSpacingVec);
 		fillMask();
 		createDFTMatrix();
 		createIDFTMatrix();
-//		createShift(0.0f);
-		
-			
+		//		createShift(0.0f);
+
+
 	}
 	/**
 	 * loads all data from a configfile, uses scalingfactor if original data is smaller for testing purpose
@@ -90,21 +93,21 @@ public class Config {
 		Trajectory geom = config.getGeometry();
 		// convert angle to radians
 		angleInc = geom.getAverageAngularIncrement()*Math.PI/180.0 * m_scalingFactor;
-		
+
 		//TODO return back to regular, factor 2 only test with smaller database
 		spacingX = geom.getPixelDimensionX() * m_scalingFactor;
 		spacingY = geom.getPixelDimensionY() * m_scalingFactor;
-		
+
 		N = geom.getDetectorWidth()/m_scalingFactor;
 		M = geom.getDetectorHeight()/m_scalingFactor;
 		K = geom.getProjectionStackSize()/m_scalingFactor;
-		
-		
+
+
 		D = geom.getSourceToDetectorDistance() - geom.getSourceToAxisDistance();
 		L = geom.getSourceToAxisDistance();
-		
-		
-		
+
+
+
 	}
 	public double getSourceToPatientDist(){
 		return L;
@@ -115,7 +118,7 @@ public class Config {
 	public double getMaxObjectToDetectorDist(){
 		return rp;
 	}
-	
+
 	// as this parameter is approximated at the moment it is adjustable from outside
 	public void setMaxObjectToDetectorDist(double dist){
 		if(dist < 0){
@@ -168,14 +171,14 @@ public class Config {
 	public Grid2D getMask(){
 		return mask;
 	}
-	
+
 	public ComplexGrid2D getDFTMatrix(){
 		return dftMatrix;
 	}
 	public ComplexGrid2D getIDFTMatrix(){
 		return idftMatrix;
 	}
-	
+
 	/**
 	 * 
 	 * @param dim: size of array
@@ -193,25 +196,25 @@ public class Config {
 		}
 		return frequArray;
 	}
-	
-	
-	
-	private Grid1D constructShiftFreq(Grid1D spacingVec, double spacingLocal){
+
+
+
+	private Grid1D constructShiftFreq(Grid1D spacingVec){
 		int dim = spacingVec.getSize()[0];
 		Grid1D frequencies = new Grid1D(dim);
 		for(int i = 0; i < frequencies.getSize()[0]; i++){
-			frequencies.setAtIndex(i, (float)(-2*Math.PI*spacingVec.getAtIndex(i)*spacingLocal));
+			frequencies.setAtIndex(i, (float)(-2*Math.PI*spacingVec.getAtIndex(i)));
 		}
 		return frequencies;
 	}
-	
+
 	/**
 	 * computes ideal mask according to equation (paper M. Berger), than filtering with erosion mask
 	 */
 	private void fillMask(){
 		mask = new Grid2D(K,N);
 		Grid2D helpMask = new Grid2D(K,N);
-		
+
 		// filling mask according to formula
 		int counter = 0;
 		for(int proj = 0; proj < helpMask.getSize()[0]; proj++){
@@ -221,64 +224,69 @@ public class Config {
 					counter++;
 				}
 			}
-			
+
 		}
-		
-		System.out.println("Anzahl 1 in Maske" + counter);
-		
+
+		System.out.println("Anzahl 1 in Maske " + counter);
+
 		// using erosion
-		int shift = (int)(m_erosionFactor/2);
-		for(int proj = 0; proj < mask.getSize()[0]; proj++){
-			for(int uPixel = 0; uPixel < helpMask.getSize()[1]; uPixel++){
-				boolean foundZero = false;
-				
-				for(int horiErosion = proj-shift; horiErosion <= proj+shift; horiErosion++){
-					int horiErosionValid =  horiErosion;
-					if (horiErosion < 0){
-						horiErosionValid = K+horiErosion;
-					}
-					if(horiErosion >= K){
-						horiErosionValid = horiErosion - K;
-					}
-					
-					// we are at a boundary ((N-1)/2 and -(N/2))
-					
-					if(Math.abs(kSpacingVec.getAtIndex(proj) - kSpacingVec.getAtIndex(horiErosionValid))> (shift+1)*kSpacing){
-						continue;
-					}
-					for(int vertErosion = uPixel-shift; vertErosion <= uPixel+shift; vertErosion++){
-						int vertErosionValid = vertErosion;
-						if(vertErosion < 0){
-							vertErosionValid = N+vertErosion;
+		if (m_erosionFactor > 0){
+			int shift = (int)(m_erosionFactor/2);
+			for(int proj = 0; proj < mask.getSize()[0]; proj++){
+				for(int uPixel = 0; uPixel < helpMask.getSize()[1]; uPixel++){
+					boolean foundZero = false;
+
+					for(int horiErosion = proj-shift; horiErosion <= proj+shift; horiErosion++){
+						int horiErosionValid =  horiErosion;
+						if (horiErosion < 0){
+							horiErosionValid = K+horiErosion;
 						}
-						if(vertErosion >= N){
-							vertErosionValid = vertErosion - N;
+						if(horiErosion >= K){
+							horiErosionValid = horiErosion - K;
 						}
-						if(Math.abs(wuSpacingVec.getAtIndex(uPixel) - wuSpacingVec.getAtIndex(vertErosionValid))> (shift+1)*wuSpacing){
+
+						// we are at a boundary ((N-1)/2 and -(N/2))
+
+						if(Math.abs(kSpacingVec.getAtIndex(proj) - kSpacingVec.getAtIndex(horiErosionValid))> (shift+1)*kSpacing){
 							continue;
 						}
-						
-						if (helpMask.getAtIndex(horiErosionValid, vertErosionValid) == 0){
-							foundZero = true;
+						for(int vertErosion = uPixel-shift; vertErosion <= uPixel+shift; vertErosion++){
+							int vertErosionValid = vertErosion;
+							if(vertErosion < 0){
+								vertErosionValid = N+vertErosion;
+							}
+							if(vertErosion >= N){
+								vertErosionValid = vertErosion - N;
+							}
+							if(Math.abs(wuSpacingVec.getAtIndex(uPixel) - wuSpacingVec.getAtIndex(vertErosionValid))> (shift+1)*wuSpacing){
+								continue;
+							}
+
+							if (helpMask.getAtIndex(horiErosionValid, vertErosionValid) == 0){
+								foundZero = true;
+								break;
+							}
+
+						}
+						if(foundZero){
 							break;
 						}
-						
+
 					}
-					if(foundZero){
-						break;
+					if(!foundZero){
+						mask.setAtIndex(proj, uPixel, 1);
 					}
-					
+					foundZero = false;
+
 				}
-				if(!foundZero){
-					mask.setAtIndex(proj, uPixel, 1);
-				}
-				foundZero = false;
-				
 			}
 		}
+		else {
+			NumericPointwiseOperators.copy(mask, helpMask);
+		}
 	}
-	
-	
+
+
 	private void createDFTMatrix(){
 		dftMatrix = new ComplexGrid2D(K,K);
 		float angle = (float)(-2*Math.PI/K);
@@ -301,7 +309,7 @@ public class Config {
 		// dft matrix is symmetric which allows simplifications
 		for(int horz = 0; horz < K; horz++){
 			for(int vert = 0; vert <= horz; vert++){
-				
+
 				float tmpAngle = angle*horz*vert;
 				Complex tmp = Complex.fromPolar(1.0f, tmpAngle);
 				tmp = tmp.mul(normalFactor);
@@ -311,6 +319,6 @@ public class Config {
 		}
 	}
 
-	
+
 
 }
