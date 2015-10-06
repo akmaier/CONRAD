@@ -15,52 +15,80 @@ import edu.stanford.rsl.conrad.utils.ImageUtil;
 public class TVGradient3D {
 	public float eps = 0.1f;
 	public float weps=0.001f;
-	public Grid3D gradient;
+	public Grid3D imgGradient;
 	public Grid3D tvGradient;
-	public double max_Value=0.0;
-	public Grid3D wMatrix;//weights for weighted TV
+	public double maxValue=0.0;
+	public Grid3D weightMatrix;//weights for weighted TV
 
 	//OpenCL
 	public OpenCLGrid3D imgGradientCL;
 	public OpenCLGrid3D tvGradientCL;
-	public OpenCLGrid3D wMatrixCL;
+	public OpenCLGrid3D weightMatrixCL;
 	TVOpenCLGridOperators tvOperators;
-	/*public TVgradient3D(Grid3D img)
-{
-TVgradient=new Grid3D(img);
-NumericPointwiseOperators.fill(TVgradient, 0);
-}*/
 
+	
+	private Grid3D onesTemp;
+/**
+ * constructor 	
+ * @param img
+ */
+public TVGradient3D(Grid3D img){
+	this.imgGradient=new Grid3D(img);
+	this.tvGradient=new Grid3D(img);
+    onesTemp=new Grid3D(weightMatrix);
+	NumericPointwiseOperators.fill(onesTemp, 1.0f);
+}
+	
+	
+/**
+ * constructor with OpenCL
+ * @param imgCL
+ */
 public TVGradient3D(OpenCLGrid3D imgCL)
-{this.tvGradientCL=new OpenCLGrid3D(imgCL);
-tvGradientCL.getGridOperator().fill(tvGradientCL, 0);
-wMatrixCL=new OpenCLGrid3D(tvGradientCL);
-tvOperators=new TVOpenCLGridOperators();	
+{
+	this.tvGradientCL=new OpenCLGrid3D(imgCL);
+	tvGradientCL.getGridOperator().fill(tvGradientCL, 0);
+	weightMatrixCL=new OpenCLGrid3D(tvGradientCL);
+	tvOperators=new TVOpenCLGridOperators();	
 }
 
+/**
+ * constructor
+ * @param size
+ */
 public TVGradient3D(int[] size)
 {this.tvGradientCL=new OpenCLGrid3D(new Grid3D(size[0],size[1],size[2]));
 tvGradientCL.getGridOperator().fill(tvGradientCL, 0);
-wMatrixCL=new OpenCLGrid3D(tvGradientCL);
+weightMatrixCL=new OpenCLGrid3D(tvGradientCL);
 tvOperators=new TVOpenCLGridOperators();	
 }
 
-public void initialWmatrix(){
-	wMatrix=new Grid3D(tvGradient);
-	NumericPointwiseOperators.fill(wMatrix, 1.0f);
+/**
+ * initial weight matrix as 1
+ */
+public void initialWeightMatrix(){
+	weightMatrix=new Grid3D(tvGradient);
+	NumericPointwiseOperators.fill(weightMatrix, 1.0f);
 }
-public void initialWmatrixCL(){
+
+/**
+ * initial weight matrix as 1 using OpenCL
+ */
+public void initialWeightMatrixCL(){
 	
-	wMatrixCL.getGridOperator().fill(wMatrixCL, 1.0f);
+	weightMatrixCL.getGridOperator().fill(weightMatrixCL, 1.0f);
 }
 
-
-public void computeGradient(Grid3D img){//Compute the gradient of the img
-	this.gradient=new Grid3D(img);
+/**
+ * compute image gradient
+ * @param img
+ */
+public void computeImageGradient(Grid3D img){//Compute the gradient of the img
+	this.imgGradient=new Grid3D(img);
 	double Hdiff,Vdiff,Zdiff;
-	for (int i = 0; i < gradient.getSize()[0]; i++) {
-		for (int j = 0; j < gradient.getSize()[1]; j++) {
-			for(int k=0;k<gradient.getSize()[2];k++){
+	for (int i = 0; i < imgGradient.getSize()[0]; i++) {
+		for (int j = 0; j < imgGradient.getSize()[1]; j++) {
+			for(int k=0;k<imgGradient.getSize()[2];k++){
 			double fij = img.getAtIndex(i, j,k);
 			double fijl = fij;
 			double fiju = fij;
@@ -74,51 +102,76 @@ public void computeGradient(Grid3D img){//Compute the gradient of the img
 			Hdiff=fij-fijl;
 			Vdiff=fij-fiju;
 			Zdiff=fij-fijt;
-			this.gradient.setAtIndex(i, j,k, (float)Math.sqrt(Hdiff*Hdiff+Vdiff*Vdiff+Zdiff*Zdiff));
+			this.imgGradient.setAtIndex(i, j,k, (float)Math.sqrt(Hdiff*Hdiff+Vdiff*Vdiff+Zdiff*Zdiff));
 			}
 		}
 	}
 }
-public void computeGradientCL(OpenCLGrid3D imgCL){
+
+/**
+ * compute image gradient with OpenCL
+ * @param imgCL
+ */
+public void computeImageGradientCL(OpenCLGrid3D imgCL){
 	//TVOpenCLGridOperators.getInstance().compute_img_gradient(imgCL, this.imgGradientCL);
 	this.imgGradientCL=new OpenCLGrid3D(tvGradientCL);
-	tvOperators.compute_img_gradient(imgCL, imgGradientCL);
+	tvOperators.computeImageGradient(imgCL, imgGradientCL);
 }
 
-
-
-public void wMatrixUpdate(){//Update the weights for weighted TV
-	Grid3D Ones_temp=new Grid3D(wMatrix);
-	NumericPointwiseOperators.fill(Ones_temp, 1.0f);
-	Grid3D gradient_temp=new Grid3D(this.gradient);
+/**
+ * update the weight matrix
+ */
+public void weightMatrixUpdate(){//Update the weights for weighted TV
+	
+	Grid3D gradient_temp=new Grid3D(this.imgGradient);
 	NumericPointwiseOperators.addBy(gradient_temp, (float)this.weps);
-	wMatrix=(Grid3D)NumericPointwiseOperators.dividedBy(Ones_temp,gradient_temp );	
+	weightMatrix=(Grid3D)NumericPointwiseOperators.dividedBy(onesTemp,gradient_temp );	
 }
 
-public void wMatrixCLUpdate(OpenCLGrid3D imgCL){
+/**
+ * update the weight matrix with OpenCL
+ * @param imgCL
+ */
+public void weightMatrixCLUpdate(OpenCLGrid3D imgCL){
 	
 	//this.ComputeGradientCL(imgCL);
-	TVOpenCLGridOperators.getInstance().compute_Wmatrix_Update(imgCL, wMatrixCL, weps);
+	TVOpenCLGridOperators.getInstance().computeWeightMatrixUpdate(imgCL, weightMatrixCL, weps);
 }
 
-public void adaptiveWmatrixCLUpdate(OpenCLGrid3D imgCL){
+/**
+ * 
+ * @param imgCL
+ */
+public void adaptiveWeightMatrixCLUpdate(OpenCLGrid3D imgCL){
 	
 	//this.ComputeGradientCL(imgCL);
-	TVOpenCLGridOperators.getInstance().compute_img_gradient(imgCL,this.tvGradientCL);
-	TVOpenCLGridOperators.getInstance().compute_adaptive_Wmatrix_Update(tvGradientCL, this.wMatrixCL, weps);
+	TVOpenCLGridOperators.getInstance().computeImageGradient(imgCL,this.tvGradientCL);
+	TVOpenCLGridOperators.getInstance().computeAdaptiveWeightMatrixUpdate(tvGradientCL, this.weightMatrixCL, weps);
+}
+/**
+ * update weight matrix for anisotropic weighted TV (AwTV)
+ * @param imgCL
+ */
+public void anisotropicWeightedTVWeightMatrixCLUpdate(OpenCLGrid3D imgCL){
+	
+	//this.ComputeGradientCL(imgCL);
+	TVOpenCLGridOperators.getInstance().computeDirectionalWeightedTVWeightMatrixUpdate(imgCL, weightMatrixCL, weps);
 }
 
-public void awTVWmatrixCLUpdate(OpenCLGrid3D imgCL){
+/**
+ * update weight matrix, here only compute image gradient in each XY plane, not include Z direction
+ * @param imgCL
+ */
+public void weightMatrixCLUpdate2(OpenCLGrid3D imgCL){//do TV in each Z slice
 	
 	//this.ComputeGradientCL(imgCL);
-	TVOpenCLGridOperators.getInstance().compute_AwTV_Wmatrix_Update(imgCL, wMatrixCL, weps);
-}
-public void wMatrixCLUpdate2(OpenCLGrid3D imgCL){//do TV in each Z slide
-	
-	//this.ComputeGradientCL(imgCL);
-	TVOpenCLGridOperators.getInstance().compute_Wmatrix_Update2(imgCL, wMatrixCL, weps);
+	TVOpenCLGridOperators.getInstance().computeWeightMatrixUpdate2(imgCL, weightMatrixCL, weps);
 }
 
+/**
+ * compute nonweighted TV value
+ * @return
+ */
 public double getTVvalue()//Compute ComputeGradient(Grid2D img)
 {
 	double TV=0.0;
@@ -126,79 +179,91 @@ public double getTVvalue()//Compute ComputeGradient(Grid2D img)
 		for (int j = 0; j < gradient.getSize()[1]; j++) 
 			for(int k=0;k<gradient.getSize()[2];k++)
 			TV+=gradient.getAtIndex(i, j,k);*/
-	TV=NumericPointwiseOperators.sum(gradient);
+	TV=NumericPointwiseOperators.sum(imgGradient);
 	return TV;
 }
 
-public double getwTVvalue()//Compute ComputeGradient(Grid2D img)
+/**
+ * compute weighted TV value
+ * @return
+ */
+public double getWeightedTVvalue()//Compute ComputeGradient(Grid2D img)
 {
 	double wTV=0.0;
-	/*for (int i = 0; i < gradient.getSize()[0]; i++) 
-		for (int j = 0; j < gradient.getSize()[1]; j++)
-			for(int k=0;k<gradient.getSize()[2];k++)
-			wTV+=this.Wmatrix.getAtIndex(i, j,k)*this.gradient.getAtIndex(i, j,k);*/
-	wTV=NumericPointwiseOperators.sum(NumericPointwiseOperators.multipliedBy(gradient, wMatrix));
+	
+	wTV=NumericPointwiseOperators.sum(NumericPointwiseOperators.multipliedBy(imgGradient, weightMatrix));
 
 	return wTV;
 }
 
-public double getwTVvalueCL(OpenCLGrid3D imgCL)
+/**
+ * get weighted TV value with OpenCL
+ * @param imgCL
+ * @return
+ */
+public double getWeightedTVvalueCL(OpenCLGrid3D imgCL)
 {   
 	OpenCLGrid3D tempZSum=new OpenCLGrid3D(new Grid3D(imgCL.getSize()[0],imgCL.getSize()[1],1));
 	tempZSum.getGridOperator().fill(tempZSum, 0);
-	tvOperators.getwTV(imgCL, wMatrixCL,tempZSum);
+	tvOperators.getWeightedTV(imgCL, weightMatrixCL,tempZSum);
 	double wTV=tempZSum.getGridOperator().sum(tempZSum);
    tempZSum.release();
 	return wTV;
 }
 
-public double getwTVvalueCL_adaptive(OpenCLGrid3D imgCL)
+/**
+ * get TV value in adaptive weighted TV
+ * @param imgCL
+ * @return
+ */
+public double getWeightedTVvalueCLAdaptive(OpenCLGrid3D imgCL)
 {   
 	OpenCLGrid3D tempZSum=new OpenCLGrid3D(new Grid3D(imgCL.getSize()[0],imgCL.getSize()[1],1));
 	tempZSum.getGridOperator().fill(tempZSum, 0);
-	tvOperators.getwTV_adaptive(imgCL, wMatrixCL,tempZSum);
+	tvOperators.getAdaptiveWeightedTV(imgCL, weightMatrixCL,tempZSum);
 	double wTV=tempZSum.getGridOperator().sum(tempZSum);
    tempZSum.release();
 	return wTV;
 }
 
-public double getAwTVvalueCL(OpenCLGrid3D imgCL)
+/**
+ * compute directional weighted TV with OpenCL, in Y direction gradient has a large weight, B=100 for instance
+ * @param imgCL
+ * @return
+ */
+public double getDirectionalWeightedTVvalueCL(OpenCLGrid3D imgCL)
 {   
 	OpenCLGrid3D tempZSum=new OpenCLGrid3D(new Grid3D(imgCL.getSize()[0],imgCL.getSize()[1],1));
 	tempZSum.getGridOperator().fill(tempZSum, 0);
-	tvOperators.getAwTV(imgCL, wMatrixCL,tempZSum);
+	tvOperators.getDirectionalWeightedTV(imgCL, weightMatrixCL,tempZSum);
 	double wTV=tempZSum.getGridOperator().sum(tempZSum);
    tempZSum.release();
 	return wTV;
 }
 
-public double getwTVvalueCL2(OpenCLGrid3D imgCL)
+/**
+ * compute weighted TV value with OpenCL, here compute image gradient in each XY plane
+ * @param imgCL
+ * @return
+ */
+public double getWeightedTVvalueCL2(OpenCLGrid3D imgCL)
 {   
 	OpenCLGrid3D tempZSum=new OpenCLGrid3D(new Grid3D(imgCL.getSize()[0],imgCL.getSize()[1],1));
 	tempZSum.getGridOperator().fill(tempZSum, 0);
-	tvOperators.getwTV2(imgCL, wMatrixCL,tempZSum);
+	tvOperators.getWeightedTV2(imgCL, weightMatrixCL,tempZSum);
 	double wTV=tempZSum.getGridOperator().sum(tempZSum);
    tempZSum.release();
 	return wTV;
 }
-/*
-public double getwTVvalueCL(OpenCLGrid3D imgCL)
-{   this.ComputeGradientCL(imgCL);
-	OpenCLGrid3D wTVTempGrid=new OpenCLGrid3D(this.imgGradientCL);
-	wTVTempGrid.getGridOperator().multiplyBy(wTVTempGrid, WmatrixCL);
-	double wTV=wTVTempGrid.getGridOperator().sum(wTVTempGrid);
-	wTVTempGrid.release();
-	return wTV;
-}
-*/
 
-	public Grid3D computeTVgradient(Grid3D img) {
+
+public Grid3D computeTVgradient(Grid3D img) {
 		//According to the paper:
 		//Accurate image reconstruction from few-views and limited-angle data in divergent-beam CT
-		this.max_Value=0.0f;
+		this.maxValue=0.0f;
 		for (int i = 0; i < tvGradient.getSize()[0]; i++) {
 			for (int j = 0; j < tvGradient.getSize()[1]; j++) {
-				for(int k=0;k<gradient.getSize()[2];k++){
+				for(int k=0;k<imgGradient.getSize()[2];k++){
 				double fijk = img.getAtIndex(i, j,k);
 	
 				double fl = fijk;
@@ -247,8 +312,8 @@ public double getwTVvalueCL(OpenCLGrid3D imgCL)
 						/ Math.sqrt(eps + (fd - fijk) * (fd - fijk)+ (fd - fld)*(fd - fld)+(fd-fdt)*(fd-fdt))
 						-(fb-fijk)
 						/Math.sqrt(eps+(fb-flb)*(fb-flb)+(fb-fub)*(fb-fub)+(fb-fijk)*(fb-fijk));
-				if (Math.abs(vij)>max_Value)
-					max_Value=Math.abs(vij);
+				if (Math.abs(vij)>maxValue)
+					maxValue=Math.abs(vij);
 				tvGradient.setAtIndex(i, j,k, (float) vij);
 				}
 			}
@@ -256,15 +321,19 @@ public double getwTVvalueCL(OpenCLGrid3D imgCL)
 		return tvGradient;
 	}
 	
-
-	public Grid3D computewTVgradient(Grid3D img) {//weighted TV gradient
+/**
+ * compute weighted TV gradient
+ * @param img
+ * @return
+ */
+	public Grid3D computeWeightedTVGradient(Grid3D img) {//weighted TV gradient
 		//According to the paper:
 		//Accurate image reconstruction from few-views and limited-angle data in divergent-beam CT
 		double vij;
 		double wr,wd,wb;
 		for (int i = 0; i < tvGradient.getSize()[0]; i++) {
 			for (int j = 0; j < tvGradient.getSize()[1]; j++) {
-				for(int k=0;k<gradient.getSize()[2];k++){
+				for(int k=0;k<imgGradient.getSize()[2];k++){
 				double fijk = img.getAtIndex(i, j,k);
 				double fl = fijk;
 				double fr = fijk;
@@ -284,21 +353,21 @@ public double getwTVvalueCL(OpenCLGrid3D imgCL)
 				if (i < tvGradient.getSize()[0] - 1)
 				{
 					fr = img.getAtIndex(i + 1, j,k);
-					wr=wMatrix.getAtIndex(i+1, j, k);}
+					wr=weightMatrix.getAtIndex(i+1, j, k);}
 				else
 					wr=0;
 				if (j > 0)
 					fu = img.getAtIndex(i, j - 1,k);
 				if (j < tvGradient.getSize()[1] - 1){
 					fd = img.getAtIndex(i, j + 1,k);
-					wd=wMatrix.getAtIndex(i, j+1, k);}
+					wd=weightMatrix.getAtIndex(i, j+1, k);}
 				else
 					wd=0;
 				if(k>0)
 					ft=img.getAtIndex(i, j, k-1);
 				if(k<tvGradient.getSize()[2]-1){
 					fb=img.getAtIndex(i, j, k+1);
-					wb=wMatrix.getAtIndex(i, j, k+1);
+					wb=weightMatrix.getAtIndex(i, j, k+1);
 				}
 				else
 					wb=0;
@@ -315,7 +384,7 @@ public double getwTVvalueCL(OpenCLGrid3D imgCL)
 				if(k<(tvGradient.getSize()[2] - 1) & j>0)
 					fub=img.getAtIndex(i, j-1, k+1);
 				//Not at border           
-				vij = wMatrix.getAtIndex(i, j, k)*(3 * fijk -  fl - fu-ft)
+				vij = weightMatrix.getAtIndex(i, j, k)*(3 * fijk -  fl - fu-ft)
 						/ Math.sqrt(eps + (fijk- fl) * (fijk - fl)+ (fijk - fu) * (fijk - fu)+(fijk-ft)*(fijk-ft))
 						- wr* (fr - fijk)
 						/ Math.sqrt(eps + (fr - fijk) * (fr - fijk)+ (fr - fru) * (fr - fru)+(fr-frt)*(fr-frt))
@@ -323,8 +392,8 @@ public double getwTVvalueCL(OpenCLGrid3D imgCL)
 						/ Math.sqrt(eps + (fd - fijk) * (fd - fijk)+ (fd - fld)*(fd - fld)+(fd-fdt)*(fd-fdt))
 						-wb*(fb-fijk)
 						/Math.sqrt(eps+(fb-flb)*(fb-flb)+(fb-fub)*(fb-fub)+(fb-fijk)*(fb-fijk));
-				if (Math.abs(vij)>max_Value)
-					max_Value=Math.abs(vij);
+				if (Math.abs(vij)>maxValue)
+					maxValue=Math.abs(vij);
 				tvGradient.setAtIndex(i, j,k, (float) vij);
 				}
 			}
@@ -332,82 +401,130 @@ public double getwTVvalueCL(OpenCLGrid3D imgCL)
 		return tvGradient;
 	}
 	
-	public OpenCLGrid3D compute_wTV_Gradient(OpenCLGrid3D imgCL)
+	/**
+	 * compute weighted TV gradient with OpenCL
+	 * @param imgCL
+	 * @return
+	 */
+	public OpenCLGrid3D computeWeightedTVGradient(OpenCLGrid3D imgCL)
 	{
 		//TVOpenCLGridOperators.getInstance().compute_wTV_Gradient(imgCL, WmatrixCL, TVgradientCL);
-		tvOperators.compute_wTV_Gradient(imgCL, wMatrixCL, tvGradientCL);
-	
-		return this.tvGradientCL;
-	}
-	public OpenCLGrid3D compute_wTV_adaptive_Gradient(OpenCLGrid3D imgCL)
-	{
-		//TVOpenCLGridOperators.getInstance().compute_wTV_Gradient(imgCL, WmatrixCL, TVgradientCL);
-		tvOperators.compute_wTV_adaptive_Gradient(imgCL, wMatrixCL, tvGradientCL);
-	
-		return this.tvGradientCL;
-	}
-	
-	public OpenCLGrid3D compute_AwTV_Gradient(OpenCLGrid3D imgCL)
-	{
-		//TVOpenCLGridOperators.getInstance().compute_wTV_Gradient(imgCL, WmatrixCL, TVgradientCL);
-		tvOperators.compute_AwTV_Gradient(imgCL, wMatrixCL, tvGradientCL);
+		tvOperators.computeWeightedTVGradient(imgCL, weightMatrixCL, tvGradientCL);
 	
 		return this.tvGradientCL;
 	}
 	
-	public OpenCLGrid3D compute_wTV_Gradient2(OpenCLGrid3D imgCL)//do TV in each Z slide
+	/**
+	 * 
+	 * @param imgCL
+	 * @return
+	 */
+	public OpenCLGrid3D computeAdaptiveWeightedTVGradient(OpenCLGrid3D imgCL)
 	{
 		//TVOpenCLGridOperators.getInstance().compute_wTV_Gradient(imgCL, WmatrixCL, TVgradientCL);
-		tvOperators.compute_wTV_Gradient2(imgCL, wMatrixCL, tvGradientCL);
+		tvOperators.computeAdaptiveWeightedTVGradient(imgCL, weightMatrixCL, tvGradientCL);
 	
 		return this.tvGradientCL;
 	}
 	
-	public void wMatrixCLUpdate_Y(OpenCLGrid3D imgCL){//mainly along Y
+	/**
+	 * compute anisotropic weighted TV gradient
+	 * @param imgCL
+	 * @return
+	 */
+	public OpenCLGrid3D computeAnisotropicWeightedTVGradient(OpenCLGrid3D imgCL)
+	{
+		//TVOpenCLGridOperators.getInstance().compute_wTV_Gradient(imgCL, WmatrixCL, TVgradientCL);
+		tvOperators.computeDirectionalWeightedTVGradient(imgCL, weightMatrixCL, tvGradientCL);
+	
+		return this.tvGradientCL;
+	}
+	
+	/**
+	 * compute wTV gradient, only in XY plane
+	 * @param imgCL
+	 * @return
+	 */
+	public OpenCLGrid3D computeWeightedTVGradient2(OpenCLGrid3D imgCL)//do TV in each Z slide
+	{
+		//TVOpenCLGridOperators.getInstance().compute_wTV_Gradient(imgCL, WmatrixCL, TVgradientCL);
+		tvOperators.computeWeightedTVGradient2(imgCL, weightMatrixCL, tvGradientCL);
+	
+		return this.tvGradientCL;
+	}
+	
+	/**
+	 * update weight matrix for anisotropic weighted TV (AwTV) along Y direction
+	 * @param imgCL
+	 */
+	public void weightMatrixCLUpdateY(OpenCLGrid3D imgCL){//mainly along Y
 		
 		//this.ComputeGradientCL(imgCL);
-		TVOpenCLGridOperators.getInstance().compute_Wmatrix_Update_Y(imgCL, wMatrixCL, weps);
+		TVOpenCLGridOperators.getInstance().computeWeightMatrixUpdateY(imgCL, weightMatrixCL, weps);
 	}
 	
-	public double getwTVvalueCL_Y(OpenCLGrid3D imgCL)
+	/**
+	 * get weighted TV value for anisotropic weighted TV (AwTV) along Y direction
+	 * @param imgCL
+	 * @return
+	 */
+	public double getWeightedTVvalueCLY(OpenCLGrid3D imgCL)
 	{   
 		OpenCLGrid3D tempZSum=new OpenCLGrid3D(new Grid3D(imgCL.getSize()[0],imgCL.getSize()[1],1));
 		tempZSum.getGridOperator().fill(tempZSum, 0);
-		tvOperators.getwTV_Y(imgCL, wMatrixCL,tempZSum);
+		tvOperators.getWeightedTVY(imgCL, weightMatrixCL,tempZSum);
 		double wTV=tempZSum.getGridOperator().sum(tempZSum);
 	   tempZSum.release();
 		return wTV;
 	}
 	
-	public OpenCLGrid3D compute_wTV_Gradient_Y(OpenCLGrid3D imgCL)
+	/**
+	 * get weighted TV gradient for anisotropic weighted TV (AwTV) along Y direction
+	 * @param imgCL
+	 * @return
+	 */
+	public OpenCLGrid3D computeWeightedTVGradientY(OpenCLGrid3D imgCL)
 	{
 		//TVOpenCLGridOperators.getInstance().compute_wTV_Gradient(imgCL, WmatrixCL, TVgradientCL);
-		tvOperators.compute_wTV_Gradient_Y(imgCL, wMatrixCL, tvGradientCL);
+		tvOperators.computeWeightedTVGradientY(imgCL, weightMatrixCL, tvGradientCL);
 	
 		return this.tvGradientCL;
 	}
 
-	
-	public void wMatrixCLUpdate_X(OpenCLGrid3D imgCL){//mainly along Y
+	/**
+	 * update weight matrix for anisotropic weighted TV (AwTV) along X direction
+	 * @param imgCL
+	 */
+	public void weightMatrixCLUpdateX(OpenCLGrid3D imgCL){//mainly along Y
 		
 		//this.ComputeGradientCL(imgCL);
-		TVOpenCLGridOperators.getInstance().compute_Wmatrix_Update_X(imgCL, wMatrixCL, weps);
+		TVOpenCLGridOperators.getInstance().computeWeightMatrixUpdateX(imgCL, weightMatrixCL, weps);
 	}
 	
-	public double getwTVvalueCL_X(OpenCLGrid3D imgCL)
+	/**
+	 * get weighted TV value for anisotropic weighted TV (AwTV) along X direction
+	 * @param imgCL
+	 * @return
+	 */
+	public double getWeightedTVvalueCLX(OpenCLGrid3D imgCL)
 	{   
 		OpenCLGrid3D tempZSum=new OpenCLGrid3D(new Grid3D(imgCL.getSize()[0],imgCL.getSize()[1],1));
 		tempZSum.getGridOperator().fill(tempZSum, 0);
-		tvOperators.getwTV_Y(imgCL, wMatrixCL,tempZSum);
+		tvOperators.getWeightedTVY(imgCL, weightMatrixCL,tempZSum);
 		double wTV=tempZSum.getGridOperator().sum(tempZSum);
 	   tempZSum.release();
 		return wTV;
 	}
 	
-	public OpenCLGrid3D compute_wTV_Gradient_X(OpenCLGrid3D imgCL)
+	/**
+	 * get weighted TV gradient for anisotropic weighted TV (AwTV) along X direction
+	 * @param imgCL
+	 * @return
+	 */
+	public OpenCLGrid3D computeWeightedTVGradientX(OpenCLGrid3D imgCL)
 	{
 		//TVOpenCLGridOperators.getInstance().compute_wTV_Gradient(imgCL, WmatrixCL, TVgradientCL);
-		tvOperators.compute_wTV_Gradient_X(imgCL, wMatrixCL, tvGradientCL);
+		tvOperators.computeWeightedTVGradientX(imgCL, weightMatrixCL, tvGradientCL);
 	
 		return this.tvGradientCL;
 	}
