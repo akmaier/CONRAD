@@ -83,12 +83,11 @@ kernel void gradient(global float *gridA, global float *gridB, const int xOffset
 
 
 //Yixing Huang
-kernel void compute_img_gradient(global float* grid,global float* imggradient, const int sizeX,const int sizeY,const int sizeZ)
+kernel void computeImageGradient(global float* grid,global float* imggradient, const int sizeX,const int sizeY,const int sizeZ)
 {
 
 int x=get_global_id(0);
 int y=get_global_id(1);
-//float B=10;
 if((x>=sizeX) ||(y>=sizeY)||x<0||y<0)
 	{
 	return;
@@ -119,7 +118,7 @@ for(int z=0;z<sizeZ;z++)
 }
 
 //*****************************************************************************************************************************************************************2D case
-kernel void compute_img_gradient2D(global float* grid,global float* imggradient, const int sizeX,const int sizeY)
+kernel void  computeImageGradient2D(global float* grid,global float* imggradient, const int sizeX,const int sizeY)
 {
 
 int x=get_global_id(0);
@@ -146,7 +145,7 @@ if((x>=sizeX) ||(y>=sizeY)||x<0||y<0)
 }
 
 
-kernel void compute_Wmatrix_Update2D(global float* grid,global float* wmatrix, const float eps,const int sizeX,const int sizeY)
+kernel void computeWeightMatrixUpdate2D(global float* grid,global float* wmatrix, const float eps,const int sizeX,const int sizeY)
 {
 int x=get_global_id(0);
 int y=get_global_id(1);
@@ -176,7 +175,7 @@ float grad=0;
 }
 
 
-kernel void compute_wTV_gradient2D(global float* grid, global float* Wmatrix,global float* TVgradient,const int sizeX,const int sizeY)
+kernel void computeWeightedTVGradient2D(global float* grid, global float* Wmatrix,global float* TVgradient,const int sizeX,const int sizeY)
 {
 float eps=0.1;
 int x=get_global_id(0);
@@ -244,7 +243,7 @@ TVgradient[y*sizeX+x]=vxy;
 }
 
 //**************************************************************************************************************************************************2D AwTV
-kernel void compute_img_gradient2D_X(global float* grid,global float* imggradient, const int sizeX,const int sizeY)
+kernel void computeImageGradient2DX(global float* grid,global float* imggradient, const int sizeX,const int sizeY)
 {
 
 int x=get_global_id(0);
@@ -276,7 +275,7 @@ if((x>=sizeX) ||(y>=sizeY)||x<0||y<0)
 			imggradient[y*sizeX+x]=sqrt(Hdiff*Hdiff+Vdiff*Vdiff);
 }
 
-kernel void compute_Wmatrix_Update2D_X(global float* grid,global float* wmatrix, const float eps,const int sizeX,const int sizeY)
+kernel void computeWeightMatrixUpdate2DX(global float* grid,global float* wmatrix, const float eps,const int sizeX,const int sizeY)
 {
 int x=get_global_id(0);
 int y=get_global_id(1);
@@ -311,7 +310,7 @@ float grad=0;
 
 
 //Yixing Huang
-kernel void compute_wTV_gradient2D_X(global float* grid, global float* Wmatrix,global float* TVgradient,const int sizeX,const int sizeY)
+kernel void computeWeightedTVGradient2DX(global float* grid, global float* Wmatrix,global float* TVgradient,const int sizeX,const int sizeY)
 {
 float eps=0.1;
 int x=get_global_id(0);
@@ -368,7 +367,7 @@ TVgradient[idx]=vxy;
 
 
 //
-kernel void compute_Wmatrix_Update(global float* grid,global float* wmatrix, const float eps,const int sizeX,const int sizeY,const int sizeZ)
+kernel void computeWeightMatrixUpdate(global float* grid,global float* wmatrix, const float eps,const int sizeX,const int sizeY,const int sizeZ)
 {
 
 int x=get_global_id(0);
@@ -408,7 +407,7 @@ for(int z=0;z<sizeZ;z++){
 
 
 //
-kernel void compute_AwTV_Wmatrix_Update(global float* grid,global float* wmatrix, const float eps,const int sizeX,const int sizeY,const int sizeZ)
+kernel void computeDirectionalWeightedTVWeightMatrixUpdate(global float* grid,global float* wmatrix, const float eps,const int sizeX,const int sizeY,const int sizeZ)
 {
 
 int x=get_global_id(0);
@@ -445,7 +444,7 @@ for(int z=0;z<sizeZ;z++){
 
 
 //
-kernel void compute_Wmatrix_Update2(global float* grid,global float* wmatrix, const float eps,const int sizeX,const int sizeY,const int sizeZ)
+kernel void computeWeightMatrixUpdate2(global float* grid,global float* wmatrix, const float eps,const int sizeX,const int sizeY,const int sizeZ)
 {
 
 int x=get_global_id(0);
@@ -498,7 +497,7 @@ float ycenter=sizeY/2.0;
 	}
 }
 
-kernel void getwTV(global float* grid, global float* Wmatrix,global float* ZSum,const int sizeX,const int sizeY,const int sizeZ){
+kernel void getWeightedTV(global float* grid, global float* Wmatrix,global float* ZSum,const int sizeX,const int sizeY,const int sizeZ){
 int x=get_global_id(0);
 int y=get_global_id(1);
 if((x>=sizeX) ||(y>=sizeY)||x<0||y<0)
@@ -534,7 +533,7 @@ int idx=z*sizeX*sizeY+y*sizeX+x;
 
 
 
-kernel void getAwTV(global float* grid, global float* Wmatrix,global float* ZSum,const int sizeX,const int sizeY,const int sizeZ){
+kernel void getDirectionalWeightedTV(global float* grid, global float* Wmatrix,global float* ZSum,const int sizeX,const int sizeY,const int sizeZ){
 int x=get_global_id(0);
 int y=get_global_id(1);
 if((x>=sizeX) ||(y>=sizeY)||x<0||y<0)
@@ -566,7 +565,7 @@ int idx=z*sizeX*sizeY+y*sizeX+x;
 }//end getwTV
 
 
-kernel void getwTV2(global float* grid, global float* Wmatrix,global float* ZSum,const int sizeX,const int sizeY,const int sizeZ){
+kernel void getWeightedTV2(global float* grid, global float* Wmatrix,global float* ZSum,const int sizeX,const int sizeY,const int sizeZ){
 //without Z direction gradient
 int x=get_global_id(0);
 int y=get_global_id(1);
@@ -597,7 +596,7 @@ int idx=z*sizeX*sizeY+y*sizeX+x;
 }//end getwTV
 
 //Yixing Huang
-kernel void compute_wTV_gradient(global float* grid, global float* Wmatrix,global float* TVgradient,const int sizeX,const int sizeY,const int sizeZ)
+kernel void computeWeightedTVGradient(global float* grid, global float* Wmatrix,global float* TVgradient,const int sizeX,const int sizeY,const int sizeZ)
 {
 float eps=0.1;
 int x=get_global_id(0);
@@ -705,7 +704,7 @@ TVgradient[idx]=vxyz;}
 
 
 //Yixing Huang
-kernel void compute_AwTV_gradient(global float* grid, global float* Wmatrix,global float* TVgradient,const int sizeX,const int sizeY,const int sizeZ)
+kernel void computeDirectionalWeightedTVGradient(global float* grid, global float* Wmatrix,global float* TVgradient,const int sizeX,const int sizeY,const int sizeZ)
 {
 float eps=0.1;
 int x=get_global_id(0);
@@ -811,7 +810,7 @@ TVgradient[z*sizeX*sizeY+y*sizeX+x]=vxyz;}
 
 //Yixing Huang
 //only compute gradient in X,Y direction, without Z direction
-kernel void compute_wTV_gradient2(global float* grid, global float* Wmatrix,global float* TVgradient,const int sizeX,const int sizeY,const int sizeZ)
+kernel void computeWeightedTVGradient2(global float* grid, global float* Wmatrix,global float* TVgradient,const int sizeX,const int sizeY,const int sizeZ)
 {
 
 float eps=0.1;
@@ -922,7 +921,7 @@ for(int z=0;z<sizeZ;z++){
 
 
 /*
-kernel void compute_adaptive_Wmatrix_Update(global float* imggradient,global float* wmatrix, const float eps,const int sizeX,const int sizeY,const int sizeZ)
+kernel void computeAdaptiveWeightMatrixUpdate(global float* imggradient,global float* wmatrix, const float eps,const int sizeX,const int sizeY,const int sizeZ)
 {
 int x=get_global_id(0);
 int y=get_global_id(1);
@@ -941,7 +940,7 @@ for(int z=0;z<sizeZ;z++){
 }
 */
 
-kernel void getwTV_adaptive(global float* grid, global float* Wmatrix,global float* ZSum,const int sizeX,const int sizeY,const int sizeZ){
+kernel void getAdaptiveWeightedTV(global float* grid, global float* Wmatrix,global float* ZSum,const int sizeX,const int sizeY,const int sizeZ){
 int x=get_global_id(0);
 int y=get_global_id(1);
 if((x>=sizeX) ||(y>=sizeY)||x<0||y<0)
@@ -976,8 +975,8 @@ int idx=z*sizeX*sizeY+y*sizeX+x;
 }//end getwTV
 
 
-//Yixing Huang
-kernel void compute_wTV_adaptive_gradient(global float* grid, global float* Wmatrix,global float* TVgradient,const int sizeX,const int sizeY,const int sizeZ)
+//
+kernel void computeAdaptiveWeightedTVGradient(global float* grid, global float* Wmatrix,global float* TVgradient,const int sizeX,const int sizeY,const int sizeZ)
 {
 float eps=0.1;
 int x=get_global_id(0);
@@ -1095,7 +1094,7 @@ TVgradient[idx]=vxyz;}
 
 
 //*************************************************************************************************************************************************wTV_Y
-kernel void compute_Wmatrix_Update_Y(global float* grid,global float* wmatrix, const float eps,const int sizeX,const int sizeY,const int sizeZ)
+kernel void computeWeightMatrixUpdateY(global float* grid,global float* wmatrix, const float eps,const int sizeX,const int sizeY,const int sizeZ)
 {
 
 int x=get_global_id(0);
@@ -1134,7 +1133,7 @@ for(int z=0;z<sizeZ;z++){
 }
 }
 
-kernel void getwTV_Y(global float* grid, global float* Wmatrix,global float* ZSum,const int sizeX,const int sizeY,const int sizeZ){
+kernel void getWeightedTVY(global float* grid, global float* Wmatrix,global float* ZSum,const int sizeX,const int sizeY,const int sizeZ){
 int x=get_global_id(0);
 int y=get_global_id(1);
 if((x>=sizeX) ||(y>=sizeY)||x<0||y<0)
@@ -1173,8 +1172,8 @@ int idx=z*sizeX*sizeY+y*sizeX+x;
 
 
 
-//Yixing Huang
-kernel void compute_wTV_gradient_Y(global float* grid, global float* Wmatrix,global float* TVgradient,const int sizeX,const int sizeY,const int sizeZ)
+//AwTV Y
+kernel void computeWeightedTVGradientY(global float* grid, global float* Wmatrix,global float* TVgradient,const int sizeX,const int sizeY,const int sizeZ)
 {
 float eps=0.1;
 int x=get_global_id(0);
@@ -1242,7 +1241,7 @@ TVgradient[idx]=vxyz;
 
 //***************************************************************************************************************************************************below wTV_X
 
-kernel void compute_Wmatrix_Update_X(global float* grid,global float* wmatrix, const float eps,const int sizeX,const int sizeY,const int sizeZ)
+kernel void computeWeightMatrixUpdateX(global float* grid,global float* wmatrix, const float eps,const int sizeX,const int sizeY,const int sizeZ)
 {
 
 int x=get_global_id(0);
@@ -1282,7 +1281,7 @@ for(int z=0;z<sizeZ;z++){
 }
 
 
-kernel void getwTV_X(global float* grid, global float* Wmatrix,global float* ZSum,const int sizeX,const int sizeY,const int sizeZ){
+kernel void getWeightedTVX(global float* grid, global float* Wmatrix,global float* ZSum,const int sizeX,const int sizeY,const int sizeZ){
 int x=get_global_id(0);
 int y=get_global_id(1);
 if((x>=sizeX) ||(y>=sizeY)||x<0||y<0)
@@ -1320,8 +1319,8 @@ int idx=z*sizeX*sizeY+y*sizeX+x;
 
 
 
-//Yixing Huang
-kernel void compute_wTV_gradient_X(global float* grid, global float* Wmatrix,global float* TVgradient,const int sizeX,const int sizeY,const int sizeZ)
+//AwTV along X
+kernel void computeWeightedTVGradientX(global float* grid, global float* Wmatrix,global float* TVgradient,const int sizeX,const int sizeY,const int sizeZ)
 {
 float eps=0.1;
 int x=get_global_id(0);
