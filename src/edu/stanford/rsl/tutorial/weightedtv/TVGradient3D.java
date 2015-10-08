@@ -37,6 +37,7 @@ public TVGradient3D(Grid3D img){
 	this.tvGradient=new Grid3D(img);
     onesTemp=new Grid3D(weightMatrix);
 	NumericPointwiseOperators.fill(onesTemp, 1.0f);
+	initialWeightMatrix();
 }
 	
 	
@@ -50,6 +51,7 @@ public TVGradient3D(OpenCLGrid3D imgCL)
 	tvGradientCL.getGridOperator().fill(tvGradientCL, 0);
 	weightMatrixCL=new OpenCLGrid3D(tvGradientCL);
 	tvOperators=new TVOpenCLGridOperators();	
+	initialWeightMatrixCL();
 }
 
 /**
@@ -60,7 +62,8 @@ public TVGradient3D(int[] size)
 {this.tvGradientCL=new OpenCLGrid3D(new Grid3D(size[0],size[1],size[2]));
 tvGradientCL.getGridOperator().fill(tvGradientCL, 0);
 weightMatrixCL=new OpenCLGrid3D(tvGradientCL);
-tvOperators=new TVOpenCLGridOperators();	
+tvOperators=new TVOpenCLGridOperators();
+initialWeightMatrixCL();
 }
 
 /**
