@@ -4,8 +4,8 @@
 */
 
 #define LOCAL_GROUP_XDIM 256
-#define a 1
-#define b 2
+#define A 1
+#define B 2
 
 
 /* subtraction of two grids with offsets - used for gradients*/
@@ -269,7 +269,7 @@ if((x>=sizeX) ||(y>=sizeY)||x<0||y<0)
 			if (y > 0)
 				fu = grid[(y-1)*sizeX+x];
 	
-			float Hdiff=a*fr+b*fxy-b*fl1-a*fl2;
+			float Hdiff=A*fr+B*fxy-B*fl1-A*fl2;
 			float Vdiff=fxy-fu;
 			
 			imggradient[y*sizeX+x]=sqrt(Hdiff*Hdiff+Vdiff*Vdiff);
@@ -301,7 +301,7 @@ float grad=0;
 			if (y > 0)
 				fu = grid[(y-1)*sizeX+x];
 	
-			float Hdiff=a*fr+b*fxy-b*fl1-a*fl2;
+			float Hdiff=A*fr+B*fxy-B*fl1-A*fl2;
 			float Vdiff=fxy-fu;
 			
 			grad=sqrt(Hdiff*Hdiff+Vdiff*Vdiff);
@@ -348,16 +348,16 @@ if((x>=sizeX) ||(y>=sizeY)||(x<0)||(y<0))
 	wd=Wmatrix[idx+sizeX];
 	
 	
-vxy= Wmatrix[idx]*(b*(a*fr1+b*fxy-b*fl1-a*fl2)+fxy-fu)
-						/ sqrt(eps + (fxy- fu) * (fxy - fu)+ (a*fr1+b*fxy-b*fl1-a*fl2) * (a*fr1+b*fxy-b*fl1-a*fl2))
+vxy= Wmatrix[idx]*(B*(A*fr1+B*fxy-B*fl1-A*fl2)+fxy-fu)
+						/ sqrt(eps + (fxy- fu) * (fxy - fu)+ (A*fr1+B*fxy-B*fl1-A*fl2) * (A*fr1+B*fxy-B*fl1-A*fl2))
 						+wd* (fxy-fd)
-						/ sqrt(eps + (a*frd+b*fd-b*fl1d-a*fl2d) * (a*frd+b*fd-b*fl1d-a*fl2d)+ (fd - fxy)*(fd - fxy))
-						-wr1*b*(a*fr2+b*fr1-b*fxy-a*fl1)
-						/ sqrt(eps + (fr1 - fr1u) * (fr1 - fr1u)+ (a*fr2+b*fr1-b*fxy-a*fl1)* (a*fr2+b*fr1-b*fxy-a*fl1))
-						-wr2*a* (a*fr3+b*fr2-b*fr1-a* fxy)
-						/ sqrt(eps + (a*fr3+b*fr2-b*fr1-a* fxy) * (a*fr3+b*fr2-b*fr1-a* fxy)+ (fr2 - fr2u)*(fr2 - fr2u))
-						+wl*a*(a*fxy+b*fl1-b*fl2-a*fl3)
-						/ sqrt(eps + (a*fxy+b*fl1-b*fl2-a*fl3) * (a*fxy+b*fl1-b*fl2-a*fl3)+ (fl1 - flu)*(fl1 - flu))
+						/ sqrt(eps + (A*frd+B*fd-B*fl1d-A*fl2d) * (A*frd+B*fd-B*fl1d-A*fl2d)+ (fd - fxy)*(fd - fxy))
+						-wr1*B*(A*fr2+B*fr1-B*fxy-A*fl1)
+						/ sqrt(eps + (fr1 - fr1u) * (fr1 - fr1u)+ (A*fr2+B*fr1-B*fxy-A*fl1)* (A*fr2+B*fr1-B*fxy-A*fl1))
+						-wr2*A* (A*fr3+B*fr2-B*fr1-A* fxy)
+						/ sqrt(eps + (A*fr3+B*fr2-B*fr1-A* fxy) * (A*fr3+B*fr2-B*fr1-A* fxy)+ (fr2 - fr2u)*(fr2 - fr2u))
+						+wl*A*(A*fxy+B*fl1-B*fl2-A*fl3)
+						/ sqrt(eps + (A*fxy+B*fl1-B*fl2-A*fl3) * (A*fxy+B*fl1-B*fl2-A*fl3)+ (fl1 - flu)*(fl1 - flu))
 						;
 TVgradient[idx]=vxy;
 }//else
@@ -412,7 +412,7 @@ kernel void computeDirectionalWeightedTVWeightMatrixUpdate(global float* grid,gl
 
 int x=get_global_id(0);
 int y=get_global_id(1);
-float B=100;
+float b=100;
 if((x>=sizeX) ||(y>=sizeY))
 	{
 	return;
@@ -434,7 +434,7 @@ for(int z=0;z<sizeZ;z++){
 			float Hdiff=fxyz-fl;
 			float Vdiff=fxyz-fu;
 			float Zdiff=fxyz-ft;
-			grad=sqrt(Hdiff*Hdiff+B*Vdiff*Vdiff+Zdiff*Zdiff);
+			grad=sqrt(Hdiff*Hdiff+b*Vdiff*Vdiff+Zdiff*Zdiff);
 			
 			wmatrix[idx]= 1.f/(grad+eps);		
 	}
@@ -541,7 +541,7 @@ if((x>=sizeX) ||(y>=sizeY)||x<0||y<0)
 	return;
 	}
 float grad=0;
-float B=100;
+float b=100;
 for(int z=0;z<sizeZ;z++)
 {
 int idx=z*sizeX*sizeY+y*sizeX+x;
@@ -558,7 +558,7 @@ int idx=z*sizeX*sizeY+y*sizeX+x;
 			float Hdiff=fxyz-fl;
 			float Vdiff=fxyz-fu;
 			float Zdiff=fxyz-ft;
-			grad=sqrt(Hdiff*Hdiff+B*Vdiff*Vdiff+Zdiff*Zdiff);
+			grad=sqrt(Hdiff*Hdiff+b*Vdiff*Vdiff+Zdiff*Zdiff);
 			
 			ZSum[y*sizeX+x]=ZSum[y*sizeX+x]+Wmatrix[idx]*grad;
 }
@@ -709,7 +709,7 @@ kernel void computeDirectionalWeightedTVGradient(global float* grid, global floa
 float eps=0.1;
 int x=get_global_id(0);
 int y=get_global_id(1);
-float B=100;
+float b=100;
 if((x>=sizeX) ||(y>=sizeY)||(x<0)||(y<0))
 	{
 	return;
@@ -796,14 +796,14 @@ fub=grid[(z+1)*sizeX*sizeY+(y-1)*sizeX+x];
 if(z>0 && y<(sizeY-1)){
 fdt=grid[(z-1)*sizeX*sizeY+(y+1)*sizeX+x];
 	}
-vxyz = Wmatrix[z*sizeX*sizeY+y*sizeX+x]*((B+2)* fxyz -  fl - B*fu-ft)
-						/ sqrt(eps + (fxyz- fl) * (fxyz - fl)+ B*(fxyz - fu) * (fxyz - fu)+(fxyz-ft)*(fxyz-ft))
+vxyz = Wmatrix[z*sizeX*sizeY+y*sizeX+x]*((b+2)* fxyz -  fl - b*fu-ft)
+						/ sqrt(eps + (fxyz- fl) * (fxyz - fl)+ b*(fxyz - fu) * (fxyz - fu)+(fxyz-ft)*(fxyz-ft))
 						- wr* (fr - fxyz)
-						/ sqrt(eps + (fr - fxyz) * (fr - fxyz)+ B*(fr - fru) * (fr - fru)+(fr-frt)*(fr-frt))
-						-wd* B*(fd - fxyz)
-						/ sqrt(eps + B*(fd - fxyz) * (fd - fxyz)+ (fd - fld)*(fd - fld)+(fd-fdt)*(fd-fdt))
+						/ sqrt(eps + (fr - fxyz) * (fr - fxyz)+ b*(fr - fru) * (fr - fru)+(fr-frt)*(fr-frt))
+						-wd* b*(fd - fxyz)
+						/ sqrt(eps + b*(fd - fxyz) * (fd - fxyz)+ (fd - fld)*(fd - fld)+(fd-fdt)*(fd-fdt))
 						-wb*(fb-fxyz)
-						/sqrt(eps+(fb-flb)*(fb-flb)+B*(fb-fub)*(fb-fub)+(fb-fxyz)*(fb-fxyz));
+						/sqrt(eps+(fb-flb)*(fb-flb)+b*(fb-fub)*(fb-fub)+(fb-fxyz)*(fb-fxyz));
 TVgradient[z*sizeX*sizeY+y*sizeX+x]=vxyz;}
 }
 
@@ -1099,7 +1099,7 @@ kernel void computeWeightMatrixUpdateY(global float* grid,global float* wmatrix,
 
 int x=get_global_id(0);
 int y=get_global_id(1);
-float A=0.8, B=1.0;
+float a=0.8, b=1.0;
 if((x>=sizeX) ||(y>=sizeY))
 	{
 	return;
@@ -1125,7 +1125,7 @@ for(int z=0;z<sizeZ;z++){
 			if(z>0)
 				ft = grid[idx-sizeX*sizeY];
 			float Hdiff=fxyz-fl;
-			float Vdiff=b*(fxyz-fu1)+a*(fd2-fu2);
+			float Vdiff=B*(fxyz-fu1)+A*(fd2-fu2);
 			float Zdiff=fxyz-ft;
 			grad=sqrt(Hdiff*Hdiff+Vdiff*Vdiff+Zdiff*Zdiff);
 			wmatrix[idx]= 1.f/((grad+eps)*10000);		
@@ -1162,7 +1162,7 @@ int idx=z*sizeX*sizeY+y*sizeX+x;
 			if(z>0)
 				ft = grid[idx-sizeX*sizeY];
 			float Hdiff=fxyz-fl;
-			float Vdiff=b*(fxyz-fu1)+a*(fd2-fu2);
+			float Vdiff=B*(fxyz-fu1)+A*(fd2-fu2);
 			float Zdiff=fxyz-ft;
 			grad=sqrt(Hdiff*Hdiff+Vdiff*Vdiff+Zdiff*Zdiff);
 			
@@ -1221,18 +1221,18 @@ for(int z=1;z<sizeZ-1;z++)
 	wd2=Wmatrix[idx+2*sizeX];
 	wu=Wmatrix[idx-sizeX];
 	
-vxyz = Wmatrix[idx]*(2* fxyz -  fl -ft+b*(a*fd1+b*fxyz-b*fu1-a*fu2))
-						/ sqrt(eps + (fxyz- fl) * (fxyz - fl)+ (a*fd1+b*fxyz-b*fu1-a*fu2) * (a*fd1+b*fxyz-b*fu1-a*fu2)+(fxyz-ft)*(fxyz-ft))
+vxyz = Wmatrix[idx]*(2* fxyz -  fl -ft+B*(A*fd1+B*fxyz-B*fu1-A*fu2))
+						/ sqrt(eps + (fxyz- fl) * (fxyz - fl)+ (A*fd1+B*fxyz-B*fu1-A*fu2) * (A*fd1+B*fxyz-B*fu1-A*fu2)+(fxyz-ft)*(fxyz-ft))
 						+ wr* (-fr +fxyz)
-						/ sqrt(eps + (fr - fxyz) * (fr - fxyz)+ (a*frd+b*fr-b*fru1-a*fru2) * (a*frd+b*fr-b*fru1-a*fru2) +(fr-frt)*(fr-frt))
+						/ sqrt(eps + (fr - fxyz) * (fr - fxyz)+ (A*frd+B*fr-B*fru1-A*fru2) * (A*frd+B*fr-B*fru1-A*fru2) +(fr-frt)*(fr-frt))
 						+wb*(-fb+fxyz)
-						/sqrt(eps+(fb-flb)*(fb-flb)+(a*fdb+b*fb-b*fu1b-a*fu2b)*(a*fdb+b*fb-b*fu1b-a*fu2b)+(fb-fxyz)*(fb-fxyz))
-						-wd1*b* (a*fd2+b*fd1- b*fxyz-a*fu1)
-						/ sqrt(eps + (a*fd2+b*fd1- b*fxyz-a*fu1) * (a*fd2+b*fd1- b*fxyz-a*fu1)+ (fd1 - fld)*(fd1 - fld)+(fd1-fdt)*(fd1-fdt))
-						-wd2*a* (a*fd3+b*fd2 -b*fd1-a* fxyz)
-						/ sqrt(eps + (a*fd3+b*fd2 -b*fd1-a* fxyz) * (a*fd3+b*fd2 -b*fd1-a* fxyz)+ (fd2 - fld2)*(fd2 - fld2)+(fd2-fd2t)*(fd2-fd2t))
-						+wu* a*(a*fxyz+b*fu1-b*fu2-a*fu3)
-						/ sqrt(eps + (a*fxyz+b*fu1-b*fu2-a*fu3) * (a*fxyz+b*fu1-b*fu2-a*fu3)+ (fu1 - flu)*(fu1 - flu)+(fu1-fut)*(fu1-fut));
+						/sqrt(eps+(fb-flb)*(fb-flb)+(A*fdb+B*fb-B*fu1b-A*fu2b)*(A*fdb+B*fb-B*fu1b-A*fu2b)+(fb-fxyz)*(fb-fxyz))
+						-wd1*B* (A*fd2+B*fd1- B*fxyz-A*fu1)
+						/ sqrt(eps + (A*fd2+B*fd1- B*fxyz-A*fu1) * (A*fd2+B*fd1- B*fxyz-A*fu1)+ (fd1 - fld)*(fd1 - fld)+(fd1-fdt)*(fd1-fdt))
+						-wd2*A* (A*fd3+B*fd2 -B*fd1-A* fxyz)
+						/ sqrt(eps + (A*fd3+B*fd2 -B*fd1-A* fxyz) * (A*fd3+B*fd2 -B*fd1-A* fxyz)+ (fd2 - fld2)*(fd2 - fld2)+(fd2-fd2t)*(fd2-fd2t))
+						+wu* A*(A*fxyz+B*fu1-B*fu2-A*fu3)
+						/ sqrt(eps + (A*fxyz+B*fu1-B*fu2-A*fu3) * (A*fxyz+B*fu1-B*fu2-A*fu3)+ (fu1 - flu)*(fu1 - flu)+(fu1-fut)*(fu1-fut));
 TVgradient[idx]=vxyz;
 }//else
 }//for z
