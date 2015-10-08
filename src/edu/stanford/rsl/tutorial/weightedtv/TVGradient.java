@@ -47,6 +47,7 @@ public TVGradient(Grid2D img)
 	onesTemp=new Grid2D(img);
 	NumericPointwiseOperators.fill(onesTemp, 1.0f);
 	gradientTemp=new Grid2D(img);
+	initialWeightMatrix();
 }
 
 /**
@@ -59,6 +60,7 @@ public TVGradient(OpenCLGrid2D imgCL){
 	imgGradientCL=new OpenCLGrid2D(imgCL);
 	TVGradientCL.getGridOperator().fill(imgGradientCL, 0);
 	tvOperators=new TVOpenCLGridOperators();
+	 initialWeightMatrixCL();
 }
 
 /**
