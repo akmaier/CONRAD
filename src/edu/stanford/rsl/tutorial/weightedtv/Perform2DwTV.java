@@ -31,73 +31,67 @@ import edu.stanford.rsl.tutorial.fan.FanBeamBackprojector2D;
 public class Perform2DWeightedTV {
 	static boolean isOpencl=true;
 
-	 static int maxIter = 500;
-	 static int maxTVIter = 10;
-	 static double epsilon = 1.0e-10;
-	 static double error = 1.0;
-	 static double error2;
-	 static int iter = 0;
-	 static double step=0;
+	 private  int maxIter = 500;
+	 public  int maxTVIter = 10;
+	 private double epsilon = 1.0e-10;
+	 public double error = 1.0;
+	 public double error2;
+	 private int iter = 0;
+	 private double step=0;
 	
 	//SART
-	static Grid2D phan;
-	static Grid2D sinogram;
-	static Grid1D sinoDiff1D;
-	static Grid2D recon;
-	static Grid2D reconPre;
-	static Grid2D normSinogram;
-	static Grid2D normGrids;
-	static Grid2D localImageUpdate;
+	 public Grid2D phan;
+	 public Grid2D recon;
+	 private Grid2D sinogram;
+	 private Grid1D sinoDiff1D;
+	 private Grid2D reconPre;
+	 private Grid2D normSinogram;
+	 private Grid2D normGrids;
+	 private Grid2D localImageUpdate;
 	//weighted TV
-	static TVGradient TVGrad;
-	static Grid2D TVGradient;
+	public TVGradient TVGrad;
+	//public Grid2D TVGradient;
 	//Geometry
-	static int imgSizeX;
-	static int imgSizeY;
-	static double gammaM;
-	static double maxT;
-	static double deltaT;
-	static double focalLength;
-	static double maxBeta;
-	static double deltaBeta;
-	static int spacingX=1,spacingY=1;
-	static FanBeamProjector2D projector;
-	static FanBeamBackprojector2D backProj;
+	public int imgSizeX;
+	public int imgSizeY;
+	private double gammaM;
+	private double maxT;
+	private double deltaT;
+	private double focalLength;
+	private double maxBeta;
+	private double deltaBeta;
+	private int spacingX=1,spacingY=1;
+	private FanBeamProjector2D projector;
+	private FanBeamBackprojector2D backProj;
 	
 	public static void main(String[] args) throws IOException {
 		new ImageJ();
-		
-		imgSizeX = 256;
-		imgSizeY=imgSizeX;
-		phan = new SheppLogan(imgSizeX, false);
-		phan.setSpacing(spacingX,spacingY);
-		phan.show("The Phantom");
+		Perform2DWeightedTV tv2D=new Perform2DWeightedTV();
+		tv2D.imgSizeX = 256;
+		tv2D.imgSizeY=tv2D.imgSizeX;
+		tv2D.phan = new SheppLogan(tv2D.imgSizeX, false);
+		tv2D.phan.show("The Phantom");
 	   	
 	   
-	   initialGeometry();
-	   initialSART();
-	   createNormProj();
-       createNormGrids();	
+	   tv2D.initialGeometry();
+	   tv2D.initialSART();
+	   tv2D.createNormProj();
+       tv2D.createNormGrids();	
        
 	
        //initial wTV
-		TVGradient= new Grid2D(imgSizeX, imgSizeY);
-		TVGradient.setSpacing(1, 1);
-		TVGrad = new TVGradient(recon);
-		TVGrad.initialWeightMatrix();
-   
+		tv2D.TVGrad = new TVGradient(tv2D.recon);
 
-		
-		while (error > epsilon && iter <=maxIter) {
-		 sartIterate();		 
-		 weightedTVIterate();
+		while (tv2D.error > tv2D.epsilon && tv2D.iter <=tv2D.maxIter) {
+		 tv2D.sartIterate();		 
+		 tv2D.weightedTVIterate();
 
-		 TVGrad.weightMatrixUpdate(recon);
-		 outPutError();
-		 iter++;
+		 tv2D.TVGrad.weightMatrixUpdate(tv2D.recon);
+		 tv2D.outPutError();
+		 tv2D.iter++;
 		}
 
-		recon.show("Reconstructed Image");
+		tv2D.recon.show("Reconstructed Image");
 	}
 	
 	
@@ -105,7 +99,7 @@ public class Perform2DWeightedTV {
 /**
  * SART iteration part
  */
-private static void sartIterate(){
+public void sartIterate(){
 	reconPre=new Grid2D(recon);
 	for (int theta = 0; theta < sinogram.getSize()[1]; theta++) {
 		if(isOpencl)
@@ -137,8 +131,9 @@ private static void sartIterate(){
 /**
  * weighted TV gradient descent part
  */
-private static void weightedTVIterate()
+public void weightedTVIterate()
 {
+	Grid2D TVGradient;
 	double TV=TVGrad.getWeightedTVvalue(recon);
 	int i=0;
 	double deltaTV=-1.0;
@@ -159,7 +154,7 @@ private static void weightedTVIterate()
  * Using back tracking line search algorithm to find the step size for weighted TV gradient descent
  * @param grad
  */
-private static void backTrackingLineSearch(Grid2D grad){//weighted TV
+private void backTrackingLineSearch(Grid2D grad){//weighted TV
 	double t=1.0,tmin=1.0e-7;
 	double alpha=0.3, beta=0.6;
 	double delta=1.0f,temp1,temp2;
@@ -186,7 +181,7 @@ private static void backTrackingLineSearch(Grid2D grad){//weighted TV
 /**
  * The limited angle tomography geometry
  */
-private static void initialGeometry()
+public void initialGeometry()
 {
 	gammaM = 10. * Math.PI / 180;
 	// maxT = length of the detector array
@@ -207,7 +202,7 @@ private static void initialGeometry()
 /**
  * Initial SART grids
  */
-private static void initialSART(){
+public void initialSART(){
     if(isOpencl)
 	      sinogram = (Grid2D) projector.projectRayDrivenCL(phan);
     else
@@ -231,7 +226,7 @@ private static void initialSART(){
 /**
  * compute the normalization projections
  */
-private static void createNormProj(){
+public void createNormProj(){
 	//projection normalization weights
 	Grid2D C_phan=new Grid2D(imgSizeX,imgSizeY);//Constant grid with all values as 1;
 	C_phan.setSpacing(spacingX,spacingY);
@@ -247,7 +242,7 @@ private static void createNormProj(){
 /**
  * compute normalization grids for backprojection
  */
-private static void createNormGrids(){
+public void createNormGrids(){
 	//backprojection normalization weights
 	Grid1D C_sino1D=new Grid1D(sinogram.getSize()[0]);
 	C_sino1D.setSpacing(deltaT);
@@ -266,7 +261,7 @@ private static void createNormGrids(){
  * output the difference between too iterations and output the difference from the ground truth	
  * @throws IOException
  */
-private static void outPutError() throws IOException{
+public void outPutError() throws IOException{
 	if (iter % 5== 0){
 		recon.show(iter+"_th iteration");	
 	}
@@ -281,7 +276,7 @@ private static void outPutError() throws IOException{
  * @param imgGrid2
  * @return
  */
-private static double meanSquareError(Grid2D imgGrid1, Grid2D imgGrid2) {
+private double meanSquareError(Grid2D imgGrid1, Grid2D imgGrid2) {
 	double err = 0;
 	Grid2D temp = new Grid2D(imgGrid1);
 	NumericPointwiseOperators.subtractBy(temp, imgGrid2);
@@ -296,7 +291,7 @@ private static double meanSquareError(Grid2D imgGrid1, Grid2D imgGrid2) {
  * @param imgGrid
  * @return
  */
-private static double grid2DNorm(Grid2D imgGrid) {
+private double grid2DNorm(Grid2D imgGrid) {
 
 	double d = 0;
 	for (int row = 0; row < imgGrid.getSize()[0]; row++)
