@@ -1,5 +1,6 @@
 package edu.stanford.rsl.tutorial.weightedtv;
 
+
 import edu.stanford.rsl.conrad.data.numeric.Grid1D;
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
 import edu.stanford.rsl.conrad.data.numeric.NumericGrid;
@@ -7,6 +8,10 @@ import edu.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators;
 import edu.stanford.rsl.conrad.data.numeric.opencl.OpenCLGrid2D;
 import edu.stanford.rsl.conrad.data.numeric.opencl.OpenCLGrid3D;
 
+/**
+* 2D TV operators
+* @author Yixing Huang
+*/
 
 
 public class TVGradient {
