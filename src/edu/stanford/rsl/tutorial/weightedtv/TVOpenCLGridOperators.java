@@ -34,6 +34,7 @@ import edu.stanford.rsl.conrad.opencl.OpenCLUtil;
  * This TVOpenCLGridOperators class is derived from OpenCLGridOperators. Here all the computations use 2D range kernel
  * instead of 1D range kernel.
  * It contains the TV operators for 2D and 3D cases.
+ * @author Yixing Huang
  * *****************************************************************************************
  * OpenCLGridOperators encapsulates all grid operators which are implemented in OpenCL. 
  * It is implemented as singleton, because all grids share the same operations. 
