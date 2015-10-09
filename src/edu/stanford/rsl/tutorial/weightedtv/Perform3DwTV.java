@@ -1,6 +1,7 @@
 package edu.stanford.rsl.tutorial.weightedtv;
 /**
  * Here is an example to apply weighted total variation on 3D cone-beam limited angle tomography
+ * @author Yixing Huang
  */
 
 import java.io.IOException;
