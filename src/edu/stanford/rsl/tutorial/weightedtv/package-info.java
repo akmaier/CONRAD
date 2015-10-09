@@ -1,7 +1,7 @@
 /**
  * This package contains iterative weighted total variation experiments.
  *
- * @author Andreas Maier
+ * @author Yixing Huang
  */
 package edu.stanford.rsl.tutorial.weightedtv;
 /*
