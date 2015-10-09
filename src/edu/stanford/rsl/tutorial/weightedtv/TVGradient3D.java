@@ -10,7 +10,10 @@ import edu.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators;
 import edu.stanford.rsl.conrad.data.numeric.opencl.OpenCLGrid2D;
 import edu.stanford.rsl.conrad.data.numeric.opencl.OpenCLGrid3D;
 import edu.stanford.rsl.conrad.utils.ImageUtil;
-
+/**
+ * 3D TV operators
+ * @author Yixing Huang
+ */
 
 public class TVGradient3D {
 	public float eps = 0.1f;
