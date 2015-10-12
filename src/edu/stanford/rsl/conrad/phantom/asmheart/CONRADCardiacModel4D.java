@@ -68,6 +68,14 @@ public class CONRADCardiacModel4D extends AnalyticPhantom4D{
 	public void configure() throws Exception{
 		//heartBase = UserUtil.queryString("Specify path to model data file.", "C:\\Stanford\\CONRAD\\data\\CardiacModel\\");
 		heartBase = System.getProperty("user.dir") + "\\data\\CardiacModel\\";
+		
+		// perform sanity check
+		File scF = new File(heartBase);
+		File[] listOfFiles = scF.listFiles();
+		if(listOfFiles.length < 7){
+			throw new Exception("CONRADCardiacModel files are not found at "+heartBase+".\n Please download them from: https://www5.cs.fau.de/conrad/data/heart-model/");
+		}
+		
 		heartBeats = UserUtil.queryInt("Number of heart beats in this scene:", 1);
 		
 		boolean rotTrans = UserUtil.queryBoolean("Apply rotatation and translation?");
