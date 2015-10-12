@@ -75,6 +75,7 @@ public class ROC {
             sens[i] = (double)TP[i]/(double)(TP[i]+FN[i]);
         }
 
+        //create ROC plot
         VisualizationUtil.createPlot(fpf,sens,"ROC","fpf","sens").show();
 	}
 }
