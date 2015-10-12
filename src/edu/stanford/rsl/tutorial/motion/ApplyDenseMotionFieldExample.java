@@ -2,9 +2,6 @@ package edu.stanford.rsl.tutorial.motion;
 
 import java.io.IOException;
 
-import org.itk.simple.doubleArray;
-import org.itk.simple.int16Array;
-
 import com.jogamp.opencl.CLContext;
 import com.jogamp.opencl.CLDevice;
 
