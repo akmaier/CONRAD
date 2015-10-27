@@ -64,7 +64,7 @@ import edu.stanford.rsl.conrad.utils.RegKeys;
  * LEGALLY FOR ANY CORPORATE OR COMMERCIAL PURPOSE.
  */
 public class ReconstructionPipelineFrame extends JFrame implements ActionListener, UpdateableGUI {
-
+	
 	/**
 	 * 
 	 */
@@ -522,6 +522,7 @@ public class ReconstructionPipelineFrame extends JFrame implements ActionListene
 	public static void main(String [] args){
 		CONRAD.setup();
 		ReconstructionPipelineFrame oscar = new ReconstructionPipelineFrame();
+		System.out.println(oscar.isValid());
 		oscar.setVisible(true);
 	}
 
