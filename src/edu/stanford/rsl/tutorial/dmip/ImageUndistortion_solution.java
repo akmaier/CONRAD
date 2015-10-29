@@ -22,7 +22,7 @@ public class ImageUndistortion_solution {
 		// In the preprocessing part, an artificial distortion field is generated.
 		// With this field, a distorted image is generated.
 		
-		
+		///////////////
 		// 1. Load undistorted image
 		int caseNo = 0;
 		String filename = "C:/Users/Bier/Documents/DMIP lectures/exercises/2015/2/frame32.jpg";
