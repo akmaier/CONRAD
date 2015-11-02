@@ -33,35 +33,46 @@ public class Intro {
 	
 		//Define an image
 		//Hint: Import the package edu.stanford.rsl.conrad.data.numeric.Grid2D
-		//TODO
+		Grid2D image = new Grid2D(imageSizeX, imageSizeY);
 	
 		//Draw a circle
 		int radius = 50;
 		//Set all pixels within the circle to 100
 		int insideVal = 100;
-	
-		//TODO
-		//TODO
-		//TODO
+		
+		for( int x  = 0; x < imageSizeX; x++)
+		{
+			for( int y = 0; y < imageSizeY; y++)
+			{
+				if( Math.pow( (x - (imageSizeX/2.f)), 2) + Math.pow( (y - (imageSizeY/2.f)), 2) < Math.pow(radius, 2))
+				{
+					image.setAtIndex(x, y, insideVal);
+				}
+				else
+				{
+					image.setAtIndex(x,  y,  0);
+				}
+			}
+		}
 		
 		//Show ImageJ GUI
 		ImageJ ij = new ImageJ();
 		//Display image
-		//TODO
+		image.show("Circle");
 		
 		//Copy an image
-		//TODO
-		//copy.show("Copy of circle");
+		Grid2D copy = new Grid2D(image);		
+		copy.show("Copy of circle");
 		
 		
 		//Load an image from file
-		String filename = "D:/02_lectures/DMIP/exercises/2014/matlab_intro/mr12.dcm";
+		String filename = "/proj/i5dmip/ej66edag/Reconstruction/Conrad/src/edu/stanford/rsl/tutorial/dmip/mr12.dcm";
 		//TODO. Hint: Use IJ and ImageUtil
-		//mrImage.show();
+		Grid2D mrImage = ImageUtil.wrapImagePlus(IJ.openImage(filename)).getSubGrid(0);
+		mrImage.show();
 		
 		//convolution
-		//TODO
-		//TODO
+		Convolver conv = new Convolver();
 		
 		//define the kernel. Try simple averaging 3x3 filter
 		int kw = 3;
@@ -72,12 +83,11 @@ public class Intro {
 			kernel[i] = 1.f / (kw*kh);
 		}
 		
-		//TODO
-			
+		conv.convolve(ImageUtil.wrapGrid2D(mrImage), kernel, kw, kh);	
 		
 		//write an image to disk, check the supported output formats
-		String outFilename ="D:/02_lectures/DMIP/exercises/2014/matlab_intro/mr12out.tif";
-		//TODO
+		String outFilename ="/proj/i5dmip/ej66edag/Reconstruction/Conrad/src/edu/stanford/rsl/tutorial/dmip/mr12out.tif";
+		IJ.save(ImageUtil.wrapGrid(mrImage, null), outFilename);
 	}
 	
 	
@@ -91,8 +101,7 @@ public class Intro {
 		
 		for(int i = 0; i < y.length; i++)
 		{
-			//TODO
-			
+			y[i] = Math.sin(2.0 * Math.PI * stepSize * (double) i);
 		}
 		
 		VisualizationUtil.createPlot(y).show();
@@ -112,33 +121,42 @@ public class Intro {
 		System.out.println("Creating a vector: v1 = [1.0; 2.0; 3.0]");
 		
 		//create column vector
-		//TODO
-		//System.out.println("v1 = " + v1.toString());
+		SimpleVector v1 = new SimpleVector(1.0, 2.0, 3.0);
+		System.out.println("v1 = " + v1.toString());
 		
 		//create a randomly initialized vector
 		SimpleVector vRand = new SimpleVector(3);
-		//TODO
-		//System.out.println("vRand = " + vRand.toString());
+		vRand.randomize(0.1, 10.0);
+		System.out.println("vRand = " + vRand.toString());
 		
 		//create matrix M 3x3  1 2 3; 4 5 6; 7 8 9
-		SimpleMatrix M = new SimpleMatrix();
-		//TODO
-		//System.out.println("M = " + M.toString());
+		SimpleMatrix M = new SimpleMatrix(3,3);
+		int val = 1;
+		for (int x = 0; x < M.getRows(); x++)
+		{
+			for (int y = 0; y < M.getCols(); y++)
+			{
+					M.setElementValue(x, y, val);
+					val++;
+			}
+		}	
+		System.out.println("M = " + M.toString());
 		
 		//determinant of M
-		//System.out.println("Determinant of matrix m: " + TODO );
+		System.out.println("Determinant of matrix m: " + M.determinant() );
 		
 		//transpose M
-		//TODO
+		SimpleMatrix Mtrans = M.transposed();
 		//copy matrix
-		//TODO
+		SimpleMatrix Mcopy = new SimpleMatrix(M);
 		//transpose M inplace
-		//TODO
+		Mcopy.transpose();
 		
 		//get size
 		int numRows = 0;
 		int numCols = 0;
-		//TODO
+		numRows = M.getRows();
+		numCols = M.getCols();
 		
 		//access elements of M
 		System.out.println("M: ");
@@ -146,41 +164,41 @@ public class Intro {
 		{
 			for(int j = 0; j < numCols; j++)
 			{
-				//TODO
-				//System.out.print(element + " ");
+				double element = M.getElement(i, j);
+				System.out.print(element + " ");
 			}
 			System.out.println();
 		}
 		
 		//Create 3x3 Matrix of 1's
 		SimpleMatrix Mones = new SimpleMatrix(3,3);
-		//TODO
+		Mones.ones();
 		//Create a 3x3 Matrix of 0's
 		SimpleMatrix Mzeros = new SimpleMatrix(3,3);
-		//TODO
+		Mzeros.zeros();
 		//Create a 3x3 Identity matrix
 		SimpleMatrix Midentity = new SimpleMatrix(3,3);
-		//TODO
+		Midentity.identity();
 		
 		//Matrix multiplication
-		//TODO
-		//System.out.println("M^T * M = " + ResMat.toString());
+		SimpleMatrix ResMat = SimpleOperators.multiplyMatrixProd(Mtrans, M);
+		System.out.println("M^T * M = " + ResMat.toString());
 		
 
 		//Matrix vector multiplication
-		//TODO
-		//System.out.println("M * v1 = " + resVec.toString());
+		SimpleVector resVec = SimpleOperators.multiply(M, v1);
+		System.out.println("M * v1 = " + resVec.toString());
 		
 		
 		//Extract the last column vector from matrix M
-		//SimpleVector colVector = M.getCol(2);
+		SimpleVector colVector = M.getCol(2);
 		//Extract the 1x2 subvector from the last column of matrix M
-		//TODO
-		//System.out.println("[m(0)(2); m(1)(2)] = " + subVector);
+		SimpleVector subVector = M.getSubCol(0, 2, 2);
+		System.out.println("[m(0)(2); m(1)(2)] = " + subVector);
 		
 		//Matrix elementwise multiplication
-		//TODO
-		//System.out.println("M squared Elements: " + MsquaredElem.toString());
+		SimpleMatrix MsquaredElem = SimpleOperators.multiplyElementWise(M, M);
+		System.out.println("M squared Elements: " + MsquaredElem.toString());
 		
 		//round vectors
 		SimpleVector vRandCopy = new SimpleVector(vRand);
@@ -193,9 +211,9 @@ public class Intro {
 		System.out.println("vRand.ceil()  = " + vRand.toString());
 		
 		//min, max, mean
-		//double minV1 = v1.min();
-		//double maxV1 = v1.max();
-		//System.out.println("Min(v1) = " + minV1 + " Max(v1) = " + maxV1);
+		double minV1 = v1.min();
+		double maxV1 = v1.max();
+		System.out.println("Min(v1) = " + minV1 + " Max(v1) = " + maxV1);
 		
 		//for matrices: iterate over row or column vectors
 		SimpleVector maxVec = new SimpleVector(M.getCols());
@@ -209,16 +227,16 @@ public class Intro {
 		
 		
 		//Norms
-		//TODO matrix L1
-		//TODO vector L2
-		//System.out.println("||M||_F = " + matrixNormL1);
-		//System.out.println("||colVec||_2 = " + vecNormL2);
+		double matrixNormLF = M.norm(MatrixNormType.MAT_NORM_FROBENIUS);
+		double vecNormL2 = colVector.norm(VectorNormType.VEC_NORM_L2); 
+		System.out.println("||M||_F = " + matrixNormLF);
+		System.out.println("||colVec||_2 = " + vecNormL2);
 		
 		//get normalized vector
-		//TODO
+		SimpleVector v2 = colVector.normalizedL2();
 		//normalize vector in-place
-		//TODO
-		//System.out.println("Normalized colVector: " + colVector.toString());
+		colVector.normalizeL2();
+		System.out.println("Normalized colVector: " + colVector.toString());
 		
 		
 		//SVD
@@ -229,18 +247,19 @@ public class Intro {
 				
 		System.out.println("A = " + A.toString());
 		
-		//TODO SVD
+		DecompositionSVD svd = new DecompositionSVD(A);
+		
 		
 		//print singular matrix
-		//System.out.println(svd.getS().toString());
+		System.out.println(svd.getS().toString());
 		
 		//get condition number
-		//System.out.println("Condition number of A: " + TODO );
+		System.out.println("Condition number of A: " + svd.cond() );
 		
 		//Re-compute A = U * S * V^T
-		//SimpleMatrix temp = SimpleOperators.multiplyMatrixProd(svd.getU(), svd.getS());
-		//SimpleMatrix A2 = SimpleOperators.multiplyMatrixProd(temp, svd.getV().transposed());
-		//System.out.println("U * S * V^T: " + A2.toString());
+		SimpleMatrix temp = SimpleOperators.multiplyMatrixProd(svd.getU(), svd.getS());
+		SimpleMatrix A2 = SimpleOperators.multiplyMatrixProd(temp, svd.getV().transposed());
+		System.out.println("U * S * V^T: " + A2.toString());
 		
 	}
 
