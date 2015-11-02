@@ -409,7 +409,7 @@ public class SVDandFT {
 		optimizationProblem2(vectors);
 		
 		//Load an image from file
-		String filename = "/proj/i5dmip/ej66edag/Reconstruction/Conrad/src/edu/stanford/rsl/tutorial/dmip/yu_fill.jpg";
+		String filename = "/Users/Phil/Documents/Reconstruction/Conrad/src/edu/stanford/rsl/tutorial/dmip/yu_fill.jpg";
 		Grid2D image = ImageUtil.wrapImagePlus(IJ.openImage(filename)).getSubGrid(0);
 		image.show();
 		
@@ -425,7 +425,7 @@ public class SVDandFT {
 		//5. Choose Shepp Logan Phantom
 		//6. Save the resulting volume. In the ImageJ window, File-Save As->Tiff...
 		
-		String filenameShepp = "/home/cip/medtech2011/ej66edag/DMIPExercise/Shepp-Logan_Phantom.tif";
+		String filenameShepp = "/Users/Phil/Documents/Reconstruction/DMIP_Exercise/Shepp-Logan_Phantom.tif";
 		Grid3D sheppLoganVolume = ImageUtil.wrapImagePlus(IJ.openImage(filenameShepp));
 		//To work with a 2-D image, select slice 160
 		Grid2D sheppLoganImage = sheppLoganVolume.getSubGrid(160);
