@@ -26,6 +26,8 @@ import edu.stanford.rsl.conrad.numerics.SimpleVector;
  * @author Recopra Seminar Summer 2012
  * 
  */
+
+/** just testing something */
 public class ParallelBackprojector2D {
 	final double samplingRate = 3.d;
 
