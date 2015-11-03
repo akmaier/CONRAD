@@ -26,20 +26,19 @@ public class ImageUndistortion{
 		
 		// 1. Load undistorted image
 		
-		// TODO : adapt the paths
 		int caseNo = 0;
-		String filename = "C:/StanfordRepo/CONRAD/src/edu/stanford/rsl/tutorial/dmip/frame32.jpg";
+		String filename = "/Users/Phil/Documents/Reconstruction/Conrad/src/edu/stanford/rsl/tutorial/dmip/frame32.jpg";
 		
 		if(caseNo == 0)
 		{
-			filename = "C:/StanfordRepo/CONRAD/src/edu/stanford/rsl/tutorial/dmip/frame32.jpg";
+			filename = "/Users/Phil/Documents/Reconstruction/Conrad/src/edu/stanford/rsl/tutorial/dmip/frame32.jpg";
 		}
 		else if(caseNo == 1)
 		{
-			filename = "C:/StanfordRepo/CONRAD/src/edu/stanford/rsl/tutorial/dmip/undistorted.jpg";
+			filename = "/Users/Phil/Documents/Reconstruction/Conrad/src/edu/stanford/rsl/tutorial/dmip/undistorted.jpg";
 		}else if(caseNo == 2)
 		{
-			filename = "C:/StanfordRepo/CONRAD/src/edu/stanford/rsl/tutorial/dmip/frame90.jpg";
+			filename = "/Users/Phil/Documents/Reconstruction/Conrad/src/edu/stanford/rsl/tutorial/dmip/frame90.jpg";
 		}
 				
 		Grid2D image = ImageUtil.wrapImagePlus(IJ.openImage(filename)).getSubGrid(0);
@@ -159,15 +158,13 @@ public class ImageUndistortion{
 		// can be used.
 		
 		// Number of lattice points
-		// TODO: define the number of lattice points
 		// change the value of nx, ny
-		int nx = 0;
-		int ny = 0;
+		int nx = 8;
+		int ny = 8;
 		
 		// step size
-		// TODO: calculate the stepsize of the lattice points 
-		float fx = 0;
-		float fy = 0;
+		float fx = imSize / (nx-1.f);
+		float fy = imSize / (ny-1.f);
 		
 		// Fill the distorted and undistorted lattice points with the 
 		// grid coordinates from the preprocessing part.
@@ -180,11 +177,10 @@ public class ImageUndistortion{
 		{
 			for(int j = 0; j < nx; j++)
 			{
-				//TODO: sample the distorted and undistorted grid points at the lattice points
-				// TODO
-				// TODO
-				// TODO
-				// TODO
+				Xu2.setElementValue(i, j, X.getAtIndex(i * (int) fx, j * (int) fy));
+				Yu2.setElementValue(i, j, Y.getAtIndex(i * (int) fx, j * (int) fy));
+				Xd2.setElementValue(i, j, Xd.getAtIndex(i * (int) fx, j * (int) fy));
+				Yd2.setElementValue(i, j, Yd.getAtIndex(i * (int) fx, j * (int) fy));
 			}
 		}
 		
