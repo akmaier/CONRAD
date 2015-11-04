@@ -326,6 +326,13 @@ public abstract class RegKeys {
 	public static final String DARK_FIELD_RECONSTRUCTION_LOCATION_ANISO = "DARK_FIELD_RECONSTRUCTION_LOCATION_ANISO";
 	public static final String DARK_FIELD_RECONSTRUCTION_LOCATION_ISO = "DARK_FIELD_RECONSTRUCTION_LOCATION_ISO";
 	
+	/**
+	 * Entry to set the default location of the position of the CONRAD main window. 
+	 * The key is a string that specifies the top left corner in MATLAB notation. "[0,0]" specifies the top left corner 
+	 * to be identical with the top left corner of the screen. This is the default setting.
+	 */
+	public static final String CONRAD_WINDOW_DEFAULT_LOCATION = "CONRAD_WINDOW_DEFAULT_LOCATION";
+	
 	static {
 		defaultValues = new HashMap<String, String>();
 		defaultValues.put(SLOW_DOWN_MS, "10");
@@ -333,6 +340,7 @@ public abstract class RegKeys {
 		defaultValues.put(PHANTOM_PROJECTOR_ENFORCE_PRIORITY_RAYTRACER, "false");	
 		defaultValues.put(ED_PHANTOM_BONE_RING, "false");
 		defaultValues.put(ED_PHANTOM_CENTERAL_BUFFER_DIAMETER, "15");
+		defaultValues.put(CONRAD_WINDOW_DEFAULT_LOCATION, "[0,0]");
 	}
 	
 }
