@@ -196,55 +196,7 @@ public class EpipolarConsistency {
 		
 	}
 	
-	/**
-	 * method to compute the Pluecker dual coordinates of a vector L
-	 * @param L: SimpleVector having 6 elements
-	 * @return: SimpleMatrix of size 4x4
-	 */
-	private static SimpleMatrix PlueckerMatrixDual(SimpleVector L) {
-		
-		SimpleMatrix L_out = new SimpleMatrix(4, 4);
-		// first row
-		L_out.setElementValue(0, 1, +L.getElement(5));
-		L_out.setElementValue(0, 2, -L.getElement(4));
-		L_out.setElementValue(0, 3, +L.getElement(3));
-		
-		// second row
-		L_out.setElementValue(1, 0, -L.getElement(5));
-		L_out.setElementValue(1, 2, +L.getElement(2));
-		L_out.setElementValue(1, 3, -L.getElement(1));
-		
-		// third row
-		L_out.setElementValue(2, 0, +L.getElement(4));
-		L_out.setElementValue(2, 1, -L.getElement(2));
-		L_out.setElementValue(2, 3, +L.getElement(0));
-		
-		// last row
-		L_out.setElementValue(3, 0, -L.getElement(3));
-		L_out.setElementValue(3, 1, +L.getElement(1));
-		L_out.setElementValue(3, 2, -L.getElement(0));
-		
-		return L_out;
-		
-	}
-
-	/**
-	 * method to compute the Pluecker join of a line L and a point X
-	 * @param L: line L as SimpleVector (6 entries)
-	 * @param X: point X as SimpleVector (4 entries)
-	 * @return: SimpleVector of size 4x1 representing a plane
-	 */
-	private static SimpleVector PlueckerJoin(SimpleVector L, SimpleVector X) {
-		
-		//* calculate plane E (4x1) from [~L]x * X *//
-		double v1 = + X.getElement(1)*L.getElement(5) - X.getElement(2)*L.getElement(4) + X.getElement(3)*L.getElement(3);
-		double v2 = - X.getElement(0)*L.getElement(5) + X.getElement(2)*L.getElement(2) - X.getElement(3)*L.getElement(1);
-		double v3 = + X.getElement(0)*L.getElement(4) - X.getElement(1)*L.getElement(2) + X.getElement(3)*L.getElement(0);
-		double v4 = - X.getElement(0)*L.getElement(3) + X.getElement(1)*L.getElement(1) - X.getElement(2)*L.getElement(0);
-		
-		return new SimpleVector(v1, v2, v3, v4);
-		
-	}
+	
 
 	/**
 	 * method to calculate a mapping K from two source positions C0, C1 to a plane
@@ -269,7 +221,7 @@ public class EpipolarConsistency {
 		SimpleVector N = new SimpleVector(-L03, -L13, -L23, 0);
 		
 		//* compute plane E0 containing B and X0=(0,0,0,1) *//
-		SimpleVector E0 = PlueckerJoin(B, new SimpleVector(0, 0, 0, 1));
+		SimpleVector E0 = SimpleOperators.getPlueckerJoin(B, new SimpleVector(0, 0, 0, 1));
 		
 		//* find othonormal basis from plane normals *//
 		// (vectors are of 3x1)		
@@ -290,7 +242,7 @@ public class EpipolarConsistency {
 		A.setSubColValue(0, 2, C0);
 		
 		//* return mapping matrix K (4x3 = 4x4 * 4x3) *//
-		return SimpleOperators.multiplyMatrixProd(PlueckerMatrixDual(B), A);
+		return SimpleOperators.multiplyMatrixProd(SimpleOperators.getPlueckerMatrixDual(B), A);
 		
 	}
 	
