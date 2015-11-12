@@ -5,56 +5,117 @@
 package edu.stanford.rsl.tutorial.ecc;
 
 import ij.ImageJ;
+import edu.stanford.rsl.conrad.data.numeric.Grid2D;
+import edu.stanford.rsl.conrad.data.numeric.Grid3D;
+import edu.stanford.rsl.conrad.geometry.Projection;
+import edu.stanford.rsl.conrad.geometry.trajectories.Trajectory;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix.InversionType;
+import edu.stanford.rsl.conrad.numerics.SimpleOperators;
+import edu.stanford.rsl.conrad.opencl.OpenCLForwardProjector;
+import edu.stanford.rsl.conrad.phantom.NumericalSheppLogan3D;
+import edu.stanford.rsl.conrad.utils.Configuration;
+import edu.stanford.rsl.conrad.utils.ImageUtil;
 
 /**
  * this shows an implementation how to use the Epipolar Consistency class
  * to compute line integrals that fulfill the Epipolar Consistency Conditions
- * the shown data set is a pumpkin with projection views V01 and V07
- *
+ * for this purpose a 3D phantom is simulated and all projections are computed out of it
+ * the used xml file is the standard Conrad.xml file created automatically
+ * when starting ReconstructionPipelineFrame
  */
 public class EpipolarConsistencyExample {
 
 	public static void main(String[] args) {
-			
-		ImageJ ij = new ImageJ();		
+		
+		new ImageJ();
+		
+		// load configuration from xml file //
+		Configuration.loadConfiguration();
+		Configuration conf = Configuration.getGlobalConfiguration();
 
-		// * directory for the image files (nrrd) *//
-		// has to be changed!!
-		// for example to: "C:\\Users\\NAME\\Desktop\\Epipolar Consistency\\Daten"
-		String directory = "";
+		// get the dimensions //
+		Trajectory geo = conf.getGeometry();
+		int imgSizeX = geo.getReconDimensionX();
+		int imgSizeY = geo.getReconDimensionY();
+		int imgSizeZ = geo.getReconDimensionZ();
+		
+		// simulate a 3D phantom as object //
+		Grid3D phantom = new NumericalSheppLogan3D(
+				imgSizeX, imgSizeY, imgSizeZ).getNumericalSheppLoganPhantom();
+		
+		phantom.show("simulated object");
 		
 		
-		//* set up two views by creating the class instances *//
+		// calculate all projections contained in the xml file //
+		// (in PMatrixSerialization)
+		Grid3D totalProj = null;
+		
+		// a forward projector is needed
+		OpenCLForwardProjector forwProj =  new OpenCLForwardProjector();
+		forwProj.setTex3D(ImageUtil.wrapGrid3D(phantom, ""));
+		
+		// start calculating the projections
+		try {
+			forwProj.configure();
+			totalProj = ImageUtil.wrapImagePlus(forwProj.project());
+		} catch (Exception e) {
+			System.err.println(e);
+			return;
+		}
+		
+		// display all projections //
+		totalProj.show("projections of object");
+		
+		// now we set up two views arbitrary out of all projections
+		// by creating the class instances
 		// these views are going to be compared in the following
-		// the corresponding xml file is called "ConradNRRD.xml"
-		// last index stands for the index of the projection matrices in the xml file
-		// ( PMatrixSerialization; 0 is the first projection matrix )
-		EpipolarConsistency epi1 = new EpipolarConsistency(directory, "V01.nrrd", "V01_rda.nrrd", "nrrd", 0);
-		EpipolarConsistency epi2 = new EpipolarConsistency(directory, "V07.nrrd", "V07_rda.nrrd", "nrrd", 1);
+		// the indices are needed for both the projection images and the projection matrices
+		// they state the position of the projection matrix in xml file
+		// ( PMatrixSerialization; 0 is the first projection matrix ) //
+		int index1 = 50;
+	    int index2 = 100;
+		
+	    // get the projection images and show //
+		Grid2D projection1 = totalProj.getSubGrid(index1);
+		projection1.show("Projection1");
+		
+		Grid2D projection2 = totalProj.getSubGrid(index2);
+		projection2.show("Projection2");
 		
 		
-		// if you have tiff images, you need to use the following:
-		// radon transformation is going to be calculated in the constructor
-		// the xml file is called "ConradTIFF.xml"
-		/*
-		String tiffFile = ".tiff"; // has to be changed
-		EpipolarConsistency epi1 = new EpipolarConsistency(directory, tiffFile, "", "tiff", 10);
-		EpipolarConsistency epi2 = new EpipolarConsistency(directory, tiffFile, "", "tiff", 50);
-		*/
+		// get projection matrices as a Projection class //
+		Projection[] matrices = geo.getProjectionMatrices();
+		
+		Projection proIndex1 = matrices[index1];
+		Projection proIndex2 = matrices[index2];
+		
+		// precompute radon transformed and derived images and show //
+		final int radonSize = 1024;
+		Grid2D radon1 = SimpleOperators.computeRadonTrafoAndDerive(projection1, radonSize);
+		radon1.show("Radon1");
+		
+		Grid2D radon2 = SimpleOperators.computeRadonTrafoAndDerive(projection2, radonSize);
+		radon2.show("Radon2");
 		
 		
-		//* get the mapping matrix to the epipolar plane *//
+		
+		
+		// create class instances //
+		EpipolarConsistency epi1 = new EpipolarConsistency(projection1, radon1, proIndex1);
+		EpipolarConsistency epi2 = new EpipolarConsistency(projection2, radon2, proIndex2);
+
+		
+		// get the mapping matrix to the epipolar plane //
 		SimpleMatrix K = EpipolarConsistency.createMappingToEpipolarPlane(epi1.C, epi2.C);
 		// (K is a 4x3 matrix)
 		
-		//* calculate inverses of projection matrices *//
+		// calculate inverses of projection matrices //
 		SimpleMatrix Pa_Inverse = epi1.P.inverse(InversionType.INVERT_SVD);
 		SimpleMatrix Pb_Inverse = epi2.P.inverse(InversionType.INVERT_SVD);
 				
 
-		//* go through angles *//
+		// go through angles //
 		// we go through a range of [-8°, +8°] in a stepsize of 0.05°
 		double angleBorder = 8.0;
 		double angleIncrement = 0.05;
@@ -72,7 +133,7 @@ public class EpipolarConsistencyExample {
 			
 			double kappa_RAD = kappa / 180.0 * Math.PI;
 			
-			//* get values for line integrals that fulfill the epipolar consistency conditions *//
+			// get values for line integrals that fulfill the epipolar consistency conditions //
 			double[] values = EpipolarConsistency.computeEpipolarLineIntegrals(kappa_RAD, epi1, epi2, K, Pa_Inverse, Pb_Inverse);
 			results[count][0] = Math.round(kappa*Math.pow(10, decimalPlaces)) / (Math.pow(10, decimalPlaces) + 0.0);
 			results[count][1] = values[0];
@@ -80,11 +141,15 @@ public class EpipolarConsistencyExample {
 			count++;
 		}
 
-		//* show results *//
+		// show results //
 		for (int i = 0; i < results.length; i++) {
-			System.out.println("at angle kappa: " + results[i][0] + " P0: " + results[i][1] + " P1: " + results[i][2]);
+			System.out.println("at angle kappa: " + results[i][0] + " P1: " + results[i][1] + " P2: " + results[i][2]);
 		}
 
 	}
 
 }
+/*
+ * Copyright (C) 2015 Martin Berzl
+ * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
+ */

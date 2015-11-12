@@ -1,9 +1,13 @@
 package edu.stanford.rsl.conrad.numerics;
 
+import edu.stanford.rsl.conrad.data.numeric.Grid2D;
+import edu.stanford.rsl.tutorial.motion.estimation.SobelKernel1D;
+import edu.stanford.rsl.tutorial.parallel.ParallelProjector2D;
+
 
 
 /**
- * @author Andreas Keil
+ * @author Andreas Keil, Martin Berzl
  */
 public abstract class SimpleOperators {
 
@@ -351,6 +355,10 @@ public abstract class SimpleOperators {
 		
 	}
 
+	/*
+	 * Copyright (C) 2015 Martin Berzl
+	 * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
+	 */	
 	/**
 	 * method to compute the Pluecker join of a line L and a point X
 	 * @param L: line L as SimpleVector (6 entries)
@@ -366,6 +374,74 @@ public abstract class SimpleOperators {
 		double v4 = - X.getElement(0)*L.getElement(3) + X.getElement(1)*L.getElement(1) - X.getElement(2)*L.getElement(0);
 		
 		return new SimpleVector(v1, v2, v3, v4);
+		
+	}
+	
+	/*
+	 * Copyright (C) 2015 Martin Berzl
+	 * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
+	 */	
+	/**
+	 * method to compute the squared radon transformed and derived image for one view
+	 * the derivation is done in t-direction (distance to origin)
+	 * @param data: Grid2D which represents the projection
+	 * @param radonSize: value to determine the size of the squared radon transformed
+	 *  and derived image
+	 * @return: radon transformed image as Grid2D (its size is radonSize x radonSize)
+	 */
+	public static Grid2D computeRadonTrafoAndDerive(Grid2D data, int radonSize) {
+		
+		Grid2D radon = null;
+		
+		// optional: preprocessing can be done here
+		// for example:
+		/*
+		float value;
+		for (int i = 0; i < data.getWidth(); i++) {
+			for (int j = 0; j < data.getHeight(); j++) {
+				if (j < 10 || j > data.getHeight() - 11) {
+					// set border to zero
+					value = 0.0f;
+				} else {
+					value = (float)(-Math.log(data.getAtIndex(i, j) / 0.842f));
+				}
+				data.setAtIndex(i, j, value);
+			}
+		}
+
+		data.show("preprocessed image");
+		*/
+
+		//* get some dimensions out of data (projection) *//
+		int projSizeX = data.getWidth();
+		int projSizeY = data.getHeight();
+		double projectionDiag = Math.sqrt(projSizeX*projSizeX + projSizeY*projSizeY);
+		
+		double deltaS = projectionDiag / radonSize;
+		double deltaTheta = Math.PI / radonSize;
+		
+		//* create a parallel projector in order to compute the radon transformation *//
+		ParallelProjector2D projector = new ParallelProjector2D(
+				Math.PI, deltaTheta, projectionDiag, deltaS);
+
+		//* create radon transformation *//
+		radon = projector.projectRayDriven(data);
+		// for a faster GPU implementation use: (possibly not working):
+		//radon = projector.projectRayDrivenCL(data);
+				
+
+		//* derivative by Sobel operator in t-direction *//
+		final int size = 1024;
+		SobelKernel1D kernel= new SobelKernel1D(size, 9);
+		kernel.applyToGrid(radon);
+		
+		//* optional: save file in tiff-format *//
+		/*
+		FileSaver saveRadon = new FileSaver(ImageUtil.wrapGrid(radon, ""));
+		saveRadon.saveAsTiff();
+		*/
+		
+		return radon;
 		
 	}
 	/*
