@@ -9,85 +9,207 @@ import edu.stanford.rsl.conrad.data.numeric.InterpolationOperators;
 import edu.stanford.rsl.conrad.geometry.General;
 import edu.stanford.rsl.conrad.geometry.Projection;
 import edu.stanford.rsl.conrad.numerics.*;
+import edu.stanford.rsl.conrad.numerics.SimpleMatrix.InversionType;
 
-
+/**
+ * class to compare two view with each other by
+ * applying the Epipolar Consistency Conditions
+ * @author Martin Berzl
+ */
 public class EpipolarConsistency {
 	
-	// center matrix //
-	private SimpleMatrix CENTER;
 	
-	// projection matrix of a view //
-	public SimpleMatrix P;
+	/**
+	 * inner class View representing a view with all its properties
+	 * by combining two views in a correct manner, it is possible to compute the
+	 * epipolar consistency conditions out of it
+	 * @author Martin Berzl
+	 */
+	public class View {
+		
+		// center matrix //
+		private SimpleMatrix CENTER;
+		
+		// projection matrix of a view //
+		public SimpleMatrix P;
+		
+		// inverse projection matrix of a view //
+		public SimpleMatrix P_Inverse;
+		
+		// source positions of a view //
+		public SimpleVector C;
+		
+		// radon transformed image of a view //
+		public Grid2D radon;
+		
+		// further dimensions //
+		public int projectionWidth;
+		public int projectionHeight;
+		public int radonHeight;
+		public int radonWidth;
+		public double projectionDiag;
+		public double lineIncrement;
+		public double angleIncrement;
+		
+		/**
+		 * constructor to create a view
+		 * @param projection: projection image as Grid2D
+		 * @param radon: radon transformed and derived image as Grid2D
+		 * @param projMatrix: projection matrix as Projection
+		 */
+		public View(Grid2D projection, Grid2D radon, Projection projMatrix) {
+			
+			// Initialize center matrix //
+			CENTER = new SimpleMatrix(3,4);
+			CENTER.setDiagValue(new SimpleVector(1.0, 1.0, 1.0));
+			
+			// get data out of projection //
+			this.projectionWidth = projection.getWidth();
+			this.projectionHeight = projection.getHeight();
+			
+			// get data out of radon transformed image //
+			this.radonWidth = radon.getWidth();
+			this.radonHeight = radon.getHeight();
+			this.projectionDiag = Math.sqrt(projectionWidth*projectionWidth + projectionHeight*projectionHeight);
+			this.lineIncrement = radonWidth / projectionDiag;
+			this.angleIncrement = radonHeight / Math.PI;
+
+			// store radon transformed image //
+			this.radon = radon;
+			
+			// get projection matrix P (3x4) //
+			this.P = SimpleOperators.multiplyMatrixProd(projMatrix.getK(), CENTER);
+			this.P = SimpleOperators.multiplyMatrixProd(this.P, projMatrix.getRt());
+			
+			// get source position C (nullspace of the projection) //
+			DecompositionSVD decoP = new DecompositionSVD(this.P);
+			this.C = decoP.getV().getCol(3);
+			
+			// normalize source vectors by last component //
+			// it is important that the last component is positive to have a positive center
+			// as it is defined in oriented projective geometry
+			this.C = this.C.dividedBy(this.C.getElement(3));
+		}
+		
+		
+		/**
+		 * Method to calculate alpha and t as indices from the radon transformed image of a view.
+		 * Neccessary are the inverse projection image (as SimpleMatrix) and the
+		 * epipolar plane E
+		 * @param E: epipolar plane E as SimpleVector (4 entries)
+		 * @return: line integral value as double
+		 */
+		private double getValueByAlphaAndT(SimpleVector E) {
+			
+			// compute corresponding epipolar lines //
+			// (epipolar lines are of 3x1 = 3x4 * 4x1)
+			SimpleVector l_kappa = SimpleOperators.multiply(this.P_Inverse.transposed(), E);
+			
+			// init the coordinate shift //
+			int t_u = this.projectionWidth/2;
+			int t_v = this.projectionHeight/2;
+			
+			// compute angle alpha and distance to origin t //
+			double l0 = l_kappa.getElement(0);
+			double l1 = l_kappa.getElement(1);
+			double l2 = l_kappa.getElement(2);
+			
+			double alpha_kappa_RAD = Math.atan2(-l0, l1) + Math.PI/2;
+			
+			
+			double t_kappa = -l2 / Math.sqrt(l0*l0+l1*l1);
+			// correct the coordinate shift //
+			t_kappa -= t_u * Math.cos(alpha_kappa_RAD) + t_v * Math.sin(alpha_kappa_RAD);
+
+			// correct some alpha falling out of the radon window //
+			if (alpha_kappa_RAD < 0) {
+				alpha_kappa_RAD *= -1.0;
+			} else if (alpha_kappa_RAD > Math.PI) {
+				alpha_kappa_RAD = 2.0*Math.PI - alpha_kappa_RAD;
+			}
+			
+			// write back to l_kappa //
+			l_kappa.setElementValue(0, Math.cos(alpha_kappa_RAD));
+			l_kappa.setElementValue(1, Math.sin(alpha_kappa_RAD));
+			l_kappa.setElementValue(2, -t_kappa);
+			
+			// calculate x and y coordinates for derived radon transformed image //
+			double x = t_kappa * this.lineIncrement + 0.5 * this.radonWidth;
+			double y = alpha_kappa_RAD * this.angleIncrement;
+
+
+			// get intensity value out of radon transformed image //
+			// (interpolation needed)
+			return InterpolationOperators.interpolateLinear(this.radon, x, y);
+			
+		}
+		
+	}
+	/**
+	 * end of inner class View
+	 */
 	
-	// source position of a view //
-	public SimpleVector C;
 	
-	// radon transformed image of view //
-	public Grid2D radon;
+	// attributes reserved for the epipolar consistency class //
+	// first view //
+	public View view1;
 	
-	// further dimensions //
-	public int projectionWidth;
-	public int projectionHeight;
-	public int radonHeight;
-	public int radonWidth;
-	public double projectionDiag;
-	public double lineIncrement;
-	public double angleIncrement;
+	// second view //
+	public View view2;
+	
+	// mapping matrix by combining first and second view //
+	private SimpleMatrix K;
 	
 	
 	/**
 	 * constructor to compute the metric for epipolar consistency for one view.
 	 * To compute the line integrals between two views, it is neccessary to create two instances of this class
 	 * and call the other methods on it
-	 * @param projection: Grid2D representing the projection
-	 * @param radon: Grid2D representing the radon transformed and derived image
+	 * @param projection1: Grid2D representing the first projection
+	 * @param projection2 Grid2D representing the second projection
+	 * @param radon1: Grid2D representing the radon transformed and derived image of the first view
 	 *  derivation is done in t direction (distance on detector)
-	 * @param projIndex: Projection that stands for the index number
-	 *  of projection matrix stored in the xml file
+	 * @param radon2: Grid2D representing the radon transformed and derived image of the second view
+	 *  derivation is done in t direction (distance on detector)
+	 * @param projMatrix1: Projection that stands for the index number
+	 *  of projection matrix of the first view stored in the xml file
+	 * @param projMatrix2: Projection that stands for the index number
+	 *  of projection matrix of the second view stored in the xml file
 	 */
-	public EpipolarConsistency(Grid2D projection, Grid2D radon, Projection projIndex) {
+	public EpipolarConsistency(Grid2D projection1, Grid2D projection2, Grid2D radon1, Grid2D radon2, Projection projMatrix1, Projection projMatrix2) {
 		
-		// Initialize center matrix //
-		CENTER = new SimpleMatrix(3,4);
-		CENTER.setDiagValue(new SimpleVector(1.0, 1.0, 1.0));
-		
-		// get data out of projection //
-		this.projectionWidth = projection.getWidth();
-		this.projectionHeight = projection.getHeight();
-		
-		// get data out of radon transformed image //
-		this.radonWidth = radon.getWidth();
-		this.radonHeight = radon.getHeight();
-		this.projectionDiag = Math.sqrt(projectionWidth*projectionWidth + projectionHeight*projectionHeight);
-		this.lineIncrement = radonWidth / projectionDiag;
-		this.angleIncrement = radonHeight / Math.PI;
+		// create two views //
+		view1 = new View(projection1, radon1, projMatrix1);
+		view2 = new View(projection2, radon2, projMatrix2);
 
-		// store radon transformed image //
-		this.radon = radon;
-		
-		// get projection matrix P (3x4) //
-		this.P = SimpleOperators.multiplyMatrixProd(projIndex.getK(), CENTER);
-		this.P = SimpleOperators.multiplyMatrixProd(this.P, projIndex.getRt());
-		
-		// get source position C (nullspace of the projection) //
-		DecompositionSVD decoP = new DecompositionSVD(this.P);
-		this.C = decoP.getV().getCol(3);
-		
-		// normalize source vectors by last component //
-		// it is important that the last component is positive to have a positive center
-		// as it is defined in oriented projective geometry
-		this.C = this.C.dividedBy(this.C.getElement(3));
-
+	}
+	
+	/**
+	 * getter-method to have access to the mapping matrix K
+	 * @return Simple Matrix representing the mapping matrix
+	 */
+	public SimpleMatrix getMappingMatrix() {
+		return K;
+	}
+	
+	/**
+	 * setter-method to store the mapping matrix K
+	 * @param K: SimpleMatrix containing the mapping matrix
+	 */
+	public void setMappingMatrix(SimpleMatrix K) {
+		this.K = K;
 	}
 	
 	
 	/**
 	 * method to calculate a mapping K from two source positions C0, C1 to a plane
-	 * @param C0: first source position (first view) as SimpleVector (4 entries)
-	 * @param C1: second source position (second view) as SimpleVector (4 entries)
-	 * @return: SimpleMatrix representing the mapping K (size 4x3)
+	 * C0 (C1) is the source position from the first (second) view
 	 */
-	public static SimpleMatrix createMappingToEpipolarPlane(SimpleVector C0, SimpleVector C1) {
+	public void createMappingToEpipolarPlane() {
+		
+		// set up source matrices //
+		SimpleVector C0 = this.view1.C;
+		SimpleVector C1 = this.view2.C;
 		
 		// compute Pluecker coordinates //
 		double L01 = C0.getElement(0)*C1.getElement(1) - C0.getElement(1)*C1.getElement(0);
@@ -124,62 +246,8 @@ public class EpipolarConsistency {
 		A.setSubColValue(0, 1, a2);
 		A.setSubColValue(0, 2, C0);
 		
-		// return mapping matrix K (4x3 = 4x4 * 4x3) //
-		return SimpleOperators.multiplyMatrixProd(SimpleOperators.getPlueckerMatrixDual(B), A);
-		
-	}
-	
-	
-	/**
-	 * method to calculate alpha and t as indices from the radon transformed image
-	 * inputs are the inverse projection image (as SimpleMatrix) and the
-	 * epipolar plane E
-	 * @param P_Inverse: inverse of projection image as SimpleMatrix (size 4x3)
-	 * @param E: epipolar plane E as SimpleVector (4 entries)
-	 * @return
-	 */
-	private double getValueByAlphaAndT(SimpleMatrix P_Inverse, SimpleVector E) {
-		
-		// compute corresponding epipolar lines //
-		// (epipolar lines are of 3x1 = 3x4 * 4x1)
-		SimpleVector l_kappa = SimpleOperators.multiply(P_Inverse.transposed(), E);
-		
-		// init the coordinate shift //
-		int t_u = this.projectionWidth/2;
-		int t_v = this.projectionHeight/2;
-		
-		// compute angle alpha and distance to origin t //
-		double l0 = l_kappa.getElement(0);
-		double l1 = l_kappa.getElement(1);
-		double l2 = l_kappa.getElement(2);
-		
-		double alpha_kappa_RAD = Math.atan2(-l0, l1) + Math.PI/2;
-		
-		
-		double t_kappa = -l2 / Math.sqrt(l0*l0+l1*l1);
-		// correct the coordinate shift //
-		t_kappa -= t_u * Math.cos(alpha_kappa_RAD) + t_v * Math.sin(alpha_kappa_RAD);
-
-		// correct some alpha falling out of the radon window //
-		if (alpha_kappa_RAD < 0) {
-			alpha_kappa_RAD *= -1.0;
-		} else if (alpha_kappa_RAD > Math.PI) {
-			alpha_kappa_RAD = 2.0*Math.PI - alpha_kappa_RAD;
-		}
-		
-		// write back to l_kappa //
-		l_kappa.setElementValue(0, Math.cos(alpha_kappa_RAD));
-		l_kappa.setElementValue(1, Math.sin(alpha_kappa_RAD));
-		l_kappa.setElementValue(2, -t_kappa);
-		
-		// calculate x and y coordinates for derived radon transformed image //
-		double x = t_kappa * this.lineIncrement + 0.5 * this.radonWidth;
-		double y = alpha_kappa_RAD * this.angleIncrement;
-
-
-		// get intensity value out of radon transformed image //
-		// (interpolation needed)
-		return InterpolationOperators.interpolateLinear(this.radon, x, y);
+		// store mapping matrix K (4x3 = 4x4 * 4x3) //
+		this.K = SimpleOperators.multiplyMatrixProd(SimpleOperators.getPlueckerMatrixDual(B), A);
 		
 	}
 	
@@ -188,29 +256,81 @@ public class EpipolarConsistency {
 	 * method to compute the epipolar line integrals that state the epipolar consistency conditions
 	 * by comparison of two views
 	 * @param kappa_RAD: angle of epipolar plane
-	 * @param epi1: class instance representing the first view
-	 * @param epi2: class instance representing the second view
-	 * @param K: mapping matrix K obtained from method createMappingToEpipolarPlane()
-	 * @param P1_Inverse: inverse of projection image of first view as SimpleMatrix (size 4x3) 
-	 * @param P2_Inverse: inverse of projection image of second view as SimpleMatrix (size 4x3) 
-	 * @return
+	 * @return double[] array containing two values (one for each view's line integral)
 	 */
-	public static double[] computeEpipolarLineIntegrals(double kappa_RAD, EpipolarConsistency epi1, EpipolarConsistency epi2, SimpleMatrix K, SimpleMatrix P1_Inverse, SimpleMatrix P2_Inverse) {
+	public double[] computeEpipolarLineIntegrals(double kappa_RAD) {
 		
 		// compute points on unit-circle (3x1) //
 		SimpleVector x_kappa = new SimpleVector(Math.cos(kappa_RAD), Math.sin(kappa_RAD), 1);
 		
 		// compute epipolar plane E_kappa (4x1 = 4x3 * 3x1) //
-		SimpleVector E_kappa = SimpleOperators.multiply(K, x_kappa);
+		SimpleVector E_kappa = SimpleOperators.multiply(this.K, x_kappa);
 		
 		// compute line integral out of derived radon transform //
-		double value1 = epi1.getValueByAlphaAndT(P1_Inverse, E_kappa);
-		double value2 = epi2.getValueByAlphaAndT(P2_Inverse, E_kappa);
+		double value1 = view1.getValueByAlphaAndT(E_kappa);
+		double value2 = view2.getValueByAlphaAndT(E_kappa);
 
 		// both values are returned //
 		return new double[]{value1, value2};
 		
 	}
+	
+	/**
+	 * method to compute the metric for the epipolar consistency conditions between two views
+	 * with varying angle kappa from lowerBorderAngle to upperBorderAngle with an increment of angleIncrement
+	 * @param lowerBorderAngle
+	 * @param upperBorderAngle
+	 * @param angleIncrement
+	 * @return: 2D-array containing the line integral values of two different views of all angles
+	 * 	running in the range defined by the input parameters
+	 *  the stored format is [angle, valueView1, valueView2] in the first dimension,
+	 *  increasing/decreasing angle in the second
+	 */
+	public double[][] evaluateConsistency(double lowerBorderAngle, double upperBorderAngle, double angleIncrement) {
+		
+		// compute the mapping matrix to the epipolar plane //
+		createMappingToEpipolarPlane();
+		// (K is a 4x3 matrix)
+		
+		// calculate inverses of projection matrices and save to view //
+		this.view1.P_Inverse = this.view1.P.inverse(InversionType.INVERT_SVD);
+		this.view2.P_Inverse = this.view2.P.inverse(InversionType.INVERT_SVD);
+		
+		
+		// get number of decimal places of the angleIncrement //
+		String[] split = Double.toString(angleIncrement).split("\\.");
+		int decimalPlaces = split[1].length();
+		
+		// obtain size parameter for results array //
+		int height = (int) ((upperBorderAngle - lowerBorderAngle) / angleIncrement + 1);
+	
+		// results are saved in an array in the format [angle,valueView1,valueView2]
+		double[][] results = new double[height][3];
+		int count = 0;
+				
+		// go through angles //
+		for (double kappa = lowerBorderAngle; kappa <= upperBorderAngle; kappa += angleIncrement) {
+			
+			double kappa_RAD = kappa / 180.0 * Math.PI;
+			
+			// get values for line integrals that fulfill the epipolar consistency conditions //
+			double[] values = computeEpipolarLineIntegrals(kappa_RAD);
+			
+			// store values in results array //
+			results[count][0] = Math.round(kappa*Math.pow(10, decimalPlaces)) / (Math.pow(10, decimalPlaces) + 0.0);
+			results[count][1] = values[0];
+			results[count][2] = values[1];
+			count++;
+		}
+
+		// show results //
+		for (int i = 0; i < results.length; i++) {
+			System.out.println("at angle kappa: " + results[i][0] + " P1: " + results[i][1] + " P2: " + results[i][2]);
+		}
+		
+		return results;
+		
+	}	
 
 }
 /*
