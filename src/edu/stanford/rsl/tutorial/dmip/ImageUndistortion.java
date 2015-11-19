@@ -311,6 +311,7 @@ public class ImageUndistortion{
 		
 		Grid2D differenceImage = (Grid2D) NumericPointwiseOperators.subtractedBy(quadraticImage, undistortedImage);
 		differenceImage.show("diffImage");
+		
 	}
 	
 	
