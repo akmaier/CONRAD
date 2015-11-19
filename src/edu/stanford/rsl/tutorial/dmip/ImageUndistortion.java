@@ -25,7 +25,6 @@ public class ImageUndistortion{
 		
 		
 		// 1. Load undistorted image
-		
 		int caseNo = 0;
 		String filename = "/Users/Phil/Documents/Reconstruction/Conrad/src/edu/stanford/rsl/tutorial/dmip/frame32.jpg";
 		
@@ -181,6 +180,7 @@ public class ImageUndistortion{
 				Yu2.setElementValue(j, i, Y.getAtIndex( (int) ((i+1) * fx), (int) ((j+1) * fy)));
 				Xd2.setElementValue(j, i, Xd.getAtIndex( (int) ((i+1) * fx), (int) ((j+1) * fy)));
 				Yd2.setElementValue(j, i, Yd.getAtIndex( (int) ((i+1) * fx), (int) ((j+1) * fy)));
+
 			}
 		}
 		
@@ -215,7 +215,6 @@ public class ImageUndistortion{
 		
 		// Number of Correspondences
 		int numCorresp = Xd2.getCols() * Xd2.getRows();
-		
 		
 		// Print out of the used parameters
 		System.out.println("Polynom of degree: " + degree);
@@ -268,7 +267,6 @@ public class ImageUndistortion{
 		// Compute the distortion coefficients
 		SimpleVector u_vec = SimpleOperators.multiply(A_pseudoinverse, Xd2_vec);
 		SimpleVector v_vec = SimpleOperators.multiply(A_pseudoinverse, Yd2_vec);
-		
 		
 		// 4. Compute the distorted grid points (xDist, yDist) which are used to sample the
 		// distorted image to get the undistorted image
