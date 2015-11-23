@@ -22,7 +22,7 @@ import ij.ImageJ;
  *
  */
 public class SVDandFT {
-	
+
 	public static void invertSVD(SimpleMatrix A)
 	{
 		
@@ -354,6 +354,7 @@ public class SVDandFT {
 		Grid2DComplex imageC = new Grid2DComplex(image);
 		// Important: Grid2DComplex enlarges the original image to the next power of 2
 		imageC.show();
+		
 		
 		//Apply 2-D discrete fourier transform
 		//Puts the DC component of the signal in the upper left corner of the FFT

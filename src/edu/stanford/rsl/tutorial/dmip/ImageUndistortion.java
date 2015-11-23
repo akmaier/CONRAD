@@ -25,6 +25,7 @@ public class ImageUndistortion{
 		
 		
 		// 1. Load undistorted image
+
 		int caseNo = 0;
 		String filename = "/Users/Phil/Documents/Reconstruction/Conrad/src/edu/stanford/rsl/tutorial/dmip/frame32.jpg";
 		
@@ -38,6 +39,7 @@ public class ImageUndistortion{
 		}else if(caseNo == 2)
 		{
 			filename = "/Users/Phil/Documents/Reconstruction/Conrad/src/edu/stanford/rsl/tutorial/dmip/frame90.jpg";
+
 		}
 				
 		Grid2D image = ImageUtil.wrapImagePlus(IJ.openImage(filename)).getSubGrid(0);
@@ -157,6 +159,7 @@ public class ImageUndistortion{
 		// can be used.
 		
 		// Number of lattice points
+
 		// change the value of nx, ny
 		int nx = 8;
 		int ny = 8;
@@ -198,7 +201,6 @@ public class ImageUndistortion{
 		Yd2.multiplyBy(-1);
 		Xd2.add(Xu2,Xu2);
 		Yd2.add(Yu2,Yu2);
-		
 		
 		// 2. Polynom of degree d
 		// Polynom of degree d -> (d-1): extrema
@@ -311,7 +313,6 @@ public class ImageUndistortion{
 		
 		Grid2D differenceImage = (Grid2D) NumericPointwiseOperators.subtractedBy(quadraticImage, undistortedImage);
 		differenceImage.show("diffImage");
-		
 	}
 	
 	
