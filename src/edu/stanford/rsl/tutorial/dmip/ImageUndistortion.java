@@ -39,7 +39,6 @@ public class ImageUndistortion{
 		}else if(caseNo == 2)
 		{
 			filename = "/Users/Phil/Documents/Reconstruction/Conrad/src/edu/stanford/rsl/tutorial/dmip/frame90.jpg";
-
 		}
 				
 		Grid2D image = ImageUtil.wrapImagePlus(IJ.openImage(filename)).getSubGrid(0);
@@ -183,7 +182,6 @@ public class ImageUndistortion{
 				Yu2.setElementValue(j, i, Y.getAtIndex( (int) ((i+1) * fx), (int) ((j+1) * fy)));
 				Xd2.setElementValue(j, i, Xd.getAtIndex( (int) ((i+1) * fx), (int) ((j+1) * fy)));
 				Yd2.setElementValue(j, i, Yd.getAtIndex( (int) ((i+1) * fx), (int) ((j+1) * fy)));
-
 			}
 		}
 		
@@ -256,7 +254,6 @@ public class ImageUndistortion{
 					A.setElementValue(r, cc, Math.pow(Xu2_vec.getElement(r), i) 
 							* Math.pow(Yu2_vec.getElement(r), j));
 					cc++;
-					
 				}
 			}
 		}
