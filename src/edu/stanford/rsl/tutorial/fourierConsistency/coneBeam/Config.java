@@ -1,4 +1,5 @@
 /*
+ /*
  * Copyright (C) 2015 Wolfgang Aichinger, Martin Berger
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
 */
@@ -45,6 +46,7 @@ public class Config {
 	// precomputed arrays to perform shift in frequencydomain
 	private Grid1D shiftFreqX;
 	private Grid1D shiftFreqY;
+	private Grid1D shiftFreqP;
 
 	// Size of mask used for erosion
 	private int m_erosionFactor;
@@ -54,6 +56,8 @@ public class Config {
 	// matrices to perform a dft and idft for use on graphicscard
 	private ComplexGrid2D dftMatrix;
 	private ComplexGrid2D idftMatrix;
+	
+	private int grad_idx = 0;
 
 
 	public Config(String xmlFilename, int erosionFactor, int scalingFactor){
@@ -70,6 +74,7 @@ public class Config {
 		wuSpacing = 1.0/(N*spacingX);
 		wvSpacing = 1.0/(M*spacingY);
 		kSpacing = 1.0/(K*angleInc);
+		//kSpacing = 1.0/(K*spacingX);
 		wuSpacingVec = createFrequArray(N, (float)(wuSpacing));
 		wvSpacingVec = createFrequArray(M, (float)(wvSpacing));
 		kSpacingVec = createFrequArray(K, (float)(kSpacing));
@@ -77,6 +82,7 @@ public class Config {
 		// construct a shift vector
 		shiftFreqX = constructShiftFreq(wuSpacingVec);
 		shiftFreqY = constructShiftFreq(wvSpacingVec);
+		shiftFreqP = constructShiftFreq(kSpacingVec);
 		fillMask();
 		createDFTMatrix();
 		createIDFTMatrix();
@@ -168,6 +174,9 @@ public class Config {
 	public Grid1D getShiftFreqY(){
 		return shiftFreqY;
 	}
+	public Grid1D getShiftFreqP(){
+		return shiftFreqP;
+	}
 	public Grid2D getMask(){
 		return mask;
 	}
@@ -177,6 +186,14 @@ public class Config {
 	}
 	public ComplexGrid2D getIDFTMatrix(){
 		return idftMatrix;
+	}
+	
+	public int getgrad_idx(){
+		return grad_idx;
+	}
+	
+	public void setgrad_idx(int i){
+		grad_idx = i;
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Wolfgang Aichinger, Martin Berger
+ * Copyright (C) 2015 Wolfgang Aichinger, Martin Berger, Katrin Mentl
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
 */
 package edu.stanford.rsl.tutorial.fourierConsistency.coneBeam;
@@ -28,7 +28,9 @@ public class Test3DMovementCorrection {
 		// read in projection data
 		Grid3D projections = null;
 		ApodizationImageFilter filt = new ApodizationImageFilter();
-		filt.setCustomSizes(new Integer[]{null, (int)(Configuration.getGlobalConfiguration().getGeometry().getDetectorHeight()-40)});
+		//filt.setCustomSizes(new Integer[]{null, (int)(Configuration.getGlobalConfiguration().getGeometry().getDetectorHeight()-40)});
+		//do not subtract 40 because image is currently so small
+		filt.setCustomSizes(new Integer[]{null, (int)(Configuration.getGlobalConfiguration().getGeometry().getDetectorHeight())}); 
 		try {
 			// locate the file
 			// here we only want to select files ending with ".bin". This will open them as "Dennerlein" format.
@@ -37,7 +39,9 @@ public class Test3DMovementCorrection {
 			//String filenameString = FileUtil.myFileChoose("proj/ciptmp/co98jaha/workspace/data/FinalProjections80kev/FORBILD_Head_80kev.tif",".tif", false);
 			// call the ImageJ routine to open the image:
 			//ImagePlus imp = IJ.openImage("D:/Data/ForbildHead3D/FinalProjections80kev/TestXCAT.tif");
-			ImagePlus imp = IJ.openImage("D:/Data/WeightBearing/PMB/XCatDynamicSquat_NoTruncation_256proj_620_480_MeadianRad2_80keVnoNoise.tif");
+			//ImagePlus imp = IJ.openImage("D:/Data/WeightBearing/PMB/XCatDynamicSquat_NoTruncation_256proj_620_480_MeadianRad2_80keVnoNoise.tif");
+			ImagePlus imp = IJ.openImage("/proj/ciptmp/ek50aqub/userka/Conrad/XCatDynamicSquat_NoTruncation_256proj_62_48_MeadianRad2_80keVnoNoise_scaled.tif");
+			
 			// Convert from ImageJ to Grid3D. Note that no data is copied here. The ImageJ container is only wrapped. Changes to the Grid will also affect the ImageJ ImagePlus.
 			projections = ImageUtil.wrapImagePlus(imp);
 			filt.configure();
@@ -53,11 +57,13 @@ public class Test3DMovementCorrection {
 		Grid3D projectionsWindowed = (Grid3D) ImageUtil.applyFilterInParallel((Grid3D) projections.clone(), filt).clone();
 		projectionsWindowed.show("Windowed Projections");
 		
+		
 		// get configuration
-		String xmlFilename = "D:/Data/WeightBearing/PMB/XCAT motion correction_256proj_620_480_Subj2 Static60_fullView.xml";
+		String xmlFilename = "/home/cip/medtech/ek50aqub/Conrad.xml";
 		String outXMLfile = xmlFilename;
 		outXMLfile = outXMLfile.substring(0, outXMLfile.length()-4);
 		outXMLfile += "corrected.xml";
+
 		
 		Config conf = new Config(xmlFilename, 2, 1);
 		conf.getMask().show("mask");
