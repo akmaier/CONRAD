@@ -1,7 +1,5 @@
 package edu.stanford.rsl.conrad.opencl;
 
-//TODO: Use our own matrices instead of Jama.Matrix
-
 import java.nio.FloatBuffer;
 
 import com.jogamp.opencl.CLBuffer;
@@ -22,14 +20,17 @@ import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 import edu.stanford.rsl.apps.gui.Citeable;
 import edu.stanford.rsl.apps.gui.GUIConfigurable;
+import edu.stanford.rsl.conrad.data.numeric.Grid3D;
 import edu.stanford.rsl.conrad.geometry.Projection;
 import edu.stanford.rsl.conrad.geometry.trajectories.ProjectionTableFileTrajectory;
 import edu.stanford.rsl.conrad.geometry.trajectories.Trajectory;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
+import edu.stanford.rsl.conrad.numerics.SimpleOperators;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
 import edu.stanford.rsl.conrad.utils.CONRAD;
 import edu.stanford.rsl.conrad.utils.Configuration;
 import edu.stanford.rsl.conrad.utils.ImageUtil;
+import edu.stanford.rsl.conrad.utils.UserUtil;
 
 
 
@@ -87,13 +88,20 @@ public class OpenCLForwardProjector implements GUIConfigurable, Citeable {
 	protected CLBuffer<FloatBuffer> gInvARmatrix = null;
 	protected CLBuffer<FloatBuffer> gSrcPoint = null;
 	private CLBuffer<FloatBuffer> gProjection = null;
+	
+	private SimpleVector originShift = null;
+	private boolean obtainGeometryFromVolume = false;
+	private boolean flipProjections = false;
 
+	protected Projection[] projectionMatrices = null;
+	
 	private boolean initialized = false;
 	private boolean largeVolumeMode = false;
 	private int nSteps;
 	private int currentStep = 0;
 	private float [] voxelSize = null;
 	private float [] volumeSize = null;
+	private double [] origin = null;
 	private boolean configured = false;
 	private float [] volumeEdgeMinPoint = null;
 	private float [] volumeEdgeMaxPoint = null;
@@ -102,6 +110,11 @@ public class OpenCLForwardProjector implements GUIConfigurable, Citeable {
 	private int subVolumeZ;
 
 	private ImagePlus tex3D = null;
+	
+	private float [] projection;
+	private int width;
+	private int height;
+	protected int nrProj;
 
 	/**
 	 * Gets the volume to project
@@ -116,13 +129,31 @@ public class OpenCLForwardProjector implements GUIConfigurable, Citeable {
 	 * @param tex3d
 	 */
 	public void setTex3D(ImagePlus tex3d) {
+		if (obtainGeometryFromVolume){
+			Grid3D inputTex = ImageUtil.wrapImagePlus(tex3d);
+			volumeSize = new float[]{inputTex.getSize()[0],inputTex.getSize()[1],inputTex.getSize()[2]};
+			if(inputTex.getSpacing() != null)
+				voxelSize = new float[]{(float) inputTex.getSpacing()[0],(float) inputTex.getSpacing()[1],(float) inputTex.getSpacing()[2]};
+			else{
+				System.out.println("Cannot obtain voxel spacing from volume! Using configuration spacing instead!");
+				Trajectory g = Configuration.getGlobalConfiguration().getGeometry();
+				voxelSize = new float[]{(float) g.getVoxelSpacingX(), (float) g.getVoxelSpacingY(), (float) g.getVoxelSpacingZ()};
+			}
+			if(inputTex.getOrigin() != null)
+				origin = new double[]{inputTex.getOrigin()[0], inputTex.getOrigin()[1], inputTex.getOrigin()[2]};
+			else{
+				System.out.println("Cannot obtain origin from volume! Using configuration origin instead!");
+				Trajectory g = Configuration.getGlobalConfiguration().getGeometry();
+				origin = new double[]{g.getOriginX(), g.getOriginY(), g.getOriginZ()};
+			}
+			volumeEdgeMaxPoint = new float[3];
+			for (int i=0; i < 3; i ++){
+				volumeEdgeMaxPoint[i] = (float) (volumeSize[i] -0.5 - CONRAD.SMALL_VALUE);
+			}
+		}
 		tex3D = tex3d;
 	}
-
-	private float [] projection;
-	private int width;
-	private int height;
-	protected Trajectory geometry;
+	
 
 	/**
 	 * 
@@ -167,104 +198,73 @@ public class OpenCLForwardProjector implements GUIConfigurable, Citeable {
 	 * @param srcPoint is filled with the 3x1 source point in canonical format 
 	 * @param projectionMatrix the Matrix on which the conversion is based.
 	 */
+	public void computeCanonicalProjectionMatrix(CLBuffer<FloatBuffer> invARmatrix, CLBuffer<FloatBuffer> srcPoint,  Projection proj){
+		computeCanonicalProjectionMatrix(null, invARmatrix, srcPoint, proj);
+	}
 
-	public void computeCanonicalProjectionMatrix(float [] canonicalProjMatrix, float [] invARmatrix, float [] srcPoint, Jama.Matrix projectionMatrix){
-
-		double [] du = {Configuration.getGlobalConfiguration().getGeometry().getPixelDimensionX(), 0};
-		double [] dv = {0, Configuration.getGlobalConfiguration().getGeometry().getPixelDimensionY()};
-
-
-		// Assumed the vectors have only one non-zero element
-		// use 
-		du[0] = 1;
-		dv[1] = 1;
-
-
-
-		/*  ---------------------------------------------------
-		 *
-		 *  Canonical projection matrix used for BP computation
-		 *
-		 *  ---------------------------------------------------
-		 */
-		// T0 matrix
-		Jama.Matrix T0 = new Jama.Matrix (3,3);
-		double denom = 1.0f / (du[0]*dv[1] - dv[0]*du[1]);
-		T0.set(0,0, denom * dv[1]);
-		T0.set(0,1,-denom * dv[0]);
-		T0.set(1,0, -denom * du[1]);
-		T0.set(1,1, denom * du[0]);
-		T0.set(0,2, -0.5);
-		T0.set(1,2, -0.5);
-		T0.set(2,2, 1.0);
-		//T0.print(NumberFormat.getInstance(), 8);
-
-		// T4 matrix 
-		Jama.Matrix T4 = new Jama.Matrix(4,4);
-		T4.set(0,0, voxelSize[0]);
-		T4.set(1,1, voxelSize[1]);
-		T4.set(2,2, voxelSize[2]);
-		for (int k=0; k<3; ++k){
-			T4.set(k,3, -0.5 * (volumeSize[k] - 1.0) * voxelSize[k]);
-		}
-		T4.set(3,3, 1.0);
-
-		// New projection matrix in Canonical coord sys
-		Jama.Matrix tmpMatrix;
-		Jama.Matrix newProjMat;
-		tmpMatrix = projectionMatrix.times(T4);
-		newProjMat = T0.times(tmpMatrix);
-		for (int r=0; r<3; ++r) {
-			for (int c=0; c<4; ++c) {
-				// 3x3 matrix 1st row (indices 0-3), 2nd row (indices 4-7),
-				//   and 3rd row (indices 8-11)
-				canonicalProjMatrix[4*r + c] = (float) newProjMat.get(r,c);
-			}
-		}
-
-		/*  -----------------------------------------------------------
-		 *
-		 *  Canonical inverse projection matrix used for FP computation
-		 *
-		 *  -----------------------------------------------------------
-		 */
-		// Inverse of T0 matrix
-		//T0.inverse().print(NumberFormat.getInstance(), 8);
-		T0.set(0,0, du[0]);
-		T0.set(0,1, dv[0]);
-		T0.set(1,0, du[1]);
-		T0.set(1,1, dv[1]);
-		T0.set(0,2, 0);//0.5 * (du[0]+dv[0]));
-		T0.set(1,2, 0);//0.5 * (du[1]+dv[1]));
-		//T0.print(NumberFormat.getInstance(), 8);
-
+	public void computeCanonicalProjectionMatrix(CLBuffer<FloatBuffer> detectorDirections, CLBuffer<FloatBuffer> invARmatrix, CLBuffer<FloatBuffer> srcPoint,  Projection proj){
 		// Inverse scaling by dx, dy, dz
-		Jama.Matrix invVoxelScale = new Jama.Matrix(3,3);
-		invVoxelScale.set(0,0, 1.0/voxelSize[0]);
-		invVoxelScale.set(1,1, 1.0/voxelSize[1]);
-		invVoxelScale.set(2,2, 1.0/voxelSize[2]);
+		SimpleMatrix invVoxelScale = new SimpleMatrix(3,3);
+		invVoxelScale.setElementValue(0,0, 1.0/voxelSize[0]);
+		invVoxelScale.setElementValue(1,1, 1.0/voxelSize[1]);
+		invVoxelScale.setElementValue(2,2, 1.0/voxelSize[2]);
+
 
 		// New invARmatrix in the Canonical coord sys
-		Jama.Matrix invARmatrixMat = projectionMatrix.getMatrix(0, 2, 0, 2).inverse();
-		tmpMatrix = invARmatrixMat.times(T0);    // invARmatrix_ * T0^{-1}
-		Jama.Matrix invAR = invVoxelScale.times(tmpMatrix);     // invVoxelScale * (invARmatrix_ * T0)
+		SimpleMatrix invARmatrixMat = proj.getRTKinv();
+		//SimpleMatrix invARmatrixMatTest = proj.computeP().getSubMatrix(0, 0, 3, 3).inverse(InversionType.INVERT_SVD);
+		SimpleMatrix invAR = SimpleOperators.multiplyMatrixProd(invVoxelScale,invARmatrixMat);     // invVoxelScale * (invARmatrix_ * T0)
 		for (int r=0; r<3; ++r) {
 			for (int c=0; c<3; ++c) {
 				// 3x3 matrix 1st row (indices 0-2), 2nd row (indices 3-5),
 				//   and 3rd row (indices 6-8)
-				invARmatrix[3*r + c] = (float) invAR.get(r,c);
-
+				invARmatrix.getBuffer().put((float) invAR.getElement(r,c));
 			}
 		}
-		//invAR.print(NumberFormat.getInstance(), 6);
+		
+		// shifted origin is express in updated T4 last column as origin shift in WC is added to it
+		if(originShift==null)
+			originShift = getOriginTransform();
+		
 		// New srcPoint in the Canonical coord sys
+		SimpleVector srcPtW = proj.computeCameraCenter().negated();//computeSrcPt(projectionMatrix, invARmatrixMat);
+		srcPoint.getBuffer().put((float) -(-0.5 * (volumeSize[0] -1.0) + originShift.getElement(0)*invVoxelScale.getElement(0,0) + invVoxelScale.getElement(0,0) * srcPtW.getElement(0))); 
+		srcPoint.getBuffer().put((float) -(-0.5 * (volumeSize[1] -1.0) + originShift.getElement(1)*invVoxelScale.getElement(1,1) + invVoxelScale.getElement(1,1) * srcPtW.getElement(1))); 
+		srcPoint.getBuffer().put((float) -(-0.5 * (volumeSize[2] -1.0) + originShift.getElement(2)*invVoxelScale.getElement(2,2) + invVoxelScale.getElement(2,2) * srcPtW.getElement(2))); 
 
-		Jama.Matrix srcPtW = computeSrcPt(projectionMatrix, invARmatrixMat);
-		srcPoint[0] = (float) -(-0.5 * (volumeSize[0] -1.0) + invVoxelScale.get(0,0) * srcPtW.get(0, 0)); 
-		srcPoint[1] = (float) -(-0.5 * (volumeSize[1] -1.0) + invVoxelScale.get(1,1) * srcPtW.get(1, 0)); 
-		srcPoint[2] = (float) -(-0.5 * (volumeSize[2] -1.0) + invVoxelScale.get(2,2) * srcPtW.get(2, 0)); 
+		if(detectorDirections!=null){
+
+			SimpleVector x = new SimpleVector(1,0,0);
+			SimpleVector z = new SimpleVector(0,1,0);
+			
+			SimpleMatrix R = proj.getR().transposed();
+			x=SimpleOperators.multiply(R,x);
+			z=SimpleOperators.multiply(R,z);
+			x.normalizeL2();
+			z.normalizeL2();
+			SimpleVector udir = x;
+			SimpleVector vdir = z;
+			/*
+
+			SimpleVector x = projectionMatrix.getSubRow(0, 0, 3);
+			SimpleVector y = projectionMatrix.getSubRow(1, 0, 3);
+			SimpleVector imgPlane = projectionMatrix.getSubRow(2, 0, 3);
 
 
+			SimpleVector udir = crossProduct(y,imgPlane).negated();
+			SimpleVector vdir = crossProduct(x,imgPlane);
+			udir.normalizeL2();
+			vdir.normalizeL2();
+			 */
+			detectorDirections.getBuffer().put((float) udir.getElement(0));
+			detectorDirections.getBuffer().put((float) udir.getElement(1));
+			detectorDirections.getBuffer().put((float) udir.getElement(2));
+			detectorDirections.getBuffer().put(0.f);
+			detectorDirections.getBuffer().put((float) vdir.getElement(0));
+			detectorDirections.getBuffer().put((float) vdir.getElement(1));
+			detectorDirections.getBuffer().put((float) vdir.getElement(2));
+			detectorDirections.getBuffer().put(0.f);
+		}
 	}
 
 	/**
@@ -279,6 +279,18 @@ public class OpenCLForwardProjector implements GUIConfigurable, Citeable {
 		Jama.Matrix at = projectionMatrix.getMatrix(0, 2, 3, 3);
 		//at = at.times(-1.0);
 		return invertedProjMatrix.times(at);
+	}
+	
+	protected SimpleVector getOriginTransform(){
+		SimpleVector currOrigin = new SimpleVector(this.origin);
+		// compute centered origin as assumed by forward projector
+		SimpleVector centeredOffset = new SimpleVector(this.volumeSize);
+		SimpleVector voxelSpacing = new SimpleVector(this.voxelSize);
+		centeredOffset.subtract(1);
+		centeredOffset.multiplyElementWiseBy(voxelSpacing);
+		centeredOffset.divideBy(-2);
+		// compute the actual shift
+		return SimpleOperators.subtract(currOrigin, centeredOffset);
 	}
 
 	/**
@@ -382,25 +394,16 @@ public class OpenCLForwardProjector implements GUIConfigurable, Citeable {
 	 * @param projectionNumber
 	 */
 	protected void prepareAllProjections(){
-		float [] cann = new float[3*4];
-		float [] invAR = new float[3*3];
-		float [] srcP = new float[3];
-		
 		if (gInvARmatrix == null)
-			gInvARmatrix = context.createFloatBuffer(invAR.length*geometry.getNumProjectionMatrices(), Mem.READ_ONLY);
+			gInvARmatrix = context.createFloatBuffer(3*3*nrProj, Mem.READ_ONLY);
 		if (gSrcPoint == null)
-			gSrcPoint = context.createFloatBuffer(srcP.length*geometry.getNumProjectionMatrices(), Mem.READ_ONLY);
+			gSrcPoint = context.createFloatBuffer(3*nrProj, Mem.READ_ONLY);
 		
-		for (int i=0; i < geometry.getNumProjectionMatrices(); ++i){
-			SimpleMatrix projMat = geometry.getProjectionMatrix(i).computeP();
-			double [][] mat = new double [3][4];
-			projMat.copyTo(mat);
-			computeCanonicalProjectionMatrix(cann, invAR, srcP, new Jama.Matrix(mat));
-			
-			gInvARmatrix.getBuffer().put(invAR);
-			gSrcPoint.getBuffer().put(srcP);
+		gInvARmatrix.getBuffer().rewind();
+		gSrcPoint.getBuffer().rewind();
+		for (int i=0; i < nrProj; ++i){
+			computeCanonicalProjectionMatrix(gInvARmatrix, gSrcPoint, projectionMatrices[i]);
 		}
-		
 		gInvARmatrix.getBuffer().rewind();
 		gSrcPoint.getBuffer().rewind();
 		
@@ -409,52 +412,6 @@ public class OpenCLForwardProjector implements GUIConfigurable, Citeable {
 		.putWriteBuffer(gInvARmatrix, true)
 		.finish();
 	}
-	
-	
-	
-	
-	/**
-	 * Load the inverted projection matrix for the current projection and resets the projection data.
-	 * @param projectionNumber
-	 */
-	/*
-	private void prepareProjection(int projectionNumber){
-		float [] cann = new float[3*4];
-		float [] invAR = new float[3*3];
-		float [] srcP = new float[3];
-		SimpleMatrix projMat = geometry.getProjectionMatrix(projectionNumber).computeP();
-		double [][] mat = new double [3][4];
-		projMat.copyTo(mat);
-		computeCanonicalProjectionMatrix(cann, invAR, srcP, new Jama.Matrix(mat));
-		if (gInvARmatrix == null)
-			gInvARmatrix = context.createFloatBuffer(invAR.length, Mem.READ_ONLY);
-		if (gSrcPoint == null)
-			gSrcPoint = context.createFloatBuffer(srcP.length, Mem.READ_ONLY);
-		
-		gInvARmatrix.getBuffer().put(invAR);
-		gSrcPoint.getBuffer().put(srcP);
-		gInvARmatrix.getBuffer().rewind();
-		gSrcPoint.getBuffer().rewind();
-		
-		commandQueue
-		.putWriteBuffer(gSrcPoint, true)
-		.putWriteBuffer(gInvARmatrix, true)
-		.finish();
-
-		
-//		// reset Projection Data
-//		if (gProjection == null)
-//			gProjection = context.createFloatBuffer(width*height, Mem.READ_ONLY);
-//
-//		// set everything to zero
-//		for (int i=0; i < width*height; ++i)
-//			gProjection.getBuffer().put(0);
-//		gProjection.getBuffer().rewind();
-	
-
-
-	}
-	*/
 
 
 	/**
@@ -499,22 +456,25 @@ public class OpenCLForwardProjector implements GUIConfigurable, Citeable {
 		SimpleMatrix m = proj.computeP().getSubMatrix(0, 0, 3, 3);
 		System.out.println("M="+ m.inverse(SimpleMatrix.InversionType.INVERT_QR).multipliedBy(2));
 
-		float [] cann = new float[3*4];
-		float [] invAR = new float[3*3];
-		float [] srcP = new float[3];
-		SimpleMatrix projMat = proj.computeP();
-		double [][] mat = new double [3][4];
-		projMat.copyTo(mat);
+		CLBuffer<FloatBuffer> invAR = OpenCLUtil.getStaticContext().createFloatBuffer(3*3, Mem.READ_ONLY);
+		CLBuffer<FloatBuffer> srcP = OpenCLUtil.getStaticContext().createFloatBuffer(3, Mem.READ_ONLY);
 		OpenCLForwardProjector clForwardProjector = new OpenCLForwardProjector();
 		clForwardProjector.voxelSize = new float [] {0.5f, 0.5f, 0.5f};
 		clForwardProjector.volumeSize = new float [] {512f, 512f, 512f};
-		clForwardProjector.computeCanonicalProjectionMatrix(cann, invAR, srcP, new Jama.Matrix(mat));
-		for (int i =0; i < 9; i++){
-			System.out.println(invAR[i]);
+		try {
+			clForwardProjector.configure();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		for (int i =0; i < 3; i++){
-			System.out.println(srcP[i]);
-		}
+		invAR.getBuffer().rewind();
+		srcP.getBuffer().rewind();
+		clForwardProjector.computeCanonicalProjectionMatrix(invAR, srcP, proj);
+		invAR.getBuffer().rewind();
+		srcP.getBuffer().rewind();
+		while(invAR.getBuffer().hasRemaining())
+			System.out.println(invAR.getBuffer().get());
+		while(srcP.getBuffer().hasRemaining())
+			System.out.println(srcP.getBuffer().get());
 	}
 
 	/**
@@ -554,10 +514,6 @@ public class OpenCLForwardProjector implements GUIConfigurable, Citeable {
 	 */
 	public ImageProcessor project(int projectionNumber){
 		init();
-		//prepareProjection(projectionNumber);
-
-		//gSrcPoint.getBuffer().position(projectionNumber*3);
-		//gInvARmatrix.getBuffer().position(projectionNumber*9);
 		
 		// write kernel parameters
 		kernelFunction.rewind();
@@ -608,7 +564,7 @@ public class OpenCLForwardProjector implements GUIConfigurable, Citeable {
 		// conversion from [g*mm/cm^3] = [g*0.1cm/cm^3] to [g/cm^2]
 		// fl.multiply(1.0 / 10);
 		
-		if (geometry instanceof ProjectionTableFileTrajectory){
+		if (flipProjections){
 			fl.flipVertical();
 		}
 		return fl;
@@ -624,7 +580,7 @@ public class OpenCLForwardProjector implements GUIConfigurable, Citeable {
 
 		try {
 			ImageStack stack = new ImageStack(width, height);
-			for (int i = 0; i < geometry.getNumProjectionMatrices(); i++){
+			for (int i = 0; i < nrProj; i++){
 				stack.addSlice("Projection " + i, project(i).duplicate());
 			}
 			if (largeVolumeMode){
@@ -635,7 +591,7 @@ public class OpenCLForwardProjector implements GUIConfigurable, Citeable {
 					if (currentStep == nSteps) break;
 					if (debug) System.out.println("Processing step " + currentStep + " of " + nSteps);
 					copyVolumeToCard();
-					for (int i = 0; i < geometry.getNumProjectionMatrices(); i++){
+					for (int i = 0; i < nrProj; i++){
 						ImageUtil.addProcessors(stack.getProcessor(i+1), project(i));
 						//stack.addSlice("slice " + i, project(i).duplicate());
 					}
@@ -744,28 +700,44 @@ public class OpenCLForwardProjector implements GUIConfigurable, Citeable {
 	 */
 	@Override
 	public void configure() throws Exception {
-		voxelSize = new float [3];
-		volumeSize = new float [3];
+		obtainGeometryFromVolume = UserUtil.queryBoolean("Try to obtain volume parameters from ImagePlus/Grid3D (Otherwise from configuration)?");
 		Configuration config = Configuration.getGlobalConfiguration();
-		voxelSize[0] = (float) config.getGeometry().getVoxelSpacingX();
-		voxelSize[1] = (float) config.getGeometry().getVoxelSpacingY();
-		voxelSize[2] = (float) config.getGeometry().getVoxelSpacingZ();
-		volumeSize[0] = config.getGeometry().getReconDimensionX();
-		volumeSize[1] = config.getGeometry().getReconDimensionY();
-		volumeSize[2] = config.getGeometry().getReconDimensionZ();
+		
+		if (!obtainGeometryFromVolume){
+			voxelSize = new float [3];
+			volumeSize = new float [3];
+			origin = new double [3];
+			voxelSize[0] = (float) config.getGeometry().getVoxelSpacingX();
+			voxelSize[1] = (float) config.getGeometry().getVoxelSpacingY();
+			voxelSize[2] = (float) config.getGeometry().getVoxelSpacingZ();
+			volumeSize[0] = config.getGeometry().getReconDimensionX();
+			volumeSize[1] = config.getGeometry().getReconDimensionY();
+			volumeSize[2] = config.getGeometry().getReconDimensionZ();
+			origin[0] = (float) config.getGeometry().getOriginX();
+			origin[1] = (float) config.getGeometry().getOriginY();
+			origin[2] = (float) config.getGeometry().getOriginZ();
+			volumeEdgeMaxPoint = new float[3];
+			for (int i=0; i < 3; i ++){
+				volumeEdgeMaxPoint[i] = (float) (volumeSize[i] -0.5 - CONRAD.SMALL_VALUE);
+			}
+		}
+		else{
+			voxelSize =  null;
+			volumeSize = null;
+			origin = null;
+		}
+		projectionMatrices = config.getGeometry().getProjectionMatrices();
+		width = config.getGeometry().getDetectorWidth();
+		height = config.getGeometry().getDetectorHeight();
+		nrProj = config.getGeometry().getNumProjectionMatrices();
+		flipProjections = (config.getGeometry() instanceof ProjectionTableFileTrajectory);
+		
 		volumeEdgeMinPoint = new float[3];
 		for (int i=0; i < 3; i ++){
 			volumeEdgeMinPoint[i] = (float) (-0.5 + CONRAD.SMALL_VALUE);
 		}
-		volumeEdgeMaxPoint = new float[3];
-		for (int i=0; i < 3; i ++){
-			volumeEdgeMaxPoint[i] = (float) (volumeSize[i] -0.5 - CONRAD.SMALL_VALUE);
-		}
-		width = config.getGeometry().getDetectorWidth();
-		height = config.getGeometry().getDetectorHeight();
-		geometry = config.getGeometry();
 
-		if (debug) System.out.println("Projection Matrices: " + geometry.getNumProjectionMatrices());
+		if (debug) System.out.println("Projection Matrices: " + nrProj);
 		projection = new float[width * height];
 		configured = true;
 	}

@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2015 Martin Berger
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
-*/
+ */
 package edu.stanford.rsl.tutorial.fourierConsistency.coneBeam;
 
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
@@ -17,10 +17,14 @@ public class ApodizationImageFilter extends IndividualImageFilteringTool {
 
 	private DoubleFunction[] apodFctsU;
 	private DoubleFunction[] apodFctsV;
+	private DoubleFunction[] apodFctsK;
 	private boolean initialized = false;
 
 	private windowType wtU;
+
 	private windowType wtV;
+
+	private windowType wtK;
 
 	private Integer[] customSizes = null;
 
@@ -40,12 +44,13 @@ public class ApodizationImageFilter extends IndividualImageFilteringTool {
 	public ApodizationImageFilter(ApodizationImageFilter in) {
 		this.wtU = in.wtU;
 		this.wtV = in.wtV;
+		this.wtK = in.wtK;
 		this.config = in.config;
 		this.initialized = false;
 		this.customSizes = in.customSizes;
 	}
 
-	public enum windowType{
+	public static enum windowType{
 		rect(0),
 		hann(1),
 		hamming(2),
@@ -68,14 +73,36 @@ public class ApodizationImageFilter extends IndividualImageFilteringTool {
 	private void initFcts(){
 		int U = config.getGeometry().getDetectorWidth();
 		int V = config.getGeometry().getDetectorHeight();
+		int K = config.getGeometry().getNumProjectionMatrices();
 
-		int[] s = new int[]{U,V};
+		int[] s = new int[]{U,V,K};
 		for (int i = 0; i < s.length; i++) {
 			int sin = s[i];
 			final int N = (customSizes != null && customSizes[i] != null) ? customSizes[i] : sin;
 			final int offset = (customSizes != null && customSizes[i] != null) ? (sin-customSizes[i])/2 : 0;
 			final int blockSize = (customSizes != null && customSizes[i] != null) ? customSizes[i] : s[i];
 			final int j = i;
+
+			final DoubleFunction fnRect = new DoubleFunction() {
+				@Override
+				public double f(double x) {
+					if(customSizes != null && customSizes[j] != null){
+						if(x < offset){
+							return Double.NaN;
+						}
+						else if(x >= (offset + blockSize)){
+							return (Double.NaN);
+						}
+						else{
+							return x - offset;
+						}						
+					}
+					else{
+						return x;
+					}
+				}
+			};
+
 			final DoubleFunction fn = new DoubleFunction() {
 				@Override
 				public double f(double x) {
@@ -100,7 +127,10 @@ public class ApodizationImageFilter extends IndividualImageFilteringTool {
 			DoubleFunction[] fcts = new DoubleFunction[windowType.values().length];
 			fcts[windowType.rect.getLabel()] = new DoubleFunction() {
 				public double f(double x) {
-					return Math.max(1, 0);
+					if (Double.isNaN(fnRect.f(x)))
+						return 0.0;
+					else
+						return 1.0;
 				}
 			};
 			fcts[windowType.triangular.getLabel()] =  new DoubleFunction() {
@@ -146,18 +176,27 @@ public class ApodizationImageFilter extends IndividualImageFilteringTool {
 				}
 			}; 
 
-			if(i==0)
+			switch (i) {
+			case 0:
 				apodFctsU = fcts;
-			else
+				break;
+			case 1:
 				apodFctsV = fcts;
+				break;
+			case 2:
+				apodFctsK = fcts;
+				break;
+
+			default:
+				apodFctsU = fcts;
+				break;
+			}
 		}
 	}
 
 	@Override
 	public void configure() throws Exception {
 		config = Configuration.getGlobalConfiguration();
-		wtU = windowType.rect;
-		wtV = windowType.blackman;
 	}
 
 	@Override
@@ -184,7 +223,9 @@ public class ApodizationImageFilter extends IndividualImageFilteringTool {
 				imageProcessor.setAtIndex(i, j, 
 						(float)(imageProcessor.getAtIndex(i, j)*
 								apodFctsU[wtU.getLabel()].f(i)*
-								apodFctsV[wtV.getLabel()].f(j)));
+								apodFctsV[wtV.getLabel()].f(j)*
+								apodFctsK[wtK.getLabel()].f(this.getImageIndex())
+								));
 			}
 		}
 		return imageProcessor;
@@ -199,5 +240,34 @@ public class ApodizationImageFilter extends IndividualImageFilteringTool {
 	public String getToolName() {
 		return "Apodization Window Filter";
 	}
+
+
+	public windowType getWtU() {
+		return wtU;
+	}
+
+	public void setWtU(windowType wtU) {
+		this.wtU = wtU;
+		initialized = false;
+	}
+
+	public windowType getWtV() {
+		return wtV;
+	}
+
+	public void setWtV(windowType wtV) {
+		this.wtV = wtV;
+		initialized = false;
+	}
+	
+	public windowType getWtK() {
+		return wtK;
+	}
+
+	public void setWtK(windowType wtK) {
+		this.wtK = wtK;
+		initialized = false;
+	}
+
 
 }
