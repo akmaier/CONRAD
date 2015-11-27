@@ -670,8 +670,10 @@ public class MovementCorrection3D {
 		fo.setMaxima(max);
 		fo.setMinima(min);
 		fo.setItnlim(5);
-		fo.setMsg(18);
+		//fo.setMsg(18);
 		//fo.setMsg(16);
+		fo.setItnlim(m_conf.getNumberOfIterations());
+		fo.setMsg(16);
 		fo.setNdigit(6);
 		fo.setIexp(1);
 		ArrayList<OptimizationOutputFunction> visFcts = new ArrayList<OptimizationOutputFunction>();
@@ -819,7 +821,8 @@ public class MovementCorrection3D {
 			if(maskNormalizationSum == null){
 				maskNormalizationSum = 1.0;
 				//maskNormalizationSum *= (double)(NumericPointwiseOperators.sum(m_mask)*m_conf.getNumberOfProjections());
-				maskNormalizationSum*=m_2dFourierTransposed.getNumberOfElements();
+				//maskNormalizationSum*=m_2dFourierTransposed.getNumberOfElements();
+				maskNormalizationSum = sum/1e2;
 			}
 			sum/=maskNormalizationSum;
 			CONRAD.log("Calculated Energy: " + sum);
@@ -884,7 +887,7 @@ public class MovementCorrection3D {
 				}
 				backTransposeData();
 				doiFFT2();
-				NumericPointwiseOperators.copy(outputCentralSino, m_data.getMagGrid());
+				NumericPointwiseOperators.copy(outputCentralSino, m_data.getRealGrid());
 				
 				if (firstShow)
 					outputCentralSino.show("Intermediate Projection Result");
