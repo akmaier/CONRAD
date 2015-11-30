@@ -1,4 +1,5 @@
 /*
+ /*
  * Copyright (C) 2015 Wolfgang Aichinger, Martin Berger
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
  */
@@ -47,6 +48,7 @@ public class Config {
 	// precomputed arrays to perform shift in frequencydomain
 	private Grid1D shiftFreqX;
 	private Grid1D shiftFreqY;
+	private Grid1D shiftFreqP;
 
 	// Size of mask used for erosion
 	private int m_erosionFactor;
@@ -56,7 +58,9 @@ public class Config {
 	// matrices to perform a dft and idft for use on graphicscard
 	private ComplexGrid2D dftMatrix;
 	private ComplexGrid2D idftMatrix;
+
 	private Integer numberOfIterations;
+
 
 
 	public Config(String xmlFilename, int erosionFactor, int scalingFactor, double maxObjectRadius, int nrOfIterations){
@@ -81,6 +85,7 @@ public class Config {
 		// construct a shift vector
 		shiftFreqX = constructShiftFreq(wuSpacingVec);
 		shiftFreqY = constructShiftFreq(wvSpacingVec);
+		shiftFreqP = constructShiftFreq(kSpacingVec);
 		fillMask();
 		createDFTMatrix();
 		createIDFTMatrix();
@@ -171,6 +176,9 @@ public class Config {
 	}
 	public Grid1D getShiftFreqY(){
 		return shiftFreqY;
+	}
+	public Grid1D getShiftFreqP(){
+		return shiftFreqP;
 	}
 	public Grid2D getMask(){
 		return mask;
