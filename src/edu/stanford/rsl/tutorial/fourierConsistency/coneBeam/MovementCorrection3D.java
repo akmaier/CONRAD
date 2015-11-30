@@ -1,5 +1,4 @@
 /*
- /*
  * Copyright (C) 2015 Wolfgang Aichinger, Martin Berger, Katrin Mentl
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
 */
@@ -92,7 +91,7 @@ public class MovementCorrection3D {
 	// exponents of complex factors multiplied to shift in frequency space
 	protected OpenCLGrid1D freqU;
 	protected OpenCLGrid1D freqV;
-	protected OpenCLGrid1D freqP; //added
+	protected OpenCLGrid1D freqP; 
 	
 	// ext_p dependent on current gradient optimization parameter alpha_i (index i)
 	protected int grad_idx = 0;
@@ -134,7 +133,7 @@ public class MovementCorrection3D {
 		m_maskCL = new OpenCLGrid2D(m_mask);
 		freqU = new OpenCLGrid1D(conf.getShiftFreqX());
 		freqV = new OpenCLGrid1D(conf.getShiftFreqY());
-		freqP = new OpenCLGrid1D(conf.getShiftFreqP()); //added
+		freqP = new OpenCLGrid1D(conf.getShiftFreqP());
 		
 		//dftMatrix = new ComplexGrid2D(conf.getDFTMatrix());
 		//dftMatrix.activateCL();
@@ -658,7 +657,6 @@ public class MovementCorrection3D {
 		EnergyToBeMinimized function = new EnergyToBeMinimized();
 		FunctionOptimizer fo = new FunctionOptimizer();
 		fo.setDimension(2*m_conf.getNumberOfProjections());
-		//fo.setOptimizationMode(OptimizationMode.Function); //replace Function by Gradient
 		fo.setOptimizationMode(OptimizationMode.Gradient);
 		fo.setConsoleOutput(true);
 		double[]min = new double[2*m_conf.getNumberOfProjections()];
@@ -669,9 +667,6 @@ public class MovementCorrection3D {
 		}
 		fo.setMaxima(max);
 		fo.setMinima(min);
-		fo.setItnlim(5);
-		//fo.setMsg(18);
-		//fo.setMsg(16);
 		fo.setItnlim(m_conf.getNumberOfIterations());
 		fo.setMsg(16);
 		fo.setNdigit(6);
@@ -761,11 +756,6 @@ public class MovementCorrection3D {
 				m_oldGuessAbs.setAtIndex(i,(float) (x[i]));
 			}
 			
-			//use absolute shifts is the shifts are not supposed to be done in place
-			/*for(int i = 0; i < x.length; i++){
-				m_shift.setAtIndex(i, (float)(x[i]));
-			}*/
-			
 			m_shift.getDelegate().notifyHostChange();
 
 			long time1 = System.nanoTime();
@@ -780,7 +770,7 @@ public class MovementCorrection3D {
 			//time = time1;
 			//CONRAD.log("Time for 2) Setting the motion vector:  " + diff/1e6);
 
-			applyShift(); //shifts are applied to m_2dFourierTransposed, result is written in m_3dFourierTransposed
+			applyShift(); 
 
 			time1 = System.nanoTime();
 			diff = time1 - time;
@@ -838,12 +828,11 @@ public class MovementCorrection3D {
 		 * @return the gradient at x. (In Fortran Style)
 		 */
 		public double [] gradient(double[] x, int block){
-			//System.out.println("in gradient method");
 			double[] gradient = new double[x.length];
 			
 			for(int i = 0; i < x.length; i++){ //walk over all alphas
 				grad_idx = i;
-				float sum = getFFTandEnergyGradient(); //is the fast version so everything on GPU (doesnt work yet)
+				float sum = getFFTandEnergyGradient(); //fast version on GPU
 				gradient[i] = 2*sum/maskNormalizationSum;
 				//calculate sum by reduction (Energy in the mask)
 				//System.out.println("Finished partial derivative for: " + grad_idx + " gradient: " + gradient[i]);

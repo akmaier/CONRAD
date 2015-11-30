@@ -59,7 +59,6 @@ public class Config {
 	private ComplexGrid2D dftMatrix;
 	private ComplexGrid2D idftMatrix;
 
-	private int grad_idx = 0;
 	private Integer numberOfIterations;
 
 
@@ -79,7 +78,6 @@ public class Config {
 		wuSpacing = 1.0/(N*spacingX);
 		wvSpacing = 1.0/(M*spacingY);
 		kSpacing = 1.0/(K*angleInc);
-		//kSpacing = 1.0/(K*spacingX);
 		wuSpacingVec = createFrequArray(N, (float)(wuSpacing));
 		wvSpacingVec = createFrequArray(M, (float)(wvSpacing));
 		kSpacingVec = createFrequArray(K, (float)(kSpacing));
@@ -191,14 +189,6 @@ public class Config {
 	}
 	public ComplexGrid2D getIDFTMatrix(){
 		return idftMatrix;
-	}
-	
-	public int getgrad_idx(){
-		return grad_idx;
-	}
-	
-	public void setgrad_idx(int i){
-		grad_idx = i;
 	}
 
 	/**
