@@ -94,11 +94,11 @@ public class EpipolarConsistencyExample {
 		
 		// precompute radon transformed and derived images and show //
 		final int radonSize = 1024;
-		Grid2D radon1 = SimpleOperators.computeRadonTrafoAndDerive(projection1, radonSize);
+		Grid2D radon1 = EpipolarConsistency.computeRadonTrafoAndDerive(projection1, radonSize);
 		projection1.show("Projection1");
 		radon1.show("Radon1");
 		
-		Grid2D radon2 = SimpleOperators.computeRadonTrafoAndDerive(projection2, radonSize);
+		Grid2D radon2 = EpipolarConsistency.computeRadonTrafoAndDerive(projection2, radonSize);
 		projection2.show("Projection2");
 		radon2.show("Radon2");
 		
