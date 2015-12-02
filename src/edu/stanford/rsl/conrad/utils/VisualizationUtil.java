@@ -48,7 +48,7 @@ public abstract class VisualizationUtil {
 		double [] y = new double[length];
 		for (int i = 0; i< length; i++){
 			PointND p = spline.evaluate(((double) i) / (length));
-			x[i] = ((double) i) / (length);
+			x[i] = p.get(0);
 			y[i] = p.get(1);
 		}
 		
