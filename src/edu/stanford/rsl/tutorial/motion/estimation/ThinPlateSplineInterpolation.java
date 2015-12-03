@@ -40,6 +40,7 @@ public class ThinPlateSplineInterpolation {
 	 * Polynomial Ax+b
 	 */
 	private SimpleMatrix A;
+
 	/**
 	 * Polynomial Ax+b
 	 */
@@ -235,6 +236,46 @@ public class ThinPlateSplineInterpolation {
 		SimpleVector Ax = SimpleOperators.multiply(A, pt.getAbstractVector());
 		res = SimpleOperators.add(res, Ax, b);
 		return res;
+	}
+	
+	public ArrayList<PointND> getGridPoints() {
+		return gridPoints;
+	}
+
+	public void setGridPoints(ArrayList<PointND> gridPoints) {
+		this.gridPoints = gridPoints;
+	}
+
+	public ArrayList<PointND> getValues() {
+		return values;
+	}
+
+	public void setValues(ArrayList<PointND> values) {
+		this.values = values;
+	}
+
+	public SimpleMatrix getCoefficients() {
+		return coefficients;
+	}
+
+	public void setCoefficients(SimpleMatrix coefficients) {
+		this.coefficients = coefficients;
+	}
+
+	public SimpleMatrix getA() {
+		return A;
+	}
+
+	public void setA(SimpleMatrix a) {
+		A = a;
+	}
+
+	public SimpleVector getB() {
+		return b;
+	}
+
+	public void setB(SimpleVector b) {
+		this.b = b;
 	}
 
 	public static void main(String args[]) {
