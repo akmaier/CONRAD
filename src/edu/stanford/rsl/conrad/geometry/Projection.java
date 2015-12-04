@@ -1604,7 +1604,9 @@ public class Projection implements Serializable {
 		/** Indicates that an image axis is oriented along the rotation direction of the camera */
 		ROTATIONAXIS_PLUS,
 		/** Indicates that an image axis is oriented opposite to the rotation direction of the camera */
-		ROTATIONAXIS_MINUS
+		ROTATIONAXIS_MINUS,
+		DETECTORMOTION_ROTATED,
+		ROTATIONAXIS_ROTATED
 	}
 
 	/**
@@ -1716,6 +1718,14 @@ public class Projection implements Serializable {
 
 		// transformation (rotation only) from (AA) to imageaxes-aligned system (IA)
 		final SimpleMatrix rot = new SimpleMatrix(3, 3);
+		
+		double beta = 0;
+		if(Configuration.getGlobalConfiguration() != null){
+			beta = (double)Configuration.getGlobalConfiguration().getGeometry().getDetectorWidth()/
+							(double)Configuration.getGlobalConfiguration().getGeometry().getDetectorHeight();
+			beta = Math.atan(beta);
+		} 
+		
 		switch (uDirection) {
 		case DETECTORMOTION_PLUS:
 			rot.setColValue(0, General.E_Y.negated());
@@ -1728,6 +1738,13 @@ public class Projection implements Serializable {
 			break;
 		case ROTATIONAXIS_MINUS:
 			rot.setColValue(0, General.E_X.negated());
+			break;
+		case DETECTORMOTION_ROTATED:
+			if(Configuration.getGlobalConfiguration()==null){
+				rot.setColValue(0, General.E_Y.negated());
+				break;
+			}
+			rot.setColValue(0,new SimpleVector(-Math.cos(beta), -Math.sin(beta),0));
 			break;
 		default:
 			throw new RuntimeException("Unexpected axis definition for u direction!");
@@ -1744,6 +1761,13 @@ public class Projection implements Serializable {
 			break;
 		case ROTATIONAXIS_MINUS:
 			rot.setColValue(1, General.E_X.negated());
+			break;
+		case ROTATIONAXIS_ROTATED:
+			if(Configuration.getGlobalConfiguration()==null){
+				rot.setColValue(1, General.E_X);
+				break;
+			}
+			rot.setColValue(1, new SimpleVector(Math.sin(beta), -Math.cos(beta), 0));
 			break;
 		default:
 			throw new RuntimeException("Unexpected axis definition for v direction!");

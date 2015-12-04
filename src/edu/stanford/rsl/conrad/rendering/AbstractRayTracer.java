@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 
 import edu.stanford.rsl.conrad.geometry.AbstractCurve;
 import edu.stanford.rsl.conrad.geometry.AbstractShape;
@@ -66,6 +67,11 @@ public abstract class AbstractRayTracer {
 	 */
 	public ArrayList<PhysicalObject> castRay(AbstractCurve ray) {
 		ArrayList<PhysicalPoint> rayList = intersectWithScene(ray);
+		
+		if (rayList == null || rayList.size() == 0) {
+			return null;
+		}
+		
 		boolean doubles = false;
 		// Filter double hits
 		while (doubles){
@@ -101,6 +107,7 @@ public abstract class AbstractRayTracer {
 			
 			
 			if (inconsistentDataCorrection){
+				// Count hits per object
 				ArrayList<PhysicalObject> objects = new ArrayList<PhysicalObject>();
 				ArrayList<Integer> count = new ArrayList<Integer>();
 				for (int i = 0; i < points.length; i++){
@@ -119,8 +126,9 @@ public abstract class AbstractRayTracer {
 				}
 				boolean rewrite = false;
 				for (int i = 0; i < objects.size(); i++){
-					if (count.get(i) %2 == 1){
+					if (count.get(i) % 2 == 1){
 						boolean resolved = false;
+						// Iterate over hits to find all hits on object i
 						for (int j = 0; j < points.length; j++){
 							if (!resolved) {
 								if (points[j].getObject().equals(objects.get(i))){
@@ -132,6 +140,7 @@ public abstract class AbstractRayTracer {
 									}
 									// three hits in a row of the same object. no problem.
 									if (j > 0 && j < points.length-1) {
+										// If we have three hits in a row on an object, remove the center hit (j)
 										if (points[j-1].getObject().equals(objects.get(i)) && (points[j+1].getObject().equals(objects.get(i)))){
 											points[j] = null;
 											rewrite = true;
@@ -180,6 +189,7 @@ public abstract class AbstractRayTracer {
 		} else {
 			return null;
 		}
+
 	}
 
 	/**
@@ -327,14 +337,15 @@ public abstract class AbstractRayTracer {
 	 * A ray is supposed to enter and leave a closed object composed out of triangles in an alternating order. If the ray e.g. enters the object twice, it's likely that the two intersections considered as entry are very close.
 	 * An intersecting point is considered an entry if the dot product of the ray's direction and the hit triangle's normal vector is smaller than 0
 	 * @param rayList list of points where the ray intersects with an object
-	 * @return
+	 * @return filtered list of points
 	 */
-	private ArrayList<PhysicalPoint> filterDoubles(ArrayList<PhysicalPoint> rayList) {
+	protected ArrayList<PhysicalPoint> filterDoubles(ArrayList<PhysicalPoint> rayList) {
 		ArrayList<PhysicalPoint> filtered = new ArrayList<>();
+		Map<PhysicalObject, Boolean> nextEntersObject = new HashMap<>();	// object-specific switch whether the next intersection with a particular object enters or leaves the object
 		
 		// First intersection enters the object
-		boolean nextEntersObject = true;
-		boolean init = false;
+		boolean normalsPointOutside = false;	// yet to determine (but compiler forces to initialize this variable here)
+		boolean init = false;					// true if normalsPointOutside was truly initialized
 		for (int i=0; i<rayList.size(); i++) {
 			PhysicalPoint p = rayList.get(i);
 			
@@ -345,22 +356,31 @@ public abstract class AbstractRayTracer {
 			}
 			
 			if (!init) {
-				nextEntersObject = !(p.getHitOrientation() < 0);
-				filtered.add(p);
+				// Usually, the normal is defined to point out of the 3-D polygon.
+				// However, some applications seem to export their polygons with normals pointing in the opposite way.
+				// To be sure, we go by the direction of the first intersection.
+				normalsPointOutside = (p.getHitOrientation() < 0);
 				init = true;
 			}
-			else if (nextEntersObject && p.getHitOrientation() < 0) {
+			
+			// If this is the first intersection (by this ray) with the p's polygon, then add the polygon to the map
+			if (!nextEntersObject.containsKey(p.getObject())) {
+				nextEntersObject.put(p.getObject(), normalsPointOutside);
+			}
+			
+			if (nextEntersObject.get(p.getObject()) && p.getHitOrientation() < 0) {
 				// Ray enters the object
 				filtered.add(p);
-				nextEntersObject = false;	// alternate
+				nextEntersObject.put(p.getObject(), false);	// toggle
 			}
-			else if (!nextEntersObject && p.getHitOrientation() > 0) {
+			else if (!nextEntersObject.get(p.getObject()) && p.getHitOrientation() > 0) {
 				// Ray leaves the object
 				filtered.add(p);
-				nextEntersObject = true;	// alternate
+				nextEntersObject.put(p.getObject(), true);	// toggle
 			}
 			else if (p.getHitOrientation() == 0) {
 				// Ray is parallel to the triangle's surface
+				// Or the hit orientation attribute was not set by the intersection test
 				filtered.add(p);
 			}
 			

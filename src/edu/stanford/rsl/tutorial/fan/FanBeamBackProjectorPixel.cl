@@ -22,7 +22,7 @@ float2 intersectLines(float2 p1, float2 p2, float2 p3, float2 p4);
 
 kernel void backprojectPixelDriven2DCL(
 	/* not yet... float2 gridSpacing, */
-	global image2d_t sino,
+	image2d_t sino,
 	global float* grid,
 	int gridSizeX,
 	int gridSizeY, 
@@ -35,14 +35,14 @@ kernel void backprojectPixelDriven2DCL(
 	int maxBetaIndex
 	) {
 	// compute x, y from thread idx
-	const unsigned int x = get_global_id(0);// x index
-	const unsigned int y = get_global_id(1);// y index
+	const int x = get_global_id(0);// x index
+	const int y = get_global_id(1);// y index
 	
 	if (x >= gridSizeX || y >= gridSizeY) {
 		return;
 	}
 	float normalizationFactor = maxBetaIndex / M_PI_F;
-	int idx = x + y*gridSizeX;
+	int idx = mad24(y,gridSizeX,x);
 	grid[idx] = 0;
 	
 	for(int b=0; b<maxBetaIndex; ++b){
@@ -63,25 +63,100 @@ kernel void backprojectPixelDriven2DCL(
 	 	if (isnan(detectorPixel.x))
 	 		continue;
 		float2 p = detectorPixel -p0;
-		float len = length(p);
+		if((p.x*p0.x+p.y*p0.y)>0)//wrong direction//FIXME
+		//len=-len;
+			continue;
+		float len = length(p);		
 		float t = len/deltaT -0.5f;
+		if(t>maxT)
+		continue;//******************************************FIXME
 		float2 bt = {t+0.5f, b+0.5f};
 		float val = read_imagef(sino, linearSampler, bt).x;
-		//DistanceWeighting
-		float radius = length(point);
-		float phi = (float) ((M_PI_F/2) + atan2(point.y, point.x));
-		float dWeight = (focalLength  +radius*sin(beta - phi))/focalLength;
-		float valtemp = val / (dWeight*dWeight*normalizationFactor);
+		//DistanceWeighting //No distance weighting for iterative reconstruction
+		//float radius = length(point);
+		//float phi = (float) ((M_PI_F/2) + atan2(point.y, point.x));
+		//float dWeight = (focalLength  +radius*sin(beta - phi))/focalLength;
+		//float valtemp = val / (dWeight*dWeight*normalizationFactor);
 
-		grid[idx] += valtemp;
+		//grid[idx] += valtemp;
+		grid[idx] += val;
 	} // end for
+	
+}
+kernel void backprojectPixelDriven1DCL(
+	/* not yet... float2 gridSpacing, */
+	image2d_t sino,
+	global float* grid,
+	int gridSizeX,
+	int gridSizeY, 
+	float maxT,
+	float deltaT,
+	float maxBeta,
+	float deltaBeta,
+	float focalLength,
+	int maxTIndex,
+	int maxBetaIndex,
+	int b
+	) {
+	// compute x, y from thread idx
+	const int x = get_global_id(0);// x index
+	const int y = get_global_id(1);// y index
+	
+	if (x >= gridSizeX || y >= gridSizeY) {
+		return;
+	}
+	//float normalizationFactor = maxBetaIndex / M_PI;//Without initialSinogram, maxBetaIndex is not defined
+   float normalizationFactor = 2.f / deltaBeta;
+    
+	int idx = mad24(y,gridSizeX,x);
+	grid[idx] = 0;
+	
+	//for(int b=0; b<maxBetaIndex; ++b){
+		// compute beta [rad] and angular functions.
+		float beta = deltaBeta * b;
+		float cosBeta = cos(beta);
+		float sinBeta = sin(beta);
+
+		float2 a = {focalLength * cosBeta, focalLength * sinBeta};
+		float2 p0 = {-maxT / 2.f * sinBeta, maxT / 2.f * cosBeta};
+		
+		// compute two points on the line through t and beta
+		// We use PointND for points in 3D space and SimpleVector for directions.
+		float2 point = {x-gridSizeX/2.0f, y-gridSizeY/2.0f};
+		float2 origin = {0.0f,0.0f};
+		
+		float2 detectorPixel = intersectLines(point, a, p0, origin);
+	 	if (isnan(detectorPixel.x))
+	 		return;
+
+		float2 p = detectorPixel -p0;
+		if((p.x*p0.x+p.y*p0.y)>=0)//wrong direction//FIXME
+		//len=-len;
+			return;
+		float len = length(p);
+		if((len>=maxT))//************************FIXME
+		return;
+		float t = len/deltaT -0.5f;
+		float2 bt = {t+0.5f, 0.5f};//****************FIXME
+		
+		float val = read_imagef(sino, linearSampler, bt).x;
+		
+		//DistanceWeighting
+		//float radius = length(point);
+		//float phi = (float) ((M_PI/2) + atan2(point.y, point.x));
+		//float dWeight = (focalLength  +radius*sin(beta - phi))/focalLength;
+		//float valtemp = val / (dWeight*dWeight*normalizationFactor);
+		float valtemp=val/normalizationFactor;
+        grid[idx] += valtemp;
+        
+	//} // end for
 	
 }
 
 float2 intersectLines(float2 p1, float2 p2, float2 p3, float2 p4) {
 	float dNom = (p1.x - p2.x)*(p3.y - p4.y) - (p1.y -p2.y)*(p3.x - p4.x);
 	
-	if( dNom < 0.000001 && dNom >-0.000001){
+	if( dNom < 0.000001f && dNom >-0.000001f){
 		float2 retValue = {NAN,NAN};
 		return retValue;
 	}
@@ -112,6 +187,7 @@ inline OutCode ComputeOutCode(float x, float y, float xmin, float ymin, float xm
  
         return code;
 }
+
 
 //returns NAN in .x-argument if no intersection
 float4 CohenSutherlandLineClip(float x0, float y0, float x1, float y1, float xmin, float ymin, float xmax, float ymax)

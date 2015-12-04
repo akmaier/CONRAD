@@ -1,22 +1,15 @@
 package edu.stanford.rsl.tutorial.cone;
 
-import java.io.IOException;
 
 import ij.ImageJ;
 import edu.stanford.rsl.conrad.data.numeric.Grid3D;
 import edu.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators;
 import edu.stanford.rsl.conrad.geometry.trajectories.Trajectory;
-import edu.stanford.rsl.conrad.opencl.OpenCLBackProjector;
-import edu.stanford.rsl.conrad.opencl.OpenCLForwardProjector;
 import edu.stanford.rsl.conrad.phantom.NumericalSheppLogan3D;
 import edu.stanford.rsl.conrad.utils.Configuration;
-import edu.stanford.rsl.conrad.utils.ImageUtil;
 import edu.stanford.rsl.tutorial.cone.ConeBeamBackprojector;
 import edu.stanford.rsl.tutorial.cone.ConeBeamCosineFilter;
-import edu.stanford.rsl.tutorial.cone.ConeBeamProjector;
 import edu.stanford.rsl.tutorial.filters.RamLakKernel;
-import edu.stanford.rsl.tutorial.phantoms.Phantom3D;
-import edu.stanford.rsl.tutorial.phantoms.Sphere3D;
 
 /**
  * Simple example that computes and displays a cone-beam reconstruction.
@@ -56,17 +49,11 @@ public class ConeBeamReconstructionExample {
 		 */
 		Grid3D grid = test3D;
 		grid.show("object");
-		/*
-		ConeBeamProjector cbp = new ConeBeamProjector();
-		Grid3D sino = cbp.projectRayDrivenCL(grid);
-		sino.show("sinoCL");
-		*/
+
 		Grid3D sino;
-		OpenCLForwardProjector cbp =  new OpenCLForwardProjector();
-		cbp.setTex3D(ImageUtil.wrapGrid3D(grid, ""));
+		ConeBeamProjector cbp =  new ConeBeamProjector();
 		try {
-			cbp.configure();
-			sino = ImageUtil.wrapImagePlus(cbp.project());
+			sino = cbp.projectRayDrivenCL(grid);
 		} catch (Exception e) {
 			System.out.println(e);
 			return;
@@ -80,8 +67,6 @@ public class ConeBeamReconstructionExample {
 			//ramp
 			for (int j = 0;j <maxV_PX; ++j)
 				ramK.applyToGrid(sino.getSubGrid(i).getSubGrid(j));
-			float D = (float) geo.getSourceToDetectorDistance();
-			NumericPointwiseOperators.multiplyBy(sino.getSubGrid(i), (float) (D*D * Math.PI / geo.getNumProjectionMatrices()));
 		}
 		sino.show("sinoFilt");
 			

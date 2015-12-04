@@ -1,7 +1,5 @@
 package edu.stanford.rsl.conrad.fitting;
 
-import org.itk.simple.doubleArray;
-
 import edu.stanford.rsl.conrad.utils.CONRAD;
 
 public class LinearFunction extends Function {

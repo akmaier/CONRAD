@@ -4,6 +4,7 @@
 */
 package edu.stanford.rsl.conrad.utils;
 
+import java.awt.Point;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -71,6 +72,14 @@ public abstract class CONRAD {
 		opener.getjButtonLittle().doClick();
 		opener.getjButtonFloat().doClick();
 		opener.setLocation(0, 500);
+	}
+	
+	public static Point getWindowTopCorner(){
+		String string = Configuration.getGlobalConfiguration().getRegistryEntry(RegKeys.CONRAD_WINDOW_DEFAULT_LOCATION);
+		string = string.replace("[","").replace("]", "").replace(" ", "").replace(";", "");
+		String [] strings = string.split(",");
+		Point location = new Point(Integer.parseInt(strings[0]), Integer.parseInt(strings[1]));
+		return location;
 	}
 
 	public static void gc(){

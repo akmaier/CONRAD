@@ -17,7 +17,7 @@ import edu.stanford.rsl.conrad.utils.CONRAD;
  *
  */
 public class PointND implements Serializable, Transformable {
-	
+
 	protected SimpleVector coordinates;
 	/**
 	 * @param coordinates the coordinates to set
@@ -31,7 +31,7 @@ public class PointND implements Serializable, Transformable {
 	 * 
 	 */
 	private static final long serialVersionUID = -1747968959310910786L;
-	
+
 	/**
 	 * Creates a new point of the specified dimension
 	 * @param knotVector the dimension
@@ -39,11 +39,11 @@ public class PointND implements Serializable, Transformable {
 	public PointND(SimpleVector knotVector){
 		coordinates = knotVector;
 	}
-	
+
 	public PointND(){
-		
+
 	}
-	
+
 	/**
 	 * Copy constructor
 	 * @param point
@@ -51,11 +51,11 @@ public class PointND implements Serializable, Transformable {
 	public PointND(PointND point){
 		coordinates = point.coordinates.clone();
 	}
-	
+
 	public PointND clone(){
 		return new PointND(coordinates.clone());
 	}
-	
+
 	/**
 	 * Creates a new point of a given array or list of double values.<br>
 	 * <pre>
@@ -79,7 +79,7 @@ public class PointND implements Serializable, Transformable {
 		coordinates.copyTo(revan);
 		return revan;
 	}
-	
+
 	/**
 	 * Method to retrieve coordinate entries
 	 * @param i the index of the coordinate [0, dim[
@@ -88,7 +88,7 @@ public class PointND implements Serializable, Transformable {
 	public double get(int i){
 		return coordinates.getElement(i);
 	}
-	
+
 	/**
 	 * Methods to set individual entries of the coordinates
 	 * @param i the index of the coordinate [0, dim[
@@ -97,7 +97,7 @@ public class PointND implements Serializable, Transformable {
 	public void set(int i, double d){
 		coordinates.setElementValue(i, d);
 	}
-	
+
 	/**
 	 * Returns the internal abstract vector to enable computations via the numerics library.<BR>
 	 * <b>Changes to the vector will affect the point</b>
@@ -106,7 +106,7 @@ public class PointND implements Serializable, Transformable {
 	public SimpleVector getAbstractVector(){
 		return coordinates;
 	}
-	
+
 	/**
 	 * Returns the dimension of the point
 	 * @return the dimension
@@ -114,7 +114,7 @@ public class PointND implements Serializable, Transformable {
 	public int getDimension() {
 		return coordinates.getLen();
 	}
-	
+
 	/**
 	 * computes the Euclidean distance between the current point {@latex.inline $\\mathbf{x_1} = (x_1, y_1)$} the the point "two" {@latex.inline $\\mathbf{x_2} = (x_2, y_2)$} as
 	 * {@latex.ilb 
@@ -125,20 +125,15 @@ public class PointND implements Serializable, Transformable {
 	 */
 	public double euclideanDistance(PointND two){
 		return General.euclideanDistance(this.coordinates, two.coordinates);
-//		assert(two.getDimension() == getDimension());
-//		double revan = 0;
-//		double [] other = two.getCoordinates();
-//		for (int i=0; i< coordinates.getLen(); i++){
-//			revan += Math.pow(other[i] - coordinates.getElement(i), 2);
-//		}
-//		return Math.sqrt(revan);
+		//		assert(two.getDimension() == getDimension());
+		//		double revan = 0;
+		//		double [] other = two.getCoordinates();
+		//		for (int i=0; i< coordinates.getLen(); i++){
+		//			revan += Math.pow(other[i] - coordinates.getElement(i), 2);
+		//		}
+		//		return Math.sqrt(revan);
 	}
 
-	@Override
-	public String toString(){
-		return coordinates.toString();
-	}
-	
 	/**
 	 * Updates the vector at entries which are higher in p. Used to scan for a maximum in an iterative process.
 	 * Search for a bounding box can be performed like this:
@@ -155,14 +150,14 @@ public class PointND implements Serializable, Transformable {
 	public void updateIfHigher(PointND p) {
 		if (p == null)
 			return;
-		
+
 		for (int i = 0; i < coordinates.getLen(); i++) {
 			if (p.coordinates.getElement(i) > coordinates.getElement(i)) {
 				coordinates.setElementValue(i, p.coordinates.getElement(i));
 			}
 		}
 	}
-	
+
 	/**
 	 * Updates the vector at entries which are higher in p. Used to scan for a minimum in an iterative process.
 	 * Search for a bounding box can be performed like this:
@@ -179,14 +174,14 @@ public class PointND implements Serializable, Transformable {
 	public void updateIfLower(PointND p) {
 		if (p == null)
 			return;
-		
+
 		for (int i = 0; i < coordinates.getLen(); i++) {
 			if (p.coordinates.getElement(i) < coordinates.getElement(i)) {
 				coordinates.setElementValue(i, p.coordinates.getElement(i));
 			}
 		}
 	}
-	
+
 	@Override
 	public boolean equals(Object o) {
 		if (o instanceof PointND) {
@@ -196,7 +191,7 @@ public class PointND implements Serializable, Transformable {
 			return false;
 		}
 	}
-	
+
 	@Override
 	public void applyTransform(Transform t) {
 		coordinates = t.transform(this).coordinates;
@@ -208,11 +203,33 @@ public class PointND implements Serializable, Transformable {
 			innerProduct += this.get(i) * pointND.get(i);
 		}
 		return innerProduct;
-		
+
 	}
-	
+
+	/////////////////////////////////////////////////
+	// Serialization and Persistence               //
+	/////////////////////////////////////////////////
+
+	public String getVectorSerialization() {
+		return (coordinates != null) ? coordinates.toString() : null;
+	}
+
+	public void setVectorSerialization(final String str) {
+		if(str == null) coordinates = null;
+		else{
+			if (coordinates == null)
+				coordinates = new SimpleVector();
+			coordinates.init(str);
+		}
+	}
+
+	@Override
+	public String toString(){
+		return (coordinates != null) ? coordinates.toString() : null;
+	}
+
 }
 /*
  * Copyright (C) 2010-2014 Andreas Maier, Rotimi X Ojo 
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
-*/
+ */

@@ -48,6 +48,7 @@ import com.thoughtworks.qdox.JavaDocBuilder;
 import com.thoughtworks.qdox.model.JavaClass;
 import com.thoughtworks.qdox.model.JavaField;
 
+import edu.stanford.rsl.conrad.utils.CONRAD;
 import edu.stanford.rsl.conrad.utils.Configuration;
 import edu.stanford.rsl.conrad.utils.RegKeys;
 import edu.stanford.rsl.conrad.utils.UserUtil;
@@ -387,6 +388,7 @@ public class RegistryEditor extends JPanel implements ActionListener {
 					descTable.setPreferredScrollableViewportSize(new Dimension(640, 480));
 					keysDescription.add(new JScrollPane(descTable));
 					keysDescription.setVisible(true);
+					keysDescription.setLocation(CONRAD.getWindowTopCorner());
 					System.out.println("created");
 				} else {
 					if( keysDescription.isVisible()){

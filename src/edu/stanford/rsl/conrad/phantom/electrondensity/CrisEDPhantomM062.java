@@ -2,6 +2,8 @@ package edu.stanford.rsl.conrad.phantom.electrondensity;
 
 import edu.stanford.rsl.conrad.phantom.AnalyticPhantom;
 import edu.stanford.rsl.conrad.physics.materials.database.MaterialsDB;
+import edu.stanford.rsl.conrad.utils.Configuration;
+import edu.stanford.rsl.conrad.utils.RegKeys;
 
 /**
  * <p>This class models <a href = "http://www.cirsinc.com/pdfs/062cp.pdf"> CRIS's Electron Density Phantom Model 062 </a>.<br/>
@@ -29,6 +31,9 @@ public class CrisEDPhantomM062 extends AnalyticPhantom {
 	
 	private boolean useInnerDisk= true;
 	private boolean useOuterDisk = true;
+	private boolean useBoneRing = true;
+	private double centralInsertDiameter;
+	private double insertOneDiameter;
 	private EDInnerDisk inner = new EDInnerDisk();
 	private EDOuterDisk outer = new EDOuterDisk();
 
@@ -40,7 +45,10 @@ public class CrisEDPhantomM062 extends AnalyticPhantom {
 	
 	@Override
 	public void configure() throws Exception{
-		super.configure();		
+		super.configure();
+		useBoneRing = Boolean.parseBoolean(Configuration.getGlobalConfiguration().getRegistryEntry(RegKeys.ED_PHANTOM_BONE_RING));
+		centralInsertDiameter = Double.parseDouble(Configuration.getGlobalConfiguration().getRegistryEntry(RegKeys.ED_PHANTOM_CENTERAL_BUFFER_DIAMETER));
+		insertOneDiameter = Double.parseDouble(Configuration.getGlobalConfiguration().getRegistryEntry(RegKeys.ED_PHANTOM_INSERT_1_BUFFER_DIAMETER));
 		for(int i = 0; i < 9; i++){
 			innerDiskIns[i] = new Insert( MaterialsDB.getMaterial("vacuum"), Insert.UNBUFFERED_INSERT);
 		}
@@ -99,6 +107,13 @@ public class CrisEDPhantomM062 extends AnalyticPhantom {
 				outer.addInsert(outerDiskIns[i], i);
 			}
 			addAll(outer);
+		} else {
+			if (useBoneRing){
+				double dx = 95, dy = 95, dz = 50/2;
+				QuadricDisk disk = new QuadricDisk(dx, dy, dz);
+				disk.setMaterial(MaterialsDB.getMaterial("Bone"));
+				add(disk);
+			}
 		}
 		 if(useInnerDisk){
 			for(int i = 0; i < innerDiskIns.length; i++){

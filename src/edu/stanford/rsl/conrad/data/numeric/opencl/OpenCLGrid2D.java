@@ -21,7 +21,7 @@ public class OpenCLGrid2D extends Grid2D implements OpenCLGridInterface {
 	// ************************ Constructors and copying  *************************************
 	// ****************************************************************************************
 	
-	public OpenCLGrid2D(Grid2D input, CLContext context, CLDevice device) {
+	public OpenCLGrid2D(Grid2D input, CLContext context, CLDevice device){
 		super(input);
 		this.initializeDelegate(context, device);
 		this.numericGridOperator = OpenCLGridOperators.getInstance();
@@ -34,7 +34,7 @@ public class OpenCLGrid2D extends Grid2D implements OpenCLGridInterface {
 	
 	
 	@Override
-	public OpenCLGrid2D clone() {
+	public OpenCLGrid2D clone(){
 		notifyBeforeRead();
 		return new OpenCLGrid2D(this, delegate.getCLContext(), delegate.getCLDevice());
 	}

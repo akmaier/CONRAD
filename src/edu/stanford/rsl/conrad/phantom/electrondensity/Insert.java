@@ -31,7 +31,7 @@ public class Insert extends PrioritizableScene {
 	 * @param material
 	 * @param bufferState
 	 */
-	public Insert(Material material, int bufferState) {
+	public Insert(Material material, int bufferState, double diameter) {
 		mat.identity();
 		if(material == null){
 			material =  MaterialsDB.getMaterialWithName("air");
@@ -42,7 +42,7 @@ public class Insert extends PrioritizableScene {
 		if(bufferState== BUFFERED_INSERT){
 			buffer.setMaterial(bufferMaterial);
 			buffer.setNameString("InsertBuffer");
-			disk = new QuadricDisk(5, 5, dz);
+			disk = new QuadricDisk(diameter, diameter, dz);
 			disk.setMaterial(material);	
 			disk.setNameString("Insert");
 		}else{
@@ -54,6 +54,10 @@ public class Insert extends PrioritizableScene {
 		}
 		add(buffer, 9);
 		
+	}
+	
+	public Insert(Material material, int bufferState) {
+		this(material, bufferState, 3);
 	}
 	
 	/**
