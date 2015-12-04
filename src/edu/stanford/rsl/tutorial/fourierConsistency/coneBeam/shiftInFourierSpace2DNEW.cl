@@ -224,9 +224,130 @@ kernel void shift(
 	for(uint iGIDU = 0; iGIDU < numElementsU; iGIDU++){ 
 		uint globalOffset = mad24(iGIDU, numProj, globalOffsetStatic);	
 	    float2 orig = vload2(globalOffset, data);
-	    float angle = mad(freqULocal[iGIDU],preUShift,preAngle);
-	    float2 cshift = (float2)(native_cos(angle), native_sin(angle));
+		float currAngle = freqULocal[iGIDU]*preUShift;
+		/*
+		float2 cshift = (0.f,0.f);
+		bool uhalf = (iGIDU == numElementsU/2);
+		bool vhalf = (iGIDV == numElementsV/2);
+		if (uhalf || vhalf)
+		{
+			if(uhalf){
+				cshift*=native_cos(currAngle);
+			}
+			if(vhalf){
+				cshift*=native_cos(preAngle);
+			}
+		}
+		else
+		{
+			float angle = currAngle+preAngle;
+			cshift = (float2)(native_cos(angle), native_sin(angle));
+		}
+		*/
+		float angle = currAngle+preAngle;
+		float2 cshift = (float2)(native_cos(angle), native_sin(angle));
 		float2 res = cmult(cshift, orig);
 		vstore2(res, globalOffset, data);
 	}
 }
+
+kernel void blackmanVdirection(
+	global float *dataIn,
+	global float *res,
+	__constant float *filt
+	) 
+{
+	uint iProjLoc = get_local_id(0);
+	uint iProjGrp = get_group_id(0);
+	uint locSizex = get_local_size(0);
+	uint iProj = mad24(iProjGrp,locSizex,iProjLoc);
+	
+	uint iGIDVLoc = get_local_id(1);
+	uint iGIDVGrp = get_group_id(1);
+	uint locSizey = get_local_size(1);
+	uint iGIDV = mad24(iGIDVGrp,locSizey,iGIDVLoc);
+	
+	if (iProj >= numProj || iGIDV >= numElementsV) {
+		return;
+	}
+	// for loop over all projections (simple implementation, later vector with shifts and position and iteration over this vector)
+
+	// ((iGIDV*numElementsU+iGIDU) * numProj) + iProj = iGIDV*numElementsU*numProj + iGIDU*numProj + iProj
+	uint iGIDVPitch = mul24(numElementsU,numProj);
+	uint globalOffsetStatic = mad24(iGIDV, iGIDVPitch, iProj);
+	
+	
+	#pragma unroll 4
+	for(uint iGIDU = 0; iGIDU < numElementsU; iGIDU++){ 
+		uint globalOffset = mad24(iGIDU, numProj, globalOffsetStatic);
+		
+		float2 sum  = (float2)(0.f,0.f);
+		for(int k = 0; k < 7; k++)
+		{
+			float val = filt[k];
+			int r = 7-k;
+			int deltaV = (iGIDV < r) ? numElementsV-r : -r;
+			float2 orig1 = vload2(mad24(deltaV,(int)iGIDVPitch,(int)globalOffset), dataIn);
+			deltaV = (iGIDV > (numElementsV-r-1)) ? -numElementsV+r : r;
+			float2 orig2 = vload2(mad24(deltaV,(int)iGIDVPitch,(int)globalOffset), dataIn);
+			sum += (float2)((orig1+orig2)*val);
+		}
+		
+		float val = filt[7];
+		float2 orig1 = vload2(globalOffset, dataIn);
+		sum += (float2)(orig1*val);
+		
+		//blackman window [10.24 -64 107.52 -64 10.24]
+		vstore2(sum, globalOffset, res);
+	}
+}
+
+
+/*
+kernel void blackmanVdirection(
+	global float *dataIn,
+	global float *res
+	) 
+{
+	uint iProjLoc = get_local_id(0);
+	uint iProjGrp = get_group_id(0);
+	uint locSizex = get_local_size(0);
+	uint iProj = mad24(iProjGrp,locSizex,iProjLoc);
+	
+	uint iGIDVLoc = get_local_id(1);
+	uint iGIDVGrp = get_group_id(1);
+	uint locSizey = get_local_size(1);
+	uint iGIDV = mad24(iGIDVGrp,locSizey,iGIDVLoc);
+	
+	if (iProj >= numProj || iGIDV >= numElementsV) {
+		return;
+	}
+	// for loop over all projections (simple implementation, later vector with shifts and position and iteration over this vector)
+
+	// ((iGIDV*numElementsU+iGIDU) * numProj) + iProj = iGIDV*numElementsU*numProj + iGIDU*numProj + iProj
+	uint iGIDVPitch = mul24(numElementsU,numProj);
+	uint globalOffsetStatic = mad24(iGIDV, iGIDVPitch, iProj);
+	
+	#pragma unroll 4
+	for(uint iGIDU = 0; iGIDU < numElementsU; iGIDU++){ 
+		uint globalOffset = mad24(iGIDU, numProj, globalOffsetStatic);
+		
+		int deltaV = (iGIDV < 2) ? numElementsV-2 : -2;
+		float2 orig = vload2(mad24(deltaV,(int)iGIDVPitch,(int)globalOffset), dataIn);
+		float2 sum = (orig*10.24f);
+		deltaV = (iGIDV < 1) ? numElementsV-1 : -1;
+		orig = vload2(mad24(deltaV,(int)iGIDVPitch,(int)globalOffset), dataIn);	
+		sum += (orig*-64.f);		
+		orig = vload2(globalOffset, dataIn);
+		sum += (orig*107.52f);
+		deltaV = (iGIDV > numElementsV-2) ? -numElementsV+1 : +1;
+		orig = vload2(mad24(deltaV,(int)iGIDVPitch,(int)globalOffset), dataIn);
+		sum += (orig*-64.f);
+		deltaV = (iGIDV > numElementsV-3) ? -numElementsV+2 : +2;
+		orig = vload2(mad24(deltaV,(int)iGIDVPitch,(int)globalOffset), dataIn);
+		sum += (orig*10.24f);
+		//[10.24 -64 107.52 -64 10.24]
+		vstore2(sum, globalOffset, res);
+	}
+}
+*/

@@ -49,9 +49,10 @@ public class Test3DMovementCorrection {
 		Grid3D projectionsForOptimization = null;
 		Grid3D projectionsRealProjData = null;
 		ApodizationImageFilter filt = new ApodizationImageFilter();
-		filt.setCustomSizes(new Integer[]{null, (int)(Configuration.getGlobalConfiguration().getGeometry().getDetectorHeight()), null});
+		filt.setCustomSizes(new Integer[]{(int)(Configuration.getGlobalConfiguration().getGeometry().getDetectorWidth()),
+				(int)(Configuration.getGlobalConfiguration().getGeometry().getDetectorHeight()), null});
 		filt.setWtU(windowType.rect);
-		filt.setWtV(windowType.blackman);
+		filt.setWtV(windowType.rect);
 		filt.setWtK(windowType.rect);
 		
 		RampFilteringTool rft = new RampFilteringTool();
@@ -74,6 +75,9 @@ public class Test3DMovementCorrection {
 			
 			// Convert from ImageJ to Grid3D. Note that no data is copied here. The ImageJ container is only wrapped. Changes to the Grid will also affect the ImageJ ImagePlus.
 			projectionsForOptimization = ImageUtil.wrapImagePlus(imp);
+			IJ.run(imp, "Gaussian Blur...", "sigma=8 scaled stack");
+			//IJ.run(imp,"Convolve...", "text1=-1\n0\n1\n stack");
+			//IJ.run(imp,"Convolve...", "text1=[-1 0 1\n] stack");
 			projectionsRealProjData = ImageUtil.wrapImagePlus(realProjData);
 			filt.configure();
 			// Display the data that was read from the file.
@@ -86,10 +90,12 @@ public class Test3DMovementCorrection {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		
 
 		//NumericPointwiseOperators.fill(projections,0f);
 		//projections.setAtIndex(0, 0, 0, 1);
-		Grid3D projectionsWindowed = (Grid3D) ImageUtil.applyFiltersInParallel((Grid3D) projectionsForOptimization.clone(), new ImageFilteringTool[]{filt,rft}).clone();
+		Grid3D projectionsWindowed = (Grid3D) ImageUtil.applyFiltersInParallel((Grid3D) projectionsForOptimization.clone(), new ImageFilteringTool[]{filt}).clone();
 		projectionsWindowed.show("Windowed Projections");
 
 		// get configuration
@@ -97,13 +103,14 @@ public class Test3DMovementCorrection {
 		outXMLfile = outXMLfile.substring(0, outXMLfile.length()-4);
 		outXMLfile += "corrected.xml";
 
-		//Config conf = new Config(xmlFilenameOptimization, 0, 1, 127.8, 100); // For Forbild Phantom
-		Config conf = new Config(xmlFilenameOptimization, 0, 1, 168.9, 100); // For Forbild Phantom
+		//Config conf = new Config(xmlFilenameOptimization, 3, 1, 127.8, 50, null, -100, 100, true, true);  // For Forbild Phantom
+		//Config conf = new Config(xmlFilenameOptimization, 0, 1, 168.9, 20, null, -100, 100); // For Knee Phantom
+		Config conf = new Config(xmlFilenameOptimization, 3, 1, 168.9, 50, null, -1000, 1000, false, true, null); // For Knee Phantom
 		conf.getMask().show("mask");
 		System.out.println("N: "+ conf.getHorizontalDim() + " M: " + conf.getVerticalDim() + " K: "+  conf.getNumberOfProjections());
 
 
-		MovementCorrection3D mc = new MotionCorrection3DFast(projectionsWindowed, conf, false);
+		MovementCorrection3D mc = new MovementCorrection3D(projectionsWindowed, conf, false);
 		mc.doFFT2();
 		mc.transposeData();
 
@@ -158,7 +165,7 @@ public class Test3DMovementCorrection {
 		
 		
 		
-		
+		/*
 		newGeom = new Trajectory(geom);
 		
 		ComplexGrid2D cplxResults = new ComplexGrid2D(results);
@@ -211,6 +218,7 @@ public class Test3DMovementCorrection {
 		Grid3D recon2 = (Grid3D) ImageUtil.applyFiltersInParallel((Grid3D)projectionsRealProjData.clone(), Configuration.getGlobalConfiguration().getFilterPipeline()).clone();
 		recon2.show("Corrected Reconstruction (Low Freq Removed)");
 
+*/
 		mc.backTransposeData();
 		//		//mc.getData().show("2D-Fouriertransformed after transposing");
 		mc.doiFFT2();

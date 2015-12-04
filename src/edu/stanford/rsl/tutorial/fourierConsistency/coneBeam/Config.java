@@ -60,16 +60,36 @@ public class Config {
 	private ComplexGrid2D idftMatrix;
 
 	private Integer numberOfIterations;
+	
+	private Integer showResultsEveryNthIteration;
+
+	private double minX, maxX;
+	
+	private boolean doApodization;
+	
+	private boolean useAnalyticGradient;
+	
+	private Integer whatToOptimize = null;
 
 
-
-	public Config(String xmlFilename, int erosionFactor, int scalingFactor, double maxObjectRadius, int nrOfIterations){
+	public Config(String xmlFilename, int erosionFactor, int scalingFactor, double maxObjectRadius, int nrOfIterations, 
+			Integer showResultsPeriod, double minX, double maxX, boolean doApod, boolean useAnalyticGradient, Integer whatToOptimize){
 		/*int[] dims = data.getSize();
 		N = dims[0];
 		M = dims[1];
 		K = dims[2];*/
 
+		
 		//hard coded
+		this.minX = minX;
+		this.maxX = maxX;
+		
+		this.whatToOptimize = whatToOptimize;
+		
+		this.doApodization = doApod;
+		this.useAnalyticGradient = useAnalyticGradient;
+		
+		showResultsEveryNthIteration = showResultsPeriod;
 		numberOfIterations = nrOfIterations;
 		m_erosionFactor = erosionFactor;
 		m_scalingFactor = scalingFactor;
@@ -93,6 +113,7 @@ public class Config {
 
 
 	}
+
 	/**
 	 * loads all data from a configfile, uses scalingfactor if original data is smaller for testing purpose
 	 * @param filename
@@ -362,10 +383,32 @@ public class Config {
 			}
 		}
 	}
+	
 	public Integer getNumberOfIterations() {
 		return this.numberOfIterations;
 	}
+	
+	public Integer getShowResultsEveryNthIteration() {
+		return showResultsEveryNthIteration;
+	}
+	
+	public double getMinX() {
+		return minX;
+	}
+	
+	public double getMaxX() {
+		return maxX;
+	}
+	public boolean isDoApodization() {
+		return doApodization;
+	}
+	
+	public boolean isUseAnalyticGradient() {
+		return useAnalyticGradient;
+	}
 
-
+	public Integer getWhatToOptimize() {
+		return whatToOptimize;
+	}
 
 }

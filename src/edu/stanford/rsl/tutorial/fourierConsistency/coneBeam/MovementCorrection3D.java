@@ -1,14 +1,17 @@
 /*
  * Copyright (C) 2015 Wolfgang Aichinger, Martin Berger, Katrin Mentl
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
-*/
+ */
 package edu.stanford.rsl.tutorial.fourierConsistency.coneBeam;
 
 import ij.gui.Plot;
 import ij.gui.PlotWindow;
 
 import java.awt.Color;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -53,13 +56,18 @@ public class MovementCorrection3D {
 	 * @param Config conf: provides parameter of acquisition and precomputed arrays used to shift
 	 * @param boolean naive: if true: naive cpu version, if false faster gpu version
 	 */
+	
+	private CLProgram programTranspose;
+	private CLKernel kernelTransposeFwd;
+	private CLKernel kernelTransposeBwd;
 
 	protected CLFFTPlan fft;
 	protected Config m_conf;
 	protected ComplexGrid3D m_data;
-	
+
 	// stores transposed data (projection dimension becomes first dimension) after 2D-Fouriertransform
 	protected ComplexGrid3D m_2dFourierTransposed = null;
+	protected ComplexGrid3D m_2dFourierTransposedNonApodized = null;
 
 	// stores data after fourier transformation on projection dimension
 	protected ComplexGrid3D m_3dFourier = null;
@@ -73,18 +81,13 @@ public class MovementCorrection3D {
 	protected CLDevice device;
 	protected CLProgram program;
 	protected CLKernel kernel;
-
-	private CLProgram programFFT;
-	private CLKernel kernelFFT;
+	protected CLKernel apodizationKernel;
 
 	protected CLProgram programSumFFTEnergy;
 	protected CLKernel kernelSumFFTEnergy;
-	
+
 	protected CLProgram programSumFFTEnergyGradient;
 	protected CLKernel kernelSumFFTEnergyGradient;
-
-	private boolean m_naive;
-
 
 	// are initialized after transposing the data
 
@@ -92,22 +95,23 @@ public class MovementCorrection3D {
 	protected OpenCLGrid1D freqU;
 	protected OpenCLGrid1D freqV;
 	protected OpenCLGrid1D freqP; 
-	
+
 	// ext_p dependent on current gradient optimization parameter alpha_i (index i)
 	protected int grad_idx = 0;
-	
+
 	protected OpenCLGrid1D m_shift;
 	protected OpenCLGrid2D m_maskCL;
 
-	// dft and idft mask used to perform 1d fouriertransform on graphics card
-	private ComplexGrid2D dftMatrix;
-	
 	// test parameter to see how often shift is performed during optimization
 	public int optimizeCounter = 0;
+
+	public int parsPerProjection;
+
 
 	// parameter used when performing fouriertransform and evaluation of energy in one step without storing 3d-transformed data
 	protected final int persistentGroupSize = 128;
 	protected static CLBuffer<FloatBuffer> persistentResultBuffer = null;
+	protected static CLBuffer<FloatBuffer> persistentResultBufferFloat2 = null;
 
 	protected boolean debug = false;
 	protected CLBuffer<FloatBuffer> getPersistentResultBuffer(CLContext context){
@@ -118,6 +122,14 @@ public class MovementCorrection3D {
 		return persistentResultBuffer;
 	}
 
+	protected CLBuffer<FloatBuffer> getPersistentResultBufferFloat2(CLContext context){
+		if(persistentResultBufferFloat2==null || persistentResultBufferFloat2.isReleased())
+			persistentResultBufferFloat2 = context.createFloatBuffer(persistentGroupSize*2, Mem.WRITE_ONLY);
+		else
+			persistentResultBufferFloat2.getBuffer().rewind();
+		return persistentResultBufferFloat2;
+	}
+
 	/**
 	 * @param data
 	 * @param conf
@@ -126,7 +138,6 @@ public class MovementCorrection3D {
 	public MovementCorrection3D(Grid3D data, Config conf, boolean naive){
 		m_conf = conf;
 		m_data = new ComplexGrid3D(data);
-		m_naive = naive;
 		m_shift = null;
 
 		m_mask = conf.getMask();
@@ -134,11 +145,6 @@ public class MovementCorrection3D {
 		freqU = new OpenCLGrid1D(conf.getShiftFreqX());
 		freqV = new OpenCLGrid1D(conf.getShiftFreqY());
 		freqP = new OpenCLGrid1D(conf.getShiftFreqP());
-		
-		//dftMatrix = new ComplexGrid2D(conf.getDFTMatrix());
-		//dftMatrix.activateCL();
-		//idftMatrix = new ComplexGrid2D(conf.getIDFTMatrix());
-		//idftMatrix.activateCL();
 
 		context = OpenCLUtil.getStaticContext();
 		device = context.getMaxFlopsDevice();
@@ -146,8 +152,7 @@ public class MovementCorrection3D {
 		// opencl programs should have to be compiled only once
 		program = null;
 		kernel = null;
-		programFFT = null;
-		kernelFFT = null;
+		apodizationKernel = null;
 		programSumFFTEnergy = null;
 		kernelSumFFTEnergy = null;
 		programSumFFTEnergyGradient = null;
@@ -172,31 +177,112 @@ public class MovementCorrection3D {
 
 
 	/**
-	 * transposing data (3 ->1, 1->2, 2->3) CPU 
+		compute iFFT2 after all other operations to get displayable data	
 	 */
-	public void transposeData(){
-		int[] sizeOrig = m_data.getSize();
-		m_2dFourierTransposed = new ComplexGrid3D(sizeOrig[2],sizeOrig[0], sizeOrig[1]);
-		//		m_2dFourierTransposed.setSpacing(m_data.getSpacing()[2], m_data.getSpacing()[0], m_data.getSpacing()[1]);
-		//		m_2dFourierTransposed.setOrigin(m_data.getOrigin());
-		for(int angle = 0; angle < sizeOrig[2]; angle++){
-			for(int horiz = 0; horiz < sizeOrig[0]; horiz++){
-				for(int vert = 0; vert < sizeOrig[1]; vert++){
-					//float value = orig.getAtIndex(horiz, vert, angle);
-					//if(value > 0){
-					m_2dFourierTransposed.setAtIndex(angle, horiz, vert, m_data.getAtIndex(horiz, vert, angle));
-					//}
+	public void doiFFT2(){
+		Fourier ft = new Fourier();
+		ft.ifft2(m_data);
+		m_data.setSpacing(m_conf.getPixelXSpace(),m_conf.getPixelYSpace(), m_conf.getAngleIncrement());
+		m_data.setOrigin(0,0,0);
 
-				}
+		System.out.println("2d-iFFT done");
+		double[] spacings = m_data.getSpacing();
+		for(int i = 0; i <spacings.length; i++){
+			System.out.println("Dimension "+ i + ": "+ spacings[i]);
+		}
+	}
+
+	
+	private void initTransposeProgramAndKernels(){
+		if( programTranspose == null ){
+			try {
+				programTranspose = m_data.getDelegate().getCLContext().createProgram(MovementCorrection3D.class.getResourceAsStream("transpose.cl"));
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
+			programTranspose.build();
+		}
+		if(kernelTransposeFwd == null){
+			kernelTransposeFwd = programTranspose.createCLKernel("swapDimensionsFwd");
+		}
+		if(kernelTransposeBwd == null){
+			kernelTransposeBwd = programTranspose.createCLKernel("swapDimensionsBwd");
+		}
+	}
+
+
+	public void transposeData() {
+		int[] sizeOrig = m_data.getSize();
+		m_data.activateCL();
+		if(m_2dFourierTransposedNonApodized==null){
+			m_2dFourierTransposedNonApodized = new ComplexGrid3D(sizeOrig[2],sizeOrig[0], sizeOrig[1]);
+			m_2dFourierTransposedNonApodized.setSpacing(m_conf.getAngleIncrement() , m_conf.getUSpacing(), m_conf.getVSpacing());
+			m_2dFourierTransposedNonApodized.setOrigin(0,0,0);
+			m_2dFourierTransposedNonApodized.activateCL();
 		}
 
-		m_2dFourierTransposed.setSpacing(m_conf.getAngleIncrement() ,m_conf.getUSpacing(), m_conf.getVSpacing());
-		m_2dFourierTransposed.setOrigin(0,0,0);
+		m_data.getDelegate().prepareForDeviceOperation();
+		m_2dFourierTransposedNonApodized.getDelegate().prepareForDeviceOperation();
 
-		m_2dFourierTransposed.activateCL();
+		initTransposeProgramAndKernels();
 
-		System.out.println("Transposing done");
+		kernelTransposeFwd.rewind();
+		kernelTransposeFwd.putArg(m_data.getDelegate().getCLBuffer());
+		kernelTransposeFwd.putArg(m_2dFourierTransposedNonApodized.getDelegate().getCLBuffer());
+		kernelTransposeFwd.putArg(m_data.getSize()[0]);
+		kernelTransposeFwd.putArg(m_data.getSize()[1]);
+		kernelTransposeFwd.putArg(m_data.getSize()[2]);
+		
+		int localWorksize = 512;
+		long globalWorksize = OpenCLUtil.roundUp(localWorksize, m_data.getNumberOfElements());
+		
+		m_data.getDelegate().getCLDevice()
+		.createCommandQueue()
+		.put1DRangeKernel(kernelTransposeFwd, 0, globalWorksize, localWorksize)
+		.finish()
+		.release();
+		
+		m_2dFourierTransposedNonApodized.getDelegate().notifyDeviceChange();
+		
+		m_data.getDelegate().prepareForHostOperation();
+		m_data.deactivateCL();
+		
+		System.out.println("Transposing done on (GPU)");
+		double[] spacings = m_2dFourierTransposedNonApodized.getSpacing();
+		for(int i = 0; i <spacings.length; i++){
+			System.out.println("Dimension "+ i + ": "+ spacings[i]);
+		}
+	}
+	
+
+	public void backTransposeData() {
+		m_data.activateCL();
+		m_data.getDelegate().prepareForDeviceOperation();
+		m_2dFourierTransposed.getDelegate().prepareForDeviceOperation();
+
+		initTransposeProgramAndKernels();
+
+		kernelTransposeBwd.rewind();
+		kernelTransposeBwd.putArg(m_2dFourierTransposed.getDelegate().getCLBuffer());
+		kernelTransposeBwd.putArg(m_data.getDelegate().getCLBuffer());
+		kernelTransposeBwd.putArg(m_2dFourierTransposed.getSize()[0]);
+		kernelTransposeBwd.putArg(m_2dFourierTransposed.getSize()[1]);
+		kernelTransposeBwd.putArg(m_2dFourierTransposed.getSize()[2]);
+		
+		int localWorksize = 512;
+		long globalWorksize = OpenCLUtil.roundUp(localWorksize, m_2dFourierTransposed.getNumberOfElements());
+		
+		m_2dFourierTransposed.getDelegate().getCLDevice()
+		.createCommandQueue()
+		.put1DRangeKernel(kernelTransposeBwd, 0, globalWorksize, localWorksize)
+		.finish()
+		.release();
+		
+		m_data.getDelegate().notifyDeviceChange();
+		m_data.getDelegate().prepareForHostOperation();
+		m_data.deactivateCL();
+		
+		System.out.println("Backtransposing done on (GPU)");
 		double[] spacings = m_2dFourierTransposed.getSpacing();
 		for(int i = 0; i <spacings.length; i++){
 			System.out.println("Dimension "+ i + ": "+ spacings[i]);
@@ -205,90 +291,100 @@ public class MovementCorrection3D {
 
 
 	/**
-	 * after optimization the image has to be transposed back (+ ifft2) to be displayed in a normal way
+	 * paralellized shift on GPU
 	 */
-	public void backTransposeData(){
-		int[] sizeOrig = m_data.getSize();
-		for(int angle = 0; angle < sizeOrig[2]; angle++){
-			for(int horiz = 0; horiz < sizeOrig[0]; horiz++){
-				for(int vert = 0; vert < sizeOrig[1]; vert++){
-					m_data.setAtIndex(horiz, vert, angle, m_2dFourierTransposed.getAtIndex(angle, horiz, vert));
+	public void applyShift() {
+		m_2dFourierTransposedNonApodized.getDelegate().prepareForDeviceOperation();
+		m_shift.getDelegate().prepareForDeviceOperation();
+		freqU.getDelegate().prepareForDeviceOperation();
+		freqV.getDelegate().prepareForDeviceOperation();
+
+		CLBuffer<FloatBuffer> dataBuffer = m_2dFourierTransposedNonApodized.getDelegate().getCLBuffer();
+		CLBuffer<FloatBuffer> bufferShifts = m_shift.getDelegate().getCLBuffer();
+		CLBuffer<FloatBuffer> bufferFreqU = freqU.getDelegate().getCLBuffer();
+		CLBuffer<FloatBuffer> bufferFreqV = freqV.getDelegate().getCLBuffer();
+
+		if(program == null || kernel == null){
+			try {
+				InputStream inStream = MovementCorrection3D.class.getResourceAsStream("shiftInFourierSpace2DNEW.cl");
+				BufferedReader br = new BufferedReader(new InputStreamReader(inStream));
+				String thisline = null;
+				String prog = "";
+				while((thisline = br.readLine()) != null){
+					prog+=thisline+'\n';
 				}
+				br.close();
+				inStream.close();
+				String constants = "";
+				constants += "#define numProj " + m_2dFourierTransposedNonApodized.getSize()[0] + 'u';
+				constants += "\n#define numElementsU " + m_2dFourierTransposedNonApodized.getSize()[1] + 'u';
+				constants += "\n#define numElementsV " + m_2dFourierTransposedNonApodized.getSize()[2] + 'u';
+				constants += "\n\n";
+				prog = constants + prog;
+				program = context.createProgram(prog);
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
+			program.build();
+			kernel = program.createCLKernel("shift");
+
+			kernel.putArg(dataBuffer);
+			kernel.putArg(bufferFreqU);
+			kernel.putNullArg((int)bufferFreqU.getCLSize());
+			kernel.putArg(bufferFreqV);
+			kernel.putNullArg((int)bufferFreqV.getCLSize());
+			kernel.putArg(bufferShifts);
+			kernel.putNullArg((int)bufferShifts.getCLSize());
 		}
-		m_data.setSpacing(m_conf.getUSpacing(), m_conf.getVSpacing(),m_conf.getAngleIncrement());
-		System.out.println("Backtransposing done");
-		double[] spacings = m_2dFourierTransposed.getSpacing();
-		for(int i = 0; i <spacings.length; i++){
-			System.out.println("Dimension "+ i + ": "+ spacings[i]);
-		}
+		
+		int localWorksizeProj = 256;
+		int localWorksizeV = 2;
+		long globalWorksizeProj = OpenCLUtil.roundUp(localWorksizeProj, m_2dFourierTransposedNonApodized.getSize()[0]);
+		long globalWorksizeV = OpenCLUtil.roundUp(localWorksizeV, m_2dFourierTransposedNonApodized.getSize()[2]);
+
+		CLCommandQueue commandQueue = device.createCommandQueue();
+		//commandQueue.put3DRangeKernel(kernel, 0, 0, 0, globalWorksizeProj, globalWorksizeU, globalWorksizeV, localWorksizeProj, localWorksizeU, localWorksizeV);
+		commandQueue.put2DRangeKernel(kernel, 0, 0, globalWorksizeProj, globalWorksizeV, localWorksizeProj, localWorksizeV);
+		commandQueue.finish();
+		commandQueue.release();
+		m_2dFourierTransposedNonApodized.getDelegate().notifyDeviceChange();
 	}
 
+
 	/**
-	 * perform the fft on angles using dft mask, values are stored in m_3dFourier, not possible for big datasets, GPU
+	 * computes fft on projection and sums up energies, should work on normal datasets, GPU
+	 * @return sum of relevant energy
 	 */
-	public void doFFTAngleCL(){
-		if(m_2dFourierTransposed == null){
-			return;
+	public float getFFTandEnergy() {
+		long time = System.nanoTime();
+		long diff = 0;
+
+		if (fft == null){
+			try {
+				fft = new CLFFTPlan(m_2dFourierTransposed.getDelegate().getCLContext(), new int[]{m_2dFourierTransposed.getSize()[0]}, CLFFTDataFormat.InterleavedComplexFormat);
+			} catch (InvalidContextException e1) {
+				e1.printStackTrace();
+			}
 		}
+
 		if(m_3dFourier==null){
 			m_3dFourier = new ComplexGrid3D(m_conf.getNumberOfProjections(), m_conf.getHorizontalDim(), m_conf.getVerticalDim());
 			m_3dFourier.activateCL();
 		}
-		//m_2dFourierTransposed.show("Vor forward transformation");
-		CLBuffer<FloatBuffer> dataBuffer = m_2dFourierTransposed.getDelegate().getCLBuffer();
-		CLBuffer<FloatBuffer> dftMatBuffer = dftMatrix.getDelegate().getCLBuffer();
-		CLBuffer<FloatBuffer> resultBuffer = m_3dFourier.getDelegate().getCLBuffer();
 
 		m_2dFourierTransposed.getDelegate().prepareForDeviceOperation();
-		dftMatrix.getDelegate().prepareForDeviceOperation();
 		m_3dFourier.getDelegate().prepareForDeviceOperation();
-
-		if(programFFT == null || kernelFFT == null){
-			try {
-				programFFT = context.createProgram(MovementCorrection3D.class.getResourceAsStream("matrixMul.cl"));
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			programFFT.build();
-			kernelFFT = programFFT.createCLKernel("dftMatrixMul");
-		}
-		kernelFFT.rewind();
-		kernelFFT.putArg(resultBuffer);
-		kernelFFT.putArg(dftMatBuffer);
-		kernelFFT.putArg(dataBuffer);
-		kernelFFT.putArg(m_conf.getNumberOfProjections());
-		kernelFFT.putArg(m_conf.getNumberOfProjections());
-		kernelFFT.putArg(m_conf.getNumberOfProjections());
-		kernelFFT.putArg(m_conf.getHorizontalDim());
-		kernelFFT.putArg(m_conf.getVerticalDim());
-
-
-		int localWorksize = 10;
-		long globalWorksizeA = OpenCLUtil.roundUp(localWorksize, m_3dFourier.getSize()[0]);
-		long globalWorksizeB = OpenCLUtil.roundUp(localWorksize, m_3dFourier.getSize()[1]);
-		long globalWorksizeC = OpenCLUtil.roundUp(localWorksize, m_3dFourier.getSize()[2]);	
-
-		CLCommandQueue commandQueue = device.createCommandQueue();
-		commandQueue.put3DRangeKernel(kernelFFT, 0, 0, 0, globalWorksizeA, globalWorksizeB, globalWorksizeC, localWorksize,localWorksize,localWorksize).finish();
-		commandQueue.release();
-		m_3dFourier.getDelegate().notifyDeviceChange();
-	}
-	
-	
-	/**
-	 * computes sum of relevant energy w.r.t. the gradient
-	 * computes fft using ext_p_shift on projection and sums up energies, should work on normal datasets, GPU
-	 * @return sum of relevant energy
-	 */
-	public float getFFTandEnergyGradient() {
 		CLCommandQueue queue = device.createCommandQueue();
-		//from here on we have the 3DFFT of the projection data shifted with T_s
-		
-		/*long time1 = System.nanoTime();
+		fft.executeInterleaved(queue, m_2dFourierTransposed.getNumberOfElements()/m_2dFourierTransposed.getSize()[0], 
+				CLFFTDirection.Forward, m_2dFourierTransposed.getDelegate().getCLBuffer(), 
+				m_3dFourier.getDelegate().getCLBuffer(), null, null);
+		queue.finish();
+		m_3dFourier.getDelegate().notifyDeviceChange();
+
+		long time1 = System.nanoTime();
 		diff = time1 - time;
 		time = time1;
-		CONRAD.log("Time for 4a) Angular FFT:     " + diff/1e6);*/
+		CONRAD.log("Time for 4a) Angular FFT:     " + diff/1e6);
 
 		int elementCount = m_3dFourier.getNumberOfElements();
 
@@ -299,62 +395,34 @@ public class MovementCorrection3D {
 		// should always be an exact integer, thus no div up necessary
 		int nperWorkItem = nperGroup/localWorkSize;
 		CLBuffer<FloatBuffer> resultBuffer = getPersistentResultBuffer(context);
-		
 
 		//long time  = System.nanoTime();
 		//long time1 = System.nanoTime(); 
 		//long difftime = time1 - time;
 		//System.out.println("Time needed for copying whole dataset to GPU = " + difftime/1e6);
-		
-		/*for(int i = 0; i < freqP.getNumberOfElements(); i++){
-			System.out.println("FreqP At Index i: " + i + " is " + freqP.getAtIndex(i));
-		}*/
-		
-		if(programSumFFTEnergyGradient == null || kernelSumFFTEnergyGradient == null){
+		if(programSumFFTEnergy == null || kernelSumFFTEnergy == null){
 			try {
-				programSumFFTEnergyGradient = context.createProgram(MovementCorrection3D.class.getResourceAsStream("sumFFTEnergyGradient.cl"));
+				programSumFFTEnergy = context.createProgram(MovementCorrection3D.class.getResourceAsStream("sumFFTEnergy.cl"));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			
-			programSumFFTEnergyGradient.build();
-			kernelSumFFTEnergyGradient = programSumFFTEnergyGradient.createCLKernel("sumEnergyGradient");
-			kernelSumFFTEnergyGradient.putArg(m_3dFourier.getDelegate().getCLBuffer());
-			
-			
-			kernelSumFFTEnergyGradient.putArg(m_2dFourierTransposed.getDelegate().getCLBuffer()); 
-			kernelSumFFTEnergyGradient.putArg(freqU.getDelegate().getCLBuffer()); 
-			kernelSumFFTEnergyGradient.putArg(freqV.getDelegate().getCLBuffer()); 
-			kernelSumFFTEnergyGradient.putArg(freqP.getDelegate().getCLBuffer()); 
-			
-			kernelSumFFTEnergyGradient.putArg(m_maskCL.getDelegate().getCLBuffer());
-			kernelSumFFTEnergyGradient.putArg(resultBuffer);
-			kernelSumFFTEnergyGradient.putArg(nperGroup);
-			kernelSumFFTEnergyGradient.putArg(nperWorkItem);
-			kernelSumFFTEnergyGradient.putArg(m_maskCL.getNumberOfElements());
-			kernelSumFFTEnergyGradient.putArg(m_3dFourier.getNumberOfElements());
-			
-			kernelSumFFTEnergyGradient.putArg(m_2dFourierTransposed.getSize()[0]);
-			kernelSumFFTEnergyGradient.putArg(m_2dFourierTransposed.getSize()[1]);
-			kernelSumFFTEnergyGradient.putArg(m_2dFourierTransposed.getSize()[2]);
-			
-			kernelSumFFTEnergyGradient.putArg(grad_idx);
-			kernelSumFFTEnergyGradient.putArg((float) m_conf.getAngleIncrement());
-			
+			programSumFFTEnergy.build();
+			kernelSumFFTEnergy = programSumFFTEnergy.createCLKernel("sumEnergy");
+			kernelSumFFTEnergy.putArg(m_3dFourier.getDelegate().getCLBuffer());
+			kernelSumFFTEnergy.putArg(m_maskCL.getDelegate().getCLBuffer());
+			kernelSumFFTEnergy.putArg(resultBuffer);
+			kernelSumFFTEnergy.putArg(nperGroup);
+			kernelSumFFTEnergy.putArg(nperWorkItem);
+			kernelSumFFTEnergy.putArg(m_maskCL.getNumberOfElements());
+			kernelSumFFTEnergy.putArg(m_3dFourier.getNumberOfElements());
 		}
 
 		//long time2 = System.nanoTime();
 		//difftime = time2 - time1;
 		//System.out.println("Time needed copying Graphicscard = " + difftime/1e6);
-		kernelSumFFTEnergyGradient.setArg(14, grad_idx);
 		m_maskCL.getDelegate().prepareForDeviceOperation();
 		m_3dFourier.getDelegate().prepareForDeviceOperation();
-		m_2dFourierTransposed.getDelegate().prepareForDeviceOperation();
-		freqU.getDelegate().prepareForDeviceOperation();
-		freqV.getDelegate().prepareForDeviceOperation();
-		freqP.getDelegate().prepareForDeviceOperation();
-
-		queue.put1DRangeKernel(kernelSumFFTEnergyGradient, 0, globalWorkSize, localWorkSize)
+		queue.put1DRangeKernel(kernelSumFFTEnergy, 0, globalWorkSize, localWorkSize)
 		.putReadBuffer(resultBuffer, true)
 		.finish();
 		queue.release();
@@ -370,24 +438,24 @@ public class MovementCorrection3D {
 			sum += resultBuffer.getBuffer().get();
 		}
 
-		/*time1 = System.nanoTime();
+		time1 = System.nanoTime();
 		diff = time1 - time;
-		CONRAD.log("Time for 4b) Summing Mask Energy:     " + diff/1e6);*/
+		CONRAD.log("Time for 4b) Summing Mask Energy:     " + diff/1e6);
 
 		return sum;
 	}
 	
+	
 	/**
-	 * computes fft on projection and sums up energies, should work on normal datasets, GPU
+	 * computes sum of relevant energy w.r.t. the gradient
+	 * computes fft using ext_p_shift on projection and sums up energies, should work on normal datasets, GPU
 	 * @return sum of relevant energy
 	 */
-	public float getFFTandEnergy(){
-		//CLBuffer<FloatBuffer> dataBuffer = m_2dFourierTransposed.getDelegate().getCLBuffer();
-		CLBuffer<FloatBuffer> dftMatBuffer = dftMatrix.getDelegate().getCLBuffer();
-		CLBuffer<FloatBuffer> maskBuffer = m_maskCL.getDelegate().getCLBuffer();
-		CLBuffer<FloatBuffer> dataBuffer = m_2dFourierTransposed.getDelegate().getCLBuffer();
+	public double[] getFFTandEnergyGradient() {
+		CLCommandQueue queue = device.createCommandQueue();
+		//from here on we have the 3DFFT of the projection data shifted with T_s
 
-		int elementCount = m_2dFourierTransposed.getNumberOfElements();
+		int elementCount = m_3dFourier.getNumberOfElements();
 
 		int localWorkSize = 256;
 		int globalWorkSize = 32768;
@@ -395,207 +463,122 @@ public class MovementCorrection3D {
 		int nperGroup = (OpenCLUtil.iDivUp(OpenCLUtil.iDivUp(elementCount, persistentGroupSize),localWorkSize))*localWorkSize;
 		// should always be an exact integer, thus no div up necessary
 		int nperWorkItem = nperGroup/localWorkSize;
+		CLBuffer<FloatBuffer> resultBuffer = getPersistentResultBufferFloat2(context);
 
-
-		CLBuffer<FloatBuffer> resultBuffer = getPersistentResultBuffer(context);
-
-		long time  = System.nanoTime();
-		m_2dFourierTransposed.getDelegate().prepareForDeviceOperation();
-		dftMatrix.getDelegate().prepareForDeviceOperation();
-		m_maskCL.getDelegate().prepareForDeviceOperation();
-		long time1 = System.nanoTime(); 
-		long difftime = time1 - time;
-		System.out.println("Time needed for copying whole dataset to GPU = " + difftime/1e6);
-		if(programSumFFTEnergy == null || kernelSumFFTEnergy == null){
+		if(programSumFFTEnergyGradient == null || kernelSumFFTEnergyGradient == null){
 			try {
-				programSumFFTEnergy = context.createProgram(MovementCorrection3D.class.getResourceAsStream("sumFFTEnergy.cl"));
+				programSumFFTEnergyGradient = context.createProgram(MovementCorrection3D.class.getResourceAsStream("sumFFTEnergyGradient.cl"));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			programSumFFTEnergy.build();
-			kernelSumFFTEnergy = programSumFFTEnergy.createCLKernel("sumFFTEnergy");
-		}
-		kernelSumFFTEnergy.rewind();
-		kernelSumFFTEnergy.putArg(dataBuffer);
-		kernelSumFFTEnergy.putArg(dftMatBuffer);
-		kernelSumFFTEnergy.putArg(maskBuffer);
-		kernelSumFFTEnergy.putArg(resultBuffer);
-		kernelSumFFTEnergy.putArg(nperGroup);
-		kernelSumFFTEnergy.putArg(nperWorkItem);
-		kernelSumFFTEnergy.putArg(m_2dFourierTransposed.getSize()[0]);
-		kernelSumFFTEnergy.putArg(m_2dFourierTransposed.getSize()[1]);
-		kernelSumFFTEnergy.putArg(m_2dFourierTransposed.getSize()[2]);
 
-		CLCommandQueue commandqueue = device.createCommandQueue();
-		long time2 = System.nanoTime();
-		difftime = time2 - time1;
-		System.out.println("Time needed copying Graphicscard = " + difftime/1e6);
-		commandqueue.put1DRangeKernel(kernelSumFFTEnergy, 0, globalWorkSize, localWorkSize)
+			programSumFFTEnergyGradient.build();
+			kernelSumFFTEnergyGradient = programSumFFTEnergyGradient.createCLKernel("sumEnergyGradient");
+			kernelSumFFTEnergyGradient.putArg(m_3dFourier.getDelegate().getCLBuffer());
+
+
+			kernelSumFFTEnergyGradient.putArg(m_2dFourierTransposed.getDelegate().getCLBuffer()); 
+			kernelSumFFTEnergyGradient.putArg(freqU.getDelegate().getCLBuffer()); 
+			kernelSumFFTEnergyGradient.putArg(freqV.getDelegate().getCLBuffer()); 
+			kernelSumFFTEnergyGradient.putArg(freqP.getDelegate().getCLBuffer()); 
+
+			kernelSumFFTEnergyGradient.putArg(m_maskCL.getDelegate().getCLBuffer());
+			kernelSumFFTEnergyGradient.putArg(resultBuffer);
+			kernelSumFFTEnergyGradient.putArg(nperGroup);
+			kernelSumFFTEnergyGradient.putArg(nperWorkItem);
+			kernelSumFFTEnergyGradient.putArg(m_2dFourierTransposed.getSize()[0]);
+			kernelSumFFTEnergyGradient.putArg(m_maskCL.getNumberOfElements());
+			kernelSumFFTEnergyGradient.putArg(m_3dFourier.getNumberOfElements());
+
+			kernelSumFFTEnergyGradient.putArg(grad_idx);
+			kernelSumFFTEnergyGradient.putArg((float) m_conf.getAngleIncrement());
+
+		}
+
+		kernelSumFFTEnergyGradient.setArg(12, grad_idx);
+		m_maskCL.getDelegate().prepareForDeviceOperation();
+		m_3dFourier.getDelegate().prepareForDeviceOperation();
+		m_2dFourierTransposed.getDelegate().prepareForDeviceOperation();
+		freqU.getDelegate().prepareForDeviceOperation();
+		freqV.getDelegate().prepareForDeviceOperation();
+		freqP.getDelegate().prepareForDeviceOperation();
+
+		queue.put1DRangeKernel(kernelSumFFTEnergyGradient, 0, globalWorkSize, localWorkSize)
 		.putReadBuffer(resultBuffer, true)
 		.finish();
-		commandqueue.release();
-		long time3 = System.nanoTime();
-		difftime =time3 - time2;
-		System.out.println("Complete time on GPU = " + difftime/1e6);
+		queue.release();
 
-		float sum = 0;
+		double[] sum = new double[]{0,0};
 		while (resultBuffer.getBuffer().hasRemaining()){
-			sum += resultBuffer.getBuffer().get();
-			//sum = resultBuffer.getBuffer().get();
-			//System.out.println("resultBuffer: " + sum);
+			sum[0] += resultBuffer.getBuffer().get();
+			sum[1] += resultBuffer.getBuffer().get();
 		}
 
 		return sum;
-
-	}
-
-	/**
-	 * problem with idft on GPU, performs backtransformation on CPU
-	 */
-	public void doiFFTAngleCL(){
-
-		if(m_3dFourier == null){
-			return;
-		}
-		ComplexPointwiseOperators cpo = new  ComplexPointwiseOperators();
-		cpo.copy(m_2dFourierTransposed, m_3dFourier);
-		doiFFTAngle();
-
-		//				CLBuffer<FloatBuffer> dataBuffer = m_3dFourier.getDelegate().getCLBuffer();
-		//				CLBuffer<FloatBuffer> idftMatBuffer = idftMatrix.getDelegate().getCLBuffer();
-		//				CLBuffer<FloatBuffer> resultBuffer = m_2dFourierTransposed.getDelegate().getCLBuffer();
-		//				
-		//				m_3dFourier.getDelegate().prepareForDeviceOperation();
-		//				dftMatrix.getDelegate().prepareForDeviceOperation();
-		//				m_2dFourierTransposed.getDelegate().prepareForDeviceOperation();
-		//				
-		//				if(programFFT == null || kernelFFT == null){
-		//					try {
-		//						programFFT = context.createProgram(MovementCorrection3D.class.getResourceAsStream("matrixMul.cl"));
-		//						} catch (IOException e) {
-		//						e.printStackTrace();
-		//						}
-		//						programFFT.build();
-		//						kernelFFT = programFFT.createCLKernel("dftMatrixMul");
-		//				}
-		//				kernelFFT.rewind();
-		//				
-		//				kernelFFT.putArg(resultBuffer);
-		//				kernelFFT.putArg(idftMatBuffer);
-		//				kernelFFT.putArg(dataBuffer);
-		//				kernelFFT.putArg(m_conf.getNumberOfProjections());
-		//				kernelFFT.putArg(m_conf.getNumberOfProjections());		
-		//				kernelFFT.putArg(m_conf.getNumberOfProjections());
-		//				kernelFFT.putArg(m_conf.getHorizontalDim());
-		//				kernelFFT.putArg(m_conf.getVerticalDim());
-		//				
-		//				
-		//				int localWorksize = 10;
-		//				long globalWorksizeA = OpenCLUtil.roundUp(localWorksize, m_2dFourierTransposed.getSize()[0]);
-		//				long globalWorksizeB = OpenCLUtil.roundUp(localWorksize, m_2dFourierTransposed.getSize()[1]);
-		//				long globalWorksizeC = OpenCLUtil.roundUp(localWorksize, m_2dFourierTransposed.getSize()[2]);	
-		//				
-		//				CLCommandQueue commandQueue = device.createCommandQueue();
-		//		//		commandQueue.put2DRangeKernel(kernelFFT, 0, 0, globalWorksizeA, globalWorksizeB, localWorksize, localWorksize).finish();
-		//				commandQueue.put3DRangeKernel(kernelFFT, 0, 0, 0, globalWorksizeA, globalWorksizeB, globalWorksizeC, localWorksize,localWorksize,localWorksize).finish();
-		//				
-		//				
-		//				m_2dFourierTransposed.getDelegate().notifyDeviceChange();
-		//				//idftMatrix.getDelegate().notifyDeviceChange();
-		//				//m_3dFourier.getDelegate().notifyDeviceChange();
-		//				//m_2dFourierTransposed.show("zuruecktransformiert");
-	}
-
-	/**
-	 * "normal" fft on projectionangle, CPU
-	 */
-	public void doFFTAngle(){
-		long time = System.nanoTime();
-		if(m_2dFourierTransposed == null){
-			return;
-		}
-		Fourier ft = new Fourier();
-		ft.fft(m_2dFourierTransposed);
-		m_2dFourierTransposed.setSpacing(m_conf.getKSpacing(),m_conf.getUSpacing(), m_conf.getVSpacing());
-		m_2dFourierTransposed.setOrigin(0,0,0);
-		System.out.println("FFT on angle done");
-		double[] spacings = m_2dFourierTransposed.getSpacing();
-		for(int i = 0; i <spacings.length; i++){
-			System.out.println("Dimension "+ i + ": "+ spacings[i]);
-		}
-
-		time = System.nanoTime()-time;
-		System.out.println("Time for forward fft:"+ time/1e6);
-	}
-
-	/**
-	 * "normal" ifft on projectionangle, GPU
-	 */
-	public void doiFFTAngle(){
-		Fourier ft = new Fourier();
-		ft.ifft(m_2dFourierTransposed);
-
-		m_2dFourierTransposed.setSpacing(m_conf.getAngleIncrement(),m_conf.getUSpacing(), m_conf.getVSpacing());
-		m_2dFourierTransposed.setOrigin(0,0,0);
-		System.out.println("ifft on angle done");
-		double[] spacings = m_2dFourierTransposed.getSpacing();
-
-		for(int i = 0; i <spacings.length; i++){
-			System.out.println("Dimension "+ i + ": "+ spacings[i]);
-		}
-
 	}
 
 
-	/**
-	 * shift in frequency space on CPU
-	 */
-	public void applyShift(){
-		long time = System.nanoTime();
-		//precomputed angles(-2*pi*xi/N) for u and v direction
-		Grid1D shiftFreqX = m_conf.getShiftFreqX();
-		Grid1D shiftFreqY = m_conf.getShiftFreqY();
+	public void applyBlackmanApodizationVDirection() {
+		if(m_2dFourierTransposed==null){
+			m_2dFourierTransposed = new ComplexGrid3D(m_2dFourierTransposedNonApodized.getSize()[0],m_2dFourierTransposedNonApodized.getSize()[1],m_2dFourierTransposedNonApodized.getSize()[2]);
+			m_2dFourierTransposed.setSpacing(m_conf.getAngleIncrement() , m_conf.getUSpacing(), m_conf.getVSpacing());
+			m_2dFourierTransposed.setOrigin(0,0,0);
+			m_2dFourierTransposed.activateCL();
+		}
 
-		for(int angle = 0; angle < m_2dFourierTransposed.getSize()[0]; angle++){
-			// get the shifts in both directions (in pixel)
-			float shiftX = m_shift.getAtIndex(angle*2);
-			float shiftY = m_shift.getAtIndex(angle*2+1);
+		m_2dFourierTransposedNonApodized.getDelegate().prepareForDeviceOperation();
+		m_2dFourierTransposed.getDelegate().prepareForDeviceOperation();
+		CLBuffer<FloatBuffer> resBuffer = m_2dFourierTransposed.getDelegate().getCLBuffer();
+		CLBuffer<FloatBuffer> dataBuffer = m_2dFourierTransposedNonApodized.getDelegate().getCLBuffer();
 
-			for(int u = 0; u < m_2dFourierTransposed.getSize()[1]; u++){
-				//number representing phase of shift in x-direction	in complex number						
-				float angleX = shiftFreqX.getAtIndex(u)*shiftX;
-				//Complex expShiftX = shiftComplexFreqX.getAtIndex(u).power(shiftX);
-				for(int v = 0; v < m_2dFourierTransposed.getSize()[2]; v++){
-
-					// exponent of complex number representing shift in both directions					
-					float sumAngles = angleX + shiftFreqY.getAtIndex(v)*shiftY;
-
-					// complex number representing both shifts	
-					// multiply at position in complex grid
-					Complex shift = getComplexFromAngles(sumAngles);			
-					m_2dFourierTransposed.multiplyAtIndex(angle, u, v,shift);
-
+		if(program == null){
+			try {
+				InputStream inStream = MovementCorrection3D.class.getResourceAsStream("shiftInFourierSpace2DNEW.cl");
+				BufferedReader br = new BufferedReader(new InputStreamReader(inStream));
+				String thisline = null;
+				String prog = "";
+				while((thisline = br.readLine()) != null){
+					prog+=thisline+'\n';
 				}
+				br.close();
+				inStream.close();
+				String constants = "";
+				constants += "#define numProj " + m_2dFourierTransposed.getSize()[0] + 'u';
+				constants += "\n#define numElementsU " + m_2dFourierTransposed.getSize()[1] + 'u';
+				constants += "\n#define numElementsV " + m_2dFourierTransposed.getSize()[2] + 'u';
+				constants += "\n\n";
+				prog = constants + prog;
+				program = context.createProgram(prog);
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
+			program.build();
 		}
-		time = System.nanoTime()-time;
-		System.out.println("Time for complete shift:"+ time/1e6);
-	}
+		if(apodizationKernel == null){
+			apodizationKernel = program.createCLKernel("blackmanVdirection");
 
-	/**
-		compute iFFT2 after all other operations to get displayable data	
-	 */
-	public void doiFFT2(){
-		Fourier ft = new Fourier();
-		ft.ifft2(m_data);
-		m_data.setSpacing(m_conf.getPixelXSpace(),m_conf.getPixelYSpace(), m_conf.getAngleIncrement());
-		m_data.setOrigin(0,0,0);
-
-		System.out.println("2d-iFFT done");
-		double[] spacings = m_data.getSpacing();
-		for(int i = 0; i <spacings.length; i++){
-			System.out.println("Dimension "+ i + ": "+ spacings[i]);
+			CLBuffer<FloatBuffer> kernelBuff = m_2dFourierTransposed.getDelegate().getCLContext().createFloatBuffer(8, Mem.READ_ONLY);
+			kernelBuff.getBuffer().put(new float[]{
+					0.000007011484f, 0.000002766563f, -0.000007858687f, 0.000206291259f,
+					-0.011809976483f, 0.085357888489f, -0.238191489060f, 0.328854166667f});
+			kernelBuff.getBuffer().rewind();
+			device.createCommandQueue().putWriteBuffer(kernelBuff, true).finish().release();
+			apodizationKernel.putArg(dataBuffer);
+			apodizationKernel.putArg(resBuffer);
+			apodizationKernel.putArg(kernelBuff);	
 		}
+
+		int localWorksizeProj = 256;
+		int localWorksizeV = 2;
+		long globalWorksizeProj = OpenCLUtil.roundUp(localWorksizeProj, m_2dFourierTransposed.getSize()[0]);
+		long globalWorksizeV = OpenCLUtil.roundUp(localWorksizeV, m_2dFourierTransposed.getSize()[2]);
+
+		CLCommandQueue commandQueue = device.createCommandQueue();
+		//commandQueue.put3DRangeKernel(kernel, 0, 0, 0, globalWorksizeProj, globalWorksizeU, globalWorksizeV, localWorksizeProj, localWorksizeU, localWorksizeV);
+		commandQueue.put2DRangeKernel(apodizationKernel, 0, 0, globalWorksizeProj, globalWorksizeV, localWorksizeProj, localWorksizeV);
+		commandQueue.finish();
+		commandQueue.release();
+		m_2dFourierTransposed.getDelegate().notifyDeviceChange();
 	}
 
 	// get and set functions
@@ -637,40 +620,39 @@ public class MovementCorrection3D {
 		return m_3dFourier;
 	}
 
-	/**
-	 * computes a complex number with real and imaginary part from angle (radius 1)
-	 * @param angle
-	 * @return
-	 */
-	private Complex getComplexFromAngles(float angle){
-		//float[] result = new float[2];
-		float re = (float)(Math.cos(angle));
-		float im = (float)(Math.sin(angle));
-		return new Complex(re,im);//result;
-	}
-
+	
 	/**
 	 * 
 	 * @return shift vector where relevant energies are minimized
 	 */
 	public Grid1D computeOptimalShift(){
+		int nrParameters = 2*m_conf.getNumberOfProjections();
+
 		EnergyToBeMinimized function = new EnergyToBeMinimized();
 		FunctionOptimizer fo = new FunctionOptimizer();
-		fo.setDimension(2*m_conf.getNumberOfProjections());
-		fo.setOptimizationMode(OptimizationMode.Gradient);
+		fo.setDimension(nrParameters);
+		if (m_conf.isUseAnalyticGradient())
+			fo.setOptimizationMode(OptimizationMode.Gradient);
+		else
+			fo.setOptimizationMode(OptimizationMode.Function);
 		fo.setConsoleOutput(true);
-		double[]min = new double[2*m_conf.getNumberOfProjections()];
-		double[]max = new double[2*m_conf.getNumberOfProjections()];
+		double[]min = new double[nrParameters];
+		double[]max = new double[nrParameters];
 		for(int i = 0; i < min.length; i++){
-			min[i] = -20.0;
-			max[i] = 20.0;
+			min[i] = m_conf.getMinX();
+			max[i] = m_conf.getMaxX();
 		}
 		fo.setMaxima(max);
 		fo.setMinima(min);
 		fo.setItnlim(m_conf.getNumberOfIterations());
-		fo.setMsg(16);
 		fo.setNdigit(6);
-		fo.setIexp(1);
+		if (m_conf.isUseAnalyticGradient()){
+			fo.setMsg(18);
+			fo.setIexp(1);
+		}
+		else{
+			fo.setMsg(16);
+		}
 		ArrayList<OptimizationOutputFunction> visFcts = new ArrayList<OptimizationOutputFunction>();
 		visFcts.add(function);
 		fo.setCallbackFunctions(visFcts);
@@ -678,12 +660,12 @@ public class MovementCorrection3D {
 		double minEnergy = Double.MAX_VALUE;
 		//for(int i = 0; i < 5; i++){
 		//System.out.println("Optimizer: " + i);
-		double[] initialGuess = new double[2*m_conf.getNumberOfProjections()];
+		double[] initialGuess = new double[nrParameters];
 		fo.setInitialX(initialGuess);
 		double [] result = fo.optimizeFunction(function);
-		
+
 		double newVal = function.evaluate(result, 0);
-		
+
 		if (newVal < minEnergy) {
 			optimalShift = result;
 			minEnergy = newVal;
@@ -703,7 +685,7 @@ public class MovementCorrection3D {
 	private class EnergyToBeMinimized implements GradientOptimizableFunction, OptimizationOutputFunction{
 
 		// stores the sum of shifts made up to this point
-		Grid1D m_oldGuessAbs = new Grid1D(2*m_conf.getNumberOfProjections());
+		Grid1D m_oldGuessAbs = null;
 		// the newest shift to be performed
 		//OpenCLGrid1D m_guessRel = new OpenCLGrid1D(new Grid1D(2*m_conf.getNumberOfProjections()));
 
@@ -746,16 +728,18 @@ public class MovementCorrection3D {
 			if (m_shift == null)
 				m_shift = new OpenCLGrid1D(new Grid1D(x.length));
 			m_shift.getDelegate().prepareForHostOperation();
-			
+			if (m_oldGuessAbs == null)
+				m_oldGuessAbs = new Grid1D(m_shift.getSize()[0]);
+
 			//use relative shifts if the shifts are done in place 
-			for(int i = 0; i < x.length; i++){
+			for(int i = 0; i < m_shift.getSize()[0]; i++){
 				m_shift.setAtIndex(i, (float)(x[i]) - m_oldGuessAbs.getAtIndex(i));
 				if(Math.abs(m_shift.getAtIndex(i)) != 0.0f){
 					//CONRAD.log("pos: " + i + ", val: " + m_guessRel.getAtIndex(i));
 				}
 				m_oldGuessAbs.setAtIndex(i,(float) (x[i]));
 			}
-			
+
 			m_shift.getDelegate().notifyHostChange();
 
 			long time1 = System.nanoTime();
@@ -770,7 +754,12 @@ public class MovementCorrection3D {
 			//time = time1;
 			//CONRAD.log("Time for 2) Setting the motion vector:  " + diff/1e6);
 
-			applyShift(); 
+			applyShift();
+			if (m_conf.isDoApodization())
+				applyBlackmanApodizationVDirection();
+			else
+				m_2dFourierTransposed = m_2dFourierTransposedNonApodized;
+
 
 			time1 = System.nanoTime();
 			diff = time1 - time;
@@ -778,28 +767,8 @@ public class MovementCorrection3D {
 			CONRAD.log("Time for 3) Performing the motion: 	    " + diff/1e6);
 			float sum = 0;
 
-			// naive approach: do fft on angles, sum up relevant energies, difft 
-			if (m_naive){
-				doFFTAngleCL();
-				for(int proj = 0; proj < m_3dFourier.getSize()[0]; proj++ ){
-					for(int u = 0; u < m_3dFourier.getSize()[1]; u++){
-						if(m_mask.getAtIndex(proj, u) == 1){
-							for(int v = 0; v < m_3dFourier.getSize()[2]; v++){
-								sum += m_3dFourier.getAtIndex(proj, u, v).getMagn();
-							}
-						}
-					}
-				}
-				CONRAD.log("Berechnete Summe: " + sum);
-				doiFFTAngleCL();
-				//m_2dFourierTransposed.show("m_2dFourierTransposed after");
-				//sum /= m_datasize;
-			}
-			else{
-				sum = getFFTandEnergy();
-				//CONRAD.log("Berechnete Summe: " + sum);
+			sum = getFFTandEnergy();
 
-			}
 			time1 = System.nanoTime();
 			diff = time1 - time;
 			CONRAD.log("Time for 4) Performing the FTT + Sum:	" + diff/1e6);
@@ -819,7 +788,7 @@ public class MovementCorrection3D {
 			return sum;
 		}
 
-		
+
 		/**
 		 * Computes the Gradient at position x.
 		 * (Note that x is a Fortran Array which starts at 1.)
@@ -828,28 +797,40 @@ public class MovementCorrection3D {
 		 * @return the gradient at x. (In Fortran Style)
 		 */
 		public double [] gradient(double[] x, int block){
+
+			this.evaluate(x, block);
+
 			double[] gradient = new double[x.length];
-			
-			for(int i = 0; i < x.length; i++){ //walk over all alphas
+			long diff, time1, time;
+
+			for(int i = 0; i < x.length/2; i++){ //walk over all alphas
 				grad_idx = i;
-				float sum = getFFTandEnergyGradient(); //fast version on GPU
-				gradient[i] = 2*sum/maskNormalizationSum;
-				//calculate sum by reduction (Energy in the mask)
-				//System.out.println("Finished partial derivative for: " + grad_idx + " gradient: " + gradient[i]);
+
+				time = System.nanoTime();
+
+				double[] sumUV = getFFTandEnergyGradient(); //fast version on GPU
+				gradient[i*2] = 2*sumUV[0]/maskNormalizationSum;
+				gradient[i*2+1] = 2*sumUV[1]/maskNormalizationSum;
+
+				time1 = System.nanoTime();
+				diff = time1 - time;
+				CONRAD.log("Time for partial derivative (d" + grad_idx + "):    " + diff/1e6);
 			}
 			return gradient;
 		}
 
-		
+
 		@Override
 		public void optimizerCallbackFunction(int currIterationNumber,
 				double[] x, double currFctVal, double[] gradientAtX) {
+
+			Integer showPeriod = m_conf.getShowResultsEveryNthIteration();
 
 			// Visualization of parameter vector
 			this.visualize(x);
 			// Visualization of gradient vector
 			this.visualizeGradient(gradientAtX);
-			
+
 			/*for(int i = 0; i < gradientAtX.length; i++){
 				System.out.println("gradient at " + i + " is " + gradientAtX[i]);	
 			}*/
@@ -869,7 +850,7 @@ public class MovementCorrection3D {
 			}
 			resultVisualizerPlot = VisualizationUtil.createPlot(out.getBuffer()).show();
 
-			if (m_2dFourierTransposed != null && currIterationNumber%5==0) {
+			if (m_2dFourierTransposed != null && showPeriod != null && currIterationNumber%showPeriod==0) {
 				boolean firstShow = (outputCentralSino == null);
 				if (firstShow){
 					outputCentralSino = new Grid3D(m_data.getSize()[0], m_data.getSize()[1], m_data.getSize()[2]);
@@ -877,13 +858,13 @@ public class MovementCorrection3D {
 				backTransposeData();
 				doiFFT2();
 				NumericPointwiseOperators.copy(outputCentralSino, m_data.getRealGrid());
-				
+
 				if (firstShow)
 					outputCentralSino.show("Intermediate Projection Result");
 			}
-			
+
 			// Visualization of 3D FFT
-			if (currIterationNumber%5==0 && m_3dFourier!=null){
+			if (m_3dFourier!=null && showPeriod != null && currIterationNumber%showPeriod==0){
 				boolean firstShow = false;
 				if(outputLog3DFFT==null){
 					outputLog3DFFT = new Grid3D(m_3dFourier.getSize()[0],m_3dFourier.getSize()[1],m_3dFourier.getSize()[2]);
@@ -899,7 +880,7 @@ public class MovementCorrection3D {
 			}
 		}
 
-		
+
 		//Visualisation methods for parameters and gradients
 		private Plot[] plots = null;
 		private double[] oldOutSave;
@@ -907,7 +888,7 @@ public class MovementCorrection3D {
 		private Plot[] plotsGradient = null;
 		private double[] oldOutSaveGradient;
 		private PlotWindow[] plotWindowsGradient;
-		
+
 		private Grid3D outputLog3DFFT;
 		private Grid3D outputCentralSino;
 
@@ -946,7 +927,7 @@ public class MovementCorrection3D {
 				oldOutSave = new double[out.length];
 			System.arraycopy(out, 0, oldOutSave, 0, out.length);
 		}
-		
+
 		public void visualizeGradient(double[] out) {
 			String[] titles = new String[] {"gradient_u", "gradient_v"};
 			double[][] oldOutVecs = new double[titles.length][out.length/titles.length];

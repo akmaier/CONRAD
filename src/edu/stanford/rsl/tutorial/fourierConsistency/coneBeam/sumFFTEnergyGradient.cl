@@ -11,6 +11,7 @@ typedef float2 cfloat;
 
 #define cmult(a,b) ((cfloat)(mad(-(a).y, (b).y, (a).x * (b).x), mad((a).y, (b).x, (a).x * (b).y)))
 #define cmultConj(a,b) ((cfloat)(mad((a).y, (b).y, (a).x * (b).x), mad(-(a).y, (b).x, (a).x * (b).y)))
+#define cmultConjReal(a,b) (mad((a).y, (b).y, (a).x * (b).x))
 #define squaredLength(a) (mad((a).x, (a).x, (a).y * (a).y))
 
 
@@ -27,11 +28,9 @@ void sumEnergyGradient(
             __global float * r, // result vector
             uint n_per_group, // elements processed per group
             uint n_per_work_item, // elements processed per work item
-            uint n01, // numElementsMask
-			uint n, // numElements, add comma
 			uint n0, // dim proj
-			uint n1, // dim u
-			uint n2,  // dim v 
+			uint n01, // numElementsMask
+			uint n, // numElements, add comma
 			uint grad_idx,
 			float angleInc
 			)
@@ -40,18 +39,15 @@ void sumEnergyGradient(
     uint lcl_id = get_local_id(0);
     uint grp_id = get_group_id(0);
     
-	float priv_acc = 0.f; // accumulator in private memory
-    __local float lcl_acc[LOCAL_GROUP_XDIM]; // accumulators in local memory
+	float2 priv_acc = (float2)(0.f,0.f); // accumulator in private memory
+    __local float2 lcl_acc[LOCAL_GROUP_XDIM]; // accumulators in local memory
     
     uint grp_off = mul24(n_per_group, grp_id); // group offset
     uint lcl_off = grp_off + lcl_id; // local offset
     
     //compute ext_p and even from grad_idx
-    uint ext_p = grad_idx/2;
-    bool even = (grad_idx%2==0) ? true:false;
-
-    //precompute n011 and n00 for computation of u,v,proj
-    //uint n011 = mul24(n1,n0);
+    uint ext_p = grad_idx;
+    //bool even = (grad_idx%2==0);
     
     // Accumulate products over n_per_work_item elements.
     float priv_val = 0.f;
@@ -63,29 +59,26 @@ void sumEnergyGradient(
 		uint proj = (lcl_off%(n011))%n0;*/
 		
 		//different approach to indices computation
-		uint v = (lcl_off)/(mul24(n0,n1)); //correct
-		uint u = (lcl_off - v*(mul24(n0,n1)))/n0;
-		uint proj = lcl_off-(v*(mul24(n0,n1))+u*n0);
-		
-		
-		//if index even derive for u direction otherwise for v direction
-		float grad_val = (even) ? freqUAxis[u] : freqVAxis[v];
-		float2 grad = (float2)(0,grad_val);
+		uint proj = lcl_off%n0;
+		uint v = lcl_off/n01;
+		uint maskIdx = (lcl_off%n01);
+		uint u = maskIdx/n0;
 		
 		//compute shift in freqP axis using ext_p (equals FFT in p-direction)
 		float ext_p_shift_angle = freqPAxis[proj]*ext_p*angleInc;
-		float2 ext_p_shift = (float2)(cos(ext_p_shift_angle), sin(ext_p_shift_angle));
+		float2 ext_p_shift = (float2)(-native_sin(ext_p_shift_angle),native_cos(ext_p_shift_angle));
+
 		
 		//compute index for position corresponding to (ext_p, u, v)
-		uint index = ext_p + u * n0 + v * n0 * n1;
+		uint index = lcl_off + ext_p - proj;
 		float2 shifted_val = vload2(index, shiftedX);
 		
-		float2 val = cmult(cmult(shifted_val, ext_p_shift), grad);
+		float2 val = cmult(shifted_val, ext_p_shift);
 		
-		uint maskIdx = (lcl_off%n01);
         bool in_range = (lcl_off < n && mask[maskIdx]);
-        
-        priv_acc += ( in_range ) ? cmultConj(vload2(lcl_off, x), val).x : 0.f;
+		
+		//derive for u direction and for v direction simultaneously
+        priv_acc += ( in_range ) ? ((float2)(freqUAxis[u],freqVAxis[v]))*cmultConjReal(vload2(lcl_off, x), val) : ((float2)(0.f,0.f));
   	}
     
     // Store result accumulated so far to local accumulator.
@@ -109,6 +102,6 @@ void sumEnergyGradient(
     // Store the result.
     if ( lcl_id == 0 )
     {
-        r[grp_id] = priv_acc;
+        vstore2(priv_acc,grp_id,r);
     }
 }
