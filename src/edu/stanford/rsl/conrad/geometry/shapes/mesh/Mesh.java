@@ -16,6 +16,7 @@ import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
 /**
  * Class to read and store a mesh in a legacy .vtk polydata file. A triangular mesh as produced by Paraview  or the 
  * itkMeshFileWriter is assumed. The reader-method builds upon VTKMeshReader implemented by Marco Boegel. 
+ * Extended to meshes featuring deformation vectors at each mesh vertex by Tobias Geimer. 
  * @author Mathias Unberath
  *
  */
@@ -45,6 +46,12 @@ public class Mesh{
 	 * The matrix containing the connectivity information.
 	 */
 	private SimpleMatrix triangles;
+	
+	/**
+	 * The matrix containing the deformation vectors.
+	 */
+	private SimpleMatrix deformations;
+	
 	
 	//==========================================================================================
 	// METHODS
@@ -89,6 +96,22 @@ public class Mesh{
 	}
 	
 	/**
+	 * Sets the deformations at each vertex.
+	 * @param deform The deformation.
+	 */
+	public void setDeformation(SimpleMatrix deform){
+		this.deformations = deform;
+	}
+	
+	/**
+	 * Getter for the deformation information.
+	 * @return The deformation information.
+	 */
+	public SimpleMatrix getDeformation(){
+		return this.deformations;
+	}
+	
+	/**
 	 * Sets the vertices, e.g points, and number of vertices.
 	 * @param p The matrix containing the vertices.
 	 */
@@ -115,6 +138,8 @@ public class Mesh{
 		
 		ArrayList<PointND> points = new ArrayList<PointND>();
 		ArrayList<PointND> triangles = new ArrayList<PointND>();
+		ArrayList<PointND> deformations = new ArrayList<PointND>();
+		
 		
 		FileReader fr = new FileReader(filename);
 		BufferedReader br = new BufferedReader(fr);
@@ -173,6 +198,35 @@ public class Mesh{
 			i += nTri;
 		}
 		
+		// read deformation vectors
+		boolean hasDeform = true;
+		
+		line = br.readLine();
+		if(line!=null && line.isEmpty()){
+			line = br.readLine();
+		}
+		// not every mesh features a deformation field
+		// check whether the file contains any more information
+		if(line == null) {
+			hasDeform = false; 
+		} else {
+			tok = new StringTokenizer(line);
+			tok.nextToken(); // skip "Point_Data"
+			int numVec =  Integer.parseInt(tok.nextToken());
+			line = br.readLine(); // skip "Field FieldData 6"
+			line = br.readLine(); // skip "Phi_Glyph numComp numTuples dataType"
+			for(int i = 0; i < numVec;){
+				line = br.readLine();
+				tok = new StringTokenizer(line);
+				int nVec = tok.countTokens();
+				nVec /= 3;
+				for(int j = 0; j < nVec; j++){
+					PointND vector = new PointND(Float.parseFloat(tok.nextToken()),Float.parseFloat(tok.nextToken()),Float.parseFloat(tok.nextToken()));
+					deformations.add(vector);
+				}
+				i += nVec;
+			}
+		}		
 		br.close();	
 		fr.close();
 		
@@ -181,6 +235,7 @@ public class Mesh{
 		this.dimension = this.points.getCols();
 		this.numConnections = numTri;
 		this.triangles = toSimpleMatrix(triangles);
+		this.deformations = hasDeform ? toSimpleMatrix(deformations) : null;
 	}
 
 	/**

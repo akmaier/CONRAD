@@ -257,4 +257,22 @@ public class DataMatrix extends SimpleMatrix{
 			
 		}
 	}
+	
+	/**
+	 * Returns the column colIdx of the  {@link DataMatrix} in its original numVertices x dimension {@link SimpleMatrix} form.
+	 * @param colIdx The column index where the linearized matrix is stored.
+	 * @return SimpleMatrix of the form numVertices x dimension.
+	 */
+	public SimpleMatrix getSimpleMatrixAtIndex(int colIdx){
+		assert(colIdx < this.cols) : new IllegalArgumentException("Column index for this mesh is out of bounds.");
+		SimpleMatrix mat = new SimpleMatrix(this.rows/this.dimension, this.dimension);
+			
+		for(int i = 0; i < mat.getRows(); i++){
+			int rowMajor = dimension * i;
+			for(int j = 0; j < dimension; j++){
+				mat.setElementValue(i, j, this.getElement(rowMajor + j, colIdx));
+			}
+		}
+		return mat;
+	}
 }
