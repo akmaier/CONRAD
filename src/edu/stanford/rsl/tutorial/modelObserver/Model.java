@@ -1,11 +1,13 @@
-package ProjectIrisKellermann;
+package edu.stanford.rsl.tutorial.modelObserver;
 
 import java.util.Random;
 
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
-import edu.stanford.rsl.conrad.data.numeric.InterpolationOperators;
 import edu.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators;
 import edu.stanford.rsl.conrad.filtering.LogPoissonNoiseFilteringTool;
+import edu.stanford.rsl.tutorial.filters.RamLakKernel;
+import edu.stanford.rsl.tutorial.parallel.ParallelBackprojector2D;
+import edu.stanford.rsl.tutorial.parallel.ParallelProjector2D;
 
 /**
  * @author Iris Kellermann
@@ -13,13 +15,22 @@ import edu.stanford.rsl.conrad.filtering.LogPoissonNoiseFilteringTool;
 
 public class Model extends Grid2D
 {
+	ParallelProjector2D projector;
+	ParallelBackprojector2D backProjector;
+	RamLakKernel ramLak;
 	
 	public Model(int width, int height)
 	{
 		super(width, height);
 		
+		this.setSpacing(1.0, 1.0);
+		this.setOrigin(-width/2.d, -height/2.d);
+		
 		DrawCircle(this, width/2, height/2, width/3, 0.2);
 		
+		projector = new ParallelProjector2D(Math.PI, Math.PI/180.0, 400, 1);
+		backProjector = new ParallelBackprojector2D(width, height, 1, 1);
+		ramLak = new RamLakKernel(400, 1);
 	}
 	
 	/**
@@ -47,7 +58,7 @@ public class Model extends Grid2D
 	 * @param radius The radius of the circle.
 	 * @param intensity The intensity for the circle.
 	 */
-	private void DrawCircle(Grid2D grid, int x, int y, int radius, double intensity)
+	private void DrawCircle(Grid2D grid, int x, int y, double radius, double intensity)
 	{
 		for(int i = 0; i < this.getWidth(); ++i)
 		{
@@ -67,13 +78,18 @@ public class Model extends Grid2D
 	 */
 	public Grid2D ModelVariation()
 	{
-		Grid2D newModel = new Grid2D(this.getWidth(), this.getHeight());
+		int width = this.getWidth();
+		int height = this.getHeight();
+		Grid2D newModel = new Grid2D(width, height);
+		
+		newModel.setSpacing(1.0, 1.0);
+		newModel.setOrigin(-width/2.d, -height/2.d);
 		
 		Random rand = new Random();
 		
 		int random = rand.nextInt(10);
 			
-		DrawCircle(newModel, newModel.getWidth()/2 + random, newModel.getHeight()/2 + random, newModel.getWidth()/3, 1.0);
+		DrawCircle(newModel, newModel.getWidth()/2 + random, newModel.getHeight()/2 + random, newModel.getWidth()/(rand.nextDouble() + 2.5), 1.0);
 		
 		return newModel;
 	}
@@ -93,8 +109,11 @@ public class Model extends Grid2D
 		
 		for(int i = 0; i < width * height / 10; ++i)
 		{
-			resultImage.putPixelValue(rand.nextInt(width), rand.nextInt(height), 1);
+			resultImage.putPixelValue(rand.nextInt(width), rand.nextInt(height), rand.nextDouble() - 0.5);
 		}
+		
+		resultImage.setSpacing(1.0, 1.0);
+		resultImage.setOrigin(-width/2.d, -height/2.d);
 		
 		return resultImage;
 	}
@@ -137,54 +156,6 @@ public class Model extends Grid2D
 		
 		return filteredModel;
 	}
-	
-	/**
-	 * Calculates the sinogram of an image.  
-	 * @param model The image to calculate the sinogram of.
-	 * @return  The sinogram of the input image.
-	 */
-	public Grid2D CreateSinogram(Grid2D model)
-	{
-		Grid2D sinogram = new Grid2D(model.getWidth(), 180);
-
-		for(int s = -model.getWidth()/2; s < model.getWidth()/2; ++s)
-		{
-			for(int theta = 0; theta < 180; ++theta)
-			{
-				double degree = theta * Math.PI/180;
-				float sum = 0;
-
-				if(theta < 45 || theta > 135)
-				{
-					for(int y = 0; y < model.getHeight(); ++y)
-					{
-						double x = (s - (y - model.getHeight()/2) * Math.sin(degree))/Math.cos(degree) + model.getWidth()/2;
-
-						float interpolate = InterpolationOperators.interpolateLinear(model, x, y);
-
-						sum += interpolate;
-					}					
-				}
-
-				else
-				{
-					for(int x = 0; x < model.getWidth(); ++x)
-					{
-						double y = (s - (x - model.getWidth()/2) * Math.cos(degree))/ Math.sin(degree) + model.getHeight()/2;
-						
-						float interpolate = InterpolationOperators.interpolateLinear(model, x, y);
-						
-						sum += interpolate;
-					}
-
-				}
-				sinogram.putPixelValue(s + model.getWidth()/2, theta, sum);
-			}
-		}
-
-		return sinogram;
-
-	}
 
 	/**
 	 * Creates a number of different test images with the object present.  
@@ -207,30 +178,41 @@ public class Model extends Grid2D
 		case ProjectionWOFilter:
 			for (int i = 0; i < number; ++i)
 			{
-				Grid2D sinogram = this.CreateSinogram(this.ModelVariation());
-				
-				resultArray[i] = Backproject.Backprojection(sinogram);
+				Grid2D modelVariation = this.ModelVariation();
+				Grid2D sinogram = projector.projectPixelDriven(modelVariation);
+				resultArray[i] = backProjector.backprojectPixelDriven(sinogram);
 			}
 			break;
 		case ProjectionPoisson:
 			for (int i = 0; i < number; ++i)
 			{
-				Grid2D sinogram = this.CreateSinogram(this.ModelVariation());
+				Grid2D sinogram = projector.projectPixelDriven(this.ModelVariation());
 				NumericPointwiseOperators.divideBy(sinogram, 40);
 				Grid2D poissonSinogram = this.PoissonNoise(sinogram);
 				NumericPointwiseOperators.multiplyBy(poissonSinogram, 40);
-				Grid2D filteredSinogram = Backproject.Filter(poissonSinogram);
+
+				Grid2D filteredSinogram = new Grid2D(poissonSinogram);
 				
-				resultArray[i] = Backproject.Backprojection(filteredSinogram);			
+				for (int j = 0; j < filteredSinogram.getSize()[1]; j++)
+				{
+					ramLak.applyToGrid(filteredSinogram.getSubGrid(j));
+				}
+				resultArray[i] =  backProjector.backprojectPixelDriven(filteredSinogram);			
 			}
 			break;
 		case ProjectionWrongPoisson:
 			for (int i = 0; i < number; ++i)
 			{
-				Grid2D poissonSinogram = this.PoissonNoise(this.CreateSinogram(this.ModelVariation()));
-				Grid2D filteredSinogram = Backproject.Filter(poissonSinogram);
+				Grid2D poissonSinogram = this.PoissonNoise(projector.projectPixelDriven(this.ModelVariation()));
 				
-				resultArray[i] = Backproject.Backprojection(filteredSinogram);
+				Grid2D filteredSinogram = new Grid2D(poissonSinogram);
+				
+				for (int j = 0; j < filteredSinogram.getSize()[1]; j++)
+				{
+					ramLak.applyToGrid(filteredSinogram.getSubGrid(j));
+				}
+				
+				resultArray[i] = backProjector.backprojectPixelDriven(filteredSinogram);
 			}
 			break;
 		case SimpleVariationNoise:
@@ -269,32 +251,44 @@ public class Model extends Grid2D
 		case ProjectionWOFilter:
 			for (int i = 0; i < number; ++i)
 			{
-				Grid2D sinogram = this.CreateSinogram(this.CreateSaltImage());
+				Grid2D sinogram = projector.projectPixelDriven(this.CreateSaltImage());
 				
-				resultArray[i] = Backproject.Backprojection(sinogram);
+				resultArray[i] = backProjector.backprojectPixelDriven(sinogram);
 			}
 			
 			break;
 		case ProjectionPoisson:
 			for (int i = 0; i < number; ++i)
 			{
-				Grid2D sinogram = this.CreateSinogram(this.CreateSaltImage());
+				Grid2D sinogram = projector.projectPixelDriven(this.CreateSaltImage());
 				NumericPointwiseOperators.divideBy(sinogram, 40);
 				Grid2D poissonSinogram = this.PoissonNoise(sinogram);
 				NumericPointwiseOperators.multiplyBy(poissonSinogram, 40);
-				Grid2D filteredSinogram = Backproject.Filter(poissonSinogram);
+
+				Grid2D filteredSinogram = new Grid2D(poissonSinogram);
 				
-				resultArray[i] = Backproject.Backprojection(filteredSinogram);			
+				for (int j = 0; j < filteredSinogram.getSize()[1]; j++)
+				{
+					ramLak.applyToGrid(filteredSinogram.getSubGrid(j));
+				}
+				
+				resultArray[i] = backProjector.backprojectPixelDriven(filteredSinogram);			
 			}
 			
 			break;
 		case ProjectionWrongPoisson:
 			for (int i = 0; i < number; ++i)
 			{
-				Grid2D poissonSinogram = this.PoissonNoise(this.CreateSinogram(this.CreateSaltImage()));
-				Grid2D filteredSinogram = Backproject.Filter(poissonSinogram);
+				Grid2D poissonSinogram = this.PoissonNoise(projector.projectPixelDriven(this.CreateSaltImage()));
+
+				Grid2D filteredSinogram = new Grid2D(poissonSinogram);
 				
-				resultArray[i] = Backproject.Backprojection(filteredSinogram);
+				for (int j = 0; j < filteredSinogram.getSize()[1]; j++)
+				{
+					ramLak.applyToGrid(filteredSinogram.getSubGrid(j));
+				}
+				
+				resultArray[i] = backProjector.backprojectPixelDriven(filteredSinogram);
 			}
 			
 			break;

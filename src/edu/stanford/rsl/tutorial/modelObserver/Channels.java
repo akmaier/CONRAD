@@ -1,4 +1,4 @@
-package ProjectIrisKellermann;
+package edu.stanford.rsl.tutorial.modelObserver;
 
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix;

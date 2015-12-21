@@ -1,4 +1,4 @@
-package ProjectIrisKellermann;
+package edu.stanford.rsl.tutorial.modelObserver;
 
 import java.util.Arrays;
 
