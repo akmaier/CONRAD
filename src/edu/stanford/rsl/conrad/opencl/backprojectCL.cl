@@ -3,7 +3,7 @@ typedef float Tcoord_dev;
 typedef float TdetValue;
 
 // Volume texture
-__constant sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP_TO_EDGE | CLK_FILTER_LINEAR;
+__constant sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP | CLK_FILTER_LINEAR;
 
 //__constant__ int gVolStride[2];  
 
