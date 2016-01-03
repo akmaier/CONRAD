@@ -6,6 +6,7 @@ import com.jogamp.opencl.CLMemory.Mem;
 
 import edu.stanford.rsl.apps.gui.Citeable;
 import edu.stanford.rsl.apps.gui.GUIConfigurable;
+import edu.stanford.rsl.conrad.geometry.Projection;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
 import edu.stanford.rsl.conrad.numerics.SimpleOperators;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
@@ -35,7 +36,7 @@ public class OpenCLForwardProjectorWithMotion extends OpenCLForwardProjector imp
 	@SuppressWarnings("unchecked")
 	public SimpleMatrix[] readInMotionMatrices() {
 
-		SimpleMatrix[] motion = new SimpleMatrix[geometry.getNumProjectionMatrices()];
+		SimpleMatrix[] motion = new SimpleMatrix[nrProj];
 		// load data from XML file
 		ArrayList<double[][][]> RotTrans = null;
 		try {
@@ -44,11 +45,10 @@ public class OpenCLForwardProjectorWithMotion extends OpenCLForwardProjector imp
 			
 			RotTrans = (ArrayList<double[][][]>)XmlUtils.importFromXML(rotationTranslationFilename);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		for (int i = 0; i < geometry.getNumProjectionMatrices(); i++) {
+		for (int i = 0; i < nrProj; i++) {
 			motion[i] = new SimpleMatrix(4,4);
 			SimpleMatrix rotation = new SimpleMatrix(RotTrans.get(0)[i]);
 			SimpleMatrix translation = new SimpleMatrix(RotTrans.get(1)[i]);
@@ -69,30 +69,22 @@ public class OpenCLForwardProjectorWithMotion extends OpenCLForwardProjector imp
 	 */
 	@Override
 	protected void prepareAllProjections(){
-		float [] cann = new float[3*4];
-		float [] invAR = new float[3*3];
-		float [] srcP = new float[3];
-		
 		if (gInvARmatrix == null)
-			gInvARmatrix = context.createFloatBuffer(invAR.length*geometry.getNumProjectionMatrices(), Mem.READ_ONLY);
+			gInvARmatrix = context.createFloatBuffer(3*3*nrProj, Mem.READ_ONLY);
 		if (gSrcPoint == null)
-			gSrcPoint = context.createFloatBuffer(srcP.length*geometry.getNumProjectionMatrices(), Mem.READ_ONLY);
+			gSrcPoint = context.createFloatBuffer(3*nrProj, Mem.READ_ONLY);
 		
 		// load the motion transforms
 		// load data from XML file
 		SimpleMatrix[] motion = readInMotionMatrices();
 		
-		
-		for (int i=0; i < geometry.getNumProjectionMatrices(); ++i){
-			SimpleMatrix projMat = geometry.getProjectionMatrix(i).computeP();
-			double [][] mat = new double [3][4];
-			SimpleOperators.multiplyMatrixProd(projMat, motion[i]).copyTo(mat);
-			computeCanonicalProjectionMatrix(cann, invAR, srcP, new Jama.Matrix(mat));
-			
-			gInvARmatrix.getBuffer().put(invAR);
-			gSrcPoint.getBuffer().put(srcP);
+		gInvARmatrix.getBuffer().rewind();
+		gSrcPoint.getBuffer().rewind();
+		for (int i=0; i < nrProj; ++i){
+			Projection proj = new Projection(projectionMatrices[i]);
+			proj.setRtValue(SimpleOperators.multiplyMatrixProd(proj.getRt(),motion[i]));
+			computeCanonicalProjectionMatrix(gInvARmatrix, gSrcPoint, proj);
 		}
-		
 		gInvARmatrix.getBuffer().rewind();
 		gSrcPoint.getBuffer().rewind();
 		
@@ -104,6 +96,6 @@ public class OpenCLForwardProjectorWithMotion extends OpenCLForwardProjector imp
 
 }
 /*
- * Copyright (C) 2010-2014 Andreas Maier, Martin Berger, Marco Bögel
+ * Copyright (C) 2010-2014 Andreas Maier, Martin Berger, Marco BÃ¶gel
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
 */

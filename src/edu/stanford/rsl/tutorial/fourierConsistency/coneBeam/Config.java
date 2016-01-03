@@ -1,13 +1,16 @@
 /*
+ /*
  * Copyright (C) 2015 Wolfgang Aichinger, Martin Berger
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
-*/
+ */
 package edu.stanford.rsl.tutorial.fourierConsistency.coneBeam;
 
 import edu.stanford.rsl.conrad.data.generic.complex.ComplexGrid2D;
+import edu.stanford.rsl.conrad.data.generic.complex.Fourier;
 import edu.stanford.rsl.conrad.data.generic.datatypes.Complex;
 import edu.stanford.rsl.conrad.data.numeric.Grid1D;
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
+import edu.stanford.rsl.conrad.data.numeric.Grid2DComplex;
 import edu.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators;
 import edu.stanford.rsl.conrad.geometry.trajectories.Trajectory;
 import edu.stanford.rsl.conrad.utils.Configuration;
@@ -45,6 +48,7 @@ public class Config {
 	// precomputed arrays to perform shift in frequencydomain
 	private Grid1D shiftFreqX;
 	private Grid1D shiftFreqY;
+	private Grid1D shiftFreqP;
 
 	// Size of mask used for erosion
 	private int m_erosionFactor;
@@ -55,17 +59,21 @@ public class Config {
 	private ComplexGrid2D dftMatrix;
 	private ComplexGrid2D idftMatrix;
 
+	private Integer numberOfIterations;
 
-	public Config(String xmlFilename, int erosionFactor, int scalingFactor){
+
+
+	public Config(String xmlFilename, int erosionFactor, int scalingFactor, double maxObjectRadius, int nrOfIterations){
 		/*int[] dims = data.getSize();
 		N = dims[0];
 		M = dims[1];
 		K = dims[2];*/
 
 		//hard coded
+		numberOfIterations = nrOfIterations;
 		m_erosionFactor = erosionFactor;
 		m_scalingFactor = scalingFactor;
-		rp = 133.0f;
+		rp = maxObjectRadius;
 		getGeometry(xmlFilename);
 		wuSpacing = 1.0/(N*spacingX);
 		wvSpacing = 1.0/(M*spacingY);
@@ -77,6 +85,7 @@ public class Config {
 		// construct a shift vector
 		shiftFreqX = constructShiftFreq(wuSpacingVec);
 		shiftFreqY = constructShiftFreq(wvSpacingVec);
+		shiftFreqP = constructShiftFreq(kSpacingVec);
 		fillMask();
 		createDFTMatrix();
 		createIDFTMatrix();
@@ -168,6 +177,9 @@ public class Config {
 	public Grid1D getShiftFreqY(){
 		return shiftFreqY;
 	}
+	public Grid1D getShiftFreqP(){
+		return shiftFreqP;
+	}
 	public Grid2D getMask(){
 		return mask;
 	}
@@ -215,16 +227,48 @@ public class Config {
 		mask = new Grid2D(K,N);
 		Grid2D helpMask = new Grid2D(K,N);
 
+		boolean preserveSymmetry = false;
+
 		// filling mask according to formula
 		int counter = 0;
-		for(int proj = 0; proj < helpMask.getSize()[0]; proj++){
-			for(int uPixel = 0; uPixel < helpMask.getSize()[1]; uPixel++){
-				if(Math.abs(kSpacingVec.getAtIndex(proj)/(kSpacingVec.getAtIndex(proj)-wuSpacingVec.getAtIndex(uPixel)*(L+D))) > rp/(float)(L)){
-					helpMask.setAtIndex(proj, uPixel, 1);
-					counter++;
+		if(preserveSymmetry){
+			for(int proj = 0; proj < K/2+1; proj++){
+				for(int uPixel = 0; uPixel < N; uPixel++){
+					if(Math.abs(kSpacingVec.getAtIndex(proj)/(kSpacingVec.getAtIndex(proj)-wuSpacingVec.getAtIndex(uPixel)*(L+D))) > rp/(float)(L)){
+						if((proj == 0 && uPixel == 0) || (proj == K/2 && uPixel == 0) 
+								|| (proj == 0 && uPixel == N/2) || (proj == K/2 && uPixel == N/2)){
+							helpMask.setAtIndex(proj, uPixel, 0);
+							counter++;
+						}
+						else{
+							helpMask.setAtIndex(proj, uPixel, 1);
+							counter++;
+							if (proj == 0){
+								helpMask.setAtIndex(proj, N - uPixel, 1);
+								counter++;
+							}
+							else if (uPixel == 0){
+								helpMask.setAtIndex(K - proj, uPixel, 1);
+								counter++;
+							}
+							else{
+								helpMask.setAtIndex(K - proj, N - uPixel, 1);
+								counter++;
+							}
+						}
+					}
 				}
 			}
-
+		}
+		else{
+			for(int proj = 0; proj < K; proj++){
+				for(int uPixel = 0; uPixel < N; uPixel++){
+					if(Math.abs(kSpacingVec.getAtIndex(proj)/(kSpacingVec.getAtIndex(proj)-wuSpacingVec.getAtIndex(uPixel)*(L+D))) > rp/(float)(L)){
+						helpMask.setAtIndex(proj, uPixel, 1);
+						counter++;
+					}
+				}
+			}
 		}
 
 		System.out.println("Anzahl 1 in Maske " + counter);
@@ -317,6 +361,9 @@ public class Config {
 				idftMatrix.setAtIndex(vert, horz, tmp);
 			}
 		}
+	}
+	public Integer getNumberOfIterations() {
+		return this.numberOfIterations;
 	}
 
 
