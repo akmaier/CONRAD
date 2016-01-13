@@ -173,7 +173,8 @@ public class DMIP_FanBeamBackProjector2D {
 		Grid1D cosineKernel = new Grid1D(detectorPixels);
 		for(int i=0; i<detectorPixels; ++i){
 			//TODO
-			cosineKernel.setAtIndex(i, 9999);//TODO
+			double s = ( i + 0.5) * detectorSpacing - detectorLength/2;
+			cosineKernel.setAtIndex(i, (float) (focalLength / Math.sqrt(focalLength * focalLength + s * s) ));//TODO
 		}
 		
 		//apply cosine weights to each projection
@@ -221,7 +222,8 @@ public class DMIP_FanBeamBackProjector2D {
 
 				// implement the conditions as described in Parker's paper
 				if (beta <= 2 * (delta - gamma)) {
-					float val = 0; //TODO
+					double tmp = (Math.PI * beta) / (4.0 * (delta - gamma));
+					float val = (float) (Math.pow(Math.sin(tmp), 2)); //TODO
 					if (Double.isNaN(val)){
 						continue;
 					}
@@ -231,7 +233,8 @@ public class DMIP_FanBeamBackProjector2D {
 					parker.setAtIndex(t, b , 1);
 				}
 				else if (beta <= (Math.PI + 2.d * delta) + 1e-12) {
-					float val = 0;//TODO
+					double tmp = (Math.PI / 4.0) * ((Math.PI + 2.0 * delta - beta) / (delta + gamma));
+					float val = (float) (Math.pow(Math.sin(tmp), 2));//TODO
 					if (Double.isNaN(val)){
 						continue;
 					}
