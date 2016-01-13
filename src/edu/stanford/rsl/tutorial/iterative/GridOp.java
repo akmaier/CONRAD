@@ -185,7 +185,7 @@ public final class GridOp {
 	 * @return maximum value of grid a
 	 */
 	public static double max(Grid3D a) {
-		return a.getGridOperator().min(a);
+		return a.getGridOperator().max(a);
 	}
 
 	/**

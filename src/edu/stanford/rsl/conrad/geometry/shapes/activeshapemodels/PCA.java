@@ -179,6 +179,28 @@ public class PCA {
 	}
 	
 	/**
+	 * Performs the principal component analysis on the data-set.
+	 * Alternative run with preset feature space dimensionality.
+	 * @param dimensionality Number of principal components used to span the feature space.
+	 */
+	public void run(int dimensionality){
+		assert(data != null) : new Exception("Initialize data array fist.");
+		assert(dimensionality <= this.numSamples ) : new Exception("Feature space dimensionality cannot exceed number of samples.");
+		
+		System.out.println("Starting principal component analysis on " + numSamples + " data-sets.");
+		
+		DecompositionSVD svd = new DecompositionSVD(data);
+		
+		plot(svd.getSingularValues());
+		
+		this.numComponents = dimensionality;
+		
+		reduceDimensionality(svd.getSingularValues(), normalizeColumns(svd.getU()));
+		//this.eigenVectors = normalizeColumns(svd.getU());
+		//this.eigenValues = svd.getSingularValues();		
+	}
+	
+	/**
 	 * Allocates and sets the principal components and the corresponding variation values. Is used for dimensionality reduction after 
 	 * the amount of principal components needed has been determined.
 	 * @param v The variation values.
@@ -255,6 +277,32 @@ public class PCA {
 	 * @return The variation as point-like matrix. 
 	 */
 	public SimpleMatrix applyWeight(float[] weights){
+		assert(weights.length == this.eigenVectors.getCols()) : new Exception("Weights don't match the size of the score matrix.");
+		SimpleVector col = new SimpleVector(numPoints);
+		
+		for(int i = 0; i < weights.length; i++){
+			col.add(this.eigenVectors.getCol(i).multipliedBy(weights[i] * eigenValues[i]));
+		}
+		
+		for(int i = 0; i < numVertices; i++){
+			SimpleVector row = data.consensus.getRow(i);
+			for(int j = 0; j < dimension; j++){
+				col.addToElement(i * dimension + j, row.getElement(j));
+			}
+		}
+		
+		return toPointlikeMatrix(col);
+	}
+	
+	/**
+	 * Applies weighting to the columns in the score matrix and hence calculates weighted variation of the data corresponding 
+	 * to a variation of the principal components. Weights are multiplied with the corresponding Eigenvalue.
+	 * For the output points of dimensionality corresponding to the class member are assumed.
+	 * Note that this the weights are formulated in terms of Variance not Standard-Deviation! Care has to be taken not to produce invalid shapes! 
+	 * @param weights The weights for the different principal components.
+	 * @return The variation as point-like matrix. 
+	 */
+	public SimpleMatrix applyWeight(double[] weights){
 		assert(weights.length == this.eigenVectors.getCols()) : new Exception("Weights don't match the size of the score matrix.");
 		SimpleVector col = new SimpleVector(numPoints);
 		
