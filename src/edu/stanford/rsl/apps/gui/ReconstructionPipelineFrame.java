@@ -64,7 +64,7 @@ import edu.stanford.rsl.conrad.utils.RegKeys;
  * LEGALLY FOR ANY CORPORATE OR COMMERCIAL PURPOSE.
  */
 public class ReconstructionPipelineFrame extends JFrame implements ActionListener, UpdateableGUI {
-
+	
 	/**
 	 * 
 	 */
@@ -380,6 +380,7 @@ public class ReconstructionPipelineFrame extends JFrame implements ActionListene
 					pipelineFrame = new ConfigurePipelineFrame();
 					pipelineFrame.setParentFrame(this);
 					pipelineFrame.setVisible(true);
+					pipelineFrame.setLocation(CONRAD.getWindowTopCorner());
 				} else {
 					if (pipelineFrame.isExited()){
 						pipelineFrame = new ConfigurePipelineFrame();
@@ -398,6 +399,7 @@ public class ReconstructionPipelineFrame extends JFrame implements ActionListene
 					
 					configFrame.setParentFrame(this);
 					configFrame.setVisible(true);
+					configFrame.setLocation(CONRAD.getWindowTopCorner());
 				} else {
 					if (configFrame.isExited()){
 						configFrame = new ConfigurationFrame();
@@ -523,6 +525,7 @@ public class ReconstructionPipelineFrame extends JFrame implements ActionListene
 		CONRAD.setup();
 		ReconstructionPipelineFrame oscar = new ReconstructionPipelineFrame();
 		oscar.setVisible(true);
+		oscar.setLocation(CONRAD.getWindowTopCorner());
 	}
 
 }

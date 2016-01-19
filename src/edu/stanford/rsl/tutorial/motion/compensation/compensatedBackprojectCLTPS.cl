@@ -56,15 +56,6 @@ __kernel void backprojectKernel_returnMotion(
 	
 	int gloSizex = get_global_size(0);
 	int gloSizey = get_global_size(1);
-	
-	int x = gidx*locSizex+lidx;
-    int y = gidy*locSizey+lidy;
-	
-	if (x >= reconDimX || y >= reconDimY)
-		return;
-		
-	unsigned int zStride = reconDimX*reconDimY;
-	unsigned int yStride = reconDimX;
 		
 	int ptsFloatLength = mul24(ptsNr,3);
 	int nrOfLocalThreads = mul24(locSizex,locSizey);
@@ -81,6 +72,14 @@ __kernel void backprojectKernel_returnMotion(
 	
 	barrier(CLK_LOCAL_MEM_FENCE); // make sure that all points are in local memory
 		
+	int x = gidx*locSizex+lidx;
+    int y = gidy*locSizey+lidy;
+	
+	if (x >= reconDimX || y >= reconDimY)
+		return;
+		
+	unsigned int zStride = reconDimX*reconDimY;
+	unsigned int yStride = reconDimX;
 
 	// x and y will be constant in this thread;
     float xcoord = (x * voxelSpacingX) - offsetX;
@@ -180,18 +179,6 @@ __kernel void backprojectKernel(
 	
 	int locSizex = get_local_size(0);
 	int locSizey = get_local_size(1);
-	
-	int gloSizex = get_global_size(0);
-	int gloSizey = get_global_size(1);
-	
-	int x = gidx*locSizex+lidx;
-    int y = gidy*locSizey+lidy;
-	
-	if (x >= reconDimX || y >= reconDimY)
-		return;
-		
-	unsigned int zStride = reconDimX*reconDimY;
-	unsigned int yStride = reconDimX;
 		
 	int ptsFloatLength = mul24(ptsNr,3);
 	int nrOfLocalThreads = mul24(locSizex,locSizey);
@@ -208,6 +195,14 @@ __kernel void backprojectKernel(
 	
 	barrier(CLK_LOCAL_MEM_FENCE); // make sure that all points are in local memory
 		
+	int x = gidx*locSizex+lidx;
+    int y = gidy*locSizey+lidy;
+	
+	if (x >= reconDimX || y >= reconDimY)
+		return;
+		
+	unsigned int zStride = reconDimX*reconDimY;
+	unsigned int yStride = reconDimX;
 
 	// x and y will be constant in this thread;
     float xcoord = (x * voxelSpacingX) - offsetX;
@@ -221,12 +216,13 @@ __kernel void backprojectKernel(
 	coordPreComp.y = dot((float4)(initialRigid[1],initialRigid[4],0.f,initialRigid[10]),twoDpoint);
 	coordPreComp.z = dot((float4)(initialRigid[2],initialRigid[5],0.f,initialRigid[11]),twoDpoint);
 	coordPreComp.w = 0.f;
-
+	
 	
 	for (int z = 0; z < reconDimZ; z++){
 
 		float zcoord = (z * voxelSpacingZ)- offsetZ;
 		float4 coord = coordPreComp + ((float4)(initialRigid[6], initialRigid[7], initialRigid[8], 0.f))*zcoord;
+		//float4 coord = (float4)(xcoord,ycoord,zcoord,0.f);
 		
 		float xi = 0;
 		float yi = 0;
@@ -250,7 +246,17 @@ __kernel void backprojectKernel(
 		xi += b[0];
 		yi += b[1];
 		zi += b[2];
-
+	
+		/*
+		xi += dot((float4)(initialRigid[0],initialRigid[3],initialRigid[6],0.f),coord);
+		yi += dot((float4)(initialRigid[1],initialRigid[4],initialRigid[7],0.f),coord);
+		zi += dot((float4)(initialRigid[2],initialRigid[5],initialRigid[8],0.f),coord);
+		
+		xi += initialRigid[9];
+		yi += initialRigid[10];
+		zi += initialRigid[11]; 
+		*/
+		
 		coord.x += xi;
 		coord.y += yi;
 		coord.z += zi;

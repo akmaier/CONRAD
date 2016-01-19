@@ -213,7 +213,10 @@ public class FastRadialSymmetryTool extends IndividualImageFilteringTool {
 			// the symmetry measure.  The Gaussian is also scaled in magnitude
 			// by n so that large scales do not lose their relative weighting.
 			ImageProcessor ip = ImageUtil.wrapGrid2D(F);
-			conv.convolve(ip, ImageUtil.create2DGauss((int)Math.round(radius),(int)Math.round(radius),0.25*radius).getBuffer(), (int)Math.round(radius), (int)Math.round(radius));
+			int gaussSize = (int)Math.round(radius);
+			if(gaussSize%2==0)
+				gaussSize++;
+			conv.convolve(ip, ImageUtil.create2DGauss(gaussSize,gaussSize,0.25*radius).getBuffer(), gaussSize, gaussSize);
 			NumericPointwiseOperators.addBy(output, ImageUtil.wrapImageProcessor(ip));
 
 		}

@@ -12,6 +12,7 @@ import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 import ij.process.StackStatistics;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import edu.stanford.rsl.conrad.data.numeric.Grid3D;
@@ -21,13 +22,17 @@ import edu.stanford.rsl.conrad.filtering.ImageConstantMathFilter;
 import edu.stanford.rsl.conrad.filtering.ImageFilteringTool;
 import edu.stanford.rsl.conrad.io.ImagePlusDataSink;
 import edu.stanford.rsl.conrad.io.ImagePlusProjectionDataSource;
+import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
 import edu.stanford.rsl.conrad.opencl.OpenCLBackProjector;
 import edu.stanford.rsl.conrad.pipeline.ParallelImageFilterPipeliner;
+import edu.stanford.rsl.conrad.reconstruction.VOIBasedReconstructionFilter;
 import edu.stanford.rsl.conrad.utils.CONRAD;
 import edu.stanford.rsl.conrad.utils.Configuration;
 import edu.stanford.rsl.conrad.utils.DoubleArrayUtil;
+import edu.stanford.rsl.conrad.utils.ImageGridBuffer;
 import edu.stanford.rsl.conrad.utils.ImageUtil;
+import edu.stanford.rsl.tutorial.motion.compensation.OpenCLCompensatedBackProjectorTPS;
 
 
 public class AutomaticMarkerDetectionWorker extends MarkerDetectionWorker{
@@ -44,7 +49,7 @@ public class AutomaticMarkerDetectionWorker extends MarkerDetectionWorker{
 	int nrOfBeads = -1;
 
 	boolean showRefBeadsReconstruction = false;
-	
+
 	Roi cropRoi = null;
 
 	public AutomaticMarkerDetectionWorker(){
@@ -87,6 +92,12 @@ public class AutomaticMarkerDetectionWorker extends MarkerDetectionWorker{
 		}
 	}
 
+
+	public void initialize3DMarkerPositionsOnly(VOIBasedReconstructionFilter customBackprojector){
+		fastRadialSymmetrySpace = FRST();
+		Grid3D frst = new Grid3D(fastRadialSymmetrySpace);
+		initializeMarkerPositions(frst, false, customBackprojector);
+	}
 
 	private void initializeMarkerPositions(int nrOfMarkers){
 		fastRadialSymmetrySpace = FRST();
@@ -131,6 +142,10 @@ public class AutomaticMarkerDetectionWorker extends MarkerDetectionWorker{
 
 
 	private void initializeMarkerPositions(Grid3D frst, boolean findMaximumOnly){
+		initializeMarkerPositions(frst, findMaximumOnly, null);
+	}
+
+	private void initializeMarkerPositions(Grid3D frst, boolean findMaximumOnly, VOIBasedReconstructionFilter customBackprojector){
 		// Calculate the FRST -> subtract threshold -> set minimum to 0 ->  apply 2D Gauss -> backproject
 
 		Grid3D	frstIn = new Grid3D(frst);
@@ -159,7 +174,12 @@ public class AutomaticMarkerDetectionWorker extends MarkerDetectionWorker{
 		// ParkerWeightingTool pwt = new TrajectoryParkerWeightingTool();
 		// Apply backprojection (no ramp filtering required as we want to have the beads smeared anyway)
 
-		OpenCLBackProjector oclb = new OpenCLBackProjector();
+		VOIBasedReconstructionFilter oclb = null;
+		if (customBackprojector != null)
+			oclb = customBackprojector;
+		else
+			oclb = new OpenCLBackProjector();
+		
 		try {
 			//pwt.configure();
 			oclb.configure();
@@ -167,8 +187,20 @@ public class AutomaticMarkerDetectionWorker extends MarkerDetectionWorker{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
-		tmp = doParallelStuff(tmp, new ImageFilteringTool[] {oclb});
+		if (oclb instanceof OpenCLCompensatedBackProjectorTPS){
+			ImageGridBuffer igb = new ImageGridBuffer();
+			igb.set(tmp);
+			((OpenCLCompensatedBackProjectorTPS)oclb).setInitialRigidTransform(SimpleMatrix.I_4.clone());
+			oclb.setShowStatus(true);
+			try {
+				((OpenCLCompensatedBackProjectorTPS)oclb).loadInputQueue(igb);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			tmp = ((OpenCLCompensatedBackProjectorTPS)oclb).reconstructCL();
+		}
+		else
+			tmp = doParallelStuff(tmp, new ImageFilteringTool[] {oclb});
 
 
 
@@ -321,16 +353,16 @@ public class AutomaticMarkerDetectionWorker extends MarkerDetectionWorker{
 	public void setShowRefBeadsReconstruction(boolean showRefBeadsReconstruction) {
 		this.showRefBeadsReconstruction = showRefBeadsReconstruction;
 	}
-	
+
 	public void setCropRoi(Roi cropRoi) {
 		this.cropRoi = cropRoi;
 	}
-	
+
 	public Roi getCropRoi() {
 		return cropRoi;
 	}
-	
-	
+
+
 	public static void main(String[] args) {
 		CONRAD.setup();
 

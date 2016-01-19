@@ -30,6 +30,7 @@ import edu.stanford.rsl.conrad.geometry.trajectories.MultiSweepTrajectory;
 import edu.stanford.rsl.conrad.geometry.trajectories.Trajectory;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
 import edu.stanford.rsl.conrad.physics.detector.XRayDetector;
+import edu.stanford.rsl.conrad.utils.CONRAD;
 import edu.stanford.rsl.conrad.utils.Configuration;
 import edu.stanford.rsl.conrad.utils.GUIUtil;
 import edu.stanford.rsl.conrad.utils.UserUtil;
@@ -227,6 +228,7 @@ public class ConfigurationFrame extends JFrame implements ActionListener {
 		if(trajEdit == null) {
 			trajEdit = new TrajectoryEditor();
 			trajEdit.setVisible(true);
+			trajEdit.setLocation(CONRAD.getWindowTopCorner());
 		}
 	}
 
