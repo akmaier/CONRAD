@@ -14,21 +14,23 @@ public class SheppLoganRampFilterWithRollOff extends SheppLoganRampFilter {
 	private double slope = 1.0;
 	
 	
-	@Override
-	public RampFilter clone() {
-		SheppLoganRampFilterWithRollOff clone = new SheppLoganRampFilterWithRollOff();
-		clone.setSourceToAxisDistance(this.getSourceToAxisDistance());
-		clone.setSourceToDetectorDistance(this.getSourceToDetectorDistance());
-		clone.setCutOffFrequency(this.getCutOffFrequency());
-		clone.setPhysicalPixelWidthInMilimeters(this.getPhysicalPixelWidthInMilimeters());
-		return clone;
-	}
+    @Override
+    public RampFilter clone() {
+          SheppLoganRampFilterWithRollOff clone = new SheppLoganRampFilterWithRollOff();
+          clone.setSourceToAxisDistance(this.getSourceToAxisDistance());
+          clone.setSourceToDetectorDistance(this.getSourceToDetectorDistance());
+          clone.setCutOffFrequency(this.getCutOffFrequency());
+          clone.setPhysicalPixelWidthInMilimeters(this.getPhysicalPixelWidthInMilimeters());
+          clone.start=start;
+          clone.scale=scale;
+          clone.slope=slope;
+          return clone;
+    }
 
-
-	@Override
-	public String getRampName() {
-		return "Shepp-Logan Ramp Filter with roll-off";
-	}
+    @Override
+    public String getRampName() {
+          return "Shepp-Logan Ramp Filter with roll-off (Start "+start+", Scale "+scale +", Slope "+slope+")";
+    }
 
 	public double getStart() {
 		return start;
