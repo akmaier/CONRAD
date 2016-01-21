@@ -121,7 +121,8 @@ public class XCatMetricPhantomCreator {
 
 			double[] timeList = new double[getSteps()];
 			for (int i = 0; i < timeList.length; i++) {
-				timeList[i]=((double)i)/((double)(getSteps()-1));
+				double steps = (getSteps()==1)?1.0:((double)(getSteps()-1));
+				timeList[i]=((double)i)/steps;
 			}
 
 
