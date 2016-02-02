@@ -673,7 +673,7 @@ public class OpenCLBackProjectorStreakReduction extends VOIBasedReconstructionFi
 
 	@Override
 	public String getToolName(){
-		return "OpenCL Backprojector";
+		return "OpenCL Backprojector with Streak Reduction";
 	}
 
 	/**
