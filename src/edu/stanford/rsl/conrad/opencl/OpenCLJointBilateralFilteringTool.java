@@ -71,10 +71,18 @@ public class OpenCLJointBilateralFilteringTool extends MultiProjectionFilter {
 
 	@Override
 	public void configure() throws Exception {
+		double sigmaGeom = UserUtil.queryDouble("Enter Geometric Sigma", this.sigmaGeom);
+		double sigmaPhoto = UserUtil.queryDouble("Enter Photommetric Sigma", this.sigmaPhoto);
+		boolean showGuidance = UserUtil.queryBoolean("Add guidance image in first channel?");
+		configure(sigmaGeom, sigmaPhoto, showGuidance);
+	}
+	
+
+	public void configure(double geom, double photo, boolean guide) throws Exception {
 		context = 0;
-		this.sigmaGeom = UserUtil.queryDouble("Enter Geometric Sigma", sigmaGeom);
-		this.sigmaPhoto = UserUtil.queryDouble("Enter Photommetric Sigma", sigmaPhoto);
-		this.showGuidance = UserUtil.queryBoolean("Add guidance image in first channel?");
+		this.sigmaGeom = geom;
+		this.sigmaPhoto = photo;
+		this.showGuidance = guide;
 		configured = true;
 	}
 
@@ -94,7 +102,7 @@ public class OpenCLJointBilateralFilteringTool extends MultiProjectionFilter {
 
 	@Override
 	public String getMedlineCitation() {
-		return "G. Petschnigg, M. Agrawala, H. Hoppe, R. Szeliski, M. Cohen, and K. Toyama, Digital photography with flash and no-flash image pairs, in Proc. ACM SIGGRAPH, 2004, pp. 664–672.";
+		return "G. Petschnigg, M. Agrawala, H. Hoppe, R. Szeliski, M. Cohen, and K. Toyama, Digital photography with flash and no-flash image pairs, in Proc. ACM SIGGRAPH, 2004, pp. 664ï¿½672.";
 	}
 
 	@Override
