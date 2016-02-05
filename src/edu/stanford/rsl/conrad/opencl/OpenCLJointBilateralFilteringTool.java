@@ -94,7 +94,7 @@ public class OpenCLJointBilateralFilteringTool extends MultiProjectionFilter {
 
 	@Override
 	public String getMedlineCitation() {
-		return "G. Petschnigg, M. Agrawala, H. Hoppe, R. Szeliski, M. Cohen, and K. Toyama, Digital photography with flash and no-flash image pairs, in Proc. ACM SIGGRAPH, 2004, pp. 664–672.";
+		return "G. Petschnigg, M. Agrawala, H. Hoppe, R. Szeliski, M. Cohen, and K. Toyama, Digital photography with flash and no-flash image pairs, in Proc. ACM SIGGRAPH, 2004, pp. 664ï¿½672.";
 	}
 
 	@Override
