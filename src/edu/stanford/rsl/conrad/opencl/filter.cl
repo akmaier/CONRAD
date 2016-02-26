@@ -74,7 +74,7 @@ kernel void bilateralFilter(global float * template, global float * image, globa
 	unsigned int x = gidx*locSizex+lidx;
 	unsigned int y = gidy*locSizey+lidy;
 
-	if (x >= gloSizex || y >= gloSizey)
+	if (x >= iwidth || y >= iheight)
 		return;
 
 	int width = (int)(sigma_spatial*2);
@@ -127,7 +127,7 @@ kernel void bilateralFilterTwoSigma(global float * template, global float * imag
 	unsigned int x = gidx*locSizex+lidx;
 	unsigned int y = gidy*locSizey+lidy;
 
-	if (x >= gloSizex || y >= gloSizey)
+	if (x >= iwidth || y >= iheight)
 		return;
 
 	
@@ -188,7 +188,7 @@ kernel void bilateralFilterRangeAdaptive(global float * template, global float *
 	unsigned int x = gidx*locSizex+lidx;
 	unsigned int y = gidy*locSizey+lidy;
 
-	if (x >= gloSizex || y >= gloSizey)
+	if (x >= iwidth || y >= iheight)
 		return;
 
 	
@@ -257,7 +257,7 @@ kernel void bilateralFilterNoiseAdaptivePathLength(global float * template, glob
 	unsigned int x = gidx*locSizex+lidx;
 	unsigned int y = gidy*locSizey+lidy;
 
-	if (x >= gloSizex || y >= gloSizey)
+	if (x >= iwidth || y >= iheight)
 		return;
 
 	
@@ -333,7 +333,7 @@ kernel void bilateralFilterPathLengthAdaptive(global float * template, global fl
 	unsigned int x = gidx*locSizex+lidx;
 	unsigned int y = gidy*locSizey+lidy;
 
-	if (x >= gloSizex || y >= gloSizey)
+	if (x >= iwidth || y >= iheight)
 		return;
 
 	
@@ -397,7 +397,7 @@ kernel void laplacianFilter(global float * template, global float * image, globa
 	unsigned int x = gidx*locSizex+lidx;
 	unsigned int y = gidy*locSizey+lidy;
 
-	if (x >= gloSizex || y >= gloSizey)
+	if (x >= iwidth || y >= iheight)
 		return;
 
 	int width = (int)(sigma_spatial*2);

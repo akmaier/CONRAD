@@ -74,10 +74,10 @@ public abstract class InterpolationOperators {
 		
 		lower = correctBoundsOfIndex(lower, grid.getSize()[1], bounds);
 		lowerPlusOne = correctBoundsOfIndex(lowerPlusOne, grid.getSize()[1], bounds);
-
+			
 		return (float) (
 				(1.0-d)*((lower!=null) ? interpolateLinear(grid.getSubGrid(lower), x, bounds) : 0.0)
-				+ ((d != 0.0) ? d*((lowerPlusOne != null) ? interpolateLinear(grid.getSubGrid(lower+1), x, bounds) : 0.0) : 0.0)
+				+ ((d != 0.0) ? d*((lowerPlusOne != null) ? interpolateLinear(grid.getSubGrid(lowerPlusOne), x, bounds) : 0.0) : 0.0)
 				);
 	}
 
@@ -98,7 +98,7 @@ public abstract class InterpolationOperators {
 		
 		return (float) (
 				(1.0-d)*((lower!=null) ? interpolateLinear(grid.getSubGrid(lower), x, y, bounds) : 0.0)
-				+ ((d != 0.0) ? d*((lowerPlusOne != null) ? interpolateLinear(grid.getSubGrid(lower+1), x, y, bounds) : 0.0) : 0.0)
+				+ ((d != 0.0) ? d*((lowerPlusOne != null) ? interpolateLinear(grid.getSubGrid(lowerPlusOne), x, y, bounds) : 0.0) : 0.0)
 				);
 	}
 
