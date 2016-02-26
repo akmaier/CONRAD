@@ -196,9 +196,9 @@ kernel void evaluateBox(global const float* parameter, global const float* sampl
 	
 	}
 		
-	float4 pointTop = mix(firstTop,secondTop, (4.0*v));
-	float4 pointBottom = mix(firstBottom,secondBottom, 4.0*v);
-	float4 point = mix(pointTop, pointBottom, 1.0-u);
+	float4 pointTop = mix(firstTop,secondTop, (float4)(4.0*v));
+	float4 pointBottom = mix(firstBottom,secondBottom, (float4)(4.0*v));
+	float4 point = mix(pointTop, pointBottom, (float4)(1.0-u));
 	
 	
 	outputBuffer[(iGID*3)] = point.x;  //(float)(pointBottom[0] * (1.0 - u) + pointTop[0] * u);
@@ -311,7 +311,7 @@ kernel void evaluatePyramid(global const float* parameter, global const float* s
 		
 	}
 	
-	point = mix(first, second, (4.0*v*numKnotsV/(float)(numKnotsV)));
+	point = mix(first, second, (float4)(4.0*v*numKnotsV/(float)(numKnotsV)));
 
 	outputBuffer[(iGID*3)] = point.x;
 	outputBuffer[(iGID*3)+1] = point.y;
