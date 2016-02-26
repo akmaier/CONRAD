@@ -46,7 +46,10 @@ public class ExtremeValueTruncationFilter extends IndividualImagePipelineFilteri
 			}
 		}
 		
-		return new Grid2D((float[])revan.getPixels(), revan.getWidth(), revan.getHeight());
+		Grid2D out = new Grid2D((float[])revan.getPixels(), revan.getWidth(), revan.getHeight());
+		out.setOrigin(imageProcessor.getOrigin());
+		out.setSpacing(imageProcessor.getSpacing());
+		return out;
 	}
 	
 	@Override
