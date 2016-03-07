@@ -77,7 +77,11 @@ public class Trajectory implements SafeSerializable{
 			reconVoxelSizes = new double[3];
 		}
 		if (source.projectionMatrices != null){
-			this.projectionMatrices =  Arrays.copyOf(source.projectionMatrices, source.projectionMatrices.length);
+			this.projectionMatrices =  new Projection[source.projectionMatrices.length];
+			for(int  i = 0; i < source.projectionMatrices.length; i++)
+			{
+				this.projectionMatrices[i] = new Projection(source.projectionMatrices[i]);
+			}
 		}
 		if (source.primaryAngles != null){
 			this.primaryAngles =  Arrays.copyOf(source.primaryAngles, source.primaryAngles.length);
