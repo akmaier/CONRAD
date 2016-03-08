@@ -50,7 +50,7 @@ public class OpenCLTextureTimeVariantSurfaceBSpline extends
 		this.controlPoints.getBuffer().rewind();	
 		
 		texture = context.createImage3d(this.controlPoints.getBuffer(), this.timeVariantShapes.get(0).getVKnots().getLen()-4, this.timeVariantShapes.get(0).getUKnots().getLen()-4, this.timeVariantShapes.size(), new CLImageFormat(CLImageFormat.ChannelOrder.RGBA, CLImageFormat.ChannelType.FLOAT), CLMemory.Mem.READ_ONLY);
-		device.createCommandQueue().putWriteImage(texture, true);
+		device.createCommandQueue().putWriteImage(texture, true).finish().release();
 	}
 	
 	/*

@@ -50,7 +50,7 @@ public class SelectableEnergyMonochromaticAbsorptionModel extends
 					//
 					// length is in [mm]
 					// attenuation is in [g/cm^3]
-					// conversion from [g*mm/mc^3] = [g*0.1cm/cm^3] to [g/cm^2]
+					// conversion from [g*mm/cm^3] = [g*0.1cm/cm^3] to [g/cm^2]
 					// --> sum/10.0;
 		return  sum / 10;
 	}
@@ -65,7 +65,7 @@ public class SelectableEnergyMonochromaticAbsorptionModel extends
 	@Override
 	public void configure() throws Exception {
 		try {
-			energy=UserUtil.queryDouble("Enter energy: ", energy);
+			energy=UserUtil.queryDouble("Enter energy in [keV]: ", energy);
 			configured = true;
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

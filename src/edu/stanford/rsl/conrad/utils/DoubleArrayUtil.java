@@ -4,6 +4,7 @@ import ij.ImagePlus;
 import ij.process.FloatProcessor;
 
 import java.text.NumberFormat;
+import java.util.Arrays;
 import java.util.HashMap;
 
 
@@ -383,6 +384,17 @@ public abstract class DoubleArrayUtil {
 		}
 		return mean / array.length;
 	}
+	
+	/**
+	 * Computes the median value of a given array
+	 * @param array the array
+	 * @return the median value as double
+	 */
+	public static double computeMedian(double[] array){
+		double [] sorted = Arrays.copyOf(array, array.length);
+		Arrays.sort(sorted);
+		return sorted[sorted.length/2];
+	}
 
 	/**
 	 * Returns the minimal and the maximal value in a given array
@@ -418,6 +430,22 @@ public abstract class DoubleArrayUtil {
 
 		}
 		return min;		
+	}
+	
+	/**
+	 * Returns the maximal value in a given array
+	 * @param array the array
+	 * @return the minimal value
+	 */
+	public static double maxOfArray(double [] array){
+		double max = -Double.MAX_VALUE;
+		for (int i = 0; i < array.length; i++){
+			if (array[i] > max) {
+				max = array[i];
+			}
+
+		}
+		return max;		
 	}
 
 
