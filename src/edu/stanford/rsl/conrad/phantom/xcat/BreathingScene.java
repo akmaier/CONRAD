@@ -11,6 +11,7 @@ import edu.stanford.rsl.conrad.geometry.motion.MotionField;
 import edu.stanford.rsl.conrad.geometry.motion.PlanarMotionField;
 import edu.stanford.rsl.conrad.geometry.motion.RotationMotionField;
 import edu.stanford.rsl.conrad.geometry.motion.timewarp.DualPhasePeriodicTimeWarper;
+import edu.stanford.rsl.conrad.geometry.motion.timewarp.HarmonicTimeWarper;
 import edu.stanford.rsl.conrad.geometry.motion.timewarp.IdentityTimeWarper;
 import edu.stanford.rsl.conrad.geometry.motion.timewarp.TimeWarper;
 import edu.stanford.rsl.conrad.geometry.shapes.simple.PointND;
@@ -21,6 +22,7 @@ import edu.stanford.rsl.conrad.numerics.SimpleOperators;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
 import edu.stanford.rsl.conrad.utils.Configuration;
 import edu.stanford.rsl.conrad.utils.RegKeys;
+import edu.stanford.rsl.jpop.utils.UserUtil;
 
 public class BreathingScene extends WholeBodyScene {
 
@@ -61,7 +63,13 @@ public class BreathingScene extends WholeBodyScene {
 		//min = new PointND(-62, 100, 100);
 		//max = new PointND(320, 450, 426);
 
-
+		double breathCycles = 1.0;
+		try {
+			breathCycles = UserUtil.queryDouble("Number of Breathing Cycles in Scene (acquistion time * breathing rate):", 1.0);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		setName("Breathing Scene");
 		init();
@@ -288,7 +296,7 @@ public class BreathingScene extends WholeBodyScene {
 				splines.remove(i);
 			}
 		}
-		setTimeWarper(new IdentityTimeWarper());
+		setTimeWarper(new HarmonicTimeWarper(breathCycles));
 		
 		createPhysicalObjects();
 		min = new PointND(-62, 150, 50);

@@ -274,7 +274,7 @@ public class OpenCLProjectionPhantomRenderer extends StreamingPhantomRenderer {
 			}
 		}
 		priorities.getBuffer().rewind();
-		device.createCommandQueue().putWriteBuffer(priorities, false).finish();
+		device.createCommandQueue().putWriteBuffer(priorities, false).finish().release();
 
 		String disableAutoCenterBoolean = Configuration.getGlobalConfiguration().getRegistryEntry(RegKeys.DISABLE_CENTERING_4DPHANTOM_PROJECTION_RENDERING);
 		boolean disableAutoCenter = false;

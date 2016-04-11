@@ -183,6 +183,22 @@ public abstract class SimpleOperators {
 	// ******************* Matrix/Matrix operators ******************** //
 	// **************************************************************** //
 	/**
+	 * 
+	 * @param in The matrix to process
+	 * @param fct A generic function, e.g. the absolute value
+	 * @return a matrix with the function applied to all elements
+	 */
+	public static SimpleMatrix elementWiseOperator(final SimpleMatrix in, DoubleFunction fct){
+		SimpleMatrix out = in.clone();
+		for (int i = 0; i < out.getRows(); i++) {
+			for (int j = 0; j < out.getCols(); j++) {
+				out.setElementValue(i, j, fct.f(out.getElement(i, j)));
+			}
+		}
+		return out;
+	}
+	
+	/**
 	 * Computes the sum of provided matrices
 	 * @param addends  A comma-separated list or an array of matrices.
 	 * @return a matrix representing the sum of provided matrices
@@ -333,7 +349,7 @@ public abstract class SimpleOperators {
 	 * 
 	 * @return interpolated rigid transform matrix of size 4x4
 	 */
-	public static SimpleMatrix interpolateRigidTransforms(SimpleMatrix A, SimpleMatrix B, double weightA, double weightB){
+	public static SimpleMatrix interpolateRigidTransforms3D(SimpleMatrix A, SimpleMatrix B, double weightA, double weightB){
 		assert(A.isRigidMotion3D(CONRAD.DOUBLE_EPSILON) && B.isRigidMotion3D(CONRAD.DOUBLE_EPSILON)) : new IllegalArgumentException("Matrix interpolation requires 3D rigid motion matrices (rotation + translatio only) of size 4x4!");
 		
 		boolean considerTranslationOnly = A.getSubMatrix(0, 0, 3, 3).isIdentity(CONRAD.DOUBLE_EPSILON);
@@ -376,16 +392,89 @@ public abstract class SimpleOperators {
 	}
 	
 	/**
+	 * Performs an interpolation between two 2D rigid transformations (rotation and translation)
+	 * matrices, represented as 3x3 affine matrices.
+	 * 
+	 * @param A First 2D Rigid transform matrix of size 3x3
+	 * @param B Second 2D Rigid transform matrix of size 3x3
+	 * @param weightA weight for first rigid transform
+	 * @param weightB weight for second transform
+	 * 
+	 * @return interpolated rigid transform matrix of size 3x3
+	 */
+	public static SimpleMatrix interpolateRigidTransforms2D(SimpleMatrix A, SimpleMatrix B, double weightA, double weightB){
+		assert(A.isRigidMotion2D(CONRAD.DOUBLE_EPSILON) && B.isRigidMotion2D(CONRAD.DOUBLE_EPSILON)) : new IllegalArgumentException("Matrix interpolation requires 2D rigid motion matrices (rotation + translatio only) of size 3x3!");
+		
+		boolean considerTranslationOnly = A.getSubMatrix(0, 0, 2, 2).isIdentity(CONRAD.DOUBLE_EPSILON);
+		considerTranslationOnly &= B.getSubMatrix(0, 0, 2, 2).isIdentity(CONRAD.DOUBLE_EPSILON);
+		
+		// make sure weights add up to 1
+		double sum = (weightA+weightB);
+		weightA /= sum;
+		weightB /= sum;
+		
+		SimpleMatrix outR = null;
+		if(!considerTranslationOnly){
+			SimpleMatrix firstRpart = A.getSubMatrix(0,0,2,2);
+			SimpleMatrix scndRpart = B.getSubMatrix(0,0,2,2);
+			SimpleMatrix firstInverseRpart = firstRpart.inverse(InversionType.INVERT_SVD);
+			SimpleMatrix T = SimpleOperators.multiplyMatrixProd(firstInverseRpart,scndRpart);
+			Matrix jamT = new Matrix(T.copyAsDoubleArray());
+			EigenvalueDecomposition evd = jamT.eig();
+			double[] real = evd.getRealEigenvalues();
+			double[] imag = evd.getImagEigenvalues();
+			for (int i = 0; i < 2; i++) {
+				double angle = Math.atan2(imag[i], real[i]);
+				angle*=weightB;
+				real[i] = Math.cos(angle);
+				imag[i] = Math.sin(angle);
+			}
+			Matrix newR = evd.getV().times(evd.getD()).times(evd.getV().inverse());
+			outR = SimpleOperators.multiplyMatrixProd(firstRpart, new SimpleMatrix(newR.getArrayCopy()));
+		}
+		
+		SimpleVector outCol = A.getSubCol(0, 2, 2).multipliedBy(weightA);
+		outCol.add(B.getSubCol(0, 2, 2).multipliedBy(weightB));
+		SimpleMatrix out = new SimpleMatrix(3,3);
+		out.identity();
+		out.setSubColValue(0, 2, outCol);
+		if(!considerTranslationOnly){
+			out.setSubMatrixValue(0, 0, outR);
+		}
+		return out;
+	}
+	
+	/**
 	 * Computes the mean rigid transform of a 3D transformation
 	 * @param inputTransforms A collection of rigid transform matrices of size 4x4
 	 * @return The mean rigid transform of the collections transform
 	 */
-	public static SimpleMatrix getMeanRigidTransform(Iterable<SimpleMatrix> inputTransforms){
+	public static SimpleMatrix getMeanRigidTransform3D(Iterable<SimpleMatrix> inputTransforms){
 		Iterator<SimpleMatrix> iter = inputTransforms.iterator();
 		SimpleMatrix compareOut = SimpleMatrix.I_4.clone();
 		int ctr = 0;
 		while(iter.hasNext()){
-			compareOut = SimpleOperators.interpolateRigidTransforms(
+			compareOut = SimpleOperators.interpolateRigidTransforms3D(
+					iter.next(),
+					compareOut,
+					1, ctr);
+			ctr++;
+		}
+		return compareOut;
+	}
+	
+	
+	/**
+	 * Computes the mean rigid transform of a collection of 2D transformation
+	 * @param inputTransforms A collection of 2D rigid transform matrices of size 3x3
+	 * @return The mean rigid transform of the collections transform
+	 */
+	public static SimpleMatrix getMeanRigidTransform2D(Iterable<SimpleMatrix> inputTransforms){
+		Iterator<SimpleMatrix> iter = inputTransforms.iterator();
+		SimpleMatrix compareOut = SimpleMatrix.I_3.clone();
+		int ctr = 0;
+		while(iter.hasNext()){
+			compareOut = SimpleOperators.interpolateRigidTransforms2D(
 					iter.next(),
 					compareOut,
 					1, ctr);
