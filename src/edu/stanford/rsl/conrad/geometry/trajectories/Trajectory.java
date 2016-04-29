@@ -560,7 +560,7 @@ public class Trajectory implements SafeSerializable{
 			min.updateIfLower(source);
 			max.updateIfHigher(source);
 		}
-		PointND center = trajectory.computeIsoCenterOld();
+		PointND center = trajectory.computeIsoCenter();
 		SimpleVector range = max.getAbstractVector();
 		range.add(min.getAbstractVector().negated());		
 		
