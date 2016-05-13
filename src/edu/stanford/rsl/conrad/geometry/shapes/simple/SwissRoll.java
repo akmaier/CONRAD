@@ -17,9 +17,16 @@ public class SwissRoll implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	private static PointND[] points;
+	private static ArrayList<PointND> pointList;
 
-	public ArrayList<PointND> buildSwissRoll(double gap, int numberOfPoints, int width) {
-		ArrayList<PointND> Swiss = new ArrayList<PointND>();
+	/**
+	 * function to build a SwissRoll with the given parameters, saves the points in an PointND[] array and in a ArrayList<PoinND>  
+	 * @param gap gap between the single "snakes"
+	 * @param numberOfPoints number of points in one "snake"
+	 * @param width number of "snakes" beside each other
+	 */
+	public SwissRoll(double gap, int numberOfPoints, int width) {
+		pointList = new ArrayList<PointND>();
 		points = new PointND[numberOfPoints * width];
 		double distance = 1.0 / numberOfPoints;
 	
@@ -33,14 +40,23 @@ public class SwissRoll implements Serializable {
 						* Math.sin(2 * Math.PI
 								* Math.sqrt(2 + 2 * (-1 + i * distance))), 2
 						* j * gap);
-				Swiss.add(points[width * i + j]);
+				pointList.add(points[width * i + j]);
 
 			}
 		}
-		return Swiss;
-
 	}
-
+	/**
+	 * returns an ArrayList of the points of the SwissRoll
+	 * @return an ArrayList of the points of the SwissRoll
+	 */
+	public ArrayList<PointND> getPointList(){
+		return pointList; 
+	}
+	
+	/**
+	 * returns an PointND[] of the points of the SwissRoll
+	 * @return an PointND[] of the points of the SwissRoll
+	 */
 	public PointND[] getPoints(){
 		return points;
 	}
