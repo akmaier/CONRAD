@@ -41,6 +41,7 @@ public class BreathingScene extends WholeBodyScene {
 	private PointND diaphragmTop = new PointND(75,250,250);
 	private DualPhasePeriodicTimeWarper dualPhaseWarper = new DualPhasePeriodicTimeWarper(2,3);
 	private boolean ignoreArms = true;
+	private boolean performQuery = true;
 
 	@Override
 	public MotionField getMotionField(){
@@ -50,8 +51,20 @@ public class BreathingScene extends WholeBodyScene {
 	
 	public BreathingScene (){
 
-
+		
 	}
+	
+	
+	/**
+	 * Convenience constructor for combined scenes.
+	 * If the number of breathing phases will be defined from outside,
+	 * no user query needs to be performed during configure().
+	 * @param performQuery set to false to suppress user query.
+	 */
+	public BreathingScene( boolean performQuery ) {
+		this.performQuery = performQuery;
+	}
+	
 
 	@Override
 	public void configure(){
@@ -64,11 +77,13 @@ public class BreathingScene extends WholeBodyScene {
 		//max = new PointND(320, 450, 426);
 
 		double breathCycles = 1.0;
-		try {
-			breathCycles = UserUtil.queryDouble("Number of Breathing Cycles in Scene (acquistion time * breathing rate):", 1.0);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if(performQuery) {
+			try {
+				breathCycles = UserUtil.queryDouble("Number of Breathing Cycles in Scene (acquistion time * breathing rate):", 1.0);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		
 		setName("Breathing Scene");
