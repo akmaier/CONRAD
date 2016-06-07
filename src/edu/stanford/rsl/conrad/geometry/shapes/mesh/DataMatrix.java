@@ -321,11 +321,16 @@ public class DataMatrix extends SimpleMatrix{
 		for(int c : selectCols) {
 			subMatrix.scaling.add(this.scaling.get(c));
 		}
+		
+		// Columns have been omitted. Therefore, the consensus needs to be recalculated.
 		subMatrix.calculateConsensus();
 		
 		return subMatrix;
 	}
 	
+	/**
+	 * Calculates the mean over all observations stored column-wise and saves the result to consensus.
+	 */
 	private void calculateConsensus() {
 		if(consensus != null) return;
 		
