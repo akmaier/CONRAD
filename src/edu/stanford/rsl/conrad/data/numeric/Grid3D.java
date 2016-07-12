@@ -66,6 +66,9 @@ public class Grid3D extends NumericGrid {
 	{
 		for (int i=0; i < size[2]; ++i) {
 			buffer.add(new Grid2D(size[0],size[1]));
+			// Each subgrid has to inherit spacing and origin of parent grid
+			buffer.get(i).setSpacing(this.getSpacing()[0],this.getSpacing()[1]);
+			buffer.get(i).setOrigin( this.getOrigin()[0], this.getOrigin()[1]);
 		}
 	}
 
