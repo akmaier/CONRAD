@@ -87,14 +87,33 @@ public class Grid2D extends NumericGrid implements Transformable {
 		return this.buffer;
 	}
 
+	@Deprecated
 	/**
-	 * Returns the corresponding Grid1D object that points on the linear 2D row memory 
-	 * @param j The row-index (y-index, height-index) 
-	 * @return the sub grid
+	 * Set the corresponding Grid1D object on the linear 2D row memory
+	 * 
+	 * CAUTION: We set absolute values and no references.
+	 * If the input Grid1D subGrid is changed at a later point,
+	 * it won't change the values in the Grid2D.
+	 * This is due to "float buffer" nature of Grid2D,
+	 * which is a fundamental difference to the structure of Grid3D,
+	 * which is defined by an ArrayList of Grid2Ds.
+	 * 
+	 * You can do a little workaround, when adding the following code:
+	 * 
+	 * myGrid2D.setSubgrid(j, Grid1D myGrid1D);
+	 * myGrid1D = myGrid2D.getSubGrid(j);
+	 * 
+	 * @param j The row-index (y-index, height-index)
+	 * @param subGrid
 	 */
-	public Grid1D getSubGrid(int j) {
-		notifyBeforeRead();
-		return subGrids[j];
+	public void setSubGrid(int j, Grid1D subGrid) {
+		
+        for (int i=0; i<subGrid.getSize()[0]; ++i) {
+            setAtIndex(j, i, subGrid.getAtIndex(i));
+        }
+       
+        
+        notifyAfterWrite();
 	}
 
 	@Deprecated
