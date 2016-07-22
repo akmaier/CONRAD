@@ -87,6 +87,17 @@ public class Grid2D extends NumericGrid implements Transformable {
 		return this.buffer;
 	}
 
+	/**
+	 * Returns the corresponding Grid1D object that points on the linear 2D row memory 
+	 * @param j The row-index (y-index, height-index) 
+	 * @return the sub grid
+	 */
+	public Grid1D getSubGrid(int j) {
+		notifyBeforeRead();
+		return subGrids[j];
+	}
+	
+
 	@Deprecated
 	/**
 	 * Set the corresponding Grid1D object on the linear 2D row memory
