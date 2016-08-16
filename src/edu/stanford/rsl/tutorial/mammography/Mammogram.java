@@ -91,7 +91,7 @@ public class Mammogram {
 	}
 
 	public enum MammographyView {
-		ML(new String[] 	{ "MLO"}), 
+		MLO(new String[] 	{ "MLO"}), 
 		CC(new String[] 	{ "CC" }), 
 		Both(new String[] 	{ "MLO", "CC" }), 
 		Unknown(new String[]{ "?" });
