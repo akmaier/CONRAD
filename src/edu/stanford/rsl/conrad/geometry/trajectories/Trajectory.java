@@ -19,6 +19,7 @@ import edu.stanford.rsl.conrad.io.SafeSerializable;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
 import edu.stanford.rsl.conrad.numerics.SimpleOperators;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
+import edu.stanford.rsl.conrad.numerics.Solvers;
 import edu.stanford.rsl.conrad.phantom.AnalyticPhantom;
 import edu.stanford.rsl.jpop.FunctionOptimizer;
 import edu.stanford.rsl.jpop.FunctionOptimizer.OptimizationMode;
@@ -708,6 +709,42 @@ public class Trajectory implements SafeSerializable{
 			return grad;
 		}
 
+	}
+
+	/**
+	 * Computes the isocenter by a least-squares problem. The isocenter is computed by the 
+	 * smallest squared Eucledian distance to all principle rays.
+	 * See [1] for more details.
+	 * 
+	 * [1] J.-H. Choi, A. Maier, A. Keil, S. Pal, E. J. McWalter, G. S. Beaupré, 
+	 * G. E. Gold, and R. Fahrig, “Fiducial marker-based correction for involuntary 
+	 * motion in weight-bearing C-arm CT scanning of knees. II. Experiment,” 
+	 * Med. Phys., vol. 41, no. 6, p. 061902, Jun. 2014.
+	 */
+	public PointND computeIsoCenterSolve(){
+		
+		SimpleMatrix M = new SimpleMatrix(2*getProjectionMatrices().length,3);
+		SimpleVector vals = new SimpleVector(2*getProjectionMatrices().length);
+		
+		int idx = 0;
+		for (int i = 0; i < getProjectionMatrices().length; i++) {
+			Projection proj = getProjectionMatrices()[i];
+			SimpleMatrix projMat = proj.computeP();
+			SimpleVector vec3 = projMat.getSubRow(2, 0, 3);
+			SimpleVector vec2 = projMat.getSubRow(1, 0, 3);
+			SimpleVector vec1 = projMat.getSubRow(0, 0, 3);
+			double ppU = proj.getPrincipalPoint().getElement(0);
+			double ppV = proj.getPrincipalPoint().getElement(1);
+			M.setRowValue(idx, SimpleOperators.subtract(vec3.multipliedBy(ppU),vec1));
+			vals.setElementValue(idx, -ppU*projMat.getElement(2, 3)+projMat.getElement(0, 3));
+			idx++;
+			M.setRowValue(idx, SimpleOperators.subtract(vec3.multipliedBy(ppV),vec2));
+			vals.setElementValue(idx, -ppV*projMat.getElement(2, 3)+projMat.getElement(1, 3));
+			idx++;
+		}
+		
+		SimpleVector center = Solvers.solveLinearLeastSquares(M, vals);
+		return new PointND(center);
 	}
 
 

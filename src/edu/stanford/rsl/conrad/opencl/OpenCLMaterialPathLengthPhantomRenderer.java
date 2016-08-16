@@ -98,7 +98,7 @@ public class OpenCLMaterialPathLengthPhantomRenderer extends OpenCLProjectionPha
 		CLContext context = OpenCLUtil.createContext();
 		CLDevice device = context.getMaxFlopsDevice();
 
-		configure(phantom, context, device);
+		configure(phantom, context, device, false);
 
 		materials = new ArrayList<Material>();
 		for (PhysicalObject o: phantom){

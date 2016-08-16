@@ -97,6 +97,15 @@ public class Grid2D extends NumericGrid implements Transformable {
 		return subGrids[j];
 	}
 
+	/**
+	 * Set the corresponding Grid1D object on the linear 2D row memory
+	 * @param j The row-index (y-index, height-index)
+	 * @param subGrid
+	 */
+	public void setSubGrid(int j, Grid1D subGrid) {
+		subGrids[j] = subGrid;
+		notifyAfterWrite();
+	}
 	
 	public double[] indexToPhysical(double i, double j) {
 		return new double[] {

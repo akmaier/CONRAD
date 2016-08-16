@@ -445,7 +445,7 @@ public class ReadMammograms {
 					ArrayList<Findings> healthy = new ArrayList<Findings>();
 					healthy.add(Findings.Healthy);
 					this.findings.add(healthy);
-					this.roi.add(null);
+					this.roi.add(new ArrayList<Roi>());
 				}
 			}
 

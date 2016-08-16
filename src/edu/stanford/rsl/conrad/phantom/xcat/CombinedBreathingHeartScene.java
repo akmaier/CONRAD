@@ -72,7 +72,7 @@ public class CombinedBreathingHeartScene extends WholeBodyScene {
 			heart.configure();
 			heart.setTimeWarper(new HarmonicTimeWarper(heartCycles));
 	
-			breathing = new BreathingScene();
+			breathing = new BreathingScene(false);
 			breathing.configure();
 			breathing.setTimeWarper(new HarmonicTimeWarper(breathCycles));
 			String catheterOption = Configuration.getGlobalConfiguration().getRegistry().get(RegKeys.XCAT_ADD_HEART_CATHETER);
@@ -101,7 +101,7 @@ public class CombinedBreathingHeartScene extends WholeBodyScene {
 			heart.configure();
 			heart.setTimeWarper(new ConstantTimeWarper(refHeartPhase));
 	
-			breathing = new BreathingScene();
+			breathing = new BreathingScene(false);
 			breathing.configure();
 			breathing.setTimeWarper(new HarmonicTimeWarper(0.0));
 			
