@@ -1,14 +1,17 @@
+/*
+ * Copyright (C) 2016 - Andreas Maier 
+ * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
+ */
 package edu.stanford.rsl.apps.gui.roi;
 
 import ij.IJ;
 import ij.process.ByteProcessor;
 
-import org.fastica.FastICA;
 import org.fastica.FastICAException;
 
-import weka.core.matrix.Matrix;
 import edu.stanford.rsl.conrad.data.numeric.Grid3D;
 import edu.stanford.rsl.conrad.data.numeric.MultiChannelGrid2D;
+import edu.stanford.rsl.conrad.filtering.PatchwiseComponentComputationTool;
 import edu.stanford.rsl.conrad.utils.ImageUtil;
 import edu.stanford.rsl.jpop.utils.UserUtil;
 
@@ -84,25 +87,8 @@ public class ComputeIndependentComponents extends EvaluateROI {
 		}
 		try {
 			
-			double [][] vectors = null;
-			if (operation.equals(ICA)){
-				FastICA ica = new FastICA(signals, numChannels);
-				vectors = ica.getICVectors();
-			}
-			if (operation.equals(PCA)){
-				org.fastica.PCA pca = new org.fastica.PCA(signals);
-				vectors = org.fastica.math.Matrix.mult(pca.getEigenVectors(), pca.getVectorsZeroMean());
-				for (int k=0;k<numChannels;k++){
-					System.out.println("Eigen Value "+k+" "+pca.getEigenValues()[k]);
-				}
-			}
-			if(operation.equals(SVD)){
-				weka.core.matrix.SingularValueDecomposition svd = new weka.core.matrix.SingularValueDecomposition(new Matrix(signals).transpose());
-				vectors=svd.getU().transpose().getArray();
-				for (int k=0;k<numChannels;k++){
-					System.out.println("Singular Value "+k+" "+svd.getSingularValues()[k]);
-				}
-			}
+			double [][] vectors = PatchwiseComponentComputationTool.getComponents(signals, numChannels, operation);
+
 			ByteProcessor mask = (ByteProcessor)roi.getMask();
 			MultiChannelGrid2D out = new MultiChannelGrid2D(roi.getBounds().width, roi.getBounds().height, numChannels);
 
@@ -128,7 +114,7 @@ public class ComputeIndependentComponents extends EvaluateROI {
 				}
 			}
 			out.show("Components using" + operation);
-		} catch (FastICAException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -142,7 +128,4 @@ public class ComputeIndependentComponents extends EvaluateROI {
 
 }
 
-/*
- * Copyright (C) 2010-2014 - Andreas Maier 
- * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
- */
+

@@ -16,6 +16,13 @@ public class CalibrationBead implements Comparable<CalibrationBead> {
 		this.v = v;
 	}
 
+	public CalibrationBead (double u, double v, double x, double y, double z){
+		this.u = u;
+		this.v = v;
+		this.x = x;
+		this.y = y;
+		this.z = z;
+	}
 	public double getU() {
 		return u;
 	}

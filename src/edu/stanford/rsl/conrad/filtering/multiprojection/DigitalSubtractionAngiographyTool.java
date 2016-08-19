@@ -5,6 +5,7 @@
 package edu.stanford.rsl.conrad.filtering.multiprojection;
 
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
+import edu.stanford.rsl.conrad.data.numeric.MultiChannelGrid2D;
 import edu.stanford.rsl.conrad.filtering.ImageFilteringTool;
 import edu.stanford.rsl.jpop.utils.UserUtil;
 
@@ -43,9 +44,23 @@ public class DigitalSubtractionAngiographyTool extends MultiProjectionFilter {
 	@Override
 	protected void cleanup() {
 		int numberOfImages= inputQueue.size();
-		Grid2D refernceImage = (Grid2D) inputQueue.get(refImage).clone();
+		Grid2D refernceImage = null;
+		if (inputQueue.get(refImage) instanceof MultiChannelGrid2D){
+			refernceImage = new MultiChannelGrid2D( ((MultiChannelGrid2D) inputQueue.get(refImage)));
+		} else {
+			refernceImage = (Grid2D) inputQueue.get(refImage).clone();
+		}
 		for (int i = 0; i < numberOfImages; i++){
-			inputQueue.get(i).getGridOperator().subtractBy(inputQueue.get(i), refernceImage);;
+			if (refernceImage instanceof MultiChannelGrid2D){
+				// Perform MultiChannel DSA
+				MultiChannelGrid2D refMulti = (MultiChannelGrid2D) refernceImage;
+				MultiChannelGrid2D inMulti = (MultiChannelGrid2D) inputQueue.get(i);
+				for (int c=0; c< refMulti.getNumberOfChannels(); c++){
+					inMulti.getGridOperator().subtractBy(inMulti.getChannel(c), refMulti.getChannel(c));
+				}
+			} else{
+				inputQueue.get(i).getGridOperator().subtractBy(inputQueue.get(i), refernceImage);;
+			}
 			try {
 				sink.process(inputQueue.get(i), i);
 				inputQueue.remove(i);

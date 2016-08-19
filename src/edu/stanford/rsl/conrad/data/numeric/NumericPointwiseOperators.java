@@ -72,7 +72,7 @@ public abstract class NumericPointwiseOperators {
 		return dotProduct(grid, grid);
 	}
 
-	/** Compute grid3 = grid1 - grid2  */
+	/** Compute grid3 = grid1 + grid2  */
 	public static NumericGrid addedBy(NumericGrid input, NumericGrid sub) {
 		NumericGridOperator op = selectGridOperator(input, sub);
 		NumericGrid output=input.clone();
@@ -80,7 +80,7 @@ public abstract class NumericPointwiseOperators {
 		return output; 
 	}
 	
-	/** Compute grid1 = grid1 - grid2  */
+	/** Compute grid1 = grid1 + grid2  */
 	public static void addBy(NumericGrid input, NumericGrid sub) {
 		NumericGridOperator op = selectGridOperator(input, sub);
 		op.addBy(input, sub);

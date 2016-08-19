@@ -23,6 +23,21 @@ public class MultiChannelGrid2D extends Grid2D {
 		initialize(width, height);
 	}
 	
+	public MultiChannelGrid2D(MultiChannelGrid2D multiChannelGrid2D) {
+		super(0,0);
+		multichannelData = new Grid3D(multiChannelGrid2D.getWidth(), multiChannelGrid2D.getHeight(), multiChannelGrid2D.getNumberOfChannels());
+		buffer = multichannelData.getSubGrid(0).getBuffer();
+		// Deep copy channel names and image data...
+		if( multiChannelGrid2D.getChannelNames()!= null){
+			channelNames = new String[multiChannelGrid2D.getNumberOfChannels()];
+		};
+		for (int c= 0; c < multiChannelGrid2D.getNumberOfChannels(); c++){
+			multichannelData.setSubGrid(c, (Grid2D) multiChannelGrid2D.getChannel(c).clone());
+			if (channelNames!=null) channelNames[c] = multiChannelGrid2D.getChannelNames()[c];
+		}
+		initialize(multiChannelGrid2D.getWidth(), multiChannelGrid2D.getHeight());
+	}
+
 	/**
 	 * Returns the Grid2D of the respective Channel
 	 * @param c the channel number

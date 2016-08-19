@@ -93,6 +93,27 @@ public class DataMatrix extends SimpleMatrix{
 	public DataMatrix() {
 		// TODO Auto-generated constructor stub
 	}
+	
+	/**
+	 * Copy Constructor.
+	 * @param otherMat The DataMatrix to be copied
+	 */
+	public DataMatrix(DataMatrix otherMat) {
+		this.setDimensions(otherMat.getRows()/otherMat.dimension,otherMat.dimension,otherMat.getCols());
+		
+		this.buf = new double[otherMat.buf.length][otherMat.buf[0].length];
+		for( int i = 0; i < otherMat.buf.length; i++ ) {
+			System.arraycopy(otherMat.buf[i], 0, this.buf[i], 0, otherMat.buf[i].length);
+		}
+		this.scaling = otherMat.scaling;
+		this.consensus = otherMat.consensus;
+		this.centers = otherMat.centers;
+		
+		if(otherMat.HAS_CONNECTIVITY) {
+			this.connectivity = otherMat.connectivity;
+			this.HAS_CONNECTIVITY = true;	
+		}
+	}
 
 	/**
 	 * Sets the number of rows via the number of mesh vertices and their dimension.
@@ -274,5 +295,49 @@ public class DataMatrix extends SimpleMatrix{
 			}
 		}
 		return mat;
+	}
+	
+	/**
+	 * Creates a new sub matrix with entries from ordered rows and ordered columns provided
+	 * @param selectRows is ordered array containing rows to be copied
+	 * @param selectCols is ordered array containing columns to be copied
+	 * @return a sub matrix of this matrix 
+	 */
+	@Override
+	public DataMatrix getSubMatrix(final int[] selectRows, final int[] selectCols) {
+		final DataMatrix subMatrix = new DataMatrix();
+		subMatrix.setDimensions(selectRows.length/this.dimension, this.dimension, selectCols.length);
+		int subRow = 0;
+		for (int r : selectRows) {
+			int subCol = 0;
+			for (int c : selectCols) {
+				subMatrix.buf[subRow][subCol] = this.buf[r][c];
+				++subCol;
+			}
+			++subRow;
+		}
+		subMatrix.scaling = new ArrayList<Float>();
+		
+		for(int c : selectCols) {
+			subMatrix.scaling.add(this.scaling.get(c));
+		}
+		
+		// Columns have been omitted. Therefore, the consensus needs to be recalculated.
+		subMatrix.calculateConsensus();
+		
+		return subMatrix;
+	}
+	
+	/**
+	 * Calculates the mean over all observations stored column-wise and saves the result to consensus.
+	 */
+	private void calculateConsensus() {
+		if(consensus != null) return;
+		
+		this.consensus = new SimpleMatrix(this.getSimpleMatrixAtIndex(0));
+		for(int i = 1; i < this.getCols(); i++) {
+			this.consensus.add(this.getSimpleMatrixAtIndex(i));
+		}
+		this.consensus = this.consensus.dividedBy( (double) (this.getCols()) );
 	}
 }
