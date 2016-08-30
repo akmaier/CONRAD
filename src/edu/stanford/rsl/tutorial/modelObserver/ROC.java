@@ -31,6 +31,37 @@ public class ROC {
         	vals.setElementValue(i,Observer.GetResultValue(testImages[i], template, channelMatrix));
             vals.setElementValue(i+Ntest,Observer.GetResultValue(emptyTestImages[i], template, channelMatrix));
         }
+        
+        // compute SNR
+        
+        // mean
+        double sumObj = 0;
+        double sumEmp = 0;
+        for(int i = 0; i < Ntest; ++i)
+        {
+        	sumObj += vals.getElement(i);
+        	sumEmp += vals.getElement(i+Ntest);
+        }
+        
+        double meanObj = sumObj / Ntest;
+        double meanEmp = sumEmp / Ntest;
+        
+        // variance
+        double sumVarObj = 0;
+        double sumVarEmp = 0;
+        for(int i = 0; i < Ntest; ++i)
+        {
+        	sumVarObj += (meanObj - vals.getElement(i)) * (meanObj - vals.getElement(i));
+        	sumVarEmp += (meanEmp - vals.getElement(i + Ntest)) * (meanEmp - vals.getElement(i + Ntest));
+        }
+        
+        double varObj = sumVarObj / Ntest;
+        double varEmp = sumVarEmp / Ntest;
+        
+        double SNR = (meanObj - meanEmp) / (Math.sqrt((varObj + varEmp) / 2));
+        
+        System.out.println(SNR);
+        
 
         SimpleVector t = new SimpleVector(2 * Ntest + 2);
         
