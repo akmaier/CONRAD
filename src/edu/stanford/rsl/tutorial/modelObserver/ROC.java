@@ -14,7 +14,7 @@ import edu.stanford.rsl.conrad.utils.VisualizationUtil;
 public class ROC {
 
 	/**
-	 * Calculates and displays the ROC curve for the given test images.  
+	 * Calculates and displays the ROC curve for the given test images. Calculates and displays the SNR.
 	 * @param testImages The object test images.
 	 * @param emptyTestImages The test images without objects.
 	 * @param Ntest The number of test images in each category.
