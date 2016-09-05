@@ -18,6 +18,8 @@ public class MultiChannelGrid3D extends Grid3D {
 	Grid4D multichannelData;
 	
 	public MultiChannelGrid3D(int width, int height, int depth, int channels) {
+		// This will cause some parent methods to fail ( e.g. getSize() );
+		// TODO Override necessary parent methods.
 		super(0,0,0);
 		multichannelData = new Grid4D(width, height, depth, channels);
 		buffer = multichannelData.getSubGrid(0).getBuffer();
@@ -106,4 +108,11 @@ public class MultiChannelGrid3D extends Grid3D {
 		this.channelNames = channelNames;
 	}
 
+	@Override
+	/**
+	 * @return The array's size (excluding borders).
+	 */
+	public int[] getSize() {
+		return new int[]{this.multichannelData.getSize()[0],this.multichannelData.getSize()[1],this.multichannelData.getSize()[2]};
+	}
 }

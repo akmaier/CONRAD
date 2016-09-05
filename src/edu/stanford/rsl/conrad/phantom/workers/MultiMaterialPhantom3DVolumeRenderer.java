@@ -111,7 +111,7 @@ public class MultiMaterialPhantom3DVolumeRenderer extends SliceWorker {
 			FloatProcessor slice = new FloatProcessor(geom.getReconDimensionX(), geom.getReconDimensionY());
 			slice.add(DEFAULT_ATTENUATION);
 			if (renderAttenuation && xrayEnergy > 0)
-				slice.setValue(phantomScene.getBackgroundMaterial().getAttenuation(xrayEnergy,attType)*phantomScene.getBackgroundMaterial().getDensity());
+				slice.setValue(phantomScene.getBackgroundMaterial().getAttenuation(xrayEnergy,attType));
 			else
 				slice.setValue(phantomScene.getBackgroundMaterial().getDensity());
 			slice.fill();
@@ -141,7 +141,7 @@ public class MultiMaterialPhantom3DVolumeRenderer extends SliceWorker {
 							}
 							int iy = (int) Math.round((y / voxelSizeY) + originIndexY);
 							if (renderAttenuation && xrayEnergy > 0)
-								slice.setValue(o.getMaterial().getAttenuation(xrayEnergy, attType)*o.getMaterial().getDensity());
+								slice.setValue(o.getMaterial().getAttenuation(xrayEnergy, attType));
 							else
 								slice.setValue(o.getMaterial().getDensity());
 							slice.drawLine(ix1, iy, ix2-1, iy);

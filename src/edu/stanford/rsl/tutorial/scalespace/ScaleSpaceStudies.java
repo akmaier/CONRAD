@@ -11,11 +11,15 @@ import edu.stanford.rsl.tutorial.fan.FanBeamProjector2D;
 import edu.stanford.rsl.tutorial.filters.RamLakKernel;
 import edu.stanford.rsl.tutorial.phantoms.SheppLogan;
 import edu.stanford.rsl.tutorial.phantoms.UniformCircleGrid2D;
+import edu.stanford.rsl.tutorial.atract.LaplaceKernel2D;
+import edu.stanford.rsl.tutorial.atract.LaplaceKernel1D;
 import ij.ImageJ;
 
 /**
- * Class to convolve projection images of a phantom with either a Gaussian or a Laplacian of Gaussian.
- * Different values for sigma are used to show the impact of their size.
+ * Class to convolve projection images of a phantom with either a Gaussian, Laplacian or a Laplacian of Gaussian.
+ * Different values for sigma are used to show the impact of their size. Moreover, it is possible to compare the
+ * Laplacian of Gaussian with the successive application of filtering an image with the Gaussian and then with the
+ * Laplacian.
  * 
  * @author Markus Wolf
  */
@@ -44,7 +48,9 @@ public class ScaleSpaceStudies extends Grid2D {
 		int kernelsize = 30;
 		
 		int method = 2; // 0 = Gaussian
-						// 2 = Laplacian of Gaussian
+						// 1 = Laplace
+						// 2 = Laplacian of Gaussian (LoG)
+						// 3 = Comparison between LoG referred to method 2 and applying Laplacian on a Gaussian
 		
 		double[] sigmaValue = {0.1, 1.0, 3.0, 5.0};
 		
@@ -90,65 +96,153 @@ public class ScaleSpaceStudies extends Grid2D {
 		Grid2D projectionP = new Grid2D(phantom);
 		Grid2D fanBeamSinoRay = fanBeamProjector.projectRayDrivenCL(projectionP);	
 		fanBeamSinoRay.show("sinogram");
-
-		// calculate Gaussian or Laplacian of Gaussian on projection images for different values of sigma
-		for (int i = 0; i < sigmaValue.length; i++) {
-			
-			Grid2D workingGrid;
-			
-			switch (method){
-			case 0:
-				workingGrid = gaussianSinogram(fanBeamSinoRay, sigmaValue[i]);
-				workingGrid.show("gaussian (sigma=" + sigmaValue[i] + ") sinogram");
-				break;
-			case 2:
-				workingGrid = laplacianOfGaussianSinogram(fanBeamSinoRay, kernelsize, sigmaValue[i]);
-				workingGrid.show("laplacian of gaussian (sigma=" + sigmaValue[i] + ") sinogram");
-				break;
-			default:
-				workingGrid = laplacianOfGaussianSinogram(fanBeamSinoRay, kernelsize, sigmaValue[i]);
-				workingGrid.show("laplacian of gaussian (sigma=" + sigmaValue[i] + ") sinogram");
-			}
-			
-			// correct the sinograms	
-			RamLakKernel ramLak = new RamLakKernel((int) (maxT / deltaT), deltaT);
-			CosineFilter cKern = new CosineFilter(focalLength, maxT, deltaT);
-			
-			// apply filtering
-			for (int theta = 0; theta < workingGrid.getSize()[1]; ++theta) {
-				cKern.applyToGrid(workingGrid.getSubGrid(theta));
-			}
 		
-			for (int theta = 0; theta < workingGrid.getSize()[1]; ++theta) {
-				ramLak.applyToGrid(workingGrid.getSubGrid(theta));
+		
+		// Laplacian image (method 1)
+		if (method == 1) {
+			// create sinogram
+			Grid2D sinoLaplace = new Grid2D(fanBeamSinoRay);
+		
+			// apply Laplacian
+			LaplaceKernel2D laplacianKernelSino = new LaplaceKernel2D();
+			laplacianKernelSino.applyToGrid(sinoLaplace);
+			sinoLaplace.show("laplacian sinogram");
+		
+			// correct the sinogram	
+			RamLakKernel ramLakLaplace = new RamLakKernel((int) (maxT / deltaT), deltaT);
+			CosineFilter cKernLaplace = new CosineFilter(focalLength, maxT, deltaT);
+							
+			// apply filtering
+			for (int theta = 0; theta < sinoLaplace.getSize()[1]; ++theta) {
+				cKernLaplace.applyToGrid(sinoLaplace.getSubGrid(theta));
 			}
 						
+			for (int theta = 0; theta < sinoLaplace.getSize()[1]; ++theta) {
+				ramLakLaplace.applyToGrid(sinoLaplace.getSubGrid(theta));
+			}
+				
 			// do the backprojection
-			FanBeamBackprojector2D fbp = new FanBeamBackprojector2D(focalLength, deltaT, deltaBeta, imgSizeX, imgSizeY);
-			
-			Grid2D recoWorkingGrid;
-			
-			switch (method) {
-			case 0:
-				recoWorkingGrid = fbp.backprojectPixelDrivenCL(workingGrid);
-				recoWorkingGrid.show("gaussian (sigma=" + sigmaValue[i] + ") reconstruction");
-				break;
-			case 2:
-				recoWorkingGrid = fbp.backprojectPixelDrivenCL(workingGrid);
-				recoWorkingGrid.show("laplacian of gaussian (sigma=" + sigmaValue[i] + ") reconstruction");
-				break;
-			default:
-				recoWorkingGrid = fbp.backprojectPixelDrivenCL(workingGrid);
-				recoWorkingGrid.show("laplacian of gaussian (sigma=" + sigmaValue[i] + ") reconstruction");
-			}
-						
-			// difference between phantom and reconstruction
-			// HINT: Only makes sense for Gaussian.
-			if (method == 0) {
-				NumericGrid recoDiff = NumericPointwiseOperators.subtractedBy(phantom, recoWorkingGrid);
-				recoDiff.show("gaussian (sigma=" + sigmaValue[i] + ") RecoDiff");
-			}		
+			FanBeamBackprojector2D fbpLaplace = new FanBeamBackprojector2D(focalLength, deltaT, deltaBeta, imgSizeX, imgSizeY);
+			Grid2D recoWorkingGridLaplace;
+			recoWorkingGridLaplace = fbpLaplace.backprojectPixelDrivenCL(sinoLaplace);
+			recoWorkingGridLaplace.show("laplace reconstruction");
 		}
+		
+
+		// calculate Gaussian (method 0) or Laplacian of Gaussian (method 2) on projection images for different values of sigma
+		if (method == 0 || method == 2) {
+			
+			for (int i = 0; i < sigmaValue.length; i++) {
+				
+				Grid2D workingGrid;
+				
+				switch (method){
+				case 0:
+					workingGrid = gaussianSinogram(fanBeamSinoRay, sigmaValue[i]);
+					workingGrid.show("gaussian (sigma=" + sigmaValue[i] + ") sinogram");
+					break;
+				case 2:
+					workingGrid = laplacianOfGaussianSinogram(fanBeamSinoRay, kernelsize, sigmaValue[i]);
+					workingGrid.show("laplacian of gaussian (sigma=" + sigmaValue[i] + ") sinogram");
+					break;
+				default:
+					workingGrid = laplacianOfGaussianSinogram(fanBeamSinoRay, kernelsize, sigmaValue[i]);
+					workingGrid.show("laplacian of gaussian (sigma=" + sigmaValue[i] + ") sinogram");
+				}
+				
+				// correct the sinograms	
+				RamLakKernel ramLak = new RamLakKernel((int) (maxT / deltaT), deltaT);
+				CosineFilter cKern = new CosineFilter(focalLength, maxT, deltaT);
+				
+				// apply filtering
+				for (int theta = 0; theta < workingGrid.getSize()[1]; ++theta) {
+					cKern.applyToGrid(workingGrid.getSubGrid(theta));
+				}
+			
+				for (int theta = 0; theta < workingGrid.getSize()[1]; ++theta) {
+					ramLak.applyToGrid(workingGrid.getSubGrid(theta));
+				}
+							
+				// do the backprojection
+				FanBeamBackprojector2D fbp = new FanBeamBackprojector2D(focalLength, deltaT, deltaBeta, imgSizeX, imgSizeY);
+				
+				Grid2D recoWorkingGrid;
+				
+				switch (method) {
+				case 0:
+					recoWorkingGrid = fbp.backprojectPixelDrivenCL(workingGrid);
+					recoWorkingGrid.show("gaussian (sigma=" + sigmaValue[i] + ") reconstruction");
+					break;
+				case 2:
+					recoWorkingGrid = fbp.backprojectPixelDrivenCL(workingGrid);
+					recoWorkingGrid.show("laplacian of gaussian (sigma=" + sigmaValue[i] + ") reconstruction");
+					break;
+				default:
+					recoWorkingGrid = fbp.backprojectPixelDrivenCL(workingGrid);
+					recoWorkingGrid.show("laplacian of gaussian (sigma=" + sigmaValue[i] + ") reconstruction");
+				}
+							
+				// difference between phantom and reconstruction
+				// HINT: Only makes sense for Gaussian.
+				if (method == 0) {
+					NumericGrid recoDiff = NumericPointwiseOperators.subtractedBy(phantom, recoWorkingGrid);
+					recoDiff.show("gaussian (sigma=" + sigmaValue[i] + ") RecoDiff");
+				}
+			}
+		}
+				
+		// difference between LoG and Laplacian on Gaussian (method 3)
+		if (method == 3) {
+				
+			for (int i = 0; i < sigmaValue.length; i++) {
+					
+				Grid2D workingGridLoG;
+				Grid2D workingGridLaplace;
+				
+				// sinogram LoG
+				workingGridLoG = laplacianOfGaussianSinogram(fanBeamSinoRay, kernelsize, sigmaValue[i]);
+				workingGridLoG.show("laplacian of gaussian (sigma=" + sigmaValue[i] + ") sinogram");
+				
+				// applying Laplace on gaussian sinogram
+				workingGridLaplace = gaussianSinogram(fanBeamSinoRay, sigmaValue[i]);
+//				LaplaceKernel2D laplacianKernel = new LaplaceKernel2D();
+				LaplaceKernel1D laplacianKernel = new LaplaceKernel1D(workingGridLaplace.getSize()[0]);
+				laplacianKernel.applyToGrid(workingGridLaplace);
+				workingGridLaplace.show("laplacian on gaussian (sigma=" + sigmaValue[i] + ") sinogram");
+				
+				// correct the sinograms	
+				RamLakKernel ramLak = new RamLakKernel((int) (maxT / deltaT), deltaT);
+				CosineFilter cKern = new CosineFilter(focalLength, maxT, deltaT);
+				
+				// apply filtering
+				for (int theta = 0; theta < workingGridLoG.getSize()[1]; ++theta) {
+					cKern.applyToGrid(workingGridLoG.getSubGrid(theta));
+					cKern.applyToGrid(workingGridLaplace.getSubGrid(theta));
+				}
+			
+				for (int theta = 0; theta < workingGridLoG.getSize()[1]; ++theta) {
+					ramLak.applyToGrid(workingGridLoG.getSubGrid(theta));
+					ramLak.applyToGrid(workingGridLaplace.getSubGrid(theta));
+				}
+				
+				// do the backprojection
+				FanBeamBackprojector2D fbp = new FanBeamBackprojector2D(focalLength, deltaT, deltaBeta, imgSizeX, imgSizeY);
+				
+				Grid2D recoWorkingGridLoG;
+				Grid2D recoWorkingGridLaplace;
+				
+				recoWorkingGridLoG = fbp.backprojectPixelDrivenCL(workingGridLoG);
+				recoWorkingGridLoG.show("laplacian of gaussian (sigma=" + sigmaValue[i] + ") reconstruction");
+				
+				recoWorkingGridLaplace = fbp.backprojectPixelDrivenCL(workingGridLaplace);
+				recoWorkingGridLaplace.show("laplacian on gaussian (sigma=" + sigmaValue[i] + ") reconstruction");
+				
+				// Difference between LoG and applying Laplacian on a Gaussian
+				NumericGrid diff = NumericPointwiseOperators.subtractedBy(recoWorkingGridLoG, recoWorkingGridLaplace);
+				diff.show("LoG - laplacian on gaussian (sigma=" + sigmaValue[i] + ")");	
+			}
+					
+		}	
 	}
 	
 	/**
