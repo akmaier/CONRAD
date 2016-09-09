@@ -1,5 +1,6 @@
 package edu.stanford.rsl.tutorial.modelObserver;
 
+import ij.ImageJ;
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
@@ -16,9 +17,11 @@ public class ObserverPipeline {
 	{
 		int imageSize = 200;
 		int Ntrain = 20;
-		int Ntest = 5;
-		int channelCount = 10;
-		double gaussValue = 50;
+		int Ntest = 20;
+		int channelCount = 5;
+		double gaussValue = 40;
+		
+		new ImageJ();
 		
 		//the model
 		Model model = new Model(imageSize, imageSize);
@@ -26,31 +29,18 @@ public class ObserverPipeline {
 		//the different object-present images
 		Grid2D[] trainModels = model.CreateTestModels(Ntrain, VariationType.SimpleVariation);
 		
-		for(int i = 0; i < trainModels.length; ++i)
-		{
-			trainModels[i].show();
-		}
-		
 		//the different background images
-		Grid2D[] emptyTrainImages = model.CreateEmptyImages(Ntrain, VariationType.SimpleVariation);
-		
-		for(int i = 0; i < emptyTrainImages.length; ++i)
-		{
-			emptyTrainImages[i].show();
-		}
+		Grid2D[] emptyTrainImages = model.CreateEmptyImages(Ntrain, VariationType.ProjectionWOFilter);
 		
 		//the channel images
 		SimpleMatrix channelMatrix = Channels.CreateChannelMatrix(channelCount, imageSize, gaussValue);
-		
-		
+				
 		//create template
 		SimpleVector template = Observer.CreateTemplate(trainModels, emptyTrainImages, channelMatrix);
-	
-		
+			
 		//test and create ROC curve
-		
-		Grid2D[] testImages = model.CreateTestModels(Ntest, VariationType.ProjectionWOFilter);
-        Grid2D[] emptyTestImages = model.CreateTestModels(Ntest, VariationType.ProjectionPoisson); 
+		Grid2D[] testImages = model.CreateTestModels(Ntest, VariationType.ProjectionPoisson);
+        Grid2D[] emptyTestImages = model.CreateEmptyImages(Ntest, VariationType.ProjectionWOFilter);
         
 		ROC.ShowROC(testImages, emptyTestImages, Ntest, template, channelMatrix);		
 	}
