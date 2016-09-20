@@ -45,36 +45,57 @@ public class ReadMammograms {
 	private String imgDir = null;
 	private String xmlDir = null;
 	private String csvFile = null;
+	
+	private boolean initialized = false; // flag for single access operations
 
 	public static void main(String[] args) {
 
-		String imgDir =  "D:/Data/INbreast/AllDICOMs/";
-		String xmlDir =  "D:/Data/INbreast/ALLXML/";
-		String csvFile = "D:/Data/INbreast//INbreast.csv";
+		String imgDir =  "G:/INbreast/DataExtracted/AllDICOMs/";
+		String xmlDir =  "G:/INbreast/DataExtracted/ALLXML/";
+		String csvFile = "G:/INbreast/DataExtracted/INbreast.csv";
 		
 		ReadMammograms reader = new ReadMammograms(imgDir, xmlDir, csvFile);
 		reader.setOptions(SideOfBody.Both, MammographyView.Both, Findings.All);
 		reader.readImagesSuccessively();
 		
 		new ImageJ();
+		String selectedImage = imgDir+"22671003_f571fd4e63c718e3_MG_L_ML_ANON.dcm";
+		reader.showMammogram(selectedImage, true);
 		
-		Mammogram m = reader.readNextMammogram();
-		while (m != null) {
-			// here you can do cool stuff with the images
-			RoiManager manager = new RoiManager();
-			m = reader.readNextMammogram();
-			ImagePlus imp = ImageUtil.wrapGrid(m.getImage(), "Mammogram");
-			ArrayList<Roi> rois = m.getRois();
-			for(int i = 0; i < rois.size(); i++){
-				manager.add(imp, rois.get(i), i+1);
-			}
-			imp.show();
-			manager.runCommand("Show All");
-			
-			manager.close();
-			imp.close();			
-		}
+//		Mammogram m = reader.readNextMammogram();
+//		while (m != null) {
+//			// here you can do cool stuff with the images
+//			RoiManager manager = new RoiManager();
+//			m = reader.readNextMammogram();
+//			ImagePlus imp = ImageUtil.wrapGrid(m.getImage(), "Mammogram");
+//			ArrayList<Roi> rois = m.getRois();
+//			for(int i = 0; i < rois.size(); i++){
+//				manager.add(imp, rois.get(i), i+1);
+//			}
+//			imp.show();
+//			manager.runCommand("Show All");
+//			
+//			manager.close();
+//			imp.close();			
+//		}
 		System.out.println("Done.");
+	}
+
+	/**
+	 * prepares access to whole mammo database
+	 */
+	public void initMammoReading(){
+		this.readCSVdata();
+		initialized = true;
+	}
+	
+	/**
+	 * prepares access to whole mammo database with prior option selection
+	 */
+	public void initMammoReadingHelper(){
+		this.setOptions(SideOfBody.Both, MammographyView.Both, Findings.All);
+		this.readImagesSuccessively();
+		initialized = true;
 	}
 	
 	/**
@@ -91,6 +112,7 @@ public class ReadMammograms {
 	}
 	
 	/**
+	 * deprecated
 	 * all CSVdata will be read
 	 * all mammograms who satisfy setOptions will be read 
 	 * a new mammogram constructor will be set for every suitable mammogram
@@ -118,6 +140,9 @@ public class ReadMammograms {
 		this.mammograms = mammograms;
 	}
 	
+	/*
+	 * deprecated
+	 */
 	private void readMammograms() {
 
 		//the path of imageFolder is given to listOfFiles, all DICOM images are now listed
@@ -168,13 +193,16 @@ public class ReadMammograms {
 		System.out.println("ReadMammograms - done.");
 	}
 
-	
-	
 	private void prepReadMammograms() {
-		this.mammoCounter = 0;
 		//the path of imageFolder is given to listOfFiles, all DICOM images are now listed
 		File folder = new File(imgDir);
 		listOfFiles = folder.listFiles();
+		prepReadMammograms(listOfFiles);
+	}
+	
+	private void prepReadMammograms(File[] customListOfFiles){
+		this.mammoCounter = 0;
+		listOfFiles = customListOfFiles;
 		//pid = PatiendtID
 		ArrayList<Integer> pid = new ArrayList<Integer>();
 		for (int i = 0; i < listOfFiles.length; i++) {
@@ -346,8 +374,8 @@ public class ReadMammograms {
 					this.side.add(SideOfBody.Unknown);
 				}
 				// parse View
-				if (entry[3].equals(MammographyView.ML.getValue()[0])) {
-					this.view.add(MammographyView.ML);
+				if (entry[3].equals(MammographyView.MLO.getValue()[0])) {
+					this.view.add(MammographyView.MLO);
 				} else if (entry[3].equals(MammographyView.CC.getValue()[0])) {
 					this.view.add(MammographyView.CC);
 				} else {
@@ -395,15 +423,23 @@ public class ReadMammograms {
 				// health breast have a biradsScore of 1
 				if (biradsScore != 1) {
 					XMLparser parser = new XMLparser();
-					parser.readXml(xmlDir + entry[5] + ".xml");
-					// entry[5] contains the name of the .xml file
-					// value is of ArrayList<String>
-					fndgs.addAll(parser.getFindings());
-					// Roi.Polygon => X/Y coordinates, width & height denotes
-					// the total XY variance
-					rois.addAll(parser.getRois());
-					this.findings.add(fndgs);
-					this.roi.add(rois);
+					try{
+						parser.readXml(xmlDir + entry[5] + ".xml");
+						// entry[5] contains the name of the .xml file
+						// value is of ArrayList<String>
+						fndgs.addAll(parser.getFindings());
+						// Roi.Polygon => X/Y coordinates, width & height denotes
+						// the total XY variance
+						rois.addAll(parser.getRois());
+						this.findings.add(fndgs);
+						this.roi.add(rois);
+					}
+					catch (XPathExpressionException XPathExpExc){
+						System.err.println("Error when parsing XML, maybe no internet connection. Findings and RoIs could not be added to Mammogram object.");
+					}
+					catch (FileNotFoundException e) {
+						System.err.println("XML file not found, maybe wrong filename. Findings and RoIs could not be added to Mammogram object.");
+					}
 				} else {
 					//findings is ArrayList of ArrayList of String
 					ArrayList<Findings> healthy = new ArrayList<Findings>();
@@ -417,9 +453,9 @@ public class ReadMammograms {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
-		} catch (XPathExpressionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+//		} catch (XPathExpressionException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
 		} finally {
 			if (br != null) {
 				try {
@@ -441,5 +477,31 @@ public class ReadMammograms {
 		this.imgDir = imgFolder;
 		this.xmlDir = xmlDir;
 		this.csvFile = csvF;
+	}
+	
+	/**
+	 * prepares access to whole database
+	 * @param name : string containing 8-digit number of mammo case (INbreast only)
+	 * @param showRois : set true to show RoIs
+	 */
+	public void showMammogram(String name,boolean showRois){
+		if (!initialized)
+		{
+			initMammoReadingHelper();
+		}
+		prepReadMammograms(new File[] { new File(name) });
+		
+		RoiManager manager = new RoiManager();
+		Mammogram m = this.readNextMammogram();
+		ImagePlus imp = ImageUtil.wrapGrid(m.getImage(), "Mammogram");
+		ArrayList<Roi> rois = m.getRois();
+		for(int i = 0; i < rois.size(); i++){
+			manager.add(imp, rois.get(i), i+1);
+		}
+		imp.show();
+		manager.runCommand("Show All");
+
+//		manager.close();
+//		imp.close();			
 	}
 }
