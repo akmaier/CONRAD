@@ -17,8 +17,8 @@ import ij.process.FloatProcessor;
 
 /**
  * Introduction to the CONRAD Framework
- * Exercise 1 of Diagnostic Medical Image Processing (DMIP)
- * @author Marco Boegel
+ * Exercise 0 of Diagnostic Medical Image Processing (DMIP)
+ * @author Frank Schebesch, Marco Boegel
  *
  */
 
@@ -29,14 +29,14 @@ public class Intro {
 				
 		//Define the image size
 		int imageSizeX = 256;
-		int imageSizeY = 256;
+		int imageSizeY = 384;
 	
 		//Define an image
 		//Hint: Import the package edu.stanford.rsl.conrad.data.numeric.Grid2D
 		//TODO
 	
 		//Draw a circle
-		int radius = 50;
+		int radius = 55;
 		//Set all pixels within the circle to 100
 		int insideVal = 100;
 	
@@ -49,17 +49,17 @@ public class Intro {
 		//Display image
 		//TODO
 		
-		//Copy an image
+		//Copy an image into a new container
 		//TODO
-		//copy.show("Copy of circle");
+		copy.show("Copy of circle");
 		
 		
 		//Load an image from file
-		String filename = "D:/02_lectures/DMIP/exercises/2014/matlab_intro/mr12.dcm";
+		String filename = "G:/DMIP/exercises/2016/0/code/exercise/mr12.dcm";
 		//TODO. Hint: Use IJ and ImageUtil
-		//mrImage.show();
+		mrImage.show();
 		
-		//convolution
+		//prepare convolution by creating the relevant objects
 		//TODO
 		//TODO
 		
@@ -72,34 +72,39 @@ public class Intro {
 			kernel[i] = 1.f / (kw*kh);
 		}
 		
+		// test for error and directly show convolved image
 		//TODO
 			
 		
 		//write an image to disk, check the supported output formats
-		String outFilename ="D:/02_lectures/DMIP/exercises/2014/matlab_intro/mr12out.tif";
+		String outFilename ="G:/DMIP/exercises/2016/0/code/solution/mr12out.tif";
 		//TODO
 	}
 	
 	
 	public static void signalIntro()
 	{
-		//How can I plot a sine function sin(2*PI*x)?
-		double stepSize = 0.01;
-		int plotLength = 500;
+		//How can I plot a sine function sin(x) 
+		//which has its zeroes at multiples of 3?
+		double stepSize = 0.02;
+		int plotLength = 800;
 		
 		double[] y = new double[plotLength];
 		
 		for(int i = 0; i < y.length; i++)
 		{
 			//TODO
+			y[i] = val;
 			
 		}
 		
 		VisualizationUtil.createPlot(y).show();
+		
+		// now plot it with the specified x values
 		double[] x = new double [plotLength];
 		for(int i = 0; i < x.length; i++)
 		{
-			x[i] = (double) i * stepSize;
+			//TODO
 		}
 		
 		VisualizationUtil.createPlot(x, y, "sin(x)", "x", "y").show();		
@@ -109,24 +114,23 @@ public class Intro {
 	public static void basicIntro()
 	{
 		//Display text
-		System.out.println("Creating a vector: v1 = [1.0; 2.0; 3.0]");
+		System.out.println("Creating a vector: v1 = [3.0; 2.0; 1.0]");
 		
 		//create column vector
 		//TODO
-		//System.out.println("v1 = " + v1.toString());
+		System.out.println("v1 = " + v1.toString());
 		
 		//create a randomly initialized vector
 		SimpleVector vRand = new SimpleVector(3);
 		//TODO
-		//System.out.println("vRand = " + vRand.toString());
+		System.out.println("vRand = " + vRand.toString());
 		
 		//create matrix M 3x3  1 2 3; 4 5 6; 7 8 9
-		SimpleMatrix M = new SimpleMatrix();
 		//TODO
-		//System.out.println("M = " + M.toString());
+		System.out.println("M = " + M.toString());
 		
 		//determinant of M
-		//System.out.println("Determinant of matrix m: " + TODO );
+		System.out.println("Determinant of matrix m: " + TODO );
 		
 		//transpose M
 		//TODO
@@ -136,9 +140,8 @@ public class Intro {
 		//TODO
 		
 		//get size
-		int numRows = 0;
-		int numCols = 0;
-		//TODO
+		int numRows = M.getRows();
+		int numCols = M.getCols();
 		
 		//access elements of M
 		System.out.println("M: ");
@@ -147,7 +150,7 @@ public class Intro {
 			for(int j = 0; j < numCols; j++)
 			{
 				//TODO
-				//System.out.print(element + " ");
+				System.out.print(element + " ");
 			}
 			System.out.println();
 		}
@@ -164,23 +167,23 @@ public class Intro {
 		
 		//Matrix multiplication
 		//TODO
-		//System.out.println("M^T * M = " + ResMat.toString());
+		System.out.println("M^T * M = " + ResMat.toString());
 		
 
 		//Matrix vector multiplication
 		//TODO
-		//System.out.println("M * v1 = " + resVec.toString());
+		System.out.println("M * v1 = " + resVec.toString());
 		
 		
 		//Extract the last column vector from matrix M
-		//SimpleVector colVector = M.getCol(2);
+		SimpleVector colVector = M.getCol(2);
 		//Extract the 1x2 subvector from the last column of matrix M
 		//TODO
-		//System.out.println("[m(0)(2); m(1)(2)] = " + subVector);
+		System.out.println("[m(0)(2); m(1)(2)] = " + subVector);
 		
 		//Matrix elementwise multiplication
 		//TODO
-		//System.out.println("M squared Elements: " + MsquaredElem.toString());
+		System.out.println("M squared Elements: " + MsquaredElem.toString());
 		
 		//round vectors
 		SimpleVector vRandCopy = new SimpleVector(vRand);
@@ -193,9 +196,9 @@ public class Intro {
 		System.out.println("vRand.ceil()  = " + vRand.toString());
 		
 		//min, max, mean
-		//double minV1 = v1.min();
-		//double maxV1 = v1.max();
-		//System.out.println("Min(v1) = " + minV1 + " Max(v1) = " + maxV1);
+		double minV1 = v1.min();
+		double maxV1 = v1.max();
+		System.out.println("Min(v1) = " + minV1 + " Max(v1) = " + maxV1);
 		
 		//for matrices: iterate over row or column vectors
 		SimpleVector maxVec = new SimpleVector(M.getCols());
@@ -211,37 +214,15 @@ public class Intro {
 		//Norms
 		//TODO matrix L1
 		//TODO vector L2
-		//System.out.println("||M||_F = " + matrixNormL1);
-		//System.out.println("||colVec||_2 = " + vecNormL2);
+		System.out.println("||M||_F = " + matrixNormL1);
+		System.out.println("||colVec||_2 = " + vecNormL2);
 		
 		//get normalized vector
 		//TODO
 		//normalize vector in-place
 		//TODO
-		//System.out.println("Normalized colVector: " + colVector.toString());
-		
-		
-		//SVD
-		SimpleMatrix A = new SimpleMatrix(3,3);
-		A.setRowValue(0, new SimpleVector(11, 10,  14));
-		A.setRowValue(1, new SimpleVector(12, 11, -13));
-		A.setRowValue(2, new SimpleVector(14, 13, -66));
-				
-		System.out.println("A = " + A.toString());
-		
-		//TODO SVD
-		
-		//print singular matrix
-		//System.out.println(svd.getS().toString());
-		
-		//get condition number
-		//System.out.println("Condition number of A: " + TODO );
-		
-		//Re-compute A = U * S * V^T
-		//SimpleMatrix temp = SimpleOperators.multiplyMatrixProd(svd.getU(), svd.getS());
-		//SimpleMatrix A2 = SimpleOperators.multiplyMatrixProd(temp, svd.getV().transposed());
-		//System.out.println("U * S * V^T: " + A2.toString());
-		
+		System.out.println("Normalized colVector: " + colVector.toString());
+		System.out.println("||colVec||_2 = " + colVector.norm(VectorNormType.VEC_NORM_L2));
 	}
 
 	public static void main(String arg[])
