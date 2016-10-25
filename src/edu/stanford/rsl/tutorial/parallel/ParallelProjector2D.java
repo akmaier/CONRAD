@@ -61,8 +61,8 @@ public class ParallelProjector2D {
 		this.maxTheta = maxTheta;
 		this.deltaS = deltaS;
 		this.deltaTheta = deltaTheta;
-		this.maxSIndex = (int) (maxS / deltaS + 1);
-		this.maxThetaIndex = (int) (maxTheta / deltaTheta + 1);
+		this.maxSIndex = (int) (maxS / deltaS);
+		this.maxThetaIndex = (int) (maxTheta / deltaTheta);
 	}
 
 	/**

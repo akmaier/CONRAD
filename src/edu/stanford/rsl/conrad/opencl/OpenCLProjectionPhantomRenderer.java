@@ -240,7 +240,7 @@ public class OpenCLProjectionPhantomRenderer extends StreamingPhantomRenderer {
 	
 
 
-	protected void configure(AnalyticPhantom phantom, CLContext context, CLDevice device){
+	public void configure(AnalyticPhantom phantom, CLContext context, CLDevice device, boolean createMus){
 		this.phantom = phantom;
 		this.clContext = context;
 		
@@ -274,7 +274,7 @@ public class OpenCLProjectionPhantomRenderer extends StreamingPhantomRenderer {
 			}
 		}
 		priorities.getBuffer().rewind();
-		device.createCommandQueue().putWriteBuffer(priorities, false).finish();
+		device.createCommandQueue().putWriteBuffer(priorities, false).finish().release();
 
 		String disableAutoCenterBoolean = Configuration.getGlobalConfiguration().getRegistryEntry(RegKeys.DISABLE_CENTERING_4DPHANTOM_PROJECTION_RENDERING);
 		boolean disableAutoCenter = false;
@@ -308,6 +308,9 @@ public class OpenCLProjectionPhantomRenderer extends StreamingPhantomRenderer {
 			}
 		}
 
+		if (createMus) generateMuMap(context, device);
+
+		configured = true;
 
 
 	}
@@ -337,11 +340,8 @@ public class OpenCLProjectionPhantomRenderer extends StreamingPhantomRenderer {
 		CLContext context = OpenCLUtil.createContext();
 		CLDevice device = context.getMaxFlopsDevice();
 
-		configure(phantom, context, device);
+		configure(phantom, context, device, true);
 
-		generateMuMap(context, device);
-
-		configured = true;
 	}
 
 	public CLBuffer<FloatBuffer> generateTimeSamplingPoints(float tIndex){

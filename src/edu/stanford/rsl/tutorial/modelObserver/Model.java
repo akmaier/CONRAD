@@ -18,10 +18,14 @@ public class Model extends Grid2D
 	ParallelProjector2D projector;
 	ParallelBackprojector2D backProjector;
 	RamLakKernel ramLak;
+	int PoissonParameter;
 	
 	public Model(int width, int height)
 	{
 		super(width, height);
+		
+		//parameter which defines the intensity of the Poisson noise (higher -> more noise)
+		PoissonParameter = 500000;
 		
 		this.setSpacing(1.0, 1.0);
 		this.setOrigin(-width/2.d, -height/2.d);
@@ -47,7 +51,9 @@ public class Model extends Grid2D
 		/** Projects and backprojects the image, adds Poisson noise but without intensity shifting */
 		ProjectionWrongPoisson,
 		/** Shifts the object in the image and adds noise/creates a random salt image */
-		SimpleVariationNoise
+		SimpleVariationNoise,
+		/** Projects and backprojects the image without using a filter and adds Poisson noise */
+		ProjectionPoissonWOFilter
 	}
 		
 	/**
@@ -95,13 +101,13 @@ public class Model extends Grid2D
 	}
 
 	/**
-	 * Creates a new image with Salt noise of the same size as the model.
+	 * Creates a new image with Salt noise of arbitrary size.
+	 * @param width The width of the image.
+	 * @param height The height of the image.
 	 * @return  The salt image.
 	 */
-	public Grid2D CreateSaltImage()
+	public Grid2D CreateSaltImage(int width,int height)
 	{
-		int width = this.getWidth();
-		int height = this.getHeight();
 		
 		Grid2D resultImage = new Grid2D(width, height);
 		
@@ -109,13 +115,22 @@ public class Model extends Grid2D
 		
 		for(int i = 0; i < width * height / 10; ++i)
 		{
-			resultImage.putPixelValue(rand.nextInt(width), rand.nextInt(height), rand.nextDouble() - 0.5);
+			resultImage.putPixelValue(rand.nextInt(width), rand.nextInt(height), 100*(rand.nextDouble()));
 		}
 		
 		resultImage.setSpacing(1.0, 1.0);
 		resultImage.setOrigin(-width/2.d, -height/2.d);
 		
 		return resultImage;
+	}
+
+	/**
+	 * Creates a new image with Salt noise of the same size as the model.
+	 * @return  The salt image.
+	 */
+	public Grid2D CreateSaltImage()
+	{		
+		return CreateSaltImage(this.getWidth(),this.getHeight());
 	}
 	
 	/**
@@ -178,18 +193,23 @@ public class Model extends Grid2D
 		case ProjectionWOFilter:
 			for (int i = 0; i < number; ++i)
 			{
+				//Grid2D modelVariation = this.ModelVariation();
 				Grid2D modelVariation = this.ModelVariation();
 				Grid2D sinogram = projector.projectPixelDriven(modelVariation);
+				//sinogram.show();
+				NumericPointwiseOperators.addBy(sinogram, this.CreateSaltImage(sinogram.getWidth(),sinogram.getHeight()));
+				//sinogram.show();
 				resultArray[i] = backProjector.backprojectPixelDriven(sinogram);
 			}
 			break;
 		case ProjectionPoisson:
+			 
 			for (int i = 0; i < number; ++i)
 			{
 				Grid2D sinogram = projector.projectPixelDriven(this.ModelVariation());
-				NumericPointwiseOperators.divideBy(sinogram, 40);
+				NumericPointwiseOperators.divideBy(sinogram, PoissonParameter);
 				Grid2D poissonSinogram = this.PoissonNoise(sinogram);
-				NumericPointwiseOperators.multiplyBy(poissonSinogram, 40);
+				NumericPointwiseOperators.multiplyBy(poissonSinogram, PoissonParameter);
 
 				Grid2D filteredSinogram = new Grid2D(poissonSinogram);
 				
@@ -197,6 +217,19 @@ public class Model extends Grid2D
 				{
 					ramLak.applyToGrid(filteredSinogram.getSubGrid(j));
 				}
+				resultArray[i] =  backProjector.backprojectPixelDriven(filteredSinogram);			
+			}
+			break;
+		case ProjectionPoissonWOFilter:
+			for (int i = 0; i < number; ++i)
+			{
+				Grid2D sinogram = projector.projectPixelDriven(this.ModelVariation());
+				NumericPointwiseOperators.divideBy(sinogram, PoissonParameter);
+				Grid2D poissonSinogram = this.PoissonNoise(sinogram);
+				NumericPointwiseOperators.multiplyBy(poissonSinogram, PoissonParameter);
+
+				Grid2D filteredSinogram = new Grid2D(poissonSinogram);
+				
 				resultArray[i] =  backProjector.backprojectPixelDriven(filteredSinogram);			
 			}
 			break;
@@ -272,6 +305,20 @@ public class Model extends Grid2D
 					ramLak.applyToGrid(filteredSinogram.getSubGrid(j));
 				}
 				
+				resultArray[i] = backProjector.backprojectPixelDriven(filteredSinogram);			
+			}
+			
+			break;
+		case ProjectionPoissonWOFilter:
+			for (int i = 0; i < number; ++i)
+			{
+				Grid2D sinogram = projector.projectPixelDriven(this.CreateSaltImage());
+				NumericPointwiseOperators.divideBy(sinogram, 40);
+				Grid2D poissonSinogram = this.PoissonNoise(sinogram);
+				NumericPointwiseOperators.multiplyBy(poissonSinogram, 40);
+
+				Grid2D filteredSinogram = new Grid2D(poissonSinogram);
+								
 				resultArray[i] = backProjector.backprojectPixelDriven(filteredSinogram);			
 			}
 			

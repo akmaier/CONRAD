@@ -84,13 +84,19 @@ public class MKTProjectionSource extends FileProjectionSource {
 			throw new IOException("Wrong Header Size; Not an MKT File.");
 		}
 		fi.width = 576;
-		fi.height = (int) (sizeInByte/(2*fi.width));
+		if((sizeInByte/(2*fi.width))%2!=0){
+			fi.width=512;
+			fi.height = (int) (sizeInByte/(2*fi.width));
+		} else {
+			fi.height = (int) (sizeInByte/(2*fi.width));
+		}
 		
 		/* Here we had a look at the 16 byte header and this is what we found so far:
 		 * Width	Height	Size	Size (Byte)	Found	Size B Hex
 		 * 576		580		334080	668160		320A	A3200
 		 * 576		578		332928	665856		290A	A2900
 		 * 576		576		331776	663552		200A	A2000
+		 * 512		512		262144	524288		0008	80000
 		*/
 		fi.nImages = 1204;
 

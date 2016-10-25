@@ -66,7 +66,7 @@ public class SurfaceBSplineVolumePhantom extends SliceWorker {
 		FloatProcessor slice = new FloatProcessor(geom.getReconDimensionX(), geom.getReconDimensionY());
 		if (renderSolid){
 			if (renderAttenuation && xrayEnergy > 0)
-				slice.setValue(scene.getBackgroundMaterial().getAttenuation(xrayEnergy,attType)*scene.getBackgroundMaterial().getDensity());
+				slice.setValue(scene.getBackgroundMaterial().getAttenuation(xrayEnergy,attType));
 			else
 				slice.setValue(scene.getBackgroundMaterial().getDensity());
 			slice.fill();

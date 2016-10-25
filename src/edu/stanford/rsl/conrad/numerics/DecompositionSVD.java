@@ -581,6 +581,41 @@ public class DecompositionSVD implements java.io.Serializable {
 		} 
 		return new SimpleMatrix(new Matrix(inverse));
 	}
+	
+	/** Return the Moore-Penrose inverse including Tikhonov regularization.
+	 *  Reciprocal eigenvalues given as sigma / (sigma²+alpha), where alpha is the regularization parameter for A + alpha I.
+	 *  @param omit if true tolerance based omitting of negligible singular values
+	 *  @param alpha regularization parameter
+	 *  @return     A+
+	 *  @author Tobias Geimer
+	 */
+	public SimpleMatrix regularizedInverse(boolean omit, double alpha) {
+		// Regularization parameter < 0.0 is invalid. Call non-regularized pseudo-inverse instead.
+		if(alpha <= 0.0) return inverse(omit);
+		
+		double[][] inverse = new double[n][m];
+		if(rank()> 0) {
+			double[] reciprocalS = new double[s.length];
+			if (omit) {
+				double tol = Math.max(m,n)*s[0]*Math.pow(2.0,-52.0);
+				for (int i = s.length-1;i>=0;i--){
+					double filter = (s[i]) / (s[i]*s[i] + alpha);
+					reciprocalS[i] = Math.abs(s[i])<tol?0.0:filter;
+				}
+			} else {
+				for (int i=s.length-1;i>=0;i--) {
+					double filter = (s[i]) / (s[i]*s[i] + alpha);
+					reciprocalS[i] = s[i]==0.0?0.0:filter;
+				}
+			}
+			int min = Math.min(n, ncu);
+			for (int i = n-1; i >= 0; i--)
+				for (int j = m-1; j >= 0; j--)
+					for (int k = min-1; k >= 0; k--)
+						inverse[i][j] += V[i][k] * reciprocalS[k] * U[j][k];
+		} 
+		return new SimpleMatrix(new Matrix(inverse));
+	}
 
 	/** Two norm
    @return     max(S)
