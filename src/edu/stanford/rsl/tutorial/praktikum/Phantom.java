@@ -1,14 +1,22 @@
 package edu.stanford.rsl.tutorial.praktikum;
 
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
+import edu.stanford.rsl.conrad.data.numeric.InterpolationOperators;
+import edu.stanford.rsl.conrad.data.numeric.NumericGrid;
+import edu.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators;
 import ij.ImageJ;
 
 
 public class Phantom extends Grid2D{
 
-	public Phantom(int width, int height) {
+	public Phantom(int width, int height, double[] spacing) {
 		super(width, height);
-		// TODO Auto-generated constructor stub
+		this.setSpacing(spacing);
+		
+		double[] origin = {-(width-1) * (spacing[0]/2), -(height-1) * (spacing[1]/2)};
+		
+		this.setOrigin(origin);
+		
 		
 		//create square with intensity 0.2
 		int edgeLength = width/8;
@@ -44,11 +52,34 @@ public class Phantom extends Grid2D{
 	
 	public static void main(String[] args){
 		ImageJ ui = new ImageJ();
-		Phantom a = new Phantom(256, 256);
+		double[] spacingA = {0.5, 0.5};
+		Phantom a = new Phantom(512, 512, spacingA);
 		
-		ui.createImage(256,256);
+		double[] spacingB = {0.8, 0.8};
+		Phantom b = new Phantom(512, 512, spacingB);
 		
-		a.show();
+		a.show("Phantom A");
+		b.show("Phantom B");
+		
+		NumericGrid c = NumericPointwiseOperators.subtractedBy(a, b);
+		c.show("Phantom A - B");
+		
+		double[] origin = a.getOrigin();
+		
+		System.out.println("Origin of phantom A lies at: " +origin[0]+ ", " +origin[1]);
+		
+		float aMin = NumericPointwiseOperators.min(a);
+		float aMax = NumericPointwiseOperators.max(a);
+		float aMean = NumericPointwiseOperators.mean(a);
+		
+		System.out.println("Minimum of phantom A: " +aMin);
+		System.out.println("Maximum of phantom A: " +aMax);
+		System.out.println("Mean of phantom A: " +aMean);
+		
+		float inter = InterpolationOperators.interpolateLinear(a, 256, 256);
+		System.out.println("Linear interpolation: " +inter);
+		
+		
 	}
 
 }
