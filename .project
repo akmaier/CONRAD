@@ -20,4 +20,26 @@
 		<nature>org.eclipse.jdt.core.javanature</nature>
 		<nature>com.stateofflow.eclipse.metrics.MetricsNature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>src/edu/stanford/rsl/tutorial/dmip/frame32.jpg</name>
+			<type>1</type>
+			<location>G:/DMIPex/dmipconrad/CONRAD/src/edu/stanford/rsl/tutorial/dmip/frame32.jpg</location>
+		</link>
+		<link>
+			<name>src/edu/stanford/rsl/tutorial/dmip/frame90.jpg</name>
+			<type>1</type>
+			<location>G:/DMIPex/dmipconrad/CONRAD/src/edu/stanford/rsl/tutorial/dmip/frame90.jpg</location>
+		</link>
+		<link>
+			<name>src/edu/stanford/rsl/tutorial/dmip/mr_head_angio.jpg</name>
+			<type>1</type>
+			<locationURI>mr_head_angio.jpg</locationURI>
+		</link>
+		<link>
+			<name>src/edu/stanford/rsl/tutorial/dmip/undistorted.jpg</name>
+			<type>1</type>
+			<location>G:/DMIPex/dmipconrad/CONRAD/src/edu/stanford/rsl/tutorial/dmip/undistorted.jpg</location>
+		</link>
+	</linkedResources>
 </projectDescription>
