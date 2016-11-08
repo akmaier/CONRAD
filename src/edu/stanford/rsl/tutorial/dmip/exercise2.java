@@ -76,8 +76,10 @@ public class exercise2 {
 		// undistorted coordinates to the respective distorted coordinates.
 		// Now the mapping of the distortion field has to be considered:
 		// Distorted = Undistorted + Deformation, i.e. Xd = Xu + (Xu - Xd).
-		
-		// TODO
+		Xd.multiplyBy(-1);
+		Yd.multiplyBy(-1);
+		Xd.add(Xu,Xu);
+		Yd.add(Yu,Yu);
 		
 		
 		/** 2. Polynomial of degree d
