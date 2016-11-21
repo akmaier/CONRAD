@@ -122,6 +122,17 @@ public class Mesh{
 	}
 	
 	/**
+	 * Sets the vertices, e.g points, and number of vertices.
+	 * @param p The ArrayList containing the vertices.
+	 */
+	public void setPoints(ArrayList<PointND> p){
+		SimpleMatrix m = toSimpleMatrix(p); 
+		this.points = m;
+		this.numPoints = m.getRows();
+		this.dimension = m.getCols();
+	}
+	
+	/**
 	 * Getter for the points, i.e. vertices.
 	 * @return The matrix containing the vertices.
 	 */
