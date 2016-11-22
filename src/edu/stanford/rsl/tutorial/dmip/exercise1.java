@@ -374,8 +374,9 @@ public class exercise1 {
 		optimizationProblem2(vectors);
 		
 		//Load the head angiography image image
-		String filename = "G:/DMIP/exercises/2016/1/code/exercise/mr_head_angio.jpg";
-		Grid2D image = ImageUtil.wrapImagePlus(IJ.openImage(filename)).getSubGrid(0);
+		String imageDataLoc = System.getProperty("user.dir") + "/data/" + "/dmip/";
+		String filename = "mr_head_angio.jpg";
+		Grid2D image = ImageUtil.wrapImagePlus(IJ.openImage(imageDataLoc + filename)).getSubGrid(0);
 		image.show("mr_head_angio:original");
 			
 		int rank = 150;	

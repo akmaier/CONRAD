@@ -257,8 +257,10 @@ public class exercise2 {
 			filename = "frame32.jpg";
 			break;
 		}
-				
-		originalImage = ImageUtil.wrapImagePlus(IJ.openImage(getClass().getResource(filename).getPath())).getSubGrid(0);
+		
+		String imageDataLoc = System.getProperty("user.dir") + "/data/" + "/dmip/";
+	
+		originalImage = ImageUtil.wrapImagePlus(IJ.openImage(imageDataLoc + filename)).getSubGrid(0);
 		
 		// Normalize intensity values to [0,1]
 		float max = NumericPointwiseOperators.max(originalImage);

@@ -55,7 +55,9 @@ public class Intro {
 		
 		
 		//Load an image from file
-		String filename = "G:/DMIP/exercises/2016/0/code/exercise/mr12.dcm";
+		String imageDataLoc = System.getProperty("user.dir") + "/data/" + "/dmip/";
+
+		String filename = imageDataLoc + "mr12.dcm";
 		//TODO. Hint: Use IJ and ImageUtil
 		mrImage.show();
 		
