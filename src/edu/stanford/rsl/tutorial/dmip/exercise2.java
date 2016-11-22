@@ -13,6 +13,13 @@ import edu.stanford.rsl.conrad.numerics.SimpleOperators;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
 import edu.stanford.rsl.conrad.numerics.DecompositionSVD;
 
+/**
+ * Defect Pixel Undistortion
+ * Exercise 2 of Diagnostic Medical Image Processing (DMIP)
+ * @author Frank Schebesch
+ *
+ */
+
 public class exercise2 {
 
 	String filename; // do not edit, choose a number in the main method instead
