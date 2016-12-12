@@ -13,6 +13,7 @@ import edu.stanford.rsl.conrad.utils.Configuration;
 
 /**
  * Class to fit a grid of data points with an arbitrary degree tensor product B-Spline surface.
+ * See L Piegl. "The NURBS book". 2012, page 376
  * @author Xinyun Li
  *
  */
@@ -192,6 +193,7 @@ public class BSplineSurfaceInterpolation {
 		Configuration.loadConfiguration();
 		//generate a semi-sphere samples
 		ArrayList<PointND> list = new ArrayList<PointND>();
+		
 		int r = 1;
 		list.add(new PointND (0, r, 1));
 		list.add(new PointND (0.707 * r, 0.707 * r, 1));
@@ -203,7 +205,7 @@ public class BSplineSurfaceInterpolation {
 		list.add(new PointND (-0.707 * r, 0.707 * r, 1));
 		list.add(new PointND (0, r, 1));
 	
-		r =2;
+		r = 2;
 		list.add(new PointND (0, r, 2));
 		list.add(new PointND (0.707 * r, 0.707 * r, 2));
 		list.add(new PointND (r, 0, 2));
@@ -214,7 +216,7 @@ public class BSplineSurfaceInterpolation {
 		list.add(new PointND (-0.707 * r, 0.707 * r,2));
 		list.add(new PointND (0, r, 2));
 		
-		r =3;
+		r = 3;
 		list.add(new PointND (0, r, 3));
 		list.add(new PointND (0.707 * r, 0.707 * r, 3));
 		list.add(new PointND (r, 0, 3));
@@ -225,7 +227,7 @@ public class BSplineSurfaceInterpolation {
 		list.add(new PointND (-0.707 * r, 0.707 * r, 3));
 		list.add(new PointND (0, r, 3));
 		
-		r =5;
+		r = 5;
 		list.add(new PointND (0, r, 5));
 		list.add(new PointND (0.707 * r, 0.707 * r, 5));
 		list.add(new PointND (r, 0, 5));
@@ -235,7 +237,7 @@ public class BSplineSurfaceInterpolation {
 		list.add(new PointND (-r, 0, 5));
 		list.add(new PointND (-0.707 * r, 0.707 * r, 5));
 		list.add(new PointND (0, r, 5));
-	
+		
 		//B-Spline surface interpolation
 		int degreeU = 2, degreeV = 2;
 		int m = 9, n = 4;
@@ -248,7 +250,7 @@ public class BSplineSurfaceInterpolation {
 			}		
 		}
 		
-		//Visulization
+		//Visualization
 		BSplineVolumeRenderer test1 = new BSplineVolumeRenderer(Sbsp);
 	}
 	
