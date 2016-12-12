@@ -22,10 +22,16 @@ import edu.stanford.rsl.conrad.utils.VisualizationUtil;
  */
 public class BSplineCurveInterpolation {
 	
+	/**
+	 * End point conditions
+	 */
 	public static final int CLAMPED = 0;
 	public static final int OPEN = 1;
 	public static final int CLOSED = 2;
 	
+	/**
+	 * Parameterization
+	 */
 	public static final int UNIFORM = 0;
 	public static final int CHORD = 1;
 	public static final int CENTRIPETAL = 2;
@@ -82,16 +88,22 @@ public class BSplineCurveInterpolation {
 		return new BSpline(controlPoints, degree, knots);			
 	}
 	
+	/**
+	 * Build the interpolation parameters.
+	 * @param parametrization see applyInterpolation(int, int)
+	 * @param endpointCondition see applyInterpolation(int, int)
+	 * @return
+	 */
 	protected double[] buildParameterVector(int parametrization, int endpointCondition){	
 		parameters = new double[n];
 		//closed curve
-		if(endpointCondition == 2){
+		if(endpointCondition == CLOSED){
 			//very special case, the parameter corresponds to the first data point are both 0 and 1
 			//So actually we have n+1 parameter, but we only take the first n for solving the linear equations
-			if (parametrization == 0){
+			if (parametrization == UNIFORM){
 				for (int i = 1; i < n - 1; i++)
 					parameters[i] = (double)i / n;
-			} else if (parametrization == 1){
+			} else if (parametrization == CHORD){
 				for (int i = 1; i < n; i++){
 					double dis = dataPoints.get(i).euclideanDistance(dataPoints.get(i - 1));
 					parameters[i] = parameters[i - 1] + dis;
@@ -99,7 +111,7 @@ public class BSplineCurveInterpolation {
 				double total = parameters[n - 1] + dataPoints.get(0).euclideanDistance(dataPoints.get(n - 1));
 				for(int i = 1; i < n; i++)
 					parameters[i] /= total;
-			} else if (parametrization == 2){
+			} else if (parametrization == CENTRIPETAL){
 				for (int i = 1; i < n; i++){
 					double dis = dataPoints.get(i).euclideanDistance(dataPoints.get(i - 1));
 					parameters[i] = parameters[i - 1] + Math.sqrt(dis);
@@ -110,18 +122,17 @@ public class BSplineCurveInterpolation {
 			}
 		} else {
 			//same for open and clamped knots
-			//equally spaced
-			if (parametrization == 0){
+			if (parametrization == UNIFORM){
 				for (int i = 1; i < n - 1; i++)
 					parameters[i] = (double)i / (n - 1);
-			} else if (parametrization == 1) {
+			} else if (parametrization == CHORD) {
 				for (int i = 1; i < n; i++) {
 					double dis = dataPoints.get(i).euclideanDistance(dataPoints.get(i - 1));
 					parameters[i] = parameters[i - 1] + dis;
 				}
 				for (int i = 1; i < n - 1; i++)
 					parameters[i] /= parameters[n - 1];
-			} else if (parametrization == 2) {
+			} else if (parametrization == CENTRIPETAL) {
 				for (int i = 1; i < n; i++) {
 					double dis = dataPoints.get(i).euclideanDistance(dataPoints.get(i - 1));
 					parameters[i] = parameters[i - 1] + Math.sqrt(dis);
@@ -134,8 +145,14 @@ public class BSplineCurveInterpolation {
 		return parameters;
 	}
 	
+	/**
+	 * Build the Knot vector. Given n control points and polynomial degree d, we need n+d+1 knot points.
+	 * @param parameters see applyInterpolation(int, int)
+	 * @param endpointCondition see applyInterpolation(int, int)
+	 * @return
+	 */
 	protected double[] buildKnotVector(double[] parameters, int endpointCondition){	
-		if (endpointCondition == 1) {
+		if (endpointCondition == OPEN) {
 			//averaging over the neighboring parameters in the middle while make two ends open
 			int k = n + degree + 1; //number of knots
 			double[] uKnots = new double[k];
@@ -151,14 +168,14 @@ public class BSplineCurveInterpolation {
 				uKnots[n + i + 1] = uKnots[n + i] + (uKnots[degree + i + 1] - uKnots[degree + i]);						
 			}
 			return uKnots;
-		} else if (endpointCondition == 2) {
+		} else if (endpointCondition == CLOSED) {
 			//For simplicity we use uniform knots here, may cause singularity in the coefficient matrix
 			int k = n + degree * 2 + 1; //number of knots
 			double[] knots = new double[k];
 			for (int j = 0; j < k; j++)
 				knots[j] = ((double)(j - degree)) / n;
 			return knots;
-		} else {
+		} else { // (endpointCondition == CLAMPED)
 			//averaging over the neighboring parameters in the middle while make both ends clamped
 			int k = n + degree + 1; //number of knots
 			double[] uKnots = new double[k];
@@ -177,6 +194,7 @@ public class BSplineCurveInterpolation {
 		}
 	}
 
+	
 	protected SimpleMatrix buildCoefficientMatrix(double[] knots, double[] parameters, int endpointCondition ){
 		if(endpointCondition == 2){
 			double[][] A = new double[n][n];
@@ -239,9 +257,17 @@ public class BSplineCurveInterpolation {
 		return controlPoints;		
 	}
 	
+	/**
+	 * Computes the non-vanishing basis function according to
+	 * "The NURBS book": Algorithm 2.2
+	 * @param knots
+	 * @param internalCoordinate
+	 * @param index
+	 * @return
+	 */
 	protected double[] BasisFuns(double[] knots, double internalCoordinate, int index) {
-		//Nurbs Book Algorithms A2.2 
-		//Compute the nonvanishing basis functions
+		// The Nurbs Book Algorithms A2.2 
+		// Compute the non-vanishing basis functions
 		double[] N = new double[degree + 1];
 		double[] left = new double[degree + 1];
 		double[] right = new double[degree + 1];
@@ -260,6 +286,10 @@ public class BSplineCurveInterpolation {
 		return N;
 	}
 
+	
+	/**
+	 * Minimal example for b-spline curve interpolation.
+	 */
 	public static void main(String[] args) {
 		
 		//create a list of data points

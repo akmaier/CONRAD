@@ -26,7 +26,7 @@ public class GaussianKernel implements KernelFunction{
 		
 		SimpleVector diff = x.clone();
 		diff.subtract(y);
-		double val = - diff.normL2();
+		double val = - Math.pow(diff.normL2(),2);
 		val /= (2 * Math.pow(sigma, 2));
 		val = Math.exp( val );
 		
