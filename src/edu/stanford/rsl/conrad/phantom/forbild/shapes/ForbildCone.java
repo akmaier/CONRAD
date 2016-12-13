@@ -36,7 +36,7 @@ public class ForbildCone extends Cone {
 		// Forbild defines z-origin at bottom of cone, CONRAD does that in the center of the cone.
 		// Here we correct for this offset.
 		surfaceOrigin.getAbstractVector().add(axis.multipliedBy(dz/2));
-		InitializeCone();
+		initializeCone();
 		correctAndAddBoundingConditions();
 	}
 	
@@ -61,11 +61,11 @@ public class ForbildCone extends Cone {
 	}
 
 
-	private void InitializeCone() {
-		Axis newAxis = new Axis(axis);		
-		SimpleMatrix scaleRotate = getChangeOfAxisMatrix(newAxis);
+	private void initializeCone() {
+		SimpleMatrix rot = new SimpleMatrix(3,3);
+		rot.identity();
 		SimpleVector translatorVec = surfaceOrigin.getAbstractVector();
-		AffineTransform tr = new AffineTransform(scaleRotate, translatorVec);
+		AffineTransform tr = new AffineTransform(rot, translatorVec);
 		super.init(dx, dy, dz, tr);	
 	}
 

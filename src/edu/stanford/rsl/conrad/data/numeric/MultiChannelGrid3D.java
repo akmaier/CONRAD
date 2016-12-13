@@ -32,7 +32,10 @@ public class MultiChannelGrid3D extends Grid3D {
 	 * @return the Grid2D
 	 */
 	public Grid3D getChannel(int c){
-		return multichannelData.getSubGrid(c);
+		Grid3D intermediate = multichannelData.getSubGrid(c);
+		intermediate.setSpacing(this.getSpacing());
+		intermediate.setOrigin(this.getOrigin());
+		return intermediate;
 	}
 	
 	/**
