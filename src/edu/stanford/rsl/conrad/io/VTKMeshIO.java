@@ -217,7 +217,7 @@ public class VTKMeshIO {
 		this.mesh.setPoints(toSimpleMatrix(points));
 		this.mesh.dimension = this.mesh.getPoints().getCols();
 		this.mesh.numConnections = numTri;
-		this.mesh.setConnectivity(toSimpleMatrix(triangles));
+		if(triangles.size()!=0) this.mesh.setConnectivity(toSimpleMatrix(triangles));
 	}
 	
 	/**
