@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2014 - Martin Berger
+ * Copyright (C) 2017 - Christopher Syben
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
 */
 package edu.stanford.rsl.conrad.data.generic.complex;
