@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2014 - Martin Berger
+ * Copyright (C) 2017 - Christopher Syben
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
 */
 package edu.stanford.rsl.conrad.data.generic.complex;
@@ -76,7 +77,6 @@ public class ComplexGrid2D extends ComplexGrid {
 		for(int i = 0; i < subGrids.length;i++ ){
 			unshifted[i].fftshift();
 		}
-		//size[width,height]
 		int height = this.getSize()[1];
 		int pH = (int)Math.ceil(height/2.0);
 		
