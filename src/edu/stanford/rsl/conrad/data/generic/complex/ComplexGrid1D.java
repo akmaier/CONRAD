@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2014 - Martin Berger
+ * Copyright (C) 2017 - Christopher Syben
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
 */
 package edu.stanford.rsl.conrad.data.generic.complex;
@@ -73,14 +74,10 @@ public class ComplexGrid1D extends ComplexGrid {
 	
 	public void fftshift(){
 		int width = this.size[0];
-		int startIndex = offset*2;//offset take alternating complex values into account
+		int startIndex = offset*2;
 		int endIndex = startIndex+(width*2);
-//		[.....][rel im rel im rel im rel im rel im][....]
-//				l								 l
-//				v								 v
-//			startIndex							endIndex
-// endIndex-startIndex = 2* width
 		int pW = (int)Math.ceil(width/2.0); 
+		
 		float[] tmpArr = Arrays.copyOfRange(buffer, startIndex, endIndex);
 		for(int i = pW; i < this.getSize()[0];i++)
 		{
