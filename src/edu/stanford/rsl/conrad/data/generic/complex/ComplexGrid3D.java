@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2014 - Martin Berger
+ * Copyright (C) 2017 - Christopher Syben
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
 */
 package edu.stanford.rsl.conrad.data.generic.complex;
@@ -77,7 +78,24 @@ public class ComplexGrid3D extends ComplexGrid {
 		}
 	}
 
-
+	public void fftshift()
+	{
+		ComplexGrid2D[] unshifted = subGrids.clone();
+		for(int i = 0; i < subGrids.length;i++ ){
+			unshifted[i].fftshift();
+		}
+		int depth = this.getSize()[2];
+		int pD = (int)Math.ceil(depth/2.0);		
+		for(int k = pD; k < this.getSize()[2];k++)
+		{
+		 	this.setSubGrid(k-pD,unshifted[k]);
+		}
+		for(int k = 0; k < pD;k++)
+		{
+		 	this.setSubGrid(k+depth-pD,unshifted[k]);
+		}
+	}
+	
 	public float[] getBuffer(){
 		notifyBeforeRead();
 		return buffer;
