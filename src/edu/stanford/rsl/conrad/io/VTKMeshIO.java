@@ -21,8 +21,8 @@ import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
 /**
  * Class to write legacy .vtk polydata meshes to a file. 
  * Only triangular meshes are supported at the moment.
- * @author Mathias Unberath
- *
+ * Extended to meshes featuring deformation vectors at each mesh vertex.
+ * @author Mathias Unberath, Tobias Geimer, Bastian Bier
  */
 public class VTKMeshIO {
 	
@@ -151,6 +151,7 @@ public class VTKMeshIO {
 		
 		ArrayList<PointND> points = new ArrayList<PointND>();
 		ArrayList<PointND> triangles = new ArrayList<PointND>();
+		ArrayList<PointND> deformations = new ArrayList<PointND>();
 		
 		FileReader fr = new FileReader(filename);
 		BufferedReader br = new BufferedReader(fr);
@@ -209,6 +210,35 @@ public class VTKMeshIO {
 			i += nTri;
 		}
 		
+		// read deformation vectors
+		boolean hasDeform = true;
+		
+		line = br.readLine();
+		if(line!=null && line.isEmpty()){
+			line = br.readLine();
+		}
+		// not every mesh features a deformation field
+		// check whether the file contains any more information
+		if(line == null) {
+			hasDeform = false; 
+		} else {
+			tok = new StringTokenizer(line);
+			tok.nextToken(); // skip "Point_Data"
+			int numVec =  Integer.parseInt(tok.nextToken());
+			line = br.readLine(); // skip "Field FieldData 6"
+			line = br.readLine(); // skip "Phi_Glyph numComp numTuples dataType"
+			for(int i = 0; i < numVec;){
+				line = br.readLine();
+				tok = new StringTokenizer(line);
+				int nVec = tok.countTokens();
+				nVec /= 3;
+				for(int j = 0; j < nVec; j++){
+					PointND vector = new PointND(Float.parseFloat(tok.nextToken()),Float.parseFloat(tok.nextToken()),Float.parseFloat(tok.nextToken()));
+					deformations.add(vector);
+				}
+				i += nVec;
+			}
+		}		
 		br.close();	
 		fr.close();
 		
@@ -217,6 +247,7 @@ public class VTKMeshIO {
 		this.mesh.setPoints(toSimpleMatrix(points));
 		this.mesh.dimension = this.mesh.getPoints().getCols();
 		this.mesh.numConnections = numTri;
+		if(hasDeform) this.mesh.setDeformation(toSimpleMatrix(deformations));
 		if(triangles.size()!=0) this.mesh.setConnectivity(toSimpleMatrix(triangles));
 	}
 	

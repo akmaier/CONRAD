@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.StringTokenizer;
 
 import edu.stanford.rsl.conrad.geometry.shapes.simple.PointND;
+import edu.stanford.rsl.conrad.io.VTKMeshIO;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
 
 /**
@@ -141,112 +142,21 @@ public class Mesh{
 	}
 		
 	/**
-	 * Method to read a triangular mesh in legacy .vtk polydata format. 
+	 * Convenience method to read a triangular mesh in legacy .vtk polydata format using {@link VTKMeshIO}.
 	 * @param filename	The filename of the mesh to be read.
 	 * @throws IOException if .vtk format does not match expected format
 	 */
 	public void readMesh(String filename) throws IOException{
+		VTKMeshIO reader = new VTKMeshIO(filename);
+		reader.read();
 		
-		ArrayList<PointND> points = new ArrayList<PointND>();
-		ArrayList<PointND> triangles = new ArrayList<PointND>();
-		ArrayList<PointND> deformations = new ArrayList<PointND>();
-		
-		
-		FileReader fr = new FileReader(filename);
-		BufferedReader br = new BufferedReader(fr);
-
-		// read and discard header information
-		br.readLine();
-		br.readLine();
-		br.readLine();
-		br.readLine();
-
-		String line = br.readLine();
-		StringTokenizer tok = new StringTokenizer(line);
-		String t = tok.nextToken(); // skip "points"
-		t = tok.nextToken();
-		int numPoints = Integer.parseInt(t);
-				
-		// read points
-		// the logic here allows more than one single point per line
-		for (int i = 0; i < numPoints;){
-			line = br.readLine();
-			tok = new StringTokenizer(line);
-			int nrPts = tok.countTokens();
-			nrPts /= 3;
-			for (int j = 0; j < nrPts; j++){
-				PointND p = new PointND(Float.parseFloat(tok.nextToken()), Float.parseFloat(tok.nextToken()), Float.parseFloat(tok.nextToken()));
-				points.add(p);
-			}
-			i += nrPts;
-		}
-		// read connectivity information
-		// assumes triangle mesh, hence first number in connectivity information needs to be 3
-		// logic allows more than one triangle per line
-		line = br.readLine();
-		if(line.isEmpty()){
-			line = br.readLine();
-		}
-		tok = new StringTokenizer(line);
-		tok.nextToken(); // skip "polygons"
-		int numTri =  Integer.parseInt(tok.nextToken());
-		for(int i = 0; i < numTri;){
-			line = br.readLine();
-			tok = new StringTokenizer(line);
-			int nTri = tok.countTokens();
-			nTri /= 4;
-			for(int j = 0; j < nTri; j++){
-				t = tok.nextToken();
-				if(Integer.parseInt(t) != 3){
-					br.close();
-					fr.close();
-					throw new IOException("VTK-Polydata file: Format not yet supported.");
-				}else{
-					PointND triangle = new PointND(Integer.parseInt(tok.nextToken()),Integer.parseInt(tok.nextToken()),Integer.parseInt(tok.nextToken()));
-					triangles.add(triangle);
-				}
-			}
-			i += nTri;
-		}
-		
-		// read deformation vectors
-		boolean hasDeform = true;
-		
-		line = br.readLine();
-		if(line!=null && line.isEmpty()){
-			line = br.readLine();
-		}
-		// not every mesh features a deformation field
-		// check whether the file contains any more information
-		if(line == null) {
-			hasDeform = false; 
-		} else {
-			tok = new StringTokenizer(line);
-			tok.nextToken(); // skip "Point_Data"
-			int numVec =  Integer.parseInt(tok.nextToken());
-			line = br.readLine(); // skip "Field FieldData 6"
-			line = br.readLine(); // skip "Phi_Glyph numComp numTuples dataType"
-			for(int i = 0; i < numVec;){
-				line = br.readLine();
-				tok = new StringTokenizer(line);
-				int nVec = tok.countTokens();
-				nVec /= 3;
-				for(int j = 0; j < nVec; j++){
-					PointND vector = new PointND(Float.parseFloat(tok.nextToken()),Float.parseFloat(tok.nextToken()),Float.parseFloat(tok.nextToken()));
-					deformations.add(vector);
-				}
-				i += nVec;
-			}
-		}		
-		br.close();	
-		fr.close();
-		
-		this.numPoints = numPoints;
-		this.points = toSimpleMatrix(points);
-		this.dimension = this.points.getCols();
-		this.numConnections = numTri;
-		this.triangles = toSimpleMatrix(triangles);
-		this.deformations = hasDeform ? toSimpleMatrix(deformations) : null;
+		Mesh tmpMesh = reader.getMesh();
+		this.numPoints = tmpMesh.numPoints;
+		this.points = tmpMesh.getPoints();
+		this.dimension = tmpMesh.dimension;
+		this.numConnections = tmpMesh.numConnections;
+		this.triangles = tmpMesh.getConnectivity();
+		this.deformations = tmpMesh.getDeformation();
 	}
 
 	/**
