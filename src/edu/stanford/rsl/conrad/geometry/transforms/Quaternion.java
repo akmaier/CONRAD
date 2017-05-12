@@ -112,7 +112,7 @@ public class Quaternion {
 	 * 		R11 + R22 + R33 = (a*a + b*b - c*c - d*d) + (a*a - b*b + c*c - d*d) + (a*a - b*b - c*c + d*d)
 	 * can be solved for every element of the quaternion, where "R11 + R22 + R33" is the trace of the rotation matrix.
 	 * The maximum element is needed to avoid dividing by zero in the following steps. The result is not influenced by this choice. 
-	 * Equations taken from: Prof. Dr.-Ing. Jörg Buchholz, 2010, Regelungstechnik und Flugregler, Munich, GRIN Verlag, http://www.grin.com/de/e-book/82818/regelungstechnik-und-flugregler
+	 * Equations taken from: Prof. Dr.-Ing. Joerg Buchholz, 2010, Regelungstechnik und Flugregler, Munich, GRIN Verlag, http://www.grin.com/de/e-book/82818/regelungstechnik-und-flugregler
 	 * @param R
 	 * @return q
 	 */
