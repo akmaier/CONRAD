@@ -552,7 +552,12 @@ public class Trajectory implements SafeSerializable{
 	 */
 	public void updatePrimaryAngles(){
 		// Internal Coordinates we want to use for visualization: (0,0,0) to (1,1,1);
+		
 		Trajectory trajectory = this;
+		if(primaryAngles == null){
+			primaryAngles = new double[trajectory.getProjectionMatrices().length];
+		}
+
 		PointND min = new PointND(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
 		PointND max = new PointND(-Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE);
 		for (Projection p: trajectory.getProjectionMatrices()){
@@ -560,7 +565,7 @@ public class Trajectory implements SafeSerializable{
 			min.updateIfLower(source);
 			max.updateIfHigher(source);
 		}
-		PointND center = trajectory.computeIsoCenter();
+		PointND center = trajectory.computeIsoCenterSolve();
 		SimpleVector range = max.getAbstractVector();
 		range.add(min.getAbstractVector().negated());		
 		
