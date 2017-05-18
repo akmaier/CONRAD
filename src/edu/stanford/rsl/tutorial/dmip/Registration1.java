@@ -34,16 +34,20 @@ public class Registration1 {
 			if(i < numPoints)
 			{
 				// TODO
-				// TODO
-				// TODO
-				// TODO
+				m.setElementValue(i, 0, q.getElement(i, 0));
+				m.setElementValue(i, 1, -q.getElement(i, 1));
+				
+				m.setElementValue(i, 2, 1);
+				m.setElementValue(i, 3, 0);
 			}
 			if(i >= numPoints)
 			{
 				// TODO
-				// TODO
-				// TODO
-				// TODO
+				m.setElementValue(i, 0, q.getElement(i-numPoints, 1));
+				m.setElementValue(i, 1, q.getElement(i-numPoints, 0));
+				
+				m.setElementValue(i, 2, 0);
+				m.setElementValue(i, 3, 1);
 			}
 		}
 		
@@ -55,11 +59,13 @@ public class Registration1 {
 			if(i < numPoints)
 			{
 				// TODO
+				b.setElementValue(i, p.getElement(i, 0));
 			}
 			
 			if(i >= numPoints)
 			{
 				// TODO
+				b.setElementValue(i, p.getElement(i-numPoints,1));
 			}
 		}
 		
@@ -78,9 +84,12 @@ public class Registration1 {
 		
 		
 		// TODO: normalize r
+		double abs_r = Math.sqrt((r1*r1)+(r2*r2));
 		
+		r1 = r1 / abs_r;
+		r2 = r2 / abs_r;
 		
-		double phi = 0; // TODO
+		double phi = Math.atan(r2/r1); // TODO
 		
 		// Write the result for the translation and the rotation into the result vector
 		SimpleVector result = new SimpleVector(phi, t1, t2);
@@ -93,18 +102,18 @@ public class Registration1 {
 		
 		SimpleMatrix r = new SimpleMatrix(2,2);
 		// TODO: fill the rotation matrix
-		
-		// TODO
-		// TODO
-		// TODO
-		// TODO
+		r.setElementValue(0, 0, Math.cos(phi));
+		r.setElementValue(0, 1, -Math.sin(phi));
+		r.setElementValue(1, 0, Math.sin(phi));
+		r.setElementValue(1, 1, Math.cos(phi));
 
 		SimpleMatrix transformedPoints = new SimpleMatrix(points.getRows(), points.getCols());
 				
 		for(int i = 0; i < transformedPoints.getRows(); i++)
 		{
 			// TODO: transform points
-			
+			transformedPoints.setRowValue(i, SimpleOperators.multiply(r, points.getRow(i)));
+			transformedPoints.setRowValue(i, SimpleOperators.add(transformedPoints.getRow(i), translation));
 		}
 		
 		return transformedPoints;

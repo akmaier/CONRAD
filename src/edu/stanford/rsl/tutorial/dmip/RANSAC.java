@@ -61,16 +61,14 @@ public class RANSAC {
 				a.setRowValue(n, points.getRow(indexes.get(n)));
 			}
 			
-			SimpleVector lineParams= new SimpleVector(mn);
-			// TODO: estimate the line parameters for the selected points
+			SimpleVector lineParams = fitline(a);
 			
 			
 		
 			
 			// Calculate the error of the estimated line
 			// update the error and the parameters, if the current line has a smaller error
-			double cur_err = 0.0;
-			// TODO: calculate the error of the current line
+			double cur_err = lineError(lineParams, points);
 			
 			
 			if(cur_err < error)
@@ -109,7 +107,7 @@ public class RANSAC {
 		SimpleVector x_result = new SimpleVector(2);
 		
 		// Calculate the parameters using the Pseudo-Inverse
-		// TODO: calculate the line parameters, write them in x_result
+		x_result = SimpleOperators.multiply(m.inverse(InversionType.INVERT_SVD), b);
 		
 		return x_result;
 	}
@@ -127,24 +125,33 @@ public class RANSAC {
 		// Threshold defining the allowed distance of a point to the line
 		double thresh = 0.2;
 		
-		// TODO: line parameters
+		double m = line_params.getElement(0);
+		double c = line_params.getElement(1);
 		
 		
-		// TODO: get some point on the line
+		SimpleVector point = new SimpleVector(1, m*1 + c); 
 		
 		
-		// TODO: calculate normal vector of the line
+		SimpleVector n = new SimpleVector(-m,1);
+		n = n.normalizedL2();
+		
+		double d = SimpleOperators.multiplyInnerProd(point, n);
+		double error = 0;
+		
+		for (int i = 0; i < points.getRows(); ++i)
+		{
+			double dp = Math.abs(SimpleOperators.multiplyInnerProd(points.getRow(i), n) - d);
+			
+			if (dp > thresh)
+			{
+				error++;
+			}
+		}
+		
+		error /= points.getRows();
 		
 		
-		// TODO: calculate distance line to origin
-		
-		
-		// TODO: calculate the distance for each point to the line
-		// TODO: check if the distance is higher than the threshold
-		
-		
-		// TODO: return the error
-		return 0;
+		return error;
 	}
 	
 	

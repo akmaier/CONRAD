@@ -39,6 +39,7 @@ import edu.stanford.rsl.conrad.utils.XmlUtils;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.gui.Line;
 import ij.gui.Overlay;
 import ij.measure.Calibration;
 import ij.process.StackStatistics;
@@ -86,14 +87,6 @@ public class MarkerDetectionWorker implements GUIConfigurable{
 	protected ArrayList<ArrayList<double[]>> twoDPosMerged = null;
 
 	protected Configuration config = null;
-
-	public Configuration getConfig() {
-		return config;
-	}
-
-	public void setConfig(Configuration config) {
-		this.config = config;
-	}
 
 	protected boolean configured = false;
 

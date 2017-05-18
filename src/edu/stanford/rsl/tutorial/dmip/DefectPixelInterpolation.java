@@ -38,14 +38,13 @@ public class DefectPixelInterpolation {
 	public Grid2D interpolateSpectral(Grid2D image, Grid2D mask, int maxIter, boolean zeroPadding)
 	{
 		//padding
-		//TODO
-		//TODO
+		Grid2DComplex G = new Grid2DComplex(image, zeroPadding);
+		Grid2DComplex W = new Grid2DComplex(mask, zeroPadding);
 		
 		//fourier transform
-		Grid2DComplex G = new Grid2DComplex(1,1);//TODO
-		Grid2DComplex W = new Grid2DComplex(1,1);//TODO
-		//TODO
-		//TODO
+		G.transformForward();
+		W.transformForward();
+		
 		
 		int[] dim = G.getSize();
 		
@@ -75,7 +74,7 @@ public class DefectPixelInterpolation {
 			//which maximizes the energy reduction [Paragraph after Eq. (16) in the paper]
 			double maxDeltaE_G = Double.NEGATIVE_INFINITY;			
 			//create arraylist to store lines (in case multiple maxima are found)
-			//TODO
+		
 			ArrayList<Integer[]> sj1 = null; //HINT
 			for(int x = 0; x < dim[0]; x++)
 			{
@@ -84,11 +83,11 @@ public class DefectPixelInterpolation {
 					float val = G.getAtIndex(x, y) ;
 					if( val > maxDeltaE_G)
 					{
-						//TODO
-						//TODO
-						//TODO
+						sj1 = new ArrayList<Integer[]>();
+						sj1.add(new Integer[]{x,y});
+						maxDeltaE_G = val;
 					}else if(val == maxDeltaE_G) {
-						//TODO
+						sj1.add(new Integer[]{x,y});
 					}
 				}
 			}
@@ -107,8 +106,8 @@ public class DefectPixelInterpolation {
 			
 			//Compute the corresponding linepair s2, t2:
 			//mirror the positions at halfDim
-			int s2 = 0;//TODO
-			int t2 = 0;//TODO
+			int s2 = (s1 > 0) ? dim[0] - (s1 % dim[0]) : s1;
+			int t2 = (t1 > 0) ? dim[1] - (t1 % dim[1]) : t1;
 			
 			//[Paragraph after Eq. (17) in the paper]
 			int twice_s1 = (2*s1) % dim[0];
@@ -128,11 +127,12 @@ public class DefectPixelInterpolation {
 				specialCase = true;
 				//Eq. 15
 				//FHat = N*(G(s,t)/W(0,0))
-				//TODO compute FHatNext, use Complex class
-				//TODO
-				//TODO
-				//TODO
-				Complex res = new Complex();//HINT
+				Complex Gval = new Complex(G.getRealAtIndex(s1, t1), G.getImagAtIndex(s1, t1));
+				Complex Wval = new Complex(W.getRealAtIndex(0, 0), W.getImagAtIndex(0, 0));
+				Complex FHatNextVal = new Complex(FHatNext.getRealAtIndex(s1, t1), FHatNext.getImagAtIndex(s1, t1));
+				
+				Complex res = FHatNextVal.add(Gval.mul(dim[0] * dim[1]).div(Wval) );
+				
 				FHatNext.setRealAtIndex(s1, t1, (float) res.getReal());
 				FHatNext.setImagAtIndex(s1, t1, (float) res.getImag());
 			}
@@ -140,13 +140,19 @@ public class DefectPixelInterpolation {
 			{
 				//General case
 				//Compute FHatNext for the general case Eq.9
-				//TODO
-				//TODO
-				//TODO
-				//TODO
-				//TODO
-				Complex res_s1t1 = new Complex();//HINT
-				Complex res_s2t2 = new Complex();//HINT
+				Complex GVal = new Complex(G.getRealAtIndex(s1, t1), G.getImagAtIndex(s1, t1));
+				Complex WVal_00 = new Complex(W.getRealAtIndex(0, 0), W.getImagAtIndex(0, 0));
+				Complex WVal_twice = new Complex(W.getRealAtIndex(twice_s1, twice_t1), W.getImagAtIndex(twice_s1, twice_t1));
+				
+				Complex FHatNextVal_s1t1 = new Complex(FHatNext.getRealAtIndex(s1, t1), FHatNext.getImagAtIndex(s1, t1));
+				Complex FHatNextVal_s2t2 = new Complex(FHatNext.getRealAtIndex(s2, t2), FHatNext.getImagAtIndex(s2, t2));
+				
+				Complex val = ((GVal.mul(WVal_00.getConjugate())).sub(GVal.getConjugate().mul(WVal_twice))).mul(dim[0]*dim[1]);
+				val = val.div(WVal_00.getMagn() * WVal_00.getMagn() - WVal_twice.getMagn() * WVal_twice.getMagn());
+				
+				Complex res_s1t1 = FHatNextVal_s1t1.add(val);
+				Complex res_s2t2 = FHatNextVal_s2t2.add(val.getConjugate());
+				
 				FHatNext.setRealAtIndex(s1, t1, (float) res_s1t1.getReal());
 				FHatNext.setImagAtIndex(s1, t1, (float) res_s1t1.getImag());
 				FHatNext.setRealAtIndex(s2, t2, (float) res_s2t2.getReal());
@@ -197,10 +203,17 @@ public class DefectPixelInterpolation {
 		
 		//Fill in the defect mask pixels with the current estimation and remove the zero padding
 		Grid2D result = new Grid2D(image);
-		//TODO
-		//TODO
-		//TODO
-		//TODO
+		
+		for(int i = 0; i < result.getWidth(); i++)
+		{
+			for(int j = 0; j <  result.getHeight(); j++)
+			{
+				if (mask.getAtIndex(i, j) == 0)
+				{
+					result.setAtIndex(i, j, FHat.getRealAtIndex(i, j));
+				}
+			}
+		}
 		
 		return result;
 	}
@@ -331,8 +344,8 @@ public class DefectPixelInterpolation {
 		
 				
 		//Load an image from file
-		String filename = "D:/02_lectures/DMIP/exercises/2014/3/testimg.bmp";
-		String filenameMask = "D:/02_lectures/DMIP/exercises/2014/3/mask.bmp";
+		String filename = "/Users/Phil/Documents/Reconstruction/Conrad/src/edu/stanford/rsl/tutorial/dmip/testimg.bmp";
+		String filenameMask = "/Users/Phil/Documents/Reconstruction/Conrad/src/edu/stanford/rsl/tutorial/dmip/mask.bmp";
 
 		Grid2D image = ImageUtil.wrapImagePlus(IJ.openImage(filename)).getSubGrid(0);
 		image.show("Ideal Input Image");
@@ -340,7 +353,7 @@ public class DefectPixelInterpolation {
 		Grid2D mask = ImageUtil.wrapImagePlus(IJ.openImage(filenameMask)).getSubGrid(0);
 		//Set some pixels as defect, elementwise multiply with defect pixel mask
 		Grid2D defectImage = new Grid2D(image);
-		//TODO
+		defectImage.getGridOperator().multiplyBy(defectImage, mask);
 		defectImage.show("Defect Image");
 		
 		
@@ -369,8 +382,8 @@ public class DefectPixelInterpolation {
 		boolean zeroPadding = true;
 		int maxIter = 4000;
 		
-		//TODO
-		Grid2D spectralFiltered = new Grid2D(1,1);//TODO
+		
+		Grid2D spectralFiltered = dpi.interpolateSpectral(defectImage, mask, maxIter, zeroPadding);
 		spectralFiltered.show("Spectral Filtered Image");
 		
 		//show difference image |Spectral - Original|
