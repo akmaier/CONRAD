@@ -11,6 +11,7 @@ import edu.stanford.rsl.conrad.filtering.ImageFilteringTool;
 import edu.stanford.rsl.conrad.io.ImagePlusDataSink;
 import edu.stanford.rsl.conrad.opencl.OpenCLMaterialPathLengthPhantomRenderer;
 import edu.stanford.rsl.conrad.opencl.OpenCLProjectionPhantomRenderer;
+import edu.stanford.rsl.conrad.opencl.OpenCLSurfacePhantomRenderer;
 import edu.stanford.rsl.conrad.pipeline.IndividualImagePipelineFilteringTool;
 import edu.stanford.rsl.conrad.pipeline.ParallelImageFilterPipeliner;
 import edu.stanford.rsl.conrad.pipeline.ProjectionSource;
@@ -59,7 +60,7 @@ public abstract class PhantomRenderer implements ProjectionSource, Citeable, GUI
 	 * @return the list.
 	 */
 	public static PhantomRenderer [] getPhantoms(){
-		PhantomRenderer [] phantoms = {new MetricPhantomRenderer(), new ParallelProjectionPhantomRenderer(), new OpenCLProjectionPhantomRenderer(), new OpenCLMaterialPathLengthPhantomRenderer()};
+		PhantomRenderer [] phantoms = {new MetricPhantomRenderer(), new ParallelProjectionPhantomRenderer(), new OpenCLProjectionPhantomRenderer(), new OpenCLMaterialPathLengthPhantomRenderer(), new OpenCLSurfacePhantomRenderer()};
 		return phantoms;
 	}
 	
