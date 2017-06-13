@@ -42,7 +42,7 @@ public class ObserverPipeline {
 		Grid2D[] testImages = model.CreateTestModels(Ntest, VariationType.ProjectionPoisson);
         Grid2D[] emptyTestImages = model.CreateEmptyImages(Ntest, VariationType.ProjectionWOFilter);
         
-		ROC.ShowROC(testImages, emptyTestImages, Ntest, template, channelMatrix);		
+		ROCold.ShowROC(testImages, emptyTestImages, Ntest, template, channelMatrix);		
 	}
 }
 
