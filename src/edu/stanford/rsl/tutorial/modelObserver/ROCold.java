@@ -11,7 +11,7 @@ import edu.stanford.rsl.conrad.utils.VisualizationUtil;
  * @author Iris Kellermann
  */
 
-public class ROC {
+public class ROCold {
 
 	/**
 	 * Calculates and displays the ROC curve for the given test images. Calculates and displays the SNR.
