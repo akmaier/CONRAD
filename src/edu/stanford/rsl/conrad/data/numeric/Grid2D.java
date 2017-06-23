@@ -115,7 +115,7 @@ public class Grid2D extends NumericGrid implements Transformable {
 	 * myGrid1D = myGrid2D.getSubGrid(j);
 	 *
 	 * This code is deprecated since no final solution was found 
-	 * to solve the prior menioned problem.
+	 * to solve the prior mentioned problem.
 	 * 
 	 * @param j The row-index (y-index, height-index)
 	 * @param subGrid
