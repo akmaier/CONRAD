@@ -15,7 +15,7 @@ import ij.ImagePlus;
  * @author Priyal Patel
  * @Supervisors: Frank Schebesch, Andreas Maier
  */
-public class Model_demo{
+public class ModelDemo{
 	
 	float background_component[]; //Amplitude of noise component 1 and noise component 2
 	int n=150;                    //Number of samples of both classes   
@@ -39,7 +39,7 @@ public class Model_demo{
 	 * @param shape 
 	 */
 	
-	public Model_demo(int width,int height,int n,float background_component[],float templet_value,double[] class1,double[] class2,double[] space,String shape) {
+	public ModelDemo(int width,int height,int n,float background_component[],float templet_value,double[] class1,double[] class2,double[] space,String shape) {
 		
 		super();
 		
@@ -60,7 +60,7 @@ public class Model_demo{
 	 * Default constructor 
 	 */
 	
-	public Model_demo() {
+	public ModelDemo() {
 		
 		// TODO Auto-generated constructor stub
 	}
@@ -77,7 +77,7 @@ public class Model_demo{
 		
 		//reference image with only signal(it can be disk or Gaussian)
 		Grid2D tamplet = new Grid2D(width, height);
-		Creat_Images image1 = new Creat_Images(width, height,space);
+		CreateImages image1 = new CreateImages(width, height,space);
 		tamplet = image1.tamplets(width, height, templet_value,shape);
 		tamplet.show();
 		
@@ -87,9 +87,9 @@ public class Model_demo{
 			Grid2D sa_image;// Signal absent image
 			
 			//Generates Gaussian noise with two different amplitude components 
-			Creat_Images[] background_noise = new Creat_Images[2];
-			background_noise[0] = new Creat_Images(width, height,space);
-			background_noise[1] = new Creat_Images(width, height,space);
+			CreateImages[] background_noise = new CreateImages[2];
+			background_noise[0] = new CreateImages(width, height,space);
+			background_noise[1] = new CreateImages(width, height,space);
 			
 			//Apply Cone-filter on previously generated Gaussian noise
 			Grid2D[] filtered_noise = new Grid2D[2];
@@ -144,7 +144,7 @@ public class Model_demo{
 		String shape = "Disk";//Select shape of reference signal ("Disk" or "Gaussian")
 		
 		//Model_demo constructor generates score of class1(signal-present) and class2(signal-absent)
-		Model_demo a = new Model_demo(width,height,n,background_component,templet_value,class1,class2,space,shape);
+		ModelDemo a = new ModelDemo(width,height,n,background_component,templet_value,class1,class2,space,shape);
 		
 		// Get the ROC curve using ROC class  
 		ROC roc = new ROC(a.class1, a.class2, true);

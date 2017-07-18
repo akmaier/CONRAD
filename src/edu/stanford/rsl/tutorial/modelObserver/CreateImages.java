@@ -14,7 +14,7 @@ import edu.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators;
  * @author Priyal Patel
  * @Supervisors: Frank Schebesch, Andreas Maier
  */
-public class Creat_Images extends Grid2D {
+public class CreateImages extends Grid2D {
 
 	private int height = 500, width = 500;
 	private float sigscale = 2.5f; // signal scale parameter (Gaussian stdev)
@@ -32,11 +32,11 @@ public class Creat_Images extends Grid2D {
 		return this.height;
 	}
 	
-	public Creat_Images() {
+	public CreateImages() {
 		super(null);
 	}
 
-	public Creat_Images(int width, int height, double[] spacing) {
+	public CreateImages(int width, int height, double[] spacing) {
 		super(width, height);
 		// TODO Auto-generated constructor stub
 		this.setSpacing(spacing[0], spacing[1]);
