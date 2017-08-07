@@ -349,7 +349,7 @@ public class OpenCLForwardProjector implements GUIConfigurable, Citeable {
 					memorysize = (int) (volumeSize[0] * volumeSize[1] * subVolumeZ * Float.SIZE / 8);
 					if(debug)System.out.println("Memory: " + memorysize);
 				} else {
-					h_volume = new float[(int) (volumeSize[0] * volumeSize[1] * volumeSize[2])];
+					h_volume = new float[(int)volumeSize[0] * (int)volumeSize[1] * (int)volumeSize[2]];
 					subVolumeZ = (int) volumeSize[2];
 					nSteps = 1;
 				}
@@ -646,7 +646,8 @@ public class OpenCLForwardProjector implements GUIConfigurable, Citeable {
 							System.out.println(k + " " + i + " " + j);
 							break;
 						}
-						h_volume[index2] = currentSlice.getPixelValue(i, j);
+						float tmpVal = currentSlice.getPixelValue(i, j);
+						h_volume[index2] = tmpVal;
 					}
 				}
 			} else {
@@ -700,7 +701,8 @@ public class OpenCLForwardProjector implements GUIConfigurable, Citeable {
 	 */
 	@Override
 	public void configure() throws Exception {
-		obtainGeometryFromVolume = UserUtil.queryBoolean("Try to obtain volume parameters from ImagePlus/Grid3D (Otherwise from configuration)?");
+		//obtainGeometryFromVolume = UserUtil.queryBoolean("Try to obtain volume parameters from ImagePlus/Grid3D (Otherwise from configuration)?");
+		//obtainGeometryFromVolume = true;
 		Configuration config = Configuration.getGlobalConfiguration();
 		
 		if (!obtainGeometryFromVolume){
