@@ -1,5 +1,4 @@
 package edu.stanford.rsl.apps.gui;
-import ij.IJ;
 
 import java.awt.Color;
 import java.awt.Dimension;

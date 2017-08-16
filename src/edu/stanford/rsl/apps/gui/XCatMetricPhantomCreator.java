@@ -114,9 +114,7 @@ public class XCatMetricPhantomCreator {
 			}
 			Calibration calibration = null;
 
-			PointND saveWorldOrigin = new PointND(geom.getOriginX(),geom.getOriginY(),geom.getOriginZ());
-
-			// render the scene
+						// render the scene
 			// the number of steps gives the number of volumes rendered. (k < 40)
 
 			double[] timeList = new double[getSteps()];

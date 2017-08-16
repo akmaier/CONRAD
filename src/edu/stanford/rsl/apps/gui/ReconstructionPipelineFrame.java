@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2010-2014 - Andreas Maier 
+ * Copyright (C) 2010-2017 - Andreas Maier 
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
-*/
+ */
 package edu.stanford.rsl.apps.gui;
 
 import ij.ImagePlus;
@@ -13,6 +13,7 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.IOException;
 
@@ -64,7 +65,7 @@ import edu.stanford.rsl.conrad.utils.RegKeys;
  * LEGALLY FOR ANY CORPORATE OR COMMERCIAL PURPOSE.
  */
 public class ReconstructionPipelineFrame extends JFrame implements ActionListener, UpdateableGUI {
-	
+
 	/**
 	 * 
 	 */
@@ -93,13 +94,13 @@ public class ReconstructionPipelineFrame extends JFrame implements ActionListene
 		sink = Configuration.getGlobalConfiguration().getSink();
 		initGUI();
 		updateGUI();
-		
+
 		// Load the sound file and setup playback
 		if (Configuration.getGlobalConfiguration().getRegistry().get(RegKeys.SOUND_FILE) != null) {
 			String name = Configuration.getGlobalConfiguration().getRegistry().get(RegKeys.SOUND_FILE);
 			if (name.isEmpty())
 				return;
-			
+
 			AudioInputStream as = null;
 			try {
 				File in = new File(name);
@@ -108,13 +109,13 @@ public class ReconstructionPipelineFrame extends JFrame implements ActionListene
 				System.out.println("Failed to load sound file " + name);
 				return;
 			}
-			
+
 			DataLine.Info info = new DataLine.Info(Clip.class, as.getFormat());
 			if (!AudioSystem.isLineSupported(info)) {
 				System.out.println("Audio output is not supported for this format");
 				return;
 			}
-			
+
 			try {
 				soundClip = (Clip)AudioSystem.getLine(info);
 				soundClip.open(as);
@@ -130,20 +131,20 @@ public class ReconstructionPipelineFrame extends JFrame implements ActionListene
 		sinkPanel.updateGUI();
 		repaint();
 	}
-	
-    /**
-     * Create an Edit menu to support cut/copy/paste.
-     */
-    @SuppressWarnings("serial")
+
+	/**
+	 * Create an Edit menu to support cut/copy/paste.
+	 */
+	@SuppressWarnings("serial")
 	public JMenuBar createMenuBar () {
-        JMenuItem menuItem = null;
-        JMenuBar menuBar = new JMenuBar();
-        
-        JMenu mainMenu = new JMenu("Configuration");
-        mainMenu.setMnemonic(KeyEvent.VK_C);
-        
-        
-        menuItem = new JMenuItem(new AbstractAction(){
+		JMenuItem menuItem = null;
+		JMenuBar menuBar = new JMenuBar();
+
+		JMenu mainMenu = new JMenu("Configuration");
+		mainMenu.setMnemonic(KeyEvent.VK_C);
+
+
+		menuItem = new JMenuItem(new AbstractAction(){
 			public void actionPerformed(ActionEvent e) {
 				try {
 					String filename = FileUtil.myFileChoose(".xml", false);
@@ -154,12 +155,12 @@ public class ReconstructionPipelineFrame extends JFrame implements ActionListene
 					System.out.println(e1.getLocalizedMessage());
 				}
 			}
-        });
-        menuItem.setText("Load");
-        menuItem.setMnemonic(KeyEvent.VK_L);
-        mainMenu.add(menuItem);
+		});
+		menuItem.setText("Load");
+		menuItem.setMnemonic(KeyEvent.VK_L);
+		mainMenu.add(menuItem);
 
-        menuItem = new JMenuItem(new AbstractAction(){
+		menuItem = new JMenuItem(new AbstractAction(){
 			public void actionPerformed(ActionEvent e) {
 				try {
 					String filename = FileUtil.myFileChoose(".xml", true);
@@ -170,36 +171,36 @@ public class ReconstructionPipelineFrame extends JFrame implements ActionListene
 					System.out.println(e1.getLocalizedMessage());
 				}
 			}
-        });
-        menuItem.setText("Save");
-        menuItem.setMnemonic(KeyEvent.VK_S);
-        mainMenu.add(menuItem);
+		});
+		menuItem.setText("Save");
+		menuItem.setMnemonic(KeyEvent.VK_S);
+		mainMenu.add(menuItem);
 
-        menuBar.add(mainMenu);
-        
-        mainMenu = new JMenu("Edit");
-        mainMenu.setMnemonic(KeyEvent.VK_E);
+		menuBar.add(mainMenu);
 
-        menuItem = new JMenuItem(new DefaultEditorKit.CutAction());
-        menuItem.setText("Cut");
-        menuItem.setMnemonic(KeyEvent.VK_T);
-        mainMenu.add(menuItem);
+		mainMenu = new JMenu("Edit");
+		mainMenu.setMnemonic(KeyEvent.VK_E);
 
-        menuItem = new JMenuItem(new DefaultEditorKit.CopyAction());
-        menuItem.setText("Copy");
-        menuItem.setMnemonic(KeyEvent.VK_C);
-        mainMenu.add(menuItem);
+		menuItem = new JMenuItem(new DefaultEditorKit.CutAction());
+		menuItem.setText("Cut");
+		menuItem.setMnemonic(KeyEvent.VK_T);
+		mainMenu.add(menuItem);
 
-        menuItem = new JMenuItem(new DefaultEditorKit.PasteAction());
-        menuItem.setText("Paste");
-        menuItem.setMnemonic(KeyEvent.VK_P);
-        mainMenu.add(menuItem);
+		menuItem = new JMenuItem(new DefaultEditorKit.CopyAction());
+		menuItem.setText("Copy");
+		menuItem.setMnemonic(KeyEvent.VK_C);
+		mainMenu.add(menuItem);
 
-        menuBar.add(mainMenu);
-        
-        
-        return menuBar;
-    }
+		menuItem = new JMenuItem(new DefaultEditorKit.PasteAction());
+		menuItem.setText("Paste");
+		menuItem.setMnemonic(KeyEvent.VK_P);
+		mainMenu.add(menuItem);
+
+		menuBar.add(mainMenu);
+
+
+		return menuBar;
+	}
 
 
 	private void initGUI() {
@@ -247,7 +248,7 @@ public class ReconstructionPipelineFrame extends JFrame implements ActionListene
 				jPanel1Layout.columnWeights = new double[] {0.1, 0.1, 0.1};
 				jPanel1Layout.columnWidths = new int[] {80, 80, 80};
 				jPanel1.setLayout(jPanel1Layout);
-				
+
 				{
 					jProjectionsTextField = new JTextField();
 					jPanel1.add(
@@ -325,7 +326,7 @@ public class ReconstructionPipelineFrame extends JFrame implements ActionListene
 					sinkPanel = new GUICompatibleObjectVisualizationPanel(sink);
 					jPanel1.add(sinkPanel, new GridBagConstraints(0, 1, 3, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
 					sinkPanel.setParentFrame(this);
-				
+
 					jChooseBackprojector = new JButton();
 					jPanel1.add(jChooseBackprojector, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 					jChooseBackprojector.setText("Choose Output");
@@ -341,7 +342,7 @@ public class ReconstructionPipelineFrame extends JFrame implements ActionListene
 				jReconstructButton.setText("Reconstruct");
 				jReconstructButton.addActionListener(this);
 			}
-			
+
 
 
 		} catch (Exception e) {
@@ -396,7 +397,7 @@ public class ReconstructionPipelineFrame extends JFrame implements ActionListene
 			if (source.equals(this.jEditConfigurationButton)){
 				if (configFrame == null){
 					configFrame = new ConfigurationFrame();
-					
+
 					configFrame.setParentFrame(this);
 					configFrame.setVisible(true);
 					configFrame.setLocation(CONRAD.getWindowTopCorner());
@@ -442,7 +443,7 @@ public class ReconstructionPipelineFrame extends JFrame implements ActionListene
 						ImageFilteringTool [] filters = Configuration.getGlobalConfiguration().getFilterPipeline();
 						boolean isConfigured = true;
 						boolean recoTest = false;
-						
+
 						for (int i = 0; i < filters.length; i++){
 							if (!filters[i].isConfigured()) isConfigured = false;
 							if(filters[i] instanceof ReconstructionFilter) recoTest = true;
@@ -461,15 +462,15 @@ public class ReconstructionPipelineFrame extends JFrame implements ActionListene
 										e.printStackTrace();
 									}
 									Grid3D result = sink.getResult();
-									
+
 									time = System.currentTimeMillis() - time;
 									if (volumePreview == null) {
 										volumePreview = ImageUtil.wrapGrid3D(result, "Result of " + pSource);
-										
-										
+
+
 										ImageUtil.applyConradImageCalibration(volumePreview, isReconstruction);
-										
-										
+
+
 										if (volumePreview != null){
 											volumePreview.show();
 										}
@@ -497,7 +498,7 @@ public class ReconstructionPipelineFrame extends JFrame implements ActionListene
 										e.printStackTrace();
 									}
 									DoubleArrayUtil.visualizeBufferedArrays("Current Weighting");
-									
+
 									// Play the sound if so desired
 									if (soundClip != null) {
 										soundClip.setFramePosition(0);
@@ -521,11 +522,28 @@ public class ReconstructionPipelineFrame extends JFrame implements ActionListene
 		}
 	}
 
-	public static void main(String [] args){
-		CONRAD.setup();
+	/**
+	 * Method to start Conrad Reconstruction Pipeline Frame. This method allows to register your own window listener for call backs. If "null" is used the default window listener will be used that will terminate the VM if the pipeline frame or ImageJ are closed.
+	 * @param listen the window listener
+	 * @return
+	 */
+	public static WindowListener startConrad(WindowListener listen) {
+		WindowListener global = listen;
+		if (listen==null) global = CONRAD.setup();
+		else CONRAD.setup(listen);
 		ReconstructionPipelineFrame oscar = new ReconstructionPipelineFrame();
 		oscar.setVisible(true);
 		oscar.setLocation(CONRAD.getWindowTopCorner());
+		oscar.addWindowListener(global);
+		return global;
+	}
+
+	/**
+	 * Start Conrad with default options.
+	 * @param args
+	 */
+	public static void main(String [] args){
+		startConrad(null);
 	}
 
 }
