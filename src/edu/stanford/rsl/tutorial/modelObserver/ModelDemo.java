@@ -53,7 +53,7 @@ public class ModelDemo{
 		this.templet_value=templet_value;
 		this.space= space;
 		this.shape = shape;
-		generate_classes(this.height,this.width,background_component,this.templet_value,shape);
+		generateImages(this.height,this.width,background_component,this.templet_value,shape);
 	}
 	
 	/**
@@ -73,12 +73,12 @@ public class ModelDemo{
 	 * @param templet_value
 	 * @param shape
 	 */
-	void generate_classes(int width,int height,float background_component[],float templet_value,String shape){
+	void generateImages(int width,int height,float background_component[],float templet_value,String shape){
 		
 		//reference image with only signal(it can be disk or Gaussian)
 		Grid2D tamplet = new Grid2D(width, height);
 		CreateImages image1 = new CreateImages(width, height,space);
-		tamplet = image1.tamplets(width, height, templet_value,shape);
+		tamplet = image1.templates(width, height, templet_value,shape);
 		tamplet.show();
 		
 		//Generates n sets of image for both signal present and signal absent classes.
@@ -93,18 +93,18 @@ public class ModelDemo{
 			
 			//Apply Cone-filter on previously generated Gaussian noise
 			Grid2D[] filtered_noise = new Grid2D[2];
-			filtered_noise[0] = background_noise[0].conefilter(background_noise[0],background_component[0]);
-			filtered_noise[1] = background_noise[1].conefilter(background_noise[1],background_component[1]);
+			filtered_noise[0] = background_noise[0].coneFilter(background_noise[0],background_component[0]);
+			filtered_noise[1] = background_noise[1].coneFilter(background_noise[1],background_component[1]);
 			
 			// Creates Gaussian signal
 			Grid2D signal = new Grid2D(width, height);
-			signal = background_noise[1].create_signal();
+			signal = background_noise[1].createSignal();
 			
 			//Generates signal-Present image
-			sp_image = background_noise[0].sp(filtered_noise, signal);
+			sp_image = background_noise[0].signalPresent(filtered_noise, signal);
 			
 			//Generates signal-absent image 
-			sa_image= background_noise[1].sa(filtered_noise);
+			sa_image= background_noise[1].signalAbsent(filtered_noise);
 
 			//Computes Score of class 1 and class 2 
 			for (int y = 0; y <height; y++) {

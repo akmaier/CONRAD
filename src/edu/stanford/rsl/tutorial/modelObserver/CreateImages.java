@@ -72,7 +72,7 @@ public class CreateImages extends Grid2D {
      * @param signal:       Gaussian signal           
      * @return Signal-present images
      */
-	public Grid2D sp(Grid2D[] filter_image, Grid2D signal) {
+	public Grid2D signalPresent(Grid2D[] filter_image, Grid2D signal) {
 		Grid2D image = new Grid2D(filter_image[0].getWidth(), filter_image[0].getHeight());
 		NumericPointwiseOperators.addBy(image, signal);
 		NumericPointwiseOperators.addBy(image, filter_image[1]);
@@ -85,7 +85,7 @@ public class CreateImages extends Grid2D {
 	 * @param filter_image:   Filtered(cone-filter) noise images
 	 * @return Signal-absent image
 	 */
-	public Grid2D sa(Grid2D[] filter_image) {
+	public Grid2D signalAbsent(Grid2D[] filter_image) {
 		Grid2D image1 = new Grid2D(filter_image[0].getWidth(), filter_image[1].getHeight());
 		NumericPointwiseOperators.addBy(image1, filter_image[1]);
 		NumericPointwiseOperators.addBy(image1, filter_image[0]);
@@ -97,7 +97,7 @@ public class CreateImages extends Grid2D {
 	 * @param bg:    Amplitude of noise component
 	 * @return Filtered image
 	 */
-	public Grid2D conefilter(Grid2D image, float bg){
+	public Grid2D coneFilter(Grid2D image, float bg){
 		
 		Grid2DComplex fouriertransform = new Grid2DComplex(image, true);
 		fouriertransform.transformForward();
@@ -179,7 +179,7 @@ public class CreateImages extends Grid2D {
 	 * 
 	 * @return Signal
 	 */
-	public Grid2D create_signal() {
+	public Grid2D createSignal() {
 		float k;
 		float i11 = (float) (1 / (2 * Math.pow(sigscale, 2)));
 		float[] x11 = new float[this.getWidth()], y11 = new float[this.getWidth()];
@@ -214,23 +214,23 @@ public class CreateImages extends Grid2D {
 	 * @param a:                 Decides the shape of reference signal("Disk"or "Gaussian")   
 	 * @return Reference signal
 	 */
-	public Grid2D tamplets(int width, int height, float templet_value, String a) {
-		Grid2D tamplet = new Grid2D(width, height);
-		tamplet.setSpacing(1.0f, 1.0f);
-		tamplet.setOrigin(-tamplet.getWidth() / 2 + 0.5, +tamplet.getHeight() / 2 + 0.5);
+	public Grid2D templates(int width, int height, float templet_value, String a) {
+		Grid2D template = new Grid2D(width, height);
+		template.setSpacing(1.0f, 1.0f);
+		template.setOrigin(-template.getWidth() / 2 + 0.5, +template.getHeight() / 2 + 0.5);
 		sigscale = 2.5f;
 		float i1 = (float) (1 / (2 * Math.pow(sigscale, 2)));
 		if (a == "Disk") {
 			for (int i = 0; i < width; i++) {
 				for (int j = 0; j < height; j++) {
 					if ((Math.pow(i - (width / 2), 2) + Math.pow(j - (height / 2), 2)) <= Math.pow(sigscale, 2)) {
-						tamplet.setAtIndex(i, j, templet_value);
+						template.setAtIndex(i, j, templet_value);
 					}
 					
 					// templet_value++;
 				}
 			}
-			return tamplet;
+			return template;
 		} else {
 			for (int i = 1; i <= width; i++) {
 				for (int j = 1; j <= height; j++) {
@@ -238,11 +238,11 @@ public class CreateImages extends Grid2D {
 					//if ((Math.pow(i - (width / 2), 2) + Math.pow(j - (height / 2), 2)) <= Math.pow(sigscale, 2)){
 					templet_value = (float) (1000 * Math
 							.exp(-(i*i + j*j)*i1));
-					tamplet.setAtIndex(i, j, templet_value);
+					template.setAtIndex(i, j, templet_value);
 					//}
 				}
 			}
-			return tamplet;
+			return template;
 		}
 	}
 }
