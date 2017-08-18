@@ -175,7 +175,7 @@ public class Grid4D extends NumericGrid {
 		super.setSpacing(spacing);
 		for (Grid3D slice : buffer){
 			if (slice != null)
-				slice.setSpacing(spacing[0],spacing[1]);
+				slice.setSpacing(spacing[0],spacing[1],spacing[2]);
 		}
 	}
 
@@ -184,7 +184,7 @@ public class Grid4D extends NumericGrid {
 		super.setOrigin(origin);
 		for (Grid3D slice : buffer){
 			if (slice != null)
-				slice.setOrigin(origin[0],origin[1]);
+				slice.setOrigin(origin[0],origin[1],origin[2]);
 		}
 	}
 

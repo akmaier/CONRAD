@@ -27,9 +27,9 @@ public class MultiChannelGrid3D extends Grid3D {
 	}
 	
 	/**
-	 * Returns the Grid2D of the respective Channel
+	 * Returns the Grid3D of the respective Channel
 	 * @param c the channel number
-	 * @return the Grid2D
+	 * @return the Grid3D
 	 */
 	public Grid3D getChannel(int c){
 		Grid3D intermediate = multichannelData.getSubGrid(c);
@@ -117,5 +117,18 @@ public class MultiChannelGrid3D extends Grid3D {
 	 */
 	public int[] getSize() {
 		return new int[]{this.multichannelData.getSize()[0],this.multichannelData.getSize()[1],this.multichannelData.getSize()[2]};
+	}
+	
+	
+	@Override
+	public void setSpacing(double... spacing){
+		super.setSpacing(spacing);
+		multichannelData.setSpacing(spacing[0], spacing[1], spacing[2], 0.0);
+	}
+	
+	@Override
+	public void setOrigin(double... origin){
+		super.setOrigin(origin);
+		multichannelData.setOrigin(origin[0], origin[1], origin[2], 0.0);
 	}
 }
