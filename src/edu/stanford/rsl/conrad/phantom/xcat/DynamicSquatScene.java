@@ -46,6 +46,8 @@ public class DynamicSquatScene extends WholeBodyScene {
 	
 	int refProjection = 0;
 	
+	boolean takeOnlyOneLeg = false;
+	
 	static final int subjectNumber = 2;
 	
 	public DynamicSquatScene (){	
@@ -178,36 +180,42 @@ public class DynamicSquatScene extends WholeBodyScene {
 					displayTest = true;
 					transformPart = "LeftLower";
 				}				
-			}		
-			for (String s: partsRightLower){
-				if (splines.get(i).getTitle().toLowerCase().contains(s)){					
-					displayTest = true;
-					transformPart = "RightLower";
-				}				
+			}
+			if(!takeOnlyOneLeg){
+				for (String s: partsRightLower){
+					if (splines.get(i).getTitle().toLowerCase().contains(s)){					
+						displayTest = true;
+						transformPart = "RightLower";
+					}				
+				}
 			}
 			for (String s: partsLeftUpper){
 				if (splines.get(i).getTitle().toLowerCase().contains(s)){					
 					displayTest = true;
 					transformPart = "LeftUpper";
 				}				
-			}			
-			for (String s: partsRightUpper){
-				if (splines.get(i).getTitle().toLowerCase().contains(s)){
-					displayTest = true;
-					transformPart = "RightUpper";
-				}				
-			}			
+			}
+			if(!takeOnlyOneLeg){
+				for (String s: partsRightUpper){
+					if (splines.get(i).getTitle().toLowerCase().contains(s)){
+						displayTest = true;
+						transformPart = "RightUpper";
+					}				
+				}	
+			}
 			for (String s: partsLeftDual){ // apply two different transform based on 3d coordinate (e.g. left leg)
 				if (splines.get(i).getTitle().toLowerCase().contains(s)){
 					displayTest = true;
 					transformPart = "LeftDual";
 				}				
 			}
-			for (String s: partsRightDual){
-				if (splines.get(i).getTitle().toLowerCase().contains(s)){
-					displayTest = true;
-					transformPart = "RightDual";
-				}				
+			if(!takeOnlyOneLeg){
+				for (String s: partsRightDual){
+					if (splines.get(i).getTitle().toLowerCase().contains(s)){
+						displayTest = true;
+						transformPart = "RightDual";
+					}				
+				}
 			}
 			if (displayTest){
 				// define motion around lower body bones.
