@@ -221,7 +221,8 @@ public class OpenCLSurfacePhantomRenderer extends StreamingPhantomRenderer {
 			writer.println("ASCII");
 			writer.println("DATASET POLYDATA");
 			writer.println("POINTS " + dimx * dimy + " float");
-			double zoom = 1e-4; // convert micrometers to centimeters
+			//double zoom = 1e-4; // convert micrometers to centimeters
+			double zoom = 1e-3; // convert micrometers to centimeters
 			double threshold = 1e-6;
 			
 			// actual point cloud generation
@@ -229,6 +230,7 @@ public class OpenCLSurfacePhantomRenderer extends StreamingPhantomRenderer {
 				for(int m = 0; m < dimy; ++m){
 					double d = surfaceImage.getAtIndex(n, m);
 					if(Math.abs(d) >= threshold){ // depth should be larger than a threshold value
+						d = d * zoom;
 						SimpleVector D = tr.getProjectionMatrix(k).computeDetectorPoint(sourcePosition,
 								new SimpleVector(n, m), focallength, spacing.getElement(0),
 								spacing.getElement(1), dimx, dimy).getAbstractVector();
@@ -236,7 +238,7 @@ public class OpenCLSurfacePhantomRenderer extends StreamingPhantomRenderer {
 						D.normalizeL2();
 						D.multiplyBy(d);
 						D.add(sourcePosition);
-						D.multiplyBy(zoom);
+						//D.multiplyBy(zoom);
 						writer.println(D.getElement(0) + " " + D.getElement(1) + " " + D.getElement(2));
 					} else {
 						writer.println("0 0 0");
