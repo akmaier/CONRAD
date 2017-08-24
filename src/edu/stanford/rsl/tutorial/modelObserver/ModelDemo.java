@@ -6,12 +6,14 @@ import ij.ImageJ;
 import ij.ImagePlus;
 
 /**
- * Model_demo provides demo example of model_obserever using Hotelling Observer. It creates one set of images with signal and noise,called signal class
- *  and another set of images with only noise,called non-signal class. 
- *  Hotelling observer is used to classify with signal v/s without signal images. 
+ * Model_demo provides demo example of model_obserever using Hotelling Observer. 
+ * It creates one set of images with signal and noise, called signal class
+ *  and another set of images with noisy background only, called non-signal class. 
+ *  Hotelling observer is used to classify images with signal versus images without signal. 
  *   
- *  All original functions are written by Adam Wunderlich in MATLAB
- *  Available online, url: https://github.com/DIDSR/IQmodelo  
+ *  This code contains code transferred from the IQmodelo framework. 
+ *  The original functions were written by Adam Wunderlich in MATLAB and
+ *  are available online, URL: https://github.com/DIDSR/IQmodelo  
  * @author Priyal Patel
  * @Supervisors: Frank Schebesch, Andreas Maier
  */
@@ -24,7 +26,7 @@ public class ModelDemo{
 	double[] class2;              //Score of class2(signal absent class) 
 	int width=500;                //Width of an image
 	int height=500;               //Height of an image
-	float templet_value=2.5f;     // Gaussian standard deviation of reference signal 
+	float template_value=2.5f;     // Gaussian standard deviation of reference signal 
 	String shape;                 // shape of reference signal image("Disk" or "Gaussian") 
 	/**
 	 * Constructor 
@@ -35,11 +37,11 @@ public class ModelDemo{
 	 * @param class2
 	 * @param width
 	 * @param height
-	 * @param templet_value
+	 * @param template_value
 	 * @param shape 
 	 */
 	
-	public ModelDemo(int width,int height,int n,float background_component[],float templet_value,double[] class1,double[] class2,double[] space,String shape) {
+	public ModelDemo(int width,int height,int n,float background_component[],float template_value,double[] class1,double[] class2,double[] space,String shape) {
 		
 		super();
 		
@@ -50,10 +52,10 @@ public class ModelDemo{
 		this.width=width;
 		this.class1=class1;
 		this.class2=class2;
-		this.templet_value=templet_value;
+		this.template_value=template_value;
 		this.space= space;
 		this.shape = shape;
-		generateImages(this.height,this.width,background_component,this.templet_value,shape);
+		generateImages(this.height,this.width,background_component,this.template_value,shape);
 	}
 	
 	/**
@@ -66,20 +68,20 @@ public class ModelDemo{
 	}
 	
 	/**
-	 * computation of score of class1(signal present image) and score of class2(signal absent image)
+	 * computation of score of class1 (signal present image) and score of class2 (signal absent image)
 	 * @param width
 	 * @param height
 	 * @param background_component
-	 * @param templet_value
+	 * @param template_value
 	 * @param shape
 	 */
-	void generateImages(int width,int height,float background_component[],float templet_value,String shape){
+	void generateImages(int width,int height,float background_component[],float template_value,String shape){
 		
 		//reference image with only signal(it can be disk or Gaussian)
-		Grid2D tamplet = new Grid2D(width, height);
+		Grid2D template = new Grid2D(width, height);
 		CreateImages image1 = new CreateImages(width, height,space);
-		tamplet = image1.templates(width, height, templet_value,shape);
-		tamplet.show();
+		template = image1.templates(width, height, template_value,shape);
+		template.show();
 		
 		//Generates n sets of image for both signal present and signal absent classes.
 		for (int i = 0; i < n; i++) {
@@ -109,8 +111,8 @@ public class ModelDemo{
 			//Computes Score of class 1 and class 2 
 			for (int y = 0; y <height; y++) {
 				for (int x = 0; x < width; x++) {
-					class1[i] += (sp_image.getAtIndex(y,x) * tamplet.getAtIndex(y,x));
-					class2[i] += (sa_image.getAtIndex(y,x) * tamplet.getAtIndex(y,x));
+					class1[i] += (sp_image.getAtIndex(y,x) * template.getAtIndex(y,x));
+					class2[i] += (sa_image.getAtIndex(y,x) * template.getAtIndex(y,x));
 				}
 			}
 			System.out.println("class1            " + class1[i]);
@@ -140,11 +142,11 @@ public class ModelDemo{
 		float [] background_component={-5.0f,5f};
 		double[] class1 = new double[n];
 		double[] class2 = new double[n];
-		float templet_value=2.5f;
+		float template_value=2.5f;
 		String shape = "Disk";//Select shape of reference signal ("Disk" or "Gaussian")
 		
 		//Model_demo constructor generates score of class1(signal-present) and class2(signal-absent)
-		ModelDemo a = new ModelDemo(width,height,n,background_component,templet_value,class1,class2,space,shape);
+		ModelDemo a = new ModelDemo(width,height,n,background_component,template_value,class1,class2,space,shape);
 		
 		// Get the ROC curve using ROC class  
 		ROC roc = new ROC(a.class1, a.class2, true);
