@@ -65,7 +65,7 @@ public class Grid2D extends NumericGrid implements Transformable {
 	
 	
 	public Grid2D(Grid2D input){
-		assert input.getWidth()*input.getHeight() == this.buffer.length;
+		// assert input.getWidth()*input.getHeight() == this.buffer.length;
 		this.size = input.size.clone();
 		this.spacing = input.spacing.clone();
 		this.origin = input.origin.clone();
