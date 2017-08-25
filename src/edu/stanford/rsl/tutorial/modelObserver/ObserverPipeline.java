@@ -109,7 +109,11 @@ public class ObserverPipeline {
 	}
 	
 	/**
-	 * Deprecated method (using custom ROC implementation)
+	 * Deprecated method (uses custom ROC implementation):
+	 * Please use
+	 * computeStats(Grid2D[], Grid2D[], int, SimpleVector, SimpleMatrix)
+	 * instead of the ShowROC(...) method in future implementations and adapt existing code.
+	 * (You can also use the ROC class which allows a more general access to ROC statistics.)
 	 * 
 	 * Calculates and displays the ROC curve for the given test images. Calculates and displays the SNR.
 	 * @param testImages The object test images.
