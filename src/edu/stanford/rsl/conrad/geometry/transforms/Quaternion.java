@@ -116,37 +116,49 @@ public class Quaternion {
 	 * @param R
 	 * @return q
 	 */
-	public Quaternion equivalentQuaternion(SimpleMatrix R){
+	public static Quaternion equivalentQuaternion(SimpleMatrix R){
 		Quaternion q;
 		//find maximum element
-		double scalarNew = Math.sqrt(R.getElement(1, 1) + R.getElement(2, 2) + R.getElement(3, 3) + 1) / 2;
-		double vectorX = Math.sqrt(R.getElement(1, 1) - R.getElement(2, 2) - R.getElement(3, 3) + 1) / 2;
-		double vectorY = Math.sqrt(-R.getElement(1, 1) + R.getElement(2, 2) - R.getElement(3, 3) + 1) / 2;
-		double vectorZ = Math.sqrt(-R.getElement(1, 1) - R.getElement(2, 2) + R.getElement(3, 3) + 1) / 2;
+		double scalarNew = Math.sqrt(R.getElement(0, 0) + R.getElement(1, 1) + R.getElement(2, 2) + 1) / 2;
+		if(Double.isNaN(scalarNew)){
+			scalarNew = 0;
+		}
+		double vectorX = Math.sqrt(R.getElement(0, 0) - R.getElement(1, 1) - R.getElement(2, 2) + 1) / 2;
+		if(Double.isNaN(vectorX)){
+			vectorX = 0;
+		}
+		double vectorY = Math.sqrt(-R.getElement(0, 0) + R.getElement(1, 1) - R.getElement(2, 2) + 1) / 2;
+		if(Double.isNaN(vectorY)){
+			vectorY = 0;
+		}
+		double vectorZ = Math.sqrt(-R.getElement(0, 0) - R.getElement(1, 1) + R.getElement(2, 2) + 1) / 2;
+		if(Double.isNaN(vectorZ)){
+			vectorZ = 0;
+		}
 		double maxEl = Math.max(Math.max(scalarNew, vectorX), Math.max(vectorY, vectorZ));
 		//determine other elements with the found maximum
 		if (maxEl == scalarNew){
-			vectorX 	= (R.getElement(2, 3) - R.getElement(3, 2)) / (4 * maxEl);
-			vectorY 	= (R.getElement(3, 1) - R.getElement(1, 3)) / (4 * maxEl);
-			vectorZ 	= (R.getElement(1, 2) - R.getElement(2, 1)) / (4 * maxEl);
+			vectorX 	= (R.getElement(1, 2) - R.getElement(2, 1)) / (4 * maxEl);
+			vectorY 	= (R.getElement(2, 0) - R.getElement(0, 2)) / (4 * maxEl);
+			vectorZ 	= (R.getElement(0, 1) - R.getElement(1, 0)) / (4 * maxEl);
 			SimpleVector vectorNew = new SimpleVector(vectorX, vectorY, vectorZ);
 			q = new Quaternion(scalarNew, vectorNew);
 		}else if (maxEl == vectorX){
-			scalarNew 	= (R.getElement(2, 3) - R.getElement(3, 2)) / (4 * maxEl);
-			vectorY 	= (R.getElement(1, 2) + R.getElement(2, 1)) / (4 * maxEl);
-			vectorZ 	= (R.getElement(1, 3) + R.getElement(3, 1)) / (4 * maxEl);
+			scalarNew 	= (R.getElement(1, 2) - R.getElement(2, 1)) / (4 * maxEl);
+			vectorY 	= (R.getElement(0, 1) + R.getElement(1, 0)) / (4 * maxEl);
+			vectorZ 	= (R.getElement(0, 2) + R.getElement(2, 0)) / (4 * maxEl);
 			SimpleVector vectorNew = new SimpleVector(maxEl, vectorY, vectorZ);
 			q = new Quaternion(scalarNew, vectorNew);
 		}else if (maxEl == vectorY){
-			scalarNew 	= (R.getElement(3, 1) - R.getElement(1, 3)) / (4 * maxEl);
-			vectorX 	= (R.getElement(1, 2) + R.getElement(2, 1)) / (4 * maxEl);
-			vectorZ 	= (R.getElement(2, 3) + R.getElement(3, 2)) / (4 * maxEl);
+			scalarNew 	= (R.getElement(1, 0) - R.getElement(0, 1)) / (4 * maxEl);
+			vectorX 	= (R.getElement(0, 1) + R.getElement(1, 0)) / (4 * maxEl);
+			vectorZ 	= (R.getElement(1, 2) + R.getElement(2, 1)) / (4 * maxEl);
 			SimpleVector vectorNew = new SimpleVector(vectorX, maxEl, vectorZ);
 			q = new Quaternion(scalarNew, vectorNew);
 		}else if (maxEl == vectorZ){
-			scalarNew 	= (R.getElement(1, 2) - R.getElement(2, 1)) / (4 * maxEl);
-			vectorX 	= (R.getElement(1, 3) + R.getElement(3, 1)) / (4 * maxEl);
-			vectorY 	= (R.getElement(2, 3) + R.getElement(3, 2)) / (4 * maxEl);
+			scalarNew 	= (R.getElement(0, 1) - R.getElement(1, 0)) / (4 * maxEl);
+			vectorX 	= (R.getElement(0, 2) + R.getElement(2, 0)) / (4 * maxEl);
+			vectorY 	= (R.getElement(1, 2) + R.getElement(2, 1)) / (4 * maxEl);
 			SimpleVector vectorNew = new SimpleVector(vectorX, vectorY, maxEl);
 			q = new Quaternion(scalarNew, vectorNew);
 		}else{
