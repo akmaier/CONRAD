@@ -150,7 +150,7 @@ public class Quaternion {
 			SimpleVector vectorNew = new SimpleVector(maxEl, vectorY, vectorZ);
 			q = new Quaternion(scalarNew, vectorNew);
 		}else if (maxEl == vectorY){
-			scalarNew 	= (R.getElement(1, 0) - R.getElement(0, 1)) / (4 * maxEl);
+			scalarNew 	= (R.getElement(2, 0) - R.getElement(0, 2)) / (4 * maxEl);
 			vectorX 	= (R.getElement(0, 1) + R.getElement(1, 0)) / (4 * maxEl);
 			vectorZ 	= (R.getElement(1, 2) + R.getElement(2, 1)) / (4 * maxEl);
 			SimpleVector vectorNew = new SimpleVector(vectorX, maxEl, vectorZ);
