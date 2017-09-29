@@ -116,6 +116,7 @@ public class TimeLinePlot {
 				line = bf.readLine();
 				if (line!=null) entries.add(line.split("\\t"));
 			}
+			bf.close();
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

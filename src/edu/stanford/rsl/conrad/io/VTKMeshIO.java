@@ -21,8 +21,9 @@ import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
 /**
  * Class to write legacy .vtk polydata meshes to a file. 
  * Only triangular meshes are supported at the moment.
- * @author Mathias Unberath
- *
+ * Extended to meshes featuring deformation vectors at each mesh vertex.
+ * FIXME Parser adds additional decimal values not present in the input file.
+ * @author Mathias Unberath, Tobias Geimer, Bastian Bier
  */
 public class VTKMeshIO {
 	
@@ -100,10 +101,12 @@ public class VTKMeshIO {
 		
 		SimpleMatrix points = mesh.getPoints();
 		SimpleMatrix triangles = mesh.getConnectivity();
+		SimpleMatrix deformations = mesh.getDeformation();
 		
 		if(points == null){
 			points = new SimpleMatrix(0,0);
 		}
+		
 		if(triangles == null){
 			triangles = new SimpleMatrix(0,0);
 		}
@@ -120,6 +123,7 @@ public class VTKMeshIO {
 			for(int i = 0; i < points.getRows(); i++){
 				writer.println(points.getElement(i, 0)+" "+points.getElement(i, 1)+" "+points.getElement(i, 2));
 			}
+			
 			// write number of triangles, number of total entries and then each triangle in one line
 			writer.println("POLYGONS "+triangles.getRows()+" "+4*triangles.getRows());
 			for(int i = 0; i < triangles.getRows(); i++){
@@ -129,8 +133,20 @@ public class VTKMeshIO {
 			}
 			writer.println();
 			
+			// write deformations
+			if(deformations != null) {
+				writer.println("POINT_DATA " + points.getRows());
+				writer.println("FIELD FieldData 6");
+				writer.println("phiGlyph " + deformations.getCols() + " " + deformations.getRows() + " float");
+				for(int i = 0; i < deformations.getRows(); i++){
+					writer.println(	deformations.getElement(i, 0) + " " 
+									+ deformations.getElement(i, 1) + " " 
+									+ deformations.getElement(i, 2));
+				}
+				writer.println();
+			}
+	
 			writer.close();
-			
 			
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -138,9 +154,7 @@ public class VTKMeshIO {
 		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-		
-		
+		}	
 	}
 	
 	/**
@@ -151,6 +165,7 @@ public class VTKMeshIO {
 		
 		ArrayList<PointND> points = new ArrayList<PointND>();
 		ArrayList<PointND> triangles = new ArrayList<PointND>();
+		ArrayList<PointND> deformations = new ArrayList<PointND>();
 		
 		FileReader fr = new FileReader(filename);
 		BufferedReader br = new BufferedReader(fr);
@@ -209,6 +224,35 @@ public class VTKMeshIO {
 			i += nTri;
 		}
 		
+		// read deformation vectors
+		boolean hasDeform = true;
+		
+		line = br.readLine();
+		if(line!=null && line.isEmpty()){
+			line = br.readLine();
+		}
+		// not every mesh features a deformation field
+		// check whether the file contains any more information
+		if(line == null) {
+			hasDeform = false; 
+		} else {
+			tok = new StringTokenizer(line);
+			tok.nextToken(); // skip "Point_Data"
+			int numVec =  Integer.parseInt(tok.nextToken());
+			line = br.readLine(); // skip "Field FieldData 6"
+			line = br.readLine(); // skip "Phi_Glyph numComp numTuples dataType"
+			for(int i = 0; i < numVec;){
+				line = br.readLine();
+				tok = new StringTokenizer(line);
+				int nVec = tok.countTokens();
+				nVec /= 3;
+				for(int j = 0; j < nVec; j++){
+					PointND vector = new PointND(Float.parseFloat(tok.nextToken()),Float.parseFloat(tok.nextToken()),Float.parseFloat(tok.nextToken()));
+					deformations.add(vector);
+				}
+				i += nVec;
+			}
+		}		
 		br.close();	
 		fr.close();
 		
@@ -217,7 +261,8 @@ public class VTKMeshIO {
 		this.mesh.setPoints(toSimpleMatrix(points));
 		this.mesh.dimension = this.mesh.getPoints().getCols();
 		this.mesh.numConnections = numTri;
-		this.mesh.setConnectivity(toSimpleMatrix(triangles));
+		if(hasDeform) this.mesh.setDeformation(toSimpleMatrix(deformations));
+		if(triangles.size()!=0) this.mesh.setConnectivity(toSimpleMatrix(triangles));
 	}
 	
 	/**

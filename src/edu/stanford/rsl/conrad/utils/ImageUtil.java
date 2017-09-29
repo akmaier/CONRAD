@@ -31,6 +31,7 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.ImageWindow;
 import ij.measure.Calibration;
+import ij.plugin.HyperStackConverter;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 
@@ -94,9 +95,9 @@ public abstract class ImageUtil {
 			return null;
 	}
 	public static ImagePlus wrapGrid4D(Grid4D grid, String title){
-		if (grid != null) {
-			ImageStack stack = new ImageStack(grid.getSize()[0], grid.getSize()[1], grid.getSize()[2]);
+		if (grid != null) {						
 			if (grid.getSubGrid(0) instanceof MultiChannelGrid3D){
+				ImageStack stack = new ImageStack(grid.getSize()[0], grid.getSize()[1], grid.getSize()[2]);
 				MultiChannelGrid3D first = (MultiChannelGrid3D) grid.getSubGrid(0);
 				String [] names = first.getChannelNames();
 				// finalize the hyperstack
@@ -124,10 +125,16 @@ public abstract class ImageUtil {
 				hyper.setOpenAsHyperStack(true);
 				return hyper;
 			} else {
-				for (int i=0; i< stack.getSize(); i++){
-					stack.setPixels(grid.getSubGrid(i).getBuffer(), i+1);
+				ImageStack stack = new ImageStack(grid.getSize()[0],grid.getSize()[1]);		
+				ImagePlus imagePlus = IJ.createHyperStack(title, grid.getSize()[0], grid.getSize()[1], 1, grid.getSize()[2], grid.getSize()[3], 32);
+				for(int i = 0; i < grid.getSize()[3];i++)
+				{
+					for(int j = 0; j < grid.getSize()[2];j++)
+					{
+						stack.addSlice(ImageUtil.wrapGrid2D(grid.getSubGrid(i).getSubGrid(j)));
+					}
 				}
-				ImagePlus imagePlus = new ImagePlus(title, stack);
+				imagePlus.setStack(stack);						
 				setCalibrationToImagePlus(imagePlus, grid);
 				return imagePlus;
 			}

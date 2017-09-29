@@ -13,14 +13,14 @@ import edu.stanford.rsl.tutorial.parallel.ParallelProjector2D;
  * @author Iris Kellermann
  */
 
-public class Model extends Grid2D
+public class TestModelGenerator extends Grid2D
 {
 	ParallelProjector2D projector;
 	ParallelBackprojector2D backProjector;
 	RamLakKernel ramLak;
 	int PoissonParameter;
 	
-	public Model(int width, int height)
+	public TestModelGenerator(int width, int height)
 	{
 		super(width, height);
 		
@@ -348,6 +348,6 @@ public class Model extends Grid2D
 }
 
 /*
- * Copyright (C) 2010-2014 - Iris Kellermann 
+ * Copyright (C) 2010-2017 - Iris Kellermann, Frank Schebesch
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
 */

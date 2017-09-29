@@ -8,6 +8,7 @@ import com.jogamp.opencl.CLCommandQueue;
 import com.jogamp.opencl.CLDevice;
 import com.jogamp.opencl.CLKernel;
 import com.jogamp.opencl.CLMemory.Mem;
+import edu.stanford.rsl.conrad.data.numeric.Grid2D;
 
 /**
  * Performs rendering using an append buffer. This enables very fast simulation of volumetric rendering.
@@ -144,6 +145,32 @@ public class OpenCLAppendBufferRenderer extends OpenCLRenderer {
 		kernel.release();
 	}
 	
+	/****************************************
+	 * Function to get surface information  *
+	 * @param surfaceBuffer buffer to store *
+	 * the intersection with smallest depth *
+	 ****************************************/
+	public void getSurfaceInformation(CLBuffer<FloatBuffer> surfaceBuffer, CLBuffer<FloatBuffer> mu, CLBuffer<IntBuffer> priorities){
+		int elementCount = width * height;                                  // Length of arrays to process
+		int localWorkSize = Math.min(device.getMaxWorkGroupSize(), 512);  // Local work size dimensions
+		int globalWorkSize = OpenCLUtil.roundUp(localWorkSize, elementCount);   // rounded up to the nearest multiple of the localWorkSize
+		
+		// kernel calls getSurfaceInformationFromAppendBuffer(...) in triangleAppendBuffer.cl
+		// TODO Perhaps it is also necessary to add getSurfaceInformationFromAppendBuffer(...)
+		// in appendBuffer.cl, appendBufferConvex.cl and appendBufferNonConvexMessedUp.cl.
+		
+		CLKernel kernel = OpenCLUtil.getAppendBufferRenderInstance().createCLKernel("getSurfaceInformationFromAppendBuffer");
+		kernel.putArgs(surfaceBuffer, appendBuffer, pixelCount, mu, priorities)
+		.putArg(width)
+		.putArg(elementCount);
+		
+		CLCommandQueue clc = device.createCommandQueue();
+		clc.putWriteBuffer(surfaceBuffer, true);
+		clc.put1DRangeKernel(kernel, 0, globalWorkSize, localWorkSize).finish();
+		clc.release();
+		kernel.release();
+	}
+	
 	public void drawScreenMonochromatic(CLBuffer<FloatBuffer> screen, CLBuffer<FloatBuffer> mu, CLBuffer<IntBuffer> priorities){
 		// draw to screen buffer:
 		int elementCount = width * height;                                  // Length of arrays to process
@@ -151,7 +178,6 @@ public class OpenCLAppendBufferRenderer extends OpenCLRenderer {
 		int globalWorkSize = OpenCLUtil.roundUp(localWorkSize, elementCount);   // rounded up to the nearest multiple of the localWorkSize
 		
 		CLKernel kernel = OpenCLUtil.getAppendBufferRenderInstance().createCLKernel("drawAppendBufferScreenMonochromatic");
-		
 		kernel.putArgs(screen, appendBuffer, pixelCount, mu, priorities)
 		.putArg(width)
 		.putArg(elementCount);

@@ -1,8 +1,11 @@
 /*
  * Copyright (C) 2014 - Martin Berger
+ * Copyright (C) 2017 - Christopher Syben
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
 */
 package edu.stanford.rsl.conrad.data.generic.complex;
+
+import java.util.Arrays;
 
 import edu.stanford.rsl.conrad.data.generic.datatypes.Complex;
 import edu.stanford.rsl.conrad.data.numeric.Grid1D;
@@ -67,6 +70,25 @@ public class ComplexGrid1D extends ComplexGrid {
 	public void init(){
 		this.origin = new double[]{0};
 		this.spacing = new double[]{1};
+	}
+	
+	public void fftshift(){
+		int width = this.size[0];
+		int startIndex = offset*2;
+		int endIndex = startIndex+(width*2);
+		int pW = (int)Math.ceil(width/2.0); 
+		
+		float[] tmpArr = Arrays.copyOfRange(buffer, startIndex, endIndex);
+		for(int i = pW; i < this.getSize()[0];i++)
+		{
+			buffer[startIndex+(i-pW)*2] = tmpArr[(i)*2];
+			buffer[startIndex+(i-pW)*2+1] = tmpArr[(i)*2+1];
+		}
+		for(int i = 0; i < pW;i++)
+		{
+			buffer[startIndex + (i+width-pW)*2] = tmpArr[(i)*2];
+			buffer[startIndex + (i+width-pW)*2+1] = tmpArr[(i)*2+1];
+		}		
 	}
 	
 	public void multiplyAtIndex(int index, float val) {

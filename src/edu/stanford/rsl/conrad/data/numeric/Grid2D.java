@@ -65,7 +65,7 @@ public class Grid2D extends NumericGrid implements Transformable {
 	
 	
 	public Grid2D(Grid2D input){
-		assert input.getWidth()*input.getHeight() == this.buffer.length;
+		// assert input.getWidth()*input.getHeight() == this.buffer.length;
 		this.size = input.size.clone();
 		this.spacing = input.spacing.clone();
 		this.origin = input.origin.clone();
@@ -115,7 +115,7 @@ public class Grid2D extends NumericGrid implements Transformable {
 	 * myGrid1D = myGrid2D.getSubGrid(j);
 	 *
 	 * This code is deprecated since no final solution was found 
-	 * to solve the prior menioned problem.
+	 * to solve the prior mentioned problem.
 	 * 
 	 * @param j The row-index (y-index, height-index)
 	 * @param subGrid

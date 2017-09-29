@@ -627,6 +627,31 @@ void inconsistentDataCorrection(int* data, int* length){
 	}
 }
 
+// Function to get surface information by computing the smallest depth.
+kernel void getSurfaceInformationFromAppendBuffer(global float* surfaceBuffer, global int* appendBuffer, global int* pixelCounter, global float* mu, global int* priorities, int width, int numElements){
+	int iGID = get_global_id(0);
+	if(iGID >= numElements){
+    	return;
+    }
+    int dataMin = 2147483647;
+    int x = iGID % width;
+	int y = floor(((float) iGID) / width);
+	int nextElement = pixelCounter[(y * width) + x];
+	int dataLength = 0;
+	int currentDepth = 0;
+	while((nextElement > 0) && (dataLength < (LOCAL_LIST - 1) / 2)){
+		currentDepth = appendBuffer[(nextElement * 3) + 1];
+		nextElement = appendBuffer[nextElement * 3];
+		if(dataMin > currentDepth){
+			dataMin = currentDepth;
+		}
+		++dataLength;
+	}
+	if((dataLength > 0) && (dataLength < (LOCAL_LIST - 1) / 2)){
+		surfaceBuffer[(y * width) + x] = dataMin;
+	}
+	return;
+}
 
 kernel void drawAppendBufferScreenMonochromatic(global float * screenBuffer, global int* appendBuffer, global int* pixelCounter, global float * mu, global int* priorities, int width, int numElements){
 	int iGID = get_global_id(0);

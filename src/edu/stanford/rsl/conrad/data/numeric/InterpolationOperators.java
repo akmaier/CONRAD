@@ -101,6 +101,26 @@ public abstract class InterpolationOperators {
 				+ ((d != 0.0) ? d*((lowerPlusOne != null) ? interpolateLinear(grid.getSubGrid(lowerPlusOne), x, y, bounds) : 0.0) : 0.0)
 				);
 	}
+	
+	/** Linear interpolation of a 4D Grid */
+	public static float interpolateLinear(final Grid4D grid,double t, double z, double x, double y){
+		return interpolateLinear(grid, t, z, x, y, boundaryHandling.ZEROPAD);
+	}
+	
+	/** Linear interpolation of a 4D Grid */
+	public static float interpolateLinear(final Grid4D grid, double t, double z, double x, double y, boundaryHandling bounds) {
+		Integer lower = (int) Math.floor(t);
+		double d = t - lower; // d is in [0, 1)
+		Integer lowerPlusOne = lower+1;
+		
+		lower = correctBoundsOfIndex(lower, grid.getSize()[3], bounds);
+		lowerPlusOne = correctBoundsOfIndex(lowerPlusOne, grid.getSize()[3], bounds);
+		
+		return (float) (
+				(1.0-d)*((lower!=null) ? interpolateLinear(grid.getSubGrid(lower),z, x, y, bounds) : 0.0)
+				+ ((d != 0.0) ? d*((lowerPlusOne != null) ? interpolateLinear(grid.getSubGrid(lowerPlusOne), z, x, y, bounds) : 0.0) : 0.0)
+				);
+	}
 
 
 	///////////////////////////////////////////////////////////////////////

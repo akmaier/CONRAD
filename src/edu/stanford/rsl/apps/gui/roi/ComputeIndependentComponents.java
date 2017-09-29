@@ -7,8 +7,6 @@ package edu.stanford.rsl.apps.gui.roi;
 import ij.IJ;
 import ij.process.ByteProcessor;
 
-import org.fastica.FastICAException;
-
 import edu.stanford.rsl.conrad.data.numeric.Grid3D;
 import edu.stanford.rsl.conrad.data.numeric.MultiChannelGrid2D;
 import edu.stanford.rsl.conrad.filtering.PatchwiseComponentComputationTool;

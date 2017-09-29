@@ -33,6 +33,12 @@ public abstract class RegKeys {
 	public static final String VICON_SAMPLING_RATE = "VICON_SAMPLING_RATE";
 	
 	/**
+	 * Entry to store the surface information in point clouds as VTK files. <BR>
+	 * The <b>value</b> is a <b>String</b> indicating the location of the directory where point clouds should be stored.
+	 */
+	public static final String POINT_CLOUD_PATH = "POINT_CLOUD_PATH";
+	
+	/**
 	 * Entry to set the projection sampling rate, i.e. the number of frames that are taken by the scanner in each second. <BR>
 	 * The <b>value</b> is a <b>String</b> of a Double value in [Hz]. 
 	 */

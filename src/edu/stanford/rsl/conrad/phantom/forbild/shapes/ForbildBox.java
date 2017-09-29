@@ -32,7 +32,9 @@ public class ForbildBox extends Box {
 
 	public ForbildBox(String expression){
 		 parseExpression(expression);
-		 transform = new AffineTransform(new SimpleMatrix(3,3), new SimpleVector(3));
+		 SimpleMatrix rot = new SimpleMatrix(3,3);
+		 rot.identity();
+		 transform = new AffineTransform(rot, new SimpleVector(3));
 		 correctAndAddBoundingConditions();
 		 surfaceOrigin.set(0, surfaceOrigin.get(0)-dx/2);
 		 surfaceOrigin.set(1, surfaceOrigin.get(1)-dy/2);

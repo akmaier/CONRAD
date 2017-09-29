@@ -6,7 +6,7 @@ import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-import edu.stanford.rsl.conrad.geometry.motion.VICONMarkerMotionField;
+import edu.stanford.rsl.conrad.geometry.motion.*;
 import edu.stanford.rsl.conrad.geometry.motion.timewarp.IdentityTimeWarper;
 import edu.stanford.rsl.conrad.geometry.shapes.simple.PointND;
 import edu.stanford.rsl.conrad.geometry.splines.NearestNeighborTimeVariantSurfaceBSpline;
@@ -16,6 +16,7 @@ import edu.stanford.rsl.conrad.geometry.transforms.Translation;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
 import edu.stanford.rsl.conrad.numerics.SimpleOperators;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
+import edu.stanford.rsl.conrad.phantom.renderer.PhantomRenderer;
 import edu.stanford.rsl.conrad.physics.PhysicalObject;
 import edu.stanford.rsl.conrad.utils.Configuration;
 import edu.stanford.rsl.conrad.utils.RegKeys;
@@ -26,7 +27,7 @@ import edu.stanford.rsl.conrad.utils.XmlUtils;
  * Class to simulate very simple knee joint motion in XCat.
  * Scene contains only the lower body as only the legs and hip are of interest for a squat.
  * 
- * @author jhchoi21 / berger
+ * @author jhchoi21 / berger / Oleksiy Rybakov
  *
  */
 public class DynamicSquatScene extends WholeBodyScene {
@@ -40,7 +41,12 @@ public class DynamicSquatScene extends WholeBodyScene {
 	boolean writeGroundTruthToFile = true;
 	
 	boolean buildStaticWithRef = false;
+	
+	boolean selectDefaultVICONMotion = true;
+	
 	int refProjection = 0;
+	
+	boolean takeOnlyOneLeg = false;
 	
 	static final int subjectNumber = 2;
 	
@@ -62,17 +68,52 @@ public class DynamicSquatScene extends WholeBodyScene {
 	
 	@Override
 	public void configure(){
+		
+		// parameters for (possible) artificial motion field
+		double lengthLowerLeft = 433.976;
+		double lengthLowerRight = 434.196;
+		double lengthUpperLeft = 443.947;
+		double lengthUpperRight = 443.174;
+		double numberOfSquats = 4;
+					
+		// Here we use the medical knee flexion angle (in degrees).
+		double angleMin = 60;
+		double angleMax = 90;
+		
 		try {
 			buildStaticWithRef = UserUtil.queryBoolean("Build static version with reference frame?");
 			if(buildStaticWithRef)
 				refProjection = UserUtil.queryInt("Reference Projection Nr?", refProjection);
 			writeGroundTruthToFile=UserUtil.queryBoolean("Write Ground Truth Motion to XML?");
+			// parameter for choice of motion field (VICON marker motion or artificial motion field)
+			selectDefaultVICONMotion = UserUtil.queryBoolean("Select pre-defined VICON MOTION");
 		} catch (Exception e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		warper = new IdentityTimeWarper();
-		viconBuilder = new ViconMarkerBuilder();			
+		if(selectDefaultVICONMotion){
+			viconBuilder = new ViconMarkerBuilder();
+		} else {
+			// parameters for artificial motion field
+			lengthLowerLeft = 433.976;
+			lengthLowerRight = 434.196;
+			lengthUpperLeft = 443.947;
+			lengthUpperRight = 443.174;
+			numberOfSquats = 4;
+			
+			// Here we use the medical knee flexion angle (in degrees).
+			angleMin = 60;
+			angleMax = 90;
+			
+			try {
+				numberOfSquats = UserUtil.queryDouble("Please select the number of squats during acquisition time.", numberOfSquats);
+				angleMin = UserUtil.queryDouble("Please select the smallest knee flexion angle in degrees.", angleMin);
+				angleMax = UserUtil.queryDouble("Please select the largest knee flexion angle in degrees.", angleMax);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 		int numberOfBSplineTimePoints = Configuration.getGlobalConfiguration().getGeometry().getNumProjectionMatrices();
 
 		// mm res of XCAT, center is somewhere in the hip
@@ -109,7 +150,6 @@ public class DynamicSquatScene extends WholeBodyScene {
 				"leftfemur",				
 				"l_patella", 
 				"leftpatella"
-
 		};
 
 		String [] partsRightUpper = {	
@@ -128,6 +168,7 @@ public class DynamicSquatScene extends WholeBodyScene {
 		};
 
 		VICONMarkerMotionField VICONMotion = null;
+		ArtificialMotionField artificialMotion = null;
 		String transformPart = null;
 		// for each spline in the body
 		for (int i = splines.size()-1; i >= 0; i--){
@@ -139,44 +180,63 @@ public class DynamicSquatScene extends WholeBodyScene {
 					displayTest = true;
 					transformPart = "LeftLower";
 				}				
-			}				
-			for (String s: partsRightLower){
-				if (splines.get(i).getTitle().toLowerCase().contains(s)){					
-					displayTest = true;
-					transformPart = "RightLower";
-				}				
+			}
+			if(!takeOnlyOneLeg){
+				for (String s: partsRightLower){
+					if (splines.get(i).getTitle().toLowerCase().contains(s)){					
+						displayTest = true;
+						transformPart = "RightLower";
+					}				
+				}
 			}
 			for (String s: partsLeftUpper){
 				if (splines.get(i).getTitle().toLowerCase().contains(s)){					
 					displayTest = true;
 					transformPart = "LeftUpper";
 				}				
-			}			
-			for (String s: partsRightUpper){
-				if (splines.get(i).getTitle().toLowerCase().contains(s)){
-					displayTest = true;
-					transformPart = "RightUpper";
-				}				
-			}			
+			}
+			if(!takeOnlyOneLeg){
+				for (String s: partsRightUpper){
+					if (splines.get(i).getTitle().toLowerCase().contains(s)){
+						displayTest = true;
+						transformPart = "RightUpper";
+					}				
+				}	
+			}
 			for (String s: partsLeftDual){ // apply two different transform based on 3d coordinate (e.g. left leg)
 				if (splines.get(i).getTitle().toLowerCase().contains(s)){
 					displayTest = true;
 					transformPart = "LeftDual";
 				}				
 			}
-			for (String s: partsRightDual){
-				if (splines.get(i).getTitle().toLowerCase().contains(s)){
-					displayTest = true;
-					transformPart = "RightDual";
-				}				
+			if(!takeOnlyOneLeg){
+				for (String s: partsRightDual){
+					if (splines.get(i).getTitle().toLowerCase().contains(s)){
+						displayTest = true;
+						transformPart = "RightDual";
+					}				
+				}
 			}
 			if (displayTest){
-				// define motion around lower body bones.		
-				VICONMotion = new VICONMarkerMotionField(transformPart, splines.get(i).getTitle(), viconBuilder, this.buildStaticWithRef, this.refProjection); 
-				VICONMotion.setTimeWarper(warper);											
-				// ?? time =0, data not inserted, thus numberOfBSplineTimePoints+1
-				variants.add(new NearestNeighborTimeVariantSurfaceBSpline(splines.get(i), VICONMotion, numberOfBSplineTimePoints+1, false));
-				System.out.println("Creating affine-time-variant spline for " + splines.get(i).getTitle());				
+				// define motion around lower body bones.
+				if(selectDefaultVICONMotion){
+					VICONMotion = new VICONMarkerMotionField(transformPart, splines.get(i).getTitle(), viconBuilder, this.buildStaticWithRef, this.refProjection); 
+					VICONMotion.setTimeWarper(warper);											
+					// ?? time =0, data not inserted, thus numberOfBSplineTimePoints+1
+					variants.add(new NearestNeighborTimeVariantSurfaceBSpline(splines.get(i), VICONMotion, numberOfBSplineTimePoints+1, false));
+					System.out.println("Creating affine-time-variant spline for " + splines.get(i).getTitle());				
+				} else {
+					// creation of artificial motion field
+					artificialMotion = new ArtificialMotionField(transformPart,
+							splines.get(i).getTitle(), lengthLowerLeft, lengthLowerRight,
+							lengthUpperLeft, lengthUpperRight, numberOfSquats, angleMin, angleMax); 
+					artificialMotion.setTimeWarper(warper);
+					
+					// passing artificial motion field to time variant splines
+					variants.add(new NearestNeighborTimeVariantSurfaceBSpline(splines.get(i),
+							artificialMotion, numberOfBSplineTimePoints + 1, false));
+					System.out.println("Creating affine-time-variant spline for " + splines.get(i).getTitle());
+				}
 			} else {	
 			}
 			splines.remove(i);
@@ -224,7 +284,6 @@ public class DynamicSquatScene extends WholeBodyScene {
 			spline.applyTransform(staticTranslation);
 		}
 		
-		
 		if (writeGroundTruthToFile){
 			// dynamic transforms
 			SimpleMatrix dynamicCenterTransform = SimpleMatrix.I_4.clone();
@@ -236,14 +295,16 @@ public class DynamicSquatScene extends WholeBodyScene {
 
 			try {
 				// Order is [scalingValues, groundTruthVICONMatrices, dynamicCenterTransformMatrix, staticXMLCenterTransformMatrix]
-				XmlUtils.exportToXML(new Object[]{VICONMotion.getBoneScalingMemorizer(), VICONMotion.getBoneGlobalTransformMemorizer(), dynamicCenterTransform, staticXMLBasedCenterTransform});
+				if(selectDefaultVICONMotion){
+					XmlUtils.exportToXML(new Object[]{VICONMotion.getBoneScalingMemorizer(), VICONMotion.getBoneGlobalTransformMemorizer(), dynamicCenterTransform, staticXMLBasedCenterTransform});
+				} else {
+					XmlUtils.exportToXML(new Object[]{artificialMotion.getBoneScalingMemorizer(), artificialMotion.getBoneGlobalTransformMemorizer(), dynamicCenterTransform, staticXMLBasedCenterTransform});
+				}
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
-
-
 	}
 
 	@Override

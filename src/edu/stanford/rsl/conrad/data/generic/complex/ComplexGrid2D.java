@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2014 - Martin Berger
+ * Copyright (C) 2017 - Christopher Syben
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
 */
 package edu.stanford.rsl.conrad.data.generic.complex;
@@ -70,13 +71,29 @@ public class ComplexGrid2D extends ComplexGrid {
 		}
 	}
 	
+	public void fftshift()
+	{	
+		ComplexGrid1D[] unshifted = subGrids.clone();
+		for(int i = 0; i < subGrids.length;i++ ){
+			unshifted[i].fftshift();
+		}
+		int height = this.getSize()[1];
+		int pH = (int)Math.ceil(height/2.0);
+		
+		for(int j = pH; j < this.getSize()[1];j++)
+		{
+		 	this.setSubGrid(j-pH,unshifted[j]);
+		}
+		for(int j = 0; j < pH;j++)
+		{
+		 	this.setSubGrid(j+height-pH,unshifted[j]);
+		}
+	}
 	
 	public float[] getBuffer(){
 		notifyBeforeRead();
 		return buffer;
 	}
-	
-	
 	
 	
 	public void multiplyAtIndex(int i, int j, float val) {
@@ -160,6 +177,10 @@ public class ComplexGrid2D extends ComplexGrid {
 		return this.subGrids[j];
 	}
 	
+	public void setSubGrid(int j, ComplexGrid1D collumn){
+		subGrids[j]=collumn;
+		notifyAfterWrite();
+	}
 	
 	@Override
 	public Complex getValue(int... idx) {
