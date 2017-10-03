@@ -1,4 +1,4 @@
-package edu.stanford.rsl.tutorial.dmip;
+package edu.stanford.rsl.tutorial.mipda;
 
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
 import edu.stanford.rsl.conrad.numerics.DecompositionSVD;
@@ -17,8 +17,9 @@ import ij.process.FloatProcessor;
 
 /**
  * Introduction to the CONRAD Framework
- * Exercise 0 of Diagnostic Medical Image Processing (DMIP)
- * @author Frank Schebesch, Marco Boegel
+ * Programming exercise for module "Course Introduction"
+ * of the course "Medical Image Processing for Diagnostic Applications (MIPDA)"
+ * @author Frank Schebesch, Marco Boegel, Ashwini Jadhav
  *
  */
 
@@ -55,7 +56,7 @@ public class Intro {
 		
 		
 		//Load an image from file
-		String imageDataLoc = System.getProperty("user.dir") + "/data/" + "/dmip/";
+		String imageDataLoc = System.getProperty("user.dir") + "/data/" + "/mipda/";
 
 		String filename = imageDataLoc + "mr12.dcm";
 		//TODO. Hint: Use IJ and ImageUtil

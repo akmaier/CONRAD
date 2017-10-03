@@ -1,4 +1,4 @@
-package edu.stanford.rsl.tutorial.dmip;
+package edu.stanford.rsl.tutorial.mipda;
 
 import edu.stanford.rsl.conrad.data.numeric.Grid1D;
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;

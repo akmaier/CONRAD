@@ -1,4 +1,4 @@
-package edu.stanford.rsl.tutorial.dmip;
+package edu.stanford.rsl.tutorial.mipda;
 
 import java.awt.Color;
 

@@ -1,4 +1,4 @@
-package edu.stanford.rsl.tutorial.dmip;
+package edu.stanford.rsl.tutorial.mipda;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix.InversionType;
 import edu.stanford.rsl.conrad.numerics.SimpleOperators;
