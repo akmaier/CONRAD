@@ -24,7 +24,7 @@ float4 CohenSutherlandLineClip(float x0, float y0, float x1, float y1, float xmi
 // IN  grid
 // OUT sino
 kernel void projectRayDriven2DCL(
-	global image2d_t grid,
+	image2d_t grid,
 	global float* sino,
 	/* not yet... float2 gridSpacing, */
 	float maxS,
