@@ -1,7 +1,6 @@
 package edu.stanford.rsl.tutorial.mipda;
 
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
-import edu.stanford.rsl.conrad.numerics.DecompositionSVD;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix.MatrixNormType;
 import edu.stanford.rsl.conrad.numerics.SimpleVector.VectorNormType;
@@ -25,213 +24,460 @@ import ij.process.FloatProcessor;
 
 public class Intro {
 	
-	
-	public static void gridIntro(){
-				
-		//Define the image size
-		int imageSizeX = 256;
-		int imageSizeY = 384;
-	
-		//Define an image
-		//Hint: Import the package edu.stanford.rsl.conrad.data.numeric.Grid2D
-		//TODO
-	
-		//Draw a circle
-		int radius = 55;
-		//Set all pixels within the circle to 100
-		int insideVal = 100;
-	
-		//TODO
-		//TODO
-		//TODO
+	// variables which are checked (DO NOT CHANGE!)
+	SimpleVector v1;
+	SimpleVector vRand;
+	SimpleMatrix M;
+	double Mdeterminant;
+	SimpleMatrix Mtrans;
+	SimpleMatrix Mcopy;
+	int numRows;
+	int numCols;
+	String elementsOutput = "";
+	SimpleMatrix Mones;
+	SimpleMatrix Mzeros;
+	SimpleMatrix Midentity;
+	SimpleMatrix ResMat;
+	SimpleVector resVec;
+	SimpleVector subVector;
+	SimpleMatrix MsquaredElem ;
+	double matrixNormL1;
+	double vecNormL2;
+	SimpleVector v2;
+	SimpleVector tempColVector;
+	int plotLength = 500;
+	double[] y = new double[plotLength];
+	double[] x = new double [plotLength];
+	int imageSizeX = 256, imageSizeY = 256;
+	Grid2D image;
+	Grid2D copy;
+	String imageDataLoc = System.getProperty("user.dir") + "/data/" + "/mipda/";
+	String filename = imageDataLoc + "mr12.dcm"; 
+	Grid2D mrImage;
+	Convolver conv;
+    boolean convolution;
+    Grid2D  convolvedImage;
+    String imageFileName;
+    String outFileName;
+    
+    /**
+     * You can change this to a location OUTSIDE of the Conrad workspace, where you want to save the result to.
+     * If you leave it as it is, you find the result in your home directory.
+     */
+    String outputDataLoc = System.getProperty("user.home") + "/mipda/output/";
+    
+    
+    /**
+     * In the basicIntro routine you find out how matrix and vector computations
+     * can be performed. Follow the code and fill in missing code indicated by TODOs.
+     * There are either empty lines which need exactly one line of code,
+     * or you have to initialize declared variables appropriately.
+     */
+	public void basicIntro() {
 		
-		//Show ImageJ GUI
-		ImageJ ij = new ImageJ();
-		//Display image
-		//TODO
-		
-		//Copy an image into a new container
-		//TODO
-		copy.show("Copy of circle");
-		
-		
-		//Load an image from file
-		String imageDataLoc = System.getProperty("user.dir") + "/data/" + "/mipda/";
-
-		String filename = imageDataLoc + "mr12.dcm";
-		//TODO. Hint: Use IJ and ImageUtil
-		mrImage.show();
-		
-		//prepare convolution by creating the relevant objects
-		//TODO
-		//TODO
-		
-		//define the kernel. Try simple averaging 3x3 filter
-		int kw = 3;
-		int kh = 3;
-		float[] kernel = new float[kw*kh];
-		for(int i = 0; i < kernel.length; i++)
-		{	
-			kernel[i] = 1.f / (kw*kh);
-		}
-		
-		// test for error and directly show convolved image
-		//TODO
-			
-		
-		//write an image to disk, check the supported output formats
-		String outFilename ="G:/DMIP/exercises/2016/0/code/solution/mr12out.tif";
-		//TODO
-	}
-	
-	
-	public static void signalIntro()
-	{
-		//How can I plot a sine function sin(x) 
-		//which has its zeroes at multiples of 3?
-		double stepSize = 0.02;
-		int plotLength = 800;
-		
-		double[] y = new double[plotLength];
-		
-		for(int i = 0; i < y.length; i++)
-		{
-			//TODO
-			y[i] = val;
-			
-		}
-		
-		VisualizationUtil.createPlot(y).show();
-		
-		// now plot it with the specified x values
-		double[] x = new double [plotLength];
-		for(int i = 0; i < x.length; i++)
-		{
-			//TODO
-		}
-		
-		VisualizationUtil.createPlot(x, y, "sin(x)", "x", "y").show();		
-		
-	}
-	
-	public static void basicIntro()
-	{
-		//Display text
+		//display text
 		System.out.println("Creating a vector: v1 = [3.0; 2.0; 1.0]");
 		
-		//create column vector
-		//TODO
-		System.out.println("v1 = " + v1.toString());
+		//create column vector with the entries 3 2 and 1 as floats
+		v1 = null; //TODO
+		if (v1 != null)
+			System.out.println("v1 = " + v1.toString());
 		
-		//create a randomly initialized vector
-		SimpleVector vRand = new SimpleVector(3);
+		//create a randomly initialized vector with values between 0 and 1
+		vRand = new SimpleVector(3);
 		//TODO
 		System.out.println("vRand = " + vRand.toString());
 		
-		//create matrix M 3x3  1 2 3; 4 5 6; 7 8 9
+		//create a 3x3 matrix M with row vectors (1, 2, 3), (4, 5, 6) and (7, 8, 9)
+		//hint: have a look at the method setColValue(int, SimpleVector)
+		M = null;//TODO
 		//TODO
-		System.out.println("M = " + M.toString());
+		//TODO
+		//TODO
+		if (M != null)
+			System.out.println("M = " + M.toString());
 		
-		//determinant of M
-		System.out.println("Determinant of matrix m: " + TODO );
+		//compute the determinant of M
+		Mdeterminant = 0.0; //TODO
+		System.out.println("Determinant of matrix m: " + Mdeterminant);
 		
 		//transpose M
+		Mtrans = null;//TODO
+		//copy matrix using copy constructor
+		Mcopy = null;//TODO
+		//transpose Mcopy in-place
 		//TODO
-		//copy matrix
-		//TODO
-		//transpose M inplace
-		//TODO
-		
 		//get size
-		int numRows = M.getRows();
-		int numCols = M.getCols();
+		numRows = 0;//TODO
+		numCols = 0;//TODO
 		
-		//access elements of M
+		//access and print the elements of M (the original matrix from above)
 		System.out.println("M: ");
+	
 		for(int i = 0 ; i < numRows; i++)
 		{
 			for(int j = 0; j < numCols; j++)
 			{
-				//TODO
-				System.out.print(element + " ");
+				double element = 0;//TODO
+				
+				elementsOutput = elementsOutput + element + " ";
+			    
 			}
-			System.out.println();
+			elementsOutput += "\n";
+		}
+		System.out.print(elementsOutput);
+		
+		//create a 3x3 matrix Mones of ones (all entries are 1)
+		Mones = new SimpleMatrix(3,3);
+		//TODO
+		//create a 3x3 matrix Mzeros of zeros (all entries are 0)
+		Mzeros = new SimpleMatrix(3,3);
+		//TODO
+		//create a 3x3 identity matrix
+		Midentity = new SimpleMatrix(3,3);
+		//TODO
+		
+		//matrix multiplication
+		//compute the matrix product of Mtrans and M
+		//hint: have a look at the class edu.stanford.rsl.conrad.numerics.SimpleOperators
+		ResMat = null;//TODO
+		if (ResMat != null)
+			System.out.println("M^T * M = " + ResMat.toString());
+		
+		//matrix vector multiplication
+		//compute the matrix vector product of M and v1
+		// -> SimpleOperators
+		resVec = null;//TODO
+		if (resVec != null)
+			System.out.println("M * v1 = " + resVec.toString());
+		
+		//extract the last column vector from matrix M
+		SimpleVector colVector = null;
+		if (M != null) {
+			if (M.getCols() > 2) {
+				colVector = M.getCol(2);
+			}
 		}
 		
-		//Create 3x3 Matrix of 1's
-		SimpleMatrix Mones = new SimpleMatrix(3,3);
-		//TODO
-		//Create a 3x3 Matrix of 0's
-		SimpleMatrix Mzeros = new SimpleMatrix(3,3);
-		//TODO
-		//Create a 3x3 Identity matrix
-		SimpleMatrix Midentity = new SimpleMatrix(3,3);
-		//TODO
+		//extract the top 1x2 subvector from the last column of matrix M 
+		subVector = null;//TODO
+		if (subVector != null)
+			System.out.println("[m(0)(2); m(1)(2)] = " + subVector);
 		
-		//Matrix multiplication
-		//TODO
-		System.out.println("M^T * M = " + ResMat.toString());
+		//matrix elementwise multiplication
+		//compute a matrix which has the squared value of the elements of M in each component
+	    MsquaredElem = null;//TODO
+	    if (MsquaredElem != null)
+	    	System.out.println("M squared Elements: " + MsquaredElem.toString());
 		
-
-		//Matrix vector multiplication
-		//TODO
-		System.out.println("M * v1 = " + resVec.toString());
-		
-		
-		//Extract the last column vector from matrix M
-		SimpleVector colVector = M.getCol(2);
-		//Extract the 1x2 subvector from the last column of matrix M
-		//TODO
-		System.out.println("[m(0)(2); m(1)(2)] = " + subVector);
-		
-		//Matrix elementwise multiplication
-		//TODO
-		System.out.println("M squared Elements: " + MsquaredElem.toString());
-		
-		//round vectors
+		//examples how to round vectors
+	    // copy of the random vector vRand
 		SimpleVector vRandCopy = new SimpleVector(vRand);
 		System.out.println("vRand         = " + vRandCopy.toString());
-		
+		// bring down to a round figure
 		vRandCopy.floor();
 		System.out.println("vRand.floor() = " + vRandCopy.toString());
-		
+		// round up
 		vRand.ceil();
 		System.out.println("vRand.ceil()  = " + vRand.toString());
 		
-		//min, max, mean
-		double minV1 = v1.min();
-		double maxV1 = v1.max();
-		System.out.println("Min(v1) = " + minV1 + " Max(v1) = " + maxV1);
-		
-		//for matrices: iterate over row or column vectors
-		SimpleVector maxVec = new SimpleVector(M.getCols());
-		for(int i = 0; i < M.getCols(); i++)
-		{
-			maxVec.setElementValue(i, M.getCol(i).max());
+		//compute min and max values
+		// for vectors
+		if (v1 != null) {
+			double minV1 = v1.min();
+			double maxV1 = v1.max();
+			System.out.println("Min(v1) = " + minV1 + " Max(v1) = " + maxV1);
 		}
-		double maxM = maxVec.max();
-		System.out.println("Max(M) = " + maxM);
-		
-		
-		
-		//Norms
-		//TODO matrix L1
-		//TODO vector L2
+		// for matrices: iterate over row or column vectors
+		if (M != null) {
+			SimpleVector maxVec = new SimpleVector(M.getCols());
+			for(int i = 0; i < M.getCols(); i++)
+			{
+				maxVec.setElementValue(i, M.getCol(i).max());
+			}
+			double maxM = 0; //TODO: compute total maximum
+			System.out.println("Max(M) = " + maxM);
+		}
+
+		//norms
+		matrixNormL1 = 0;//TODO Frobenius norm of M
+		vecNormL2 = 0;//TODO L2 vector norm of colVector
 		System.out.println("||M||_F = " + matrixNormL1);
 		System.out.println("||colVec||_2 = " + vecNormL2);
 		
-		//get normalized vector
-		//TODO
-		//normalize vector in-place
-		//TODO
-		System.out.println("Normalized colVector: " + colVector.toString());
-		System.out.println("||colVec||_2 = " + colVector.norm(VectorNormType.VEC_NORM_L2));
+		//get the normalized vector from colVector without overwriting
+		v2 = null;//TODO
+		
+		if (colVector != null)
+			tempColVector = new SimpleVector(colVector); //this copy is necessary for unit testing
+		else
+			tempColVector = new SimpleVector(2);
+		
+	    //normalize tempColVector vector in-place (overwrite it with normalized values)
+		//TODO 
+		if (v2 != null)
+			System.out.println("Normalized colVector: " + v2.toString());
+		System.out.println("||colVec||_2 = " + tempColVector.norm(VectorNormType.VEC_NORM_L2)); // if done correctly this yields 1	
 	}
-
-	public static void main(String arg[])
+	
+	
+    /**
+     * The signalIntro routine shows how a sine function can be plotted.
+     * Follow the code and fill in missing code indicated by TODOs.
+     * There are either empty lines which need exactly one line of code,
+     * or you have to initialize declared variables appropriately.
+     */	
+	public void signalIntro()
 	{
-		basicIntro();
-		gridIntro();
-		signalIntro();
+		//How is the sine function sin(2*PI*x) plotted using this framework?
+		double stepSize = 0.01;
+		//compute the image of sin(2*PI*x) using the given step size stepSize and starting at the origin
+		for(int i = 0; i < y.length; i++)
+		{
+			y[i] = 0.0; //TODO
+			
+		}
+		VisualizationUtil.createPlot(y).show();
+		
+		// now plot it with the specified x values
+		// (such that it does not show the loop index but the actual x-values on the x-axis)
+		for(int i = 0; i < x.length; i++)
+		{
+			x[i] = 0.0; //TODO
+		}
+		
+		VisualizationUtil.createPlot(x, y, "sin(x)", "x", "y").show();			
+	}
+	
+    /**
+     * The gridIntro routine contains code for image manipulation with ImageJ.
+     * First a simple image is created which shows a sphere.
+     * Next, we load an image from the disk, implement an average filter, and save the result. 
+     * Follow the code and fill in missing code indicated by TODOs.
+     * There are either empty lines to be filled or you have to initialize declared variables appropriately.
+     */	
+	public void gridIntro(){
+		
+		//define the image size
+		int imageSizeX = 256;
+		int imageSizeY = 256;
+	
+		//define an image
+		//hint: use the package edu.stanford.rsl.conrad.data.numeric.Grid2D
+		image = null;//TODO
+		
+		//draw a filled circle
+		int radius = 50;
+		//set all pixels within the circle to 100
+		int insideVal = 100;
+		
+		// fill 'image' with data that shows a sphere with radius 'radius' and intensity 'insideVal' 
+		//TODO (multiple code lines, hint: two for loops)
+		
+		//show ImageJ GUI
+		ImageJ ij = new ImageJ();
+		
+		//display image using the Grid2D class methods
+		//TODO
+		
+		//copy an image
+       	copy = null;//TODO
+       	if (copy != null)
+       		copy.show("Copied image of a circle");
+		
+		//load an image from file
+	    // first use IJ to open the image
+		// then wrap it using the class ImageUtil (static)
+		// finally you need to extract the image with getSubGrid(0)
+		mrImage = null;//TODO
+		if (mrImage != null)
+			mrImage.show("MR image");
+		
+		// learn how to compute the convolution of an image with a filter kernel
+		conv = new Convolver();
+		FloatProcessor ip = null;
+		if (mrImage != null)
+			ip = ImageUtil.wrapGrid2D(mrImage);
+		
+		//this defines a simple averaging 3x3 filter kernel
+		int kw = 3;
+		int kh = 3;
+		float[] kernel = new float[kw*kh];
+		
+		for(int i = 0; i < kernel.length; i++)
+		{	
+			kernel[i] = 1.f / (kw*kh);
+		}
+
+		// trigger the convolution using ip, kernel, kw, kh
+		convolution = false;//TODO
+		if (ip != null) {
+			convolvedImage = ImageUtil.wrapFloatProcessor(ip);
+			convolvedImage.show("Convolved Image");
+		}
+
+		
+		//write an image to disk & check the supported output formats
+		imageFileName = "mr12out.tiff"; // TODO: choose a valid filename (just file+ending, no path)
+		
+		outFileName = outputDataLoc + imageFileName;
+		if (mrImage != null) {
+			//TODO: save the image using IJ and ImageUtil
+		}			
+	}
+	
+	/**
+	 * 
+	 * end of the exercise
+	 */
+	
+	
+	public static void main(String[] args) {
+		
+		(new Intro()).basicIntro();
+		(new Intro()).signalIntro();
+		(new Intro()).gridIntro();
+	}
+	
+	// getters for members
+	// variables which are checked (DO NOT CHANGE!)
+	public SimpleVector get_v1() {
+		return v1;
+	}
+	//
+	public SimpleVector get_vRand() {
+		return vRand;
+	}
+	//
+	public SimpleMatrix get_M() {
+		return M;
+	}
+	//
+	public double get_Mdeterminant() {
+		return Mdeterminant;
+	}
+	//
+	public SimpleMatrix get_Mtrans() {
+		return Mtrans;
+	}
+	//
+	public SimpleMatrix get_Mcopy() {
+		return Mcopy;
+	}
+	//
+	public int get_numRows() {
+		return numRows;
+	}
+	//
+	public int get_numCols() {
+		return numCols;
+	}
+	//
+	public String get_elementsOutput() {
+		return elementsOutput;
+	}
+	//
+	public SimpleMatrix get_Mones() {
+		return Mones;
+	}
+	//
+	public SimpleMatrix get_Mzeros() {
+		return Mzeros;
+	}
+	//
+	public SimpleMatrix get_Midentity() {
+		return Midentity;
+	}
+	//
+	public SimpleMatrix get_ResMat() {
+		return ResMat;
+	}
+	//
+	public SimpleVector get_resVec() {
+		return resVec;
+	}
+	//
+	public SimpleVector get_subVector() {
+		return subVector;
+	}
+	//
+	public SimpleMatrix get_MsquaredElem() {
+		return MsquaredElem;
+	}
+	//
+	public double get_matrixNormL1() {
+		return matrixNormL1;
+	}
+	//
+	public double get_vecNormL2() {
+		return vecNormL2;
+	}
+	//
+	public SimpleVector get_v2() {
+		return v2;
+	}
+	//
+	public SimpleVector get_tempColVector() {
+		return tempColVector;
+	}
+	//
+	public int get_plotLength() {
+		return plotLength;
+	}
+	//
+	public double[] get_y() {
+		return y;
+	}
+	//
+	public double[] get_x() {
+		return x;
+	}
+	//
+	public int get_imageSizeX(){
+		return imageSizeX;
+	}
+	//
+	public int get_imageSizeY() {
+		return imageSizeY;
+	}
+	//
+	public Grid2D get_image() {
+		return image;
+	}
+	//
+	public Grid2D get_copy() {
+		return copy;
+	}
+	//
+	public String get_imageDataLoc() {
+		return imageDataLoc;
+	}
+	//
+	public String get_filename() {
+		return filename;
+	}
+	//
+	public Grid2D get_mrImage() {
+		return mrImage;
+	}
+	//
+	public Convolver get_conv() {
+		return conv;
+	}
+	//
+	public boolean get_convolution() {
+		return convolution;
+	}
+	//
+	public Grid2D get_convolvedImage() {
+		return convolvedImage;
+	}
+	//
+	public String get_imageFileName() {
+		return imageFileName;
+	}
+	//
+	public String get_outFileName() {
+		return outFileName;
 	}
 }
