@@ -243,12 +243,12 @@ public abstract class SimpleOperators {
 	
 	
 	/**
-	 * Computes the product of matrices, e.g. matMul(m1,m2,m3,m4,m5) -> computes m1*m2*m3*m4*m5 and
+	 * Computes the product of matrices, e.g. multiplyMatrices(m1,m2,m3,m4,m5) -> computes m1*m2*m3*m4*m5 and
 	 * returns the result
 	 * @param matrices: several matrices 
 	 * @return the matrix product of all given matrices
 	 */
-	public static SimpleMatrix matMul(SimpleMatrix... matrices) {
+	public static SimpleMatrix multiplyMatrices(SimpleMatrix... matrices) {
 		int count = 0;
 		SimpleMatrix cur_matrix = null;
 		SimpleMatrix matrix_product = null;
