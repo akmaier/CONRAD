@@ -957,13 +957,13 @@ public class SimpleMatrix implements Serializable {
 		String result = new String();
 		result += "[";
 		for (int r = 0; r < this.rows; ++r) {
-			if (r != 0) result += "; ";
+			if (r != 0) result += " ";
 			result += "[";
 			for (int c = 0; c < this.cols; ++c) {
 				if (c != 0) result += " ";
 				result += new Double(this.buf[r][c]);
 			}
-			result += "]";
+			result += "]\n";
 		}
 		result += "]";
 		return result;
