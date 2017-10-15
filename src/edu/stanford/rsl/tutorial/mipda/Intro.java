@@ -78,7 +78,7 @@ public class Intro {
 		//display text
 		System.out.println("Creating a vector: v1 = [3.0; 2.0; 1.0]");
 		
-		//create column vector with the entries 3 2 and 1 as floats
+		//create column vector with the entries 3.0, 2.0 and 1.0 as floats
 		v1 = null; //TODO
 		if (v1 != null)
 			System.out.println("v1 = " + v1.toString());
@@ -97,7 +97,7 @@ public class Intro {
 		if (M != null)
 			System.out.println("M = " + M.toString());
 		
-		//compute the determinant of M
+		//Mdeterminant: compute the determinant of M
 		Mdeterminant = 0.0; //TODO
 		System.out.println("Determinant of matrix m: " + Mdeterminant);
 		
@@ -230,6 +230,7 @@ public class Intro {
 	public void signalIntro()
 	{
 		//How is the sine function sin(2*PI*x) plotted using this framework?
+		// use Math.sin and Math.PI
 		double stepSize = 0.01;
 		//compute the image of sin(2*PI*x) using the given step size stepSize and starting at the origin
 		for(int i = 0; i < y.length; i++)
@@ -241,6 +242,7 @@ public class Intro {
 		
 		// now plot it with the specified x values
 		// (such that it does not show the loop index but the actual x-values on the x-axis)
+		// x is increased after every iteration by stepSize
 		for(int i = 0; i < x.length; i++)
 		{
 			x[i] = 0.0; //TODO
