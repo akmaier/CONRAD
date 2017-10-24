@@ -99,6 +99,7 @@ public class Intro {
 		
 		//Mdeterminant: compute the determinant of M
 		Mdeterminant = 0.0; //TODO
+				
 		System.out.println("Determinant of matrix m: " + Mdeterminant);
 		
 		//transpose M
@@ -200,8 +201,8 @@ public class Intro {
 		}
 
 		//norms
-		matrixNormL1 = 0;//TODO Frobenius norm of M
-		vecNormL2 = 0;//TODO L2 vector norm of colVector
+		matrixNormL1 = 0; //TODO Frobenius norm of M
+		vecNormL2 = 0; //TODO L2 vector norm of colVector
 		System.out.println("||M||_F = " + matrixNormL1);
 		System.out.println("||colVec||_2 = " + vecNormL2);
 		
@@ -278,12 +279,11 @@ public class Intro {
 		
 		//show ImageJ GUI
 		ImageJ ij = new ImageJ();
-		
 		//display image using the Grid2D class methods
 		//TODO
 		
 		//copy an image
-       	copy = null;//TODO
+       	copy = null; //TODO
        	if (copy != null)
        		copy.show("Copied image of a circle");
 		
