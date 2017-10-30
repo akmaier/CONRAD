@@ -15,6 +15,7 @@ import org.junit.internal.TextListener;
 import org.junit.runner.JUnitCore;
 
 import ModuleCourseIntroduction.IntroTestClass;
+import ModuleMathematicalTools.SVDTestClass;
 
 public class RunExerciseEvaluation {
 
@@ -32,11 +33,12 @@ public class RunExerciseEvaluation {
 			junitCore.run(IntroTestClass.class);
 			//org.junit.runner.JUnitCore.main("ModuleCourseIntroduction.IntroTestClass");
 		}
-//		else if (exerciseName.compareTo("SVD?") == 0) {
-//			
-//		}
+		else if (choice.compareTo("SVD") == 0) {
+			junitCore.run(SVDTestClass.class);
+		}
 		else {
-			System.out.println("No test available.");
+			System.out.println("Aborted, no test selected.");
+//			System.out.println("No such test available.");
 		}
 	}
 
@@ -57,11 +59,13 @@ public class RunExerciseEvaluation {
             JComboBox<String> comboBox = new JComboBox<>(model);
             panel.add(comboBox);
 
-            int iResult = JOptionPane.showConfirmDialog(null, panel, "Flavor", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+            int iResult = JOptionPane.showConfirmDialog(null, panel, "jUnit Exercise Test Selection", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
             switch (iResult) {
                 case JOptionPane.OK_OPTION:
                     result = (String) comboBox.getSelectedItem();
                     break;
+                case JOptionPane.OK_CANCEL_OPTION:
+                	return "";
             }
 
         } else {

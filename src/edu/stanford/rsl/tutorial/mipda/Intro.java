@@ -56,7 +56,7 @@ public class Intro {
 	Grid2D mrImage;
 	Convolver conv;
     boolean convolution;
-    Grid2D  convolvedImage;
+    Grid2D convolvedImage;
     String imageFileName;
     String outFileName;
     
