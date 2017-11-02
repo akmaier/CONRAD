@@ -29,11 +29,11 @@ public class RunExerciseEvaluation {
         String choice = ask(exerciseNames);
         System.out.println("Running test " + choice);
         
-		if (choice.compareTo("Intro") == 0) {
+		if (choice.equals("Intro")) {
 			junitCore.run(IntroTestClass.class);
 			//org.junit.runner.JUnitCore.main("ModuleCourseIntroduction.IntroTestClass");
 		}
-		else if (choice.compareTo("SVD") == 0) {
+		else if (choice.equals("SVD")) {
 			junitCore.run(SVDTestClass.class);
 		}
 		else {
@@ -43,6 +43,7 @@ public class RunExerciseEvaluation {
 	}
 
 	// thanks to https://stackoverflow.com/questions/13408238/simple-java-gui-as-a-popup-window-and-drop-down-menu
+	// (adapted)
     public static String ask(final String... values) {
 
         String result = null;
