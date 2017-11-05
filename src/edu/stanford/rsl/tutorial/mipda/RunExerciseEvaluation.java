@@ -19,7 +19,7 @@ import ModuleMathematicalTools.SVDTestClass;
 
 public class RunExerciseEvaluation {
 
-	private static final String[] exerciseNames = {"Intro","SVD"}; 
+	private static final String[] exerciseNames = {"Intro","SVD","GeoU"}; 
 	
 	public static void main(String[] args) {
 		
@@ -35,6 +35,9 @@ public class RunExerciseEvaluation {
 		}
 		else if (choice.equals("SVD")) {
 			junitCore.run(SVDTestClass.class);
+		}
+		else if (choice.equals("GeoU")) {
+//			junitCore.run(GeoUTestClass.class); // available soon
 		}
 		else {
 			System.out.println("Aborted, no test selected.");
