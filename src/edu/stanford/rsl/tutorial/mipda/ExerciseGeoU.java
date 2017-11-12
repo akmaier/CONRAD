@@ -23,6 +23,12 @@ import edu.stanford.rsl.conrad.numerics.DecompositionSVD;
 
 public class ExerciseGeoU {
 
+	final static int caseNo = 0; // choose 0, 1, or 2 for different test images
+
+	final static float a = 0.6f; // a: spread among x-direction
+	final static float b = 0.3f; // b: spread among y-direction
+	final static float d = 5.0f; // d: d/2 value of distortion field at level set for (X/a)^2+(Y/b)^2=1
+	
 	String filename; // do not edit, choose a number in the main method instead
 	Grid2D originalImage; // do not edit, read from filename when instantiating the object
 	Grid2D distortedImage; // do not edit, generated in the main method
@@ -63,13 +69,7 @@ public class ExerciseGeoU {
 		
 		new ImageJ();
 		
-		int caseNo = 0; // choose 0, 1, or 2 for different test images
-
 		// generate distorted image
-		float a = 0.6f; // a: spread among x-direction
-		float b = 0.3f; // b: spread among y-direction
-		float d = 5.0f; // d: d/2 value of distortion field at level set for (X/a)^2+(Y/b)^2=1
-		
 		ExerciseGeoU exObj = new ExerciseGeoU(caseNo);
 		exObj.init(a,b,d);
 		
@@ -155,7 +155,7 @@ public class ExerciseGeoU {
 		 * d = 10 -> NumKoeff: 66 -> but only 64 lattice points are known (nx, ny = 8)
 		 */
 
-		int degree = 5; // polynomial's degree: 2,...,10
+		int degree = 5; // polynomial's degree: 2,...,10 // jUnit tests valid for degree = 5 only
 		
 		// number of coefficients: numCoeff
 		// (hint: this is NOT the total number of multiplications!)
@@ -304,7 +304,7 @@ public class ExerciseGeoU {
 		originalImage = ImageUtil.wrapImagePlus(IJ.openImage(imageDataLoc + filename)).getSubGrid(0);
 	}
 	
-	private void init(float a, float b, float d) {
+	public void init(float a, float b, float d) {
 		
 		// Normalize intensity values to [0,1]
 		float max = NumericPointwiseOperators.max(originalImage);
@@ -408,6 +408,22 @@ public class ExerciseGeoU {
 	
 	//getters for members
 	// variables which are checked (DO NOT CHANGE!)
+	
+	public static int get_caseNo() {
+		return caseNo;
+	}
+	
+	public Grid2D get_originalImage() {
+		return originalImage;
+	}
+	
+	public Grid2D get_distortedImage() {
+		return distortedImage;
+	}
+	
+	public Grid2D get_undistortedImage() {
+		return undistortedImage;
+	}
 	
 	public int get_nx() {
 		return nx;
