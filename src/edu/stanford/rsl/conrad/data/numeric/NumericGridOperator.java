@@ -209,8 +209,6 @@ public class NumericGridOperator {
 		input.notifyAfterWrite();
 	}
 
-	
-	//--> this seems to be wrong
 	/** Compute grid1 = grid1 - grid2 */
 	public void addBy(NumericGrid input, NumericGrid sub) {
 		NumericPointwiseIteratorND it_inout = new NumericPointwiseIteratorND(input);
