@@ -18,16 +18,21 @@ public class DerivativeKernel implements GridKernel {
 	private Grid1D dKernel;
 	public DerivativeKernel() {
 		// TODO Auto-generated constructor stub
-		dKernel = new Grid1D(new float[2]);
+		dKernel = new Grid1D(3);
 		dKernel.setAtIndex(0, -1.f);
-		dKernel.setAtIndex(1, 1.f);
+		dKernel.setAtIndex(1, 0.f);
+		dKernel.setAtIndex(2, 1.f);
 	}
 
 	public void applyToGrid(Grid1D input) {
+//		System.out.println("Noasdijaoijsd");
 		float[] inputFloat = input.getBuffer();
 		ImageProcessor ip = new FloatProcessor(inputFloat.length, 1, inputFloat);
 		Convolver c = new Convolver();
-		c.convolveFloat(ip, dKernel.getBuffer(), 2, 1);
+		c.convolveFloat(ip, dKernel.getBuffer(), 3, 1);
+		for(int i = 0; i<inputFloat.length;i++) {
+			input.setAtIndex(i, ip.getf(i));
+		}
 	}
 
 	/**

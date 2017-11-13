@@ -32,6 +32,7 @@ public class HilbertKernel implements GridKernel{
 		
 		for(int i = 0; i < res.length; i++) {
 			input.setAtIndex(i, (float) (-res[i]/(Math.PI*deltaS*2)));
+//			input.setAtIndex(i, (float)i);
 		}
 		
 				
