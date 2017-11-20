@@ -22,11 +22,11 @@ public class CreateMotionProfile {
 			// translation part:
 			motionList.get(1)[i] = new double[3][1];
 			motionList.get(1)[i][2][0] = ((double)(i)/nrProj) * maxz;
-			motionList.get(1)[i][0][0] = 2.5 - (i%2) * maxxy;
-			motionList.get(1)[i][1][0] = 2.5 - (i%2) * maxxy;
+			motionList.get(1)[i][0][0] = 0; //2.5 - (i%2) * maxxy;
+			motionList.get(1)[i][1][0] = 0; //2.5 - (i%2) * maxxy;
 		}
 		try {
-			XmlUtils.exportToXML(motionList, "/Users/maier/Documents/data/ERC Grant/motionpattern_extrem.xml");
+			XmlUtils.exportToXML(motionList, "/Users/maier/Documents/data/ERC Grant/motionpattern_z_only.xml");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
