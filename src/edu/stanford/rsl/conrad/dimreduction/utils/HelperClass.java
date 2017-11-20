@@ -3,7 +3,6 @@ package edu.stanford.rsl.conrad.dimreduction.utils;
 
 import java.util.ArrayList;
 import edu.stanford.rsl.apps.gui.opengl.PointCloudViewer;
-import edu.stanford.rsl.conrad.data.Grid;
 import edu.stanford.rsl.conrad.data.numeric.NumericGrid;
 import edu.stanford.rsl.conrad.data.numeric.NumericGridOperator;
 import edu.stanford.rsl.conrad.geometry.shapes.simple.PointND;

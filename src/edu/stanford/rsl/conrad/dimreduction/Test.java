@@ -1,16 +1,18 @@
+/*
+ * Copyright (C) 2017 Andreas Maier, Susanne Westphal
+ * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
+ */
 package edu.stanford.rsl.conrad.dimreduction;
 
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 import edu.stanford.rsl.conrad.dimreduction.objfunctions.LagrangianDistanceObjectiveFunction;
 import edu.stanford.rsl.conrad.dimreduction.utils.MyException;
 import edu.stanford.rsl.conrad.dimreduction.utils.PointCloud;
 import edu.stanford.rsl.conrad.dimreduction.utils.PointCloudViewableOptimizableFunction;
-import edu.stanford.rsl.conrad.geometry.shapes.simple.PointND;
 import edu.stanford.rsl.conrad.geometry.shapes.simple.SwissRoll;
-import edu.stanford.rsl.jpop.OptimizableFunction;
+
 
 public class Test {
 

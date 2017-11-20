@@ -82,10 +82,6 @@ public class DimensionalityReduction {
 	// target dimension of the optimization:
 	private int targetDimension = 2;
 
-	// initialization: false: random initialization; true: best
-	// randominitialization out of 1000
-	private boolean optimizeWithBestInitialization = false;
-
 	// Optimization function
 	// 0 : Sammon objective function
 	// 1 : Distance square objective function
@@ -647,15 +643,6 @@ public class DimensionalityReduction {
 		convexity3Dfilename = name;
 	}
 
-	/**
-	 * sets whether the best random initialization out of 1000 is used as start
-	 * initialization
-	 * 
-	 * @param bestIni
-	 */
-	public void setBestIni(boolean bestIni) {
-		optimizeWithBestInitialization = bestIni;
-	}
 
 	/**
 	 * sets whether the best result of all iteration steps is shown
