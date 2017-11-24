@@ -25,7 +25,7 @@ public class ExerciseUM {
 	Grid2D correctedHUM;
 	Grid2D correctedF;
 	Grid2D correctedCut;
-	static String example = "head"; // select "box" or "head"
+	public static final String example = "head"; // select "box" or "head"
 	
 	public static void main(String[] args) {
 
@@ -74,7 +74,8 @@ public class ExerciseUM {
 		 */
 		double cutoff = 0.01d;
 		
-		// TODO: apply a hard frequency cut-off (high pass filter), look for the appropriate class method in this file
+		exObject.correctedCut = null;// TODO: apply a hard frequency cut-off (high pass filter), look for the appropriate class method in this file
+		if (exObject.correctedCut != null)
 		exObject.correctedCut.show("Corrected image with frequency cutoff");
 		
 		IJ.run(imp, "Window/Level...", ""); // open tool to window the images properly

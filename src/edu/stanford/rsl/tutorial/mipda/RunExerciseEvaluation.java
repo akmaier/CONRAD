@@ -17,10 +17,12 @@ import org.junit.runner.JUnitCore;
 import ModuleCourseIntroduction.IntroTestClass;
 import ModuleMathematicalTools.SVDTestClass;
 import ModulePreprocessing.GeoUTestClass;
+import ModulePreprocessing.UMTestClass;
+
 
 public class RunExerciseEvaluation {
 
-	private static final String[] exerciseNames = {"Intro","SVD","GeoU"};//,"UM"}; 
+	private static final String[] exerciseNames = {"Intro","SVD","GeoU","UM"}; 
 	
 	public static void main(String[] args) {
 		
@@ -41,7 +43,7 @@ public class RunExerciseEvaluation {
 			junitCore.run(GeoUTestClass.class);
 		}
 		else if (choice.equals("UM")) {
-//			junitCore.run(UMTestClass.class); // available soon
+			junitCore.run(UMTestClass.class); // available soon
 		}
 		else {
 			System.out.println("Aborted, no test selected.");
