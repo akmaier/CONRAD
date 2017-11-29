@@ -18,11 +18,18 @@ import ModuleCourseIntroduction.IntroTestClass;
 import ModuleMathematicalTools.SVDTestClass;
 import ModulePreprocessing.GeoUTestClass;
 import ModulePreprocessing.UMTestClass;
+//import ModuleReconstruction.PBTestClass;
 
+/**
+ * Testing tool for programming exercises
+ * of the course "Medical Image Processing for Diagnostic Applications (MIPDA)"
+ * @author Frank Schebesch
+ *
+ */
 
 public class RunExerciseEvaluation {
 
-	private static final String[] exerciseNames = {"Intro","SVD","GeoU","UM"}; 
+	private static final String[] exerciseNames = {"Intro","SVD","GeoU","UM","PB"}; 
 	
 	public static void main(String[] args) {
 		
@@ -43,7 +50,12 @@ public class RunExerciseEvaluation {
 			junitCore.run(GeoUTestClass.class);
 		}
 		else if (choice.equals("UM")) {
-			junitCore.run(UMTestClass.class); // available soon
+			junitCore.run(UMTestClass.class);
+			System.out.println("Some bugfixing required (due next update of test-jar).");
+		}
+		else if (choice.equals("PB")) {
+			//junitCore.run(PBTestClass.class);
+			System.out.println("Soon available (due next update of test-jar).");
 		}
 		else {
 			System.out.println("Aborted, no test selected.");
