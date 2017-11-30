@@ -24,11 +24,21 @@ import edu.stanford.rsl.conrad.utils.VisualizationUtil;
  * The implementation assumes, that the dataset has been subject to Generalized Procrustes Alignment. If an implementation of GPA 
  * other than the one provided here is used, modifications to PCA (e.g. re-scaling and consensus subtraction) might not be necessary.
  * Jolliffe, Ian. Principal component analysis. John Wiley & Sons, Ltd, 2005.
+ * 
+ * FIXME
+ * Here, principal components are  set to the singular values s_i of the data matrix.
+ * However, the eigenvalues of the covariance matrix sigma_i (= principal component of the data matrix)
+ * are given as: sigma_i = s_i^2/(numSamples-1);
+ * Consequently, the required number of components to reach a certain variation threshold may vary.
+ * We keep this behavior to maintain backwards compatibility to ActiveShapeModel and CONRADCardiacModel *.ccm files.  
+ * 
  * @author Mathias Unberath
  *
  */
 public class PCA {
 	
+	// ---------------
+	// Data Properties
 	/**
 	 * Data-sets typically consist of point-clouds or meshes. This variable stores 
 	 * the dimension of the vertices, as the data is stored in a single column.
@@ -62,34 +72,40 @@ public class PCA {
 	 */
 	public SimpleMatrix connectivity;
 	
+	// ---------------
+	// PCA Properties
 	/**
 	 * Matrix containing the Eigenvectors of the covariance matrix after singular value decomposition.
 	 */
-	public SimpleMatrix eigenVectors;
+	public SimpleMatrix eigenVectors;	
 			
 	/**
 	 * Array containing the eigenvalues of the covariance matrix after singular value decomposition.
+	 * This represents the variance of the dataset.
 	 */
 	public double[] eigenValues;
 	
 	/**
-	 * Number of principal Components needed to reach variation threshold.
+	 * Number of principal components needed to reach variation threshold.
 	 */
 	public int numComponents;
+	
 	/**
 	 * Threshold at which principal components will be omitted if a variation of this value is reached.
+	 * Either this or the desired number of components needs to be provided.
 	 */
 	public double variationThreshold = 1;
 	
+	// ---------------
+	// Debug	
+	public boolean DEBUG = false;
 	public boolean PLOT_SINGULAR_VALUES = false;
 	
 	//==========================================================================================
-	// METHODS
+	// CONSTRUCTOR
 	//==========================================================================================
-	
 	/**
 	 * Constructs an empty PCA object. Variables need to be initialized before analysis can be performed.
-	 * TODO implement init method for this constructor
 	 */
 	public PCA(){	
 	}
@@ -99,6 +115,26 @@ public class PCA {
 	 * @param data The data array to be analyzed.
 	 */
 	public PCA(DataMatrix data){
+		this.init(data);
+	}
+	
+	/**
+	 * Constructs a PCA object and initializes the data array.
+	 * Due to the lacking information about scaling factors and consensus object, this constructor is not to be 
+	 * used for statistical shape model generation after generalized procrustes analysis.
+	 * @param data The data array to be analyzed.
+	 * @param dim The dimension of the data points.
+	 */
+	public PCA(SimpleMatrix data, int dim){
+		this.init(data, dim);
+	}
+	
+	/**
+	 * Initialize the PCA object with a (new) DataMatrix.
+	 * 
+	 * @param data The data to be analyzed.
+	 */
+	public void init(DataMatrix data) {
 		this.numPoints = data.getRows();
 		this.numSamples = data.getCols();
 		this.dimension = data.dimension;		
@@ -113,13 +149,14 @@ public class PCA {
 	}
 	
 	/**
-	 * Constructs a PCA object and initializes the data array.
-	 * Due to the lacking information about scaling factors and consensus object, this constructor is not to be 
-	 * used for statistical shape model generation after generalized procrustes analysis.
+	 * Initialize the PCA object with a (new) SimpleMatrix.
+	 * Due to the lacking information about scaling factors and consensus object, this initialization
+	 * is not to be used for statistical shape model generation after generalized procrustes analysis.
+	 * 
 	 * @param data The data array to be analyzed.
 	 * @param dim The dimension of the data points.
 	 */
-	public PCA(SimpleMatrix data, int dim){
+	public void init(SimpleMatrix data, int dim) {
 		this.numPoints = data.getRows();
 		this.numSamples = data.getCols();
 		
@@ -159,23 +196,26 @@ public class PCA {
 		return cons;
 	}
 	
+	//==========================================================================================
+	// METHODS
+	//==========================================================================================	
 	/**
 	 * Performs the principal component analysis on the data-set.
 	 */
 	public void run(){
 		assert(data != null) : new Exception("Initialize data array fist.");
 		
-		System.out.println("Starting principal component analysis on " + numSamples + " data-sets.");
+		if(DEBUG) System.out.println("Starting principal component analysis on " + numSamples + " data-sets.");
 		
 		DecompositionSVD svd = new DecompositionSVD(data);
 		
 		plot(svd.getSingularValues());
 		
+		// Determine the number of principal components needed to reach variationThreshold.
 		this.numComponents = getPrincipalModesOfVariation(svd.getSingularValues());
 		
+		// Set the first numComponents eigenValues and eigenVectors.
 		reduceDimensionality(svd.getSingularValues(), normalizeColumns(svd.getU()));
-		//this.eigenVectors = normalizeColumns(svd.getU());
-		//this.eigenValues = svd.getSingularValues();		
 	}
 	
 	/**
@@ -187,24 +227,24 @@ public class PCA {
 		assert(data != null) : new Exception("Initialize data array fist.");
 		assert(dimensionality <= this.numSamples ) : new Exception("Feature space dimensionality cannot exceed number of samples.");
 		
-		System.out.println("Starting principal component analysis on " + numSamples + " data-sets.");
+		if(DEBUG) System.out.println("Starting principal component analysis on " + numSamples + " data-sets.");
 		
 		DecompositionSVD svd = new DecompositionSVD(data);
 		
 		plot(svd.getSingularValues());
 		
+		// Set the number of components.
 		this.numComponents = dimensionality;
 		
+		// Set the first numComponents eigenValues and eigenVectors.
 		reduceDimensionality(svd.getSingularValues(), normalizeColumns(svd.getU()));
-		//this.eigenVectors = normalizeColumns(svd.getU());
-		//this.eigenValues = svd.getSingularValues();		
 	}
 	
 	/**
 	 * Allocates and sets the principal components and the corresponding variation values. Is used for dimensionality reduction after 
 	 * the amount of principal components needed has been determined.
 	 * @param v The variation values.
-	 * @param pc The principal components.
+	 * @param pc The principal components (i.e. eigenvectors)
 	 */
 	private void reduceDimensionality(double[] v, SimpleMatrix pc){
 		this.eigenValues = new double[numComponents];
@@ -226,13 +266,17 @@ public class PCA {
 		// ASSUMES THAT CONSENSUS IS SUBTRACTED AND SCALE IS MULTIPLIED
 		double[] weights = new double[numComponents];
 		SimpleVector shape = data.getCol(num);
+		
+		// Multiply with eigenvectors of the model.
 		for(int i = 0; i < numComponents; i++){
 			SimpleVector comp = eigenVectors.getCol(i);
 			double val = SimpleOperators.multiplyInnerProd(shape, comp);
 			shape.subtract(comp.multipliedBy(val));
+			// Weights are normed with the standard deviation along that component.
 			weights[i] = val/eigenValues[i];
 		}		
-		//double error = shape.normL2()/shape.getLen();
+		double error = shape.normL2()/shape.getLen();
+		if(DEBUG) System.out.println("Mapping error for " + num + ": " + error);
 		return weights;
 	}
 	
