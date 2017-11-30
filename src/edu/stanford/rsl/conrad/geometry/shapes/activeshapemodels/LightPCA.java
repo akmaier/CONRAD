@@ -106,6 +106,8 @@ public class LightPCA {
 	// Debug	
 	public boolean DEBUG = false;
 	public boolean SHOW_EIGEN_VALUES = false;
+	// Sanity
+	private boolean initialized = false;
 	
 	
 	// ----------------------------------------------------------------------------------------------------
@@ -126,6 +128,7 @@ public class LightPCA {
 		this.numSamples = data.getCols();
 		this.consensus = data.consensus;
 		this.variationThreshold= variationThreshold;
+		this.initialized = true;
 		this.run(data);
 	}
 	
@@ -143,6 +146,7 @@ public class LightPCA {
 		this.numSamples = data.getCols();
 		this.numComponents = numComponents;
 		this.consensus = data.consensus;
+		this.initialized = true;
 		this.run(data, this.numComponents);
 	}
 
@@ -155,11 +159,25 @@ public class LightPCA {
 	public LightPCA( ) {
 
 	}
+	/**
+	 * Initialize the data properties using information from the data matrix to be processed.
+	 * @param data
+	 */
+	public void init(DataMatrix data) {
+		this.dimension = data.dimension;
+		this.numVertices = data.getRows() / data.dimension;
+		this.numPoints = data.getRows();
+		this.numSamples = data.getCols();
+		this.consensus = data.consensus;
+		this.initialized = true;
+	}
 
 	// ----------------------------------------------------------------------------------------------------
 	// METHODS
 	// ----------------------------------------------------------------------------------------------------
 	public void run(DataMatrix data) {
+		if( !this.initialized ) this.init(data);
+		
 		if(DEBUG) System.out.println("Starting principal component analysis on " + numSamples + " data-sets.");
 		
 		// Make data matrix be zero-centered.
@@ -198,6 +216,8 @@ public class LightPCA {
 	}
 
 	public void run(DataMatrix data, int numComponents) {
+		if(!this.initialized) this.init(data);
+		
 		if(DEBUG) System.out.println("Starting principal component analysis on " + numSamples + " data-sets.");
 		
 		// Make data matrix be zero-centered.
@@ -206,20 +226,20 @@ public class LightPCA {
 		DecompositionSVD svd = new DecompositionSVD(data);
 		
 		// The eigenvalues sigma_i of the covariance matrix are given as the square of
-		// the signular values s_i of the data amtrix, scaled with the number of samples.
+		// the singular values s_i of the data matrix, scaled with the number of samples.
 		// sigma_i = s_i^2 / (#samples-1)
-		double[] eigenValues = new double[svd.getSingularValues().length];
-		for( int i = 0; i < eigenValues.length; i++ ) {
-			eigenValues[i] = Math.pow(svd.getSingularValues()[i],2)/(this.numSamples-1);
+		double[] eigenVals = new double[svd.getSingularValues().length];
+		for( int i = 0; i < eigenVals.length; i++ ) {
+			eigenVals[i] = Math.pow(svd.getSingularValues()[i],2)/(this.numSamples-1);
 		}
 		
-		plot(eigenValues);
+		plot(eigenVals);
 		
 		// Set the number of components.
 		this.numComponents = numComponents;
 		
 		// Set the first numComponents eigenValues, eigenVectors and standardDeviations.
-		reduceDimensionality(eigenValues, normalizeColumns(svd.getU()));
+		reduceDimensionality(eigenVals, normalizeColumns(svd.getU()));
 		
 		// Compute the pc scores for the data matrix
 		double[][] weights = new double[data.getCols()][this.numComponents];
@@ -315,7 +335,7 @@ public class LightPCA {
 	 * @param num
 	 * @return
 	 */
-	public double[] projectTrainingShape(SimpleVector shape, int num){
+	private double[] projectTrainingShape(SimpleVector shape, int num){
 		assert(this.eigenValues != null) : new Exception("Run analysis first.");
 		
 		double[] weights = new double[numComponents];
