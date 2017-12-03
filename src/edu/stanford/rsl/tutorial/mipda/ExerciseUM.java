@@ -74,7 +74,7 @@ public class ExerciseUM {
 		 */
 		double cutoff = 0.01d;
 		
-		exObject.correctedCut = null;// TODO: apply a hard frequency cut-off (high pass filter), look for the appropriate class method in this file
+		exObject.correctedCut = exObject.frequencyCutoff(exObject.correctedCut,cutoff); // TODO: Go to this method and complete it!
 		if (exObject.correctedCut != null)
 		exObject.correctedCut.show("Corrected image with frequency cutoff");
 		
@@ -163,6 +163,14 @@ public class ExerciseUM {
 		return corrected;
 	}
 
+	public Grid2D frequencyCutoff(Grid2D grid,double cutoff) {
+		
+		Grid2D returnGrid = null; // TODO: apply a hard frequency cut-off (high pass filter), ...
+		// ... look for the appropriate class method in this file
+		
+		return returnGrid;
+	}
+	
 	public Grid2D lowPass(Grid2D grid, double cutoff){
 		return passFilter(grid,true,cutoff);
 	}

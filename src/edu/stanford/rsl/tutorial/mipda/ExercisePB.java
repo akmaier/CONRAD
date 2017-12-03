@@ -259,6 +259,7 @@ public class ExercisePB {
 				PointND p2 = new PointND(-sinTheta + (s * cosTheta), cosTheta + (s * sinTheta), .0d);
 				// set up line equation
 				StraightLine line = new StraightLine(p1, p2);
+				line.setDirection(line.getDirection().normalizedL2()); // bugfix
 				// compute intersections between bounding box and intersection line
 				ArrayList<PointND> points = b.intersect(line);
 

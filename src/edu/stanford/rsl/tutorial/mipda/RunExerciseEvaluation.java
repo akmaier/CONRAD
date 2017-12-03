@@ -18,7 +18,7 @@ import ModuleCourseIntroduction.IntroTestClass;
 import ModuleMathematicalTools.SVDTestClass;
 import ModulePreprocessing.GeoUTestClass;
 import ModulePreprocessing.UMTestClass;
-//import ModuleReconstruction.PBTestClass;
+import ModuleReconstruction.PBTestClass;
 
 /**
  * Testing tool for programming exercises
@@ -51,11 +51,9 @@ public class RunExerciseEvaluation {
 		}
 		else if (choice.equals("UM")) {
 			junitCore.run(UMTestClass.class);
-			System.out.println("Some bugfixing required (due next update of test-jar).");
 		}
 		else if (choice.equals("PB")) {
-			//junitCore.run(PBTestClass.class);
-			System.out.println("Soon available (due next update of test-jar).");
+			junitCore.run(PBTestClass.class);
 		}
 		else {
 			System.out.println("Aborted, no test selected.");
