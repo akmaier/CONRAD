@@ -18,7 +18,10 @@ import edu.stanford.rsl.conrad.optimization.LSqMinNorm;
 /**
  * This class contains members and methods to generate and store an active shape model.
  * Cootes, Timothy F., et al. "Active shape models-their training and application." Computer vision and image understanding 61.1 (1995): 38-59.
- * @author Mathias Unberath
+ * 
+ * @author Mathias Unberath, Tobias Geimer
+ * 
+ * @version 2017-12-12 Now correctly uses standard deviation to scale the weights instead of variance in accordance to the {@link PCA} fix.
  *
  */
 public class ActiveShapeModel {
@@ -66,6 +69,9 @@ public class ActiveShapeModel {
 	
 	/**
 	 * Variation coefficients corresponding to the principal components. Equal to the Eigenvalues obtained by Principal Component Analysis.
+	 * They are used to determine the number of components needed to model a certain variance.
+	 * Note that model weights are formulated in respect to standard deviation (i.e. square root of the eigenvalues) of the principal components. 
+	 * E.g. most Active Shape Models limit their allowed values to [-3;3] times the standard deviation.
 	 */
 	private double[] variation;
 	
@@ -227,7 +233,8 @@ public class ActiveShapeModel {
 		
 		SimpleVector v = consensus.clone();
 		for(int i = 0; i < numComponents; i++){
-			v.add(this.principalComponents.getCol(i).multipliedBy(weights[i] * this.variation[i]));
+			// Model weights are formulated with respect to standard deviation, thus multiply with square root of the variance.
+			v.add(this.principalComponents.getCol(i).multipliedBy(weights[i] * Math.sqrt(this.variation[i])));
 		}		
 		m.setPoints(toPointlikeMatrix(v));
 		this.model = m;
@@ -254,7 +261,7 @@ public class ActiveShapeModel {
 		
 		SimpleVector v = consensus.clone();
 		for(int i = 0; i < numComponents; i++){
-			v.add(this.principalComponents.getCol(i).multipliedBy(weights[i] * this.variation[i]));
+			v.add(this.principalComponents.getCol(i).multipliedBy(weights[i] * Math.sqrt(this.variation[i])));
 		}
 		
 		// new Shape aligned to consensus at Origin
@@ -336,7 +343,7 @@ public class ActiveShapeModel {
 		// the solver is very general so we have to divide by the variance of the principal component first in order to use it for model generation
 		double[] weights = solver.getSolution();
 		for(int i = 0; i < numComponents; i++){
-			weights[i] /= variation[i];
+			weights[i] /= Math.sqrt(this.variation[i]);
 		}
 		
 		this.error = solver.getRmsError();
@@ -365,7 +372,7 @@ public class ActiveShapeModel {
 			SimpleVector comp = principalComponents.getCol(i);
 			double val = SimpleOperators.multiplyInnerProd(shape, comp);
 			shape.subtract(comp.multipliedBy(val));
-			weights[i] = val/variation[i];
+			weights[i] = val/Math.sqrt(this.variation[i]);
 		}
 		
 		double val = 0;
@@ -403,7 +410,7 @@ public class ActiveShapeModel {
 			SimpleVector comp = principalComponents.getCol(i);
 			double val = SimpleOperators.multiplyInnerProd(shape, comp);
 			shape.subtract(comp.multipliedBy(val));
-			weights[i] = val/variation[i];
+			weights[i] = val/Math.sqrt(this.variation[i]);
 		}
 		
 		double val = 0;
@@ -452,7 +459,7 @@ public class ActiveShapeModel {
 		// the solver is very general so we have to divide by the variance of the principal component first in order to use it for model generation
 		double[] weights = solver.getSolution();
 		for(int i = 0; i < numComponents; i++){
-			weights[i] /= variation[i];
+			weights[i] /= Math.sqrt(this.variation[i]);
 		}		
 		this.error = solver.getRmsError();
 		
@@ -490,7 +497,7 @@ public class ActiveShapeModel {
 		// the solver is very general so we have to divide by the variance of the principal component first in order to use it for model generation
 		double[] weights = solver.getSolution();
 		for(int i = 0; i < numComponents; i++){
-			weights[i] /= variation[i];
+			weights[i] /= Math.sqrt(this.variation[i]);
 		}
 		
 		this.error = solver.getRmsError();
@@ -522,7 +529,7 @@ public class ActiveShapeModel {
 	}
 	
 	/**
-	 * Aligns a shape matrix to the consensus object of the active shape model for fitting puposes.
+	 * Aligns a shape matrix to the consensus object of the active shape model for fitting purposes.
 	 * @param m2
 	 * @return aligned shape
 	 */
@@ -577,6 +584,14 @@ public class ActiveShapeModel {
 	
 	public double[] getEigenvalues(){
 		return this.variation;
+	}
+	
+	public double[] getStandardDeviation() {
+		double[] sd = new double[this.variation.length];
+		for( int i = 0; i < this.variation.length; i++ ) {
+			sd[i] = Math.sqrt(this.variation[i]);
+		}
+		return sd;
 	}
 }
 /*

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Mathias Unberath
+ * Copyright (C) 2017 Mathias Unberath, Tobias Geimer
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
 */
 package edu.stanford.rsl.conrad.geometry.shapes.activeshapemodels;
@@ -25,14 +25,16 @@ import edu.stanford.rsl.conrad.utils.VisualizationUtil;
  * other than the one provided here is used, modifications to PCA (e.g. re-scaling and consensus subtraction) might not be necessary.
  * Jolliffe, Ian. Principal component analysis. John Wiley & Sons, Ltd, 2005.
  * 
- * FIXME
- * Here, principal components are  set to the singular values s_i of the data matrix.
- * However, the eigenvalues of the covariance matrix sigma_i (= principal component of the data matrix)
- * are given as: sigma_i = s_i^2/(numSamples-1);
+ * @version 2017-12-12;
+ * Principal components (as the eigenvalues of the eigenvalues of the covariance matrix) are now correctly set set
+ * as the square of singular values s_i of the data matrix divided by the number of samples.
+ * sigma_i = s_i^2/(numSamples-1);
+ * Previously, they were incorrectly set to the singular values directly.
  * Consequently, the required number of components to reach a certain variation threshold may vary.
- * We keep this behavior to maintain backwards compatibility to ActiveShapeModel and CONRADCardiacModel *.ccm files.  
+ * To ensure backwards compatibility to {@link CONRADCardiacModel} *.ccm/*.ccs files, please have a look at {@link PcaHotfixScript}
+ * to update pca and score files that have been saved prior to this update.  
  * 
- * @author Mathias Unberath
+ * @author Mathias Unberath, Tobias Geimer
  *
  */
 public class PCA {
@@ -78,7 +80,7 @@ public class PCA {
 	 * Matrix containing the Eigenvectors of the covariance matrix after singular value decomposition.
 	 */
 	public SimpleMatrix eigenVectors;	
-			
+	
 	/**
 	 * Array containing the eigenvalues of the covariance matrix after singular value decomposition.
 	 * This represents the variance of the dataset.
@@ -209,13 +211,21 @@ public class PCA {
 		
 		DecompositionSVD svd = new DecompositionSVD(data);
 		
+		// The eigenvalues sigma_i of the covariance matrix are given as the square of
+		// the singular values s_i of the data matrix, scaled with the number of samples.
+		// sigma_i = s_i^2 / (numSamples-1)
+		double[] eigenVals = new double[svd.getSingularValues().length];
+		for( int i = 0; i < eigenVals.length; i++ ) {
+			eigenVals[i] = Math.pow(svd.getSingularValues()[i],2)/(this.numSamples-1);
+		}
+		
 		plot(svd.getSingularValues());
 		
 		// Determine the number of principal components needed to reach variationThreshold.
-		this.numComponents = getPrincipalModesOfVariation(svd.getSingularValues());
+		this.numComponents = getPrincipalModesOfVariation(eigenVals);
 		
-		// Set the first numComponents eigenValues and eigenVectors.
-		reduceDimensionality(svd.getSingularValues(), normalizeColumns(svd.getU()));
+		// Set the first numComponents eigenValues, eigenVectors and standardDeviations.
+		reduceDimensionality(eigenVals, normalizeColumns(svd.getU()));
 	}
 	
 	/**
@@ -230,29 +240,37 @@ public class PCA {
 		if(DEBUG) System.out.println("Starting principal component analysis on " + numSamples + " data-sets.");
 		
 		DecompositionSVD svd = new DecompositionSVD(data);
+	
+		// The eigenvalues sigma_i of the covariance matrix are given as the square of
+		// the singular values s_i of the data matrix, scaled with the number of samples.
+		// sigma_i = s_i^2 / (numSamples-1)
+		double[] eigenVals = new double[svd.getSingularValues().length];
+		for( int i = 0; i < eigenVals.length; i++ ) {
+			eigenVals[i] = Math.pow(svd.getSingularValues()[i],2)/(this.numSamples-1);
+		}
 		
 		plot(svd.getSingularValues());
 		
 		// Set the number of components.
 		this.numComponents = dimensionality;
 		
-		// Set the first numComponents eigenValues and eigenVectors.
-		reduceDimensionality(svd.getSingularValues(), normalizeColumns(svd.getU()));
+		// Set the first numComponents eigenValues, eigenVectors and standardDeviations.
+		reduceDimensionality(eigenVals, normalizeColumns(svd.getU()));
 	}
 	
 	/**
 	 * Allocates and sets the principal components and the corresponding variation values. Is used for dimensionality reduction after 
 	 * the amount of principal components needed has been determined.
-	 * @param v The variation values.
+ 	 * @param ev The eigenvalues of the covariance matrix.
 	 * @param pc The principal components (i.e. eigenvectors)
 	 */
-	private void reduceDimensionality(double[] v, SimpleMatrix pc){
+	private void reduceDimensionality(double[] ev, SimpleMatrix pc){
 		this.eigenValues = new double[numComponents];
 		this.eigenVectors = new SimpleMatrix(numPoints, numComponents);
-		
+	
 		for(int i = 0; i < numComponents; i++){
 			this.eigenVectors.setColValue(i, pc.getCol(i));
-			this.eigenValues[i] = v[i];
+			this.eigenValues[i] = ev[i];
 		}
 	}
 	
@@ -273,7 +291,7 @@ public class PCA {
 			double val = SimpleOperators.multiplyInnerProd(shape, comp);
 			shape.subtract(comp.multipliedBy(val));
 			// Weights are normed with the standard deviation along that component.
-			weights[i] = val/eigenValues[i];
+			weights[i] = val/Math.sqrt(this.eigenValues[i]);
 		}		
 		double error = shape.normL2()/shape.getLen();
 		if(DEBUG) System.out.println("Mapping error for " + num + ": " + error);
@@ -314,7 +332,7 @@ public class PCA {
 	
 	/**
 	 * Applies weighting to the columns in the score matrix and hence calculates weighted variation of the data corresponding 
-	 * to a variation of the principal components. Weights are multiplied with the corresponding Eigenvalue.
+	 * to a variation of the principal components. Weights are multiplied with the corresponding standard deviation.
 	 * For the output points of dimensionality corresponding to the class member are assumed.
 	 * Note that this the weights are formulated in terms of Variance not Standard-Deviation! Care has to be taken not to produce invalid shapes! 
 	 * @param weights The weights for the different principal components.
@@ -325,7 +343,7 @@ public class PCA {
 		SimpleVector col = new SimpleVector(numPoints);
 		
 		for(int i = 0; i < weights.length; i++){
-			col.add(this.eigenVectors.getCol(i).multipliedBy(weights[i] * eigenValues[i]));
+			col.add(this.eigenVectors.getCol(i).multipliedBy(weights[i] * Math.sqrt(this.eigenValues[i])));
 		}
 		
 		for(int i = 0; i < numVertices; i++){
@@ -340,7 +358,7 @@ public class PCA {
 	
 	/**
 	 * Applies weighting to the columns in the score matrix and hence calculates weighted variation of the data corresponding 
-	 * to a variation of the principal components. Weights are multiplied with the corresponding Eigenvalue.
+	 * to a variation of the principal components. Weights are multiplied with the corresponding standard deviation.
 	 * For the output points of dimensionality corresponding to the class member are assumed.
 	 * Note that this the weights are formulated in terms of Variance not Standard-Deviation! Care has to be taken not to produce invalid shapes! 
 	 * @param weights The weights for the different principal components.
@@ -351,7 +369,7 @@ public class PCA {
 		SimpleVector col = new SimpleVector(numPoints);
 		
 		for(int i = 0; i < weights.length; i++){
-			col.add(this.eigenVectors.getCol(i).multipliedBy(weights[i] * eigenValues[i]));
+			col.add(this.eigenVectors.getCol(i).multipliedBy(weights[i] * Math.sqrt(this.eigenValues[i])));
 		}
 		
 		for(int i = 0; i < numVertices; i++){
@@ -476,6 +494,6 @@ public class PCA {
 	
 }
 /*
- * Copyright (C) 2010-2014 Mathias Unberath
+ * Copyright (C) 2010-2017 Mathias Unberath, Tobias Geimer
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
 */
