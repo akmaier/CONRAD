@@ -235,20 +235,22 @@ public class PcaHotfixScript {
 		// ONLY RUN THIS ONCE FOR EACH FILE!
 		// =================================
 		
-		String dir = "C:\\Reconstruction\\CONRADRSL\\data\\CardiacModel\\CardiacModel";
-		String[] nums = new String[] {"0","1","2","3","4","5","6","7","8","9"};
-		
-		for( String num : nums ) {
-			String ccm = "phase_"+num+".ccm";
-			String ccs = "phase_"+num+".ccs";
-			PcaHotfixScript.update(dir,ccm,ccs);
-		}
-		
-		String dir2 = "C:\\Reconstruction\\CONRADRSL\\data\\CardiacModel";
-		String ccm2 = "CCmModel.ccm";
-		String ccs2 = "CCmExampleScores.ccs";
-		PcaHotfixScript.update(dir2,ccm2,ccs2);
-		
+		// Uncomment and adjust paths.
+		/*
+			String dir = "C:\\Reconstruction\\CONRAD\\data\\CardiacModel\\CardiacModel";
+			String[] nums = new String[] {"0","1","2","3","4","5","6","7","8","9"};
+			
+			for( String num : nums ) {
+				String ccm = "phase_"+num+".ccm";
+				String ccs = "phase_"+num+".ccs";
+				PcaHotfixScript.update(dir,ccm,ccs);
+			}
+			
+			String dir2 = "C:\\Reconstruction\\CONRAD\\data\\CardiacModel";
+			String ccm2 = "CCmModel.ccm";
+			String ccs2 = "CCmExampleScores.ccs";
+			PcaHotfixScript.update(dir2,ccm2,ccs2);
+		*/
 	}
 		
 	
