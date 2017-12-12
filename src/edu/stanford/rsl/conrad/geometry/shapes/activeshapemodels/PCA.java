@@ -26,8 +26,8 @@ import edu.stanford.rsl.conrad.utils.VisualizationUtil;
  * Jolliffe, Ian. Principal component analysis. John Wiley & Sons, Ltd, 2005.
  * 
  * @version 2017-12-12;
- * Principal components (as the eigenvalues of the eigenvalues of the covariance matrix) are now correctly set set
- * as the square of singular values s_i of the data matrix divided by the number of samples.
+ * Principal components (as the eigenvalues of the eigenvalues of the covariance matrix) are now correctly set
+ * as the square of singular values s_i of the data matrix divided by the number of samples minus 1.
  * sigma_i = s_i^2/(numSamples-1);
  * Previously, they were incorrectly set to the singular values directly.
  * Consequently, the required number of components to reach a certain variation threshold may vary.
