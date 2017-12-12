@@ -1,4 +1,4 @@
-package edu.stanford.rsl.conrad.phantom.asmheart;
+package edu.stanford.rsl.apps.activeshapemodel;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
