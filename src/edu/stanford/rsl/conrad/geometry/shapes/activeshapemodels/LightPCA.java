@@ -24,10 +24,11 @@ import ij.gui.Plot;
  * Additionally, this implementation provides methods adapted from {@link ActiveShapeModel} for out-of-sample
  * extension of unseen observations.
  * 
- * Note that {@link LightPCA} formulates pc weights with respect to the standard deviation (i.e. square root of the variance),
- * whereas {@link PCA} uses the variance. Consequently, resulting weights will differ.
- *
  * Also see Jolliffe, Ian. Principal component analysis. John Wiley & Sons, Ltd, 2005.
+ * 
+ * @version 2017-12-12;
+ * Note that now both {@link LightPCA} and {@link PCA} formulate pc weights with respect to the standard deviation
+ * (i.e. square root of the variance).
  * 
  * @author Tobias Geimer
  */
@@ -42,28 +43,28 @@ public class LightPCA {
 	 * Data-sets typically consist of point-clouds or meshes. This variable stores 
 	 * the dimension of the vertices, as the data is stored in a single column.
 	 */
-	private int dimension = 0;
+	public int dimension = 0;
 	
 	/**
 	 * Data-sets typically consist of point-clouds or meshes. This variable stores 
 	 * the number of vertices, as the data is stored in a single column.
 	 */
-	private int numVertices;
+	public int numVertices;
 	
 	/**
 	 * Number of points in a data-set. Can be calculated using the number of 
 	 * vertices and their dimension using multiplication. Corresponds to the number of rows.
 	 */
-	private int numPoints;
+	public int numPoints;
 	
 	/**
 	 * Number of samples in the data matrix, corresponds to the number of columns.
 	 */
-	private int numSamples;
+	public int numSamples;
 	/**
 	 * Consensus of the data matrix.
 	 */
-	private SimpleMatrix consensus;
+	public SimpleMatrix consensus;
 	
 	
 	// ---------------

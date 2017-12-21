@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2017 Tobias Geimer
+ * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
+*/
 package edu.stanford.rsl.apps.activeshapemodel;
 
 import java.io.BufferedReader;
@@ -255,3 +259,8 @@ public class PcaHotfixScript {
 		
 	
 }
+
+/*
+ * Copyright (C) 2010-2017 Tobias Geimer
+ * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
+*/
