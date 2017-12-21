@@ -21,7 +21,7 @@ import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
  * conrad.geometry.shapes.activeshapemodel package.
  * Older versions of {@link PCA} wrongly used eigenvalues as the singular values of the data matrix instead of their squares divided by numSamples-1.
  * Additionally, {@link ActiveShapeModel} now scales with the square root of the new eigenvalues (standard variation) instead of the eigenvalues
- * themselves (would be variance). As a result, potential pc scores that have been produced with older versions need to be updated in order to be
+ * themselves (would be variance). As a result, potential pc scores that have been produced with older versions prior to 2017-12-21 need to be updated in order to be
  * compatible with current implementation.
  * This way we ensure backwards compatibility with older {@link CONRADCardiacModel} model and score files, as well as other {@link PcaIO}-written objects.
  * 

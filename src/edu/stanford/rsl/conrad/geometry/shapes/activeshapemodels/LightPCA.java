@@ -26,7 +26,7 @@ import ij.gui.Plot;
  * 
  * Also see Jolliffe, Ian. Principal component analysis. John Wiley & Sons, Ltd, 2005.
  * 
- * @version 2017-12-12;
+ * @version 2017-12-21;
  * Note that now both {@link LightPCA} and {@link PCA} formulate pc weights with respect to the standard deviation
  * (i.e. square root of the variance).
  * 

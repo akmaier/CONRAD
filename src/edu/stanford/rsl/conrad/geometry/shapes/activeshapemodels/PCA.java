@@ -25,7 +25,7 @@ import edu.stanford.rsl.conrad.utils.VisualizationUtil;
  * other than the one provided here is used, modifications to PCA (e.g. re-scaling and consensus subtraction) might not be necessary.
  * Jolliffe, Ian. Principal component analysis. John Wiley & Sons, Ltd, 2005.
  * 
- * @version 2017-12-12;
+ * @version 2017-12-21;
  * Principal components (as the eigenvalues of the eigenvalues of the covariance matrix) are now correctly set
  * as the square of singular values s_i of the data matrix divided by the number of samples minus 1.
  * sigma_i = s_i^2/(numSamples-1);

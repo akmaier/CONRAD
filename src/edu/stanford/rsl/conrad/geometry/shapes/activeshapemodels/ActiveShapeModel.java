@@ -21,7 +21,7 @@ import edu.stanford.rsl.conrad.optimization.LSqMinNorm;
  * 
  * @author Mathias Unberath, Tobias Geimer
  * 
- * @version 2017-12-12 Now correctly uses standard deviation to scale the weights instead of variance in accordance to the {@link PCA} fix.
+ * @version 2017-12-21 Now correctly uses standard deviation to scale the weights instead of variance in accordance to the {@link PCA} fix.
  *
  */
 public class ActiveShapeModel {
