@@ -125,7 +125,7 @@ public class CreateARFF {
 		// run GPA and PCA
 		ArrayList< double[] > scores = performPCA(folders);
 		
-		String pFn = HEART_MODEL_BASE + "CCmExamples.ccm";
+		String pFn = HEART_MODEL_BASE + "CCmExampleScores.ccs";
 		writeScores(pFn, folders, scores);
 		writeARFF(folders,scores);		
 	}

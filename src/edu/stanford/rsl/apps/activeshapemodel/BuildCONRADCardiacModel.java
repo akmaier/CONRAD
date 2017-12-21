@@ -196,6 +196,7 @@ public class BuildCONRADCardiacModel {
 		
 		System.out.println("\n\n");
 		System.out.println("Parameter PCA starting.");
+		// perform PCA on the concatenated scores of the phases for each patient
 		int totPC = 0;
 		for(int i = 0; i < numPhases; i++){
 			totPC += principalComponents[i];
@@ -215,12 +216,12 @@ public class BuildCONRADCardiacModel {
 		for(int i = 0; i < folders.size(); i++){
 			proj.add(scorePCA.projectTrainingShape(i));
 		}
-		String pFn = HEART_MODEL_BASE + "CCmExamples.ccm";
+		String pFn = HEART_MODEL_BASE + "CCmExampleScores.ccs";
 		writeScores(pFn, folders, proj);
 		
-		String scoreFile = HEART_MODEL_BASE + "CCmScores.ccm";
-		PcaIO scoreWriter = new PcaIO(scoreFile, scorePCA);
-		scoreWriter.writeFile();
+		String modelFile = HEART_MODEL_BASE + "CCmModel.ccm";
+		PcaIO modelWriter = new PcaIO(modelFile, scorePCA);
+		modelWriter.writeFile();
 		System.out.println("Done.");
 	}	
 	

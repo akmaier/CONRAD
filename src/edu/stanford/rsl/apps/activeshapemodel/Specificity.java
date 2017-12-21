@@ -78,17 +78,19 @@ public class Specificity {
 		ActiveShapeModel asm = new ActiveShapeModel(pcaFile);
 		for(int testCase = 0; testCase < nTest; testCase++){
 			double[] scores = new double[asm.numComponents];
+			// Generate test weights in the range of [-1.5 ; 1.5] (later multiplied with the standard deviation).
+			// This range resembles the distribution observed with the training samples.
 			Random rand = new Random();
 			for(int i = 0; i < asm.numComponents; i++){
-				scores[i] = (rand.nextDouble() - 0.5);
+				scores[i] = (rand.nextDouble() - 0.5)*3;
 			}
 			SimpleMatrix allComp = asm.getModel(scores).getPoints();
 			specificityShapes.add(allComp);
 		}
 
 		int numPoints = specificityShapes.get(0).getRows()/3;
-		ArrayList<double[]> trainingS = getScores(HEART_MODEL_BASE+"CCmExamples.ccm");
-		ActiveShapeModel parameters = new ActiveShapeModel(HEART_MODEL_BASE + "\\CCmScores.ccm");
+		ArrayList<double[]> trainingS = getScores(HEART_MODEL_BASE+"CCmExampleScores.ccs");
+		ActiveShapeModel parameters = new ActiveShapeModel(HEART_MODEL_BASE + "\\CCmModel.ccm");
 		int start = 0;
 		for(int i = 0; i < phase; i++){
 			start += (i==0) ? 0:info.principalComp[i-1];
