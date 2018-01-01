@@ -89,6 +89,7 @@ public class ExerciseSVD {
 				
 			templowrank = SimpleOperators.multiplyMatrixProd(svd.getU(), Slowrank);
 			Alowrank = null; //TODO
+			if (Alowrank!=null)
 			System.out.println("A rank deficient = " + Alowrank.toString());
 			
 		}	
