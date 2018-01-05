@@ -242,8 +242,8 @@ public abstract class SimpleOperators {
 	}
 	
 	/**
-	 * Computes the product of matrices, e.g. matMul(m1,m2,m3,m4,m5) -> computes m1*m2*m3*m4*m5 and
-	 * returns the result
+	 * Computes the product of matrices, e.g. multiplyMatrices(m1,m2,m3,m4,m5) -> computes m1*m2*m3*m4*m5 and
+	 * returns the result, if only one matrix is given, this method returns null
 	 * @param matrices: several matrices 
 	 * @return the matrix product of all given matrices
 	 */
