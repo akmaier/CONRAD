@@ -26,7 +26,7 @@ public class TrajectoryViewer extends PointCloudViewer {
 	 */
 	private static final long serialVersionUID = -5224405819368058599L;
 	static int steps = 10;
-	static boolean plotDetector = false;
+	static boolean plotDetector = true;
 
 	public TrajectoryViewer() {
 		super("Current Trajectory", generatePoints());

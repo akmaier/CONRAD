@@ -32,6 +32,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.text.DefaultEditorKit;
 
 import edu.stanford.rsl.conrad.data.numeric.Grid3D;
@@ -64,7 +65,7 @@ import edu.stanford.rsl.conrad.utils.RegKeys;
  * THIS MACHINE, SO JIGLOO OR THIS CODE CANNOT BE USED
  * LEGALLY FOR ANY CORPORATE OR COMMERCIAL PURPOSE.
  */
-public class ReconstructionPipelineFrame extends JFrame implements ActionListener, UpdateableGUI {
+public class ReconstructionPipelineFrame extends JFrame implements ActionListener, UpdateableGUI, Runnable {
 
 	/**
 	 * 
@@ -92,8 +93,9 @@ public class ReconstructionPipelineFrame extends JFrame implements ActionListene
 
 	public ReconstructionPipelineFrame() {
 		sink = Configuration.getGlobalConfiguration().getSink();
-		initGUI();
-		updateGUI();
+
+		
+		SwingUtilities.invokeLater(this);
 
 		// Load the sound file and setup playback
 		if (Configuration.getGlobalConfiguration().getRegistry().get(RegKeys.SOUND_FILE) != null) {
@@ -544,6 +546,12 @@ public class ReconstructionPipelineFrame extends JFrame implements ActionListene
 	 */
 	public static void main(String [] args){
 		startConrad(null);
+	}
+
+	@Override
+	public void run() {
+		initGUI();
+		updateGUI();
 	}
 
 }

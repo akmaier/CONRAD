@@ -14,6 +14,7 @@ import edu.stanford.rsl.conrad.numerics.SimpleOperators;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
 import edu.stanford.rsl.conrad.utils.CONRAD;
 import edu.stanford.rsl.conrad.utils.Configuration;
+import edu.stanford.rsl.conrad.utils.RegKeys;
 
 public class CircularTrajectory extends Trajectory {
 
@@ -73,6 +74,7 @@ public class CircularTrajectory extends Trajectory {
 		rotMat.setElementValue(1,0,-sinPhi);
 		rotMat.setElementValue(1, 1, cosPhi);
 		rotMat.setElementValue(2, 2, 1);
+
 		SimpleVector centerToCameraIdealAtInitialAngle = SimpleOperators.multiply(rotMat, new SimpleVector(sourceToAxisDistance, 0, 0));
 		Plane3D trajPlane = new Plane3D(rotationAxis,SimpleOperators.multiplyInnerProd(rotationAxis, rotationCenter.getAbstractVector()));
 		double distToPlane = trajPlane.computeDistance(new PointND(centerToCameraIdealAtInitialAngle));
