@@ -19,6 +19,7 @@ import ModuleMathematicalTools.SVDTestClass;
 import ModulePreprocessing.GeoUTestClass;
 import ModulePreprocessing.UMTestClass;
 import ModuleReconstruction.PBTestClass;
+import ModuleReconstruction.FBTestClass;
 
 /**
  * Testing tool for programming exercises
