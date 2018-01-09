@@ -395,7 +395,7 @@ public class ExerciseFB {
 		return filename;
 	}
 	//
-	public double get_focalLength() {
+	public float get_focalLength() {
 		return focalLength;
 	}
 	//
@@ -403,11 +403,11 @@ public class ExerciseFB {
 		return detectorPixels;
 	}
 	//
-	public double get_detectorSpacing() {
+	public float get_detectorSpacing() {
 		return detectorSpacing;
 	}
 	//	
-	public double get_detectorLength() {
+	public float get_detectorLength() {
 		return detectorLength;
 	}
 	//
@@ -415,15 +415,15 @@ public class ExerciseFB {
 		return numProjs;
 	}
 	//
-	public double get_betaIncrement() {
+	public float get_betaIncrement() {
 		return betaIncrement;
 	}
 	//
-	public double get_maxBeta() {
+	public float get_maxBeta() {
 		return maxBeta;
 	}
 	//
-	public double get_halfFanAngle() {
+	public float get_halfFanAngle() {
 		return halfFanAngle;
 	}
 	//

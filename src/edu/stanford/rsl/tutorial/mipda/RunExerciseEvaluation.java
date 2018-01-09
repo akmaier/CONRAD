@@ -29,7 +29,7 @@ import ModuleReconstruction.PBTestClass;
 
 public class RunExerciseEvaluation {
 
-	private static final String[] exerciseNames = {"Intro","SVD","GeoU","UM","PB"}; 
+	private static final String[] exerciseNames = {"Intro","SVD","GeoU","UM","PB","FB"}; 
 	
 	public static void main(String[] args) {
 		
@@ -54,6 +54,9 @@ public class RunExerciseEvaluation {
 		}
 		else if (choice.equals("PB")) {
 			junitCore.run(PBTestClass.class);
+		}
+		else if (choice.equals("FB")) {
+			junitCore.run(FBTestClass.class);
 		}
 		else {
 			System.out.println("Aborted, no test selected.");
