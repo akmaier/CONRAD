@@ -13,6 +13,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
+import edu.stanford.rsl.conrad.geometry.shapes.activeshapemodels.PCA;
 import edu.stanford.rsl.conrad.io.PcaIO;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
 
@@ -36,17 +37,38 @@ public class PcaHotfixScript {
 	// ========================================================================================================================
 	// STATIC CALL
 	/**
-	 * Updates the CONRADCardiacModel files for model (.ccm) and scores (.ccs) located in directory.
-	 * Run this only for files, that have been created with the old version of {@link PCA} and {@link ActiveShapeModel} from the
-	 * conrad.geometry.shapes.activeshapemodel package before the Update on December 12th, 2017.
+	 * Updates the static heart phases of a CONRADCardiacModel files for model (.ccm) and scores (.ccs) located in directory.
+	 * Run this only for {@link PcaIO}-written files, that have been created with the old version of {@link PCA}
+	 * and {@link ActiveShapeModel} from the conrad.geometry.shapes.activeshapemodel package before the Update on
+	 * December 21th, 2017.
+	 * 
 	 * @param directory the directory containing the files
 	 * @param ccmFileName the model file
 	 * @param ccsFileName the score file
 	 */
-	public static void update(String directory, String ccmFileName, String ccsFileName)	{
+	public static void updatePhase(String directory, String ccmFileName, String ccsFileName)	{
 		PcaHotfixScript updater = new PcaHotfixScript(directory, ccmFileName, ccsFileName);
-		updater.run();
+		updater.runForPhase();
 	}
+	
+	/**
+	 * Recalculates the dynamic files for model (.ccm) and scores (.ccs)  of the CONRADCardiacModel located in directory.
+	 * It is assume that the phase specific score files (.ccs) are provided in phaseScoreFiles (path starting from the given directory).
+	 * This step replicates chapter 2.3 in Unberath et al., "Open-source 4D statistical shape model of the heart for x-ray projection imaging", Proc. ISBI 2015.
+	 * 
+	 * Run this only for {@link ConradCardiacModel} files of the second PCA step, that have been created with the old version of {@link PCA}
+	 * and {@link ActiveShapeModel} from the conrad.geometry.shapes.activeshapemodel package before the Update on December 21th, 2017.
+	 * Run this after updating the corresponding phase files first.
+	 * 
+	 * @param directory the directory containing the files
+	 * @param ccmFileName the model file
+	 * @param ccsFileName the score file
+	 */
+	public static void updateDynamicModel(String directory, String ccmFileName, String ccsFileName, ArrayList<String> phaseScoreFiles)	{
+		PcaHotfixScript updater = new PcaHotfixScript(directory, ccmFileName, ccsFileName);
+		updater.runForDynamic(phaseScoreFiles);
+	}
+	
 	// ========================================================================================================================
 	
 	
@@ -82,7 +104,10 @@ public class PcaHotfixScript {
 	// --------------------
 	// METHODS
 	// --------------------
-	public void run() {
+	/**
+	 *  Updates the phase specific *.ccm & *.ccs files of the first step PCA.
+	 */
+	public void runForPhase() {
 		// Compose file paths.
 		String ccmPath = directory + "\\" + ccm;
 		if( ccmPath.substring(ccmPath.length()-4).compareTo(".ccm") != 0 )
@@ -107,11 +132,72 @@ public class PcaHotfixScript {
 		// Write the new files.
 		this.writeScores(ccsPath, this.names, this.nuScores);
 		
-		PcaIO ccmFileNew = new PcaIO(ccmFile.getPointDimension(), this.nuEV, ccmFile.getEigenVectors(), ccmFile.getConsensus());
+		PcaIO ccmFileNew = new PcaIO(ccmFile.getPointDimension(), this.nuEV, ccmFile.getEigenVectors(), ccmFile.getConsensus(),ccmFile.getConnectivity());
 		ccmFileNew.setFilename(ccmPath);
 		ccmFileNew.writeFile();
 	}
 	
+	/**
+	 * Recalculates the *.ccm and *.ccs	files of the second step PCA by concatenating the phase scores of each patient
+	 * and recalculating the PCA (including new eigenvectors.
+	 * This is necessary because the second step PCA's eigenvectors depend on the updated scores of step 1 pca.
+	 * For more detail see Unberath et al., "Open-source 4D statistical shape model of the heart for x-ray projection imaging", Proc. ISBI 2015
+	 * 
+	 * @param phaseScoreFiles The *.ccs files containing the phase specific scores of step 1 PCA (i.e. phase_0.ccs - phase_9.ccs of ConradCardiacModel).
+	 */
+	public void runForDynamic(ArrayList<String> phaseScoreFiles) {
+		// Compose file paths
+		String ccmPath = directory + "\\" + ccm;
+		if( ccmPath.substring(ccmPath.length()-4).compareTo(".ccm") != 0 )
+			ccmPath += ".ccm";
+
+		String ccsPath = directory + "\\" + ccs;
+		if( ccsPath.substring(ccsPath.length()-4).compareTo(".ccs") != 0 )
+			ccsPath += ".ccs";
+
+		final int numPhases = phaseScoreFiles.size();
+		int[] numPCs = new int[numPhases];
+		int totalPC = 0;
+		
+		// First find out how many total principal components there are
+		// (for the ConradCardiacModel phantom these should be 16 each)
+		for(int i = 0; i < numPhases; i++){
+			String scoreFile = phaseScoreFiles.get(i);
+			System.out.println(scoreFile);
+			if( scoreFile.substring(scoreFile.length()-4).compareTo(".ccs") != 0 )
+				scoreFile += ".ccs";
+			SimpleMatrix scores = this.parseScores(this.directory + "\\" + scoreFile);
+			numPCs[i] = scores.getRows();
+			totalPC += numPCs[i];
+		}
+		
+		// Perform PCA on the concatenated scores of the phases for each patient
+		SimpleMatrix scores = new SimpleMatrix(totalPC, this.numSamples);
+		int offs = 0;
+		for(int i = 0; i < numPhases; i++){
+			offs += (i == 0) ? 0 : numPCs[i-1];
+			String scoreFile = phaseScoreFiles.get(i);
+			if( scoreFile.substring(scoreFile.length()-4).compareTo(".ccs") != 0 )
+				scoreFile += ".ccs";
+			scores.setSubMatrixValue(offs, 0, parseScores(this.directory + "\\" + scoreFile));			
+		}
+		
+		PCA scorePCA = new PCA(scores, 1);
+		scorePCA.variationThreshold = 0.92;
+		scorePCA.run();
+		System.out.print(scorePCA.numComponents);
+
+		ArrayList< double[] > proj = new ArrayList< double[] >();
+		for(int i = 0; i < this.numSamples; i++){
+			proj.add(scorePCA.projectTrainingShape(i));
+		}
+		System.out.println(this.names.size());
+		this.writeScores(ccsPath, this.names, proj);
+
+		PcaIO modelWriter = new PcaIO(ccmPath, scorePCA);
+		modelWriter.writeFile();
+	}	
+
 	// ---------------
 	// Eigenvalues
 	private double[] updateEigenvalues(double[] old, int numSamples) {
@@ -143,6 +229,8 @@ public class PcaHotfixScript {
 		return scoreMatrix;
 	}
 		
+	
+	
 	// ---------------
 	// IO
 	private PcaIO loadCCM(String filepath) {
@@ -154,6 +242,33 @@ public class PcaHotfixScript {
 			e.printStackTrace();
 		}
 		return pio;
+	}
+	
+	/**
+	 * Writes the scores to file.
+	 * @param filepath to the file to be written
+	 * @param names of the sample
+	 * @param scores to be written
+	 */
+	private void writeScores(String filepath, ArrayList<String> names, ArrayList<double[]> scores){
+		try {
+			PrintWriter writer = new PrintWriter(filepath,"UTF-8");
+			writer.println("NUM_SAMPLES: " + names.size());
+			writer.println("NUM_PRINCIPAL_COMPONENTS: " + scores.get(0).length);
+			
+			for(int i = 0; i < names.size(); i++){
+				String line = names.get(i);
+				for( int j = 0; j < scores.get(0).length; j++){
+					line += " " + Double.valueOf(scores.get(i)[j]);
+				}
+				writer.println(line);
+			}
+			writer.close();			
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	// ---------------------------------------------
@@ -178,6 +293,7 @@ public class PcaHotfixScript {
 			tok.nextToken(); // skip "NUM_PRINCIPAL_COMPONENTS:"
 			int numPC = Integer.parseInt(tok.nextToken());
 			SimpleMatrix m = new SimpleMatrix(numPC, this.numSamples);
+			this.names.clear();
 			for(int i = 0; i < this.numSamples; i++){
 				line = br.readLine();
 				tok = new StringTokenizer(line);
@@ -238,25 +354,24 @@ public class PcaHotfixScript {
 		// =================================
 		// ONLY RUN THIS ONCE FOR EACH FILE!
 		// =================================
-		
-		// Uncomment and adjust paths.
 		/*
-			String dir = "C:\\Reconstruction\\CONRAD\\data\\CardiacModel\\CardiacModel";
-			String[] nums = new String[] {"0","1","2","3","4","5","6","7","8","9"};
-			
-			for( String num : nums ) {
-				String ccm = "phase_"+num+".ccm";
-				String ccs = "phase_"+num+".ccs";
-				PcaHotfixScript.update(dir,ccm,ccs);
-			}
-			
-			String dir2 = "C:\\Reconstruction\\CONRAD\\data\\CardiacModel";
-			String ccm2 = "CCmModel.ccm";
-			String ccs2 = "CCmExampleScores.ccs";
-			PcaHotfixScript.update(dir2,ccm2,ccs2);
-		*/
-	}
-		
+		// Uncomment and adjust paths.
+		String dir = "C:\\Reconstruction\\CONRAD\\data\\CardiacModel\\CardiacModel";
+		String[] nums = new String[] {"0","1","2","3","4","5","6","7","8","9"};
+		ArrayList<String> phaseScoreFiles = new ArrayList<>(); 
+		for( String num : nums ) {
+			String ccm = "phase_"+num+".ccm";
+			String ccs = "phase_"+num+".ccs";
+			PcaHotfixScript.updatePhase(dir,ccm,ccs);
+			phaseScoreFiles.add("CardiacModel\\" + ccs);
+		}
+
+		String dir2 = "C:\\Reconstruction\\CONRAD\\data\\CardiacModel";
+		String ccm2 = "CCmModel.ccm";
+		String ccs2 = "CCmExampleScores.ccs";
+		PcaHotfixScript.updateDynamicModel(dir2, ccm2, ccs2, phaseScoreFiles);
+		 */
+	}	
 	
 }
 
