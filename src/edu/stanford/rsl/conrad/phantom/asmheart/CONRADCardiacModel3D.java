@@ -52,7 +52,7 @@ public class CONRADCardiacModel3D extends AnalyticPhantom{
 		// perform sanity check
 		File scF = new File(heartBase);
 		File[] listOfFiles = scF.listFiles();
-		if(listOfFiles.length < 7){
+		if(listOfFiles.length < 6){
 			throw new Exception("CONRADCardiacModel files are not found at "+heartBase+".\n Please download them from: https://www5.cs.fau.de/conrad/data/heart-model/");
 		}
 		
