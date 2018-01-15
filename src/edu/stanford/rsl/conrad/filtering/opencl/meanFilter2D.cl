@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Jennifer Maier
+ * Copyright (C) 2018 Jennifer Maier
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
  */
  #define POS(x, y) ((x) + ((y) * width))

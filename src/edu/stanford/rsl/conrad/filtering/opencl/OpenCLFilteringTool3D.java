@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2018 Benedikt Lorch, Jennifer Maier
+ * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
+*/
 package edu.stanford.rsl.conrad.filtering.opencl;
 
 import java.io.IOException;
@@ -302,3 +306,8 @@ public abstract class OpenCLFilteringTool3D extends ImageFilteringTool {
 	}
 
 }
+
+/*
+ * Copyright (C) 2018 Benedikt Lorch, Jennifer Maier
+ * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
+*/

@@ -1,8 +1,9 @@
+/*
+ * Copyright (C) 2018 Jennifer Maier
+ * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
+*/
 package edu.stanford.rsl.conrad.filtering.opencl;
 
-import com.jogamp.opencl.CLCommandQueue;
-
-import edu.stanford.rsl.conrad.data.numeric.Grid3D;
 import edu.stanford.rsl.conrad.filtering.ImageFilteringTool;
 import edu.stanford.rsl.conrad.filtering.opencl.OpenCLFilteringTool3D;
 import edu.stanford.rsl.conrad.utils.UserUtil;
@@ -104,7 +105,7 @@ public class MeanFiltering2DinGrid3DTool extends OpenCLFilteringTool3D {
 
 	@Override
 	public String getToolName() {
-		return "OpenCL Mean Filter 2D slices in Grid3D";
+		return "OpenCL Mean Filter 3D (slice-wise)";
 	}
 
 	@Override
@@ -118,3 +119,8 @@ public class MeanFiltering2DinGrid3DTool extends OpenCLFilteringTool3D {
 	}
 
 }
+
+/*
+ * Copyright (C) 2018 Jennifer Maier
+ * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
+*/

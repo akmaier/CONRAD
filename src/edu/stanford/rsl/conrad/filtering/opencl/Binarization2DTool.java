@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2018 Jennifer Maier
+ * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
+*/
 package edu.stanford.rsl.conrad.filtering.opencl;
 
 import edu.stanford.rsl.conrad.filtering.ImageFilteringTool;
@@ -86,3 +90,8 @@ public class Binarization2DTool extends OpenCLFilteringTool2D {
 	}
 	
 }
+
+/*
+ * Copyright (C) 2018 Jennifer Maier
+ * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
+*/

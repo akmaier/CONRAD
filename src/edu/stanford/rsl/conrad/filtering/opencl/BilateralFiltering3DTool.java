@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2018 Benedikt Lorch, Jennifer Maier
+ * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
+*/
 package edu.stanford.rsl.conrad.filtering.opencl;
 
 import ij.IJ;
@@ -15,7 +19,6 @@ import com.jogamp.opencl.CLMemory;
 
 import edu.stanford.rsl.conrad.data.numeric.Grid3D;
 import edu.stanford.rsl.conrad.filtering.ImageFilteringTool;
-import edu.stanford.rsl.conrad.filtering.opencl.OpenCLFilteringTool3D.kernelname;
 import edu.stanford.rsl.conrad.utils.FileUtil;
 import edu.stanford.rsl.conrad.utils.ImageUtil;
 import edu.stanford.rsl.conrad.utils.UserUtil;
@@ -348,7 +351,7 @@ public class BilateralFiltering3DTool extends OpenCLFilteringTool3D {
 
 	@Override
 	public String getToolName() {
-		return "OpenCL Bilateral Filter 3-D";
+		return "OpenCL Bilateral Filter 3D";
 	}
 
 
@@ -371,3 +374,8 @@ public class BilateralFiltering3DTool extends OpenCLFilteringTool3D {
 	}
 
 }
+
+/*
+ * Copyright (C) 2018 Benedikt Lorch, Jennifer Maier
+ * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
+*/
