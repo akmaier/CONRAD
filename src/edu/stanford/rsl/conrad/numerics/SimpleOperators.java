@@ -241,7 +241,32 @@ public abstract class SimpleOperators {
 		return result;
 	}
 	
-
+	/**
+	 * Computes the product of matrices, e.g. multiplyMatrices(m1,m2,m3,m4,m5) -> computes m1*m2*m3*m4*m5 and
+	 * returns the result, if only one matrix is given, this method returns the matrix itself.
+	 * @param matrices: several matrices 
+	 * @return the matrix product of all given matrices
+	 */
+	public static SimpleMatrix multiplyMatrices(SimpleMatrix... matrices) {
+		int count = 0;
+		SimpleMatrix cur_matrix = null;
+		SimpleMatrix matrix_product = null;
+		for(SimpleMatrix matrix: matrices) {
+			if(count == 1) {
+				matrix_product = SimpleOperators.multiplyMatrixProd(cur_matrix, matrix);
+				count++;
+			}else if(count > 1){
+				matrix_product = SimpleOperators.multiplyMatrixProd(matrix_product, matrix);
+				count++;
+			}else if(count == 0){
+				count++;
+				cur_matrix = matrix;
+				matrix_product = cur_matrix;
+			}
+		}
+		return matrix_product;
+	}
+	
 	public static SimpleMatrix multiplyElementWise(final SimpleMatrix... factors) {
 		final SimpleMatrix result = factors[0].clone();
 		for (int i = 1; i < factors.length; ++i)

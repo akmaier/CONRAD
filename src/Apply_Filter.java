@@ -4,16 +4,21 @@
 */
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.JOptionPane;
 
+import edu.stanford.rsl.conrad.data.numeric.Grid2D;
 import edu.stanford.rsl.conrad.data.numeric.Grid3D;
 import edu.stanford.rsl.conrad.filtering.HideOnUIAnnotation;
 import edu.stanford.rsl.conrad.filtering.ImageFilteringTool;
 import edu.stanford.rsl.conrad.filtering.IndividualImageFilteringTool;
 import edu.stanford.rsl.conrad.filtering.multiprojection.MultiProjectionFilter;
-import edu.stanford.rsl.conrad.filtering.opencl.BilateralFiltering3DTool;
+import edu.stanford.rsl.conrad.filtering.opencl.OpenCLFilteringTool2D;
+import edu.stanford.rsl.conrad.filtering.opencl.OpenCLFilteringTool3D;
 import edu.stanford.rsl.conrad.io.ImagePlusDataSink;
 import edu.stanford.rsl.conrad.io.ImagePlusProjectionDataSource;
 import edu.stanford.rsl.conrad.pipeline.ParallelImageFilterPipeliner;
@@ -44,6 +49,14 @@ public class Apply_Filter implements PlugIn {
 		
 		// Hide filtering tools which are annotated with HideOnUI 
 		filters = sortImageFilteringTools(filters);
+		
+		// sort filters alphabetically; Filters which return null as tool name will be put last
+		Collections.sort(Arrays.asList(filters), new Comparator<ImageFilteringTool>() {
+			public int compare(ImageFilteringTool filter1, ImageFilteringTool filter2) {	
+				return filter1.getToolName() == null ? (filter2.getToolName() == null? 0 : 1)
+						: (filter2.getToolName() == null ? -1 : filter1.getToolName().compareTo(filter2.getToolName()));
+			}
+		});
 		
 		ImagePlus projections = IJ.getImage();
 		ImageFilteringTool filter = (ImageFilteringTool) JOptionPane.showInputDialog(null, "Select filter: ", "Filter Selection", JOptionPane.PLAIN_MESSAGE, null, filters, filters[0]);
@@ -79,10 +92,20 @@ public class Apply_Filter implements PlugIn {
 				revan.show();
 			}
 			
-			if (filter instanceof BilateralFiltering3DTool) {
+			if (filter instanceof OpenCLFilteringTool3D) {
 				Grid3D source = ImageUtil.wrapImagePlus(projections, false);
-				Grid3D result = ((BilateralFiltering3DTool) filter).process(source);
+				Grid3D result = ((OpenCLFilteringTool3D) filter).process(source);
 				ImagePlus revan = ImageUtil.wrapGrid3D(result, filter.toString());
+				revan.setTitle(filter.getToolName());
+				ImageUtil.applyConradImageCalibration(revan, filter instanceof ReconstructionFilter);
+				revan.show();
+			}
+			
+			if (filter instanceof OpenCLFilteringTool2D) {
+				Grid3D source3D = ImageUtil.wrapImagePlus(projections, false);
+				Grid2D source = source3D.getSubGrid(0);
+				Grid2D result = ((OpenCLFilteringTool2D) filter).process(source);
+				ImagePlus revan = ImageUtil.wrapGrid(result, filter.toString());
 				revan.setTitle(filter.getToolName());
 				ImageUtil.applyConradImageCalibration(revan, filter instanceof ReconstructionFilter);
 				revan.show();

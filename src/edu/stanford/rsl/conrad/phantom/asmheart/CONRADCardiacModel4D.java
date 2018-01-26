@@ -72,7 +72,7 @@ public class CONRADCardiacModel4D extends AnalyticPhantom4D{
 		// perform sanity check
 		File scF = new File(heartBase);
 		File[] listOfFiles = scF.listFiles();
-		if(listOfFiles.length < 7){
+		if(listOfFiles.length < 6){
 			throw new Exception("CONRADCardiacModel files are not found at "+heartBase+".\n Please download them from: https://www5.cs.fau.de/conrad/data/heart-model/");
 		}
 		
@@ -97,19 +97,14 @@ public class CONRADCardiacModel4D extends AnalyticPhantom4D{
 		CONRADCardiacModelConfig info = new CONRADCardiacModelConfig(heartBase);
 		info.read();
 		// read the PCs of all phases
-		ActiveShapeModel parameters = new ActiveShapeModel(heartBase + "\\CCmScores.ccm");
+		ActiveShapeModel parameters = new ActiveShapeModel(heartBase + "\\CCmModel.ccm");
 		double[] scores;
 		boolean predefined = UserUtil.queryBoolean("Use predefined model?");
 		if(predefined){
 			Object tobj = UserUtil.chooseObject("Choose heart to be simulated:", "Predefined models:", PredefinedModels.getList(), PredefinedModels.getList()[0]);
 			scores = PredefinedModels.getValue(tobj.toString());
 		}else{
-			scores = UserUtil.queryArray("Specify model parameters: ", new double[parameters.numComponents]);
-			// the scores are defined with respect to variance but we want to have them with respect to standard deviation therefore divide by 
-			// sqrt of variance
-			for(int i = 0; i < parameters.numComponents; i++){
-				scores[i] /= Math.sqrt(parameters.getEigenvalues()[i]);
-			}
+			scores = UserUtil.queryArray("Specify model weights w.r.t. standard deviation: ", new double[parameters.numComponents]);
 		}
 		
 		SimpleVector paramVec = parameters.getModel(scores).getPoints().getCol(0);

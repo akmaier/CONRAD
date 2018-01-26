@@ -75,18 +75,20 @@ public class Specificity4D {
 		CONRADCardiacModelConfig info = new CONRADCardiacModelConfig(HEART_MODEL_BASE);
 		info.read();		
 
-		ActiveShapeModel pASM = new ActiveShapeModel(HEART_MODEL_BASE + "\\CCmScores.ccm");
+		ActiveShapeModel pASM = new ActiveShapeModel(HEART_MODEL_BASE + "\\CCmModel.ccm");
 		for(int testCase = 0; testCase < nTest; testCase++){
 			double[] scores = new double[pASM.numComponents];
+			// Generate test weights in the range of [-1.5 ; 1.5] (later multiplied with the standard deviation).
+			// This range resembles the distribution observed with the training samples.
 			Random rand = new Random();
 			for(int i = 0; i < numComponents; i++){
-				scores[i] = (rand.nextDouble() - 0.5);
+				scores[i] = (rand.nextDouble() - 0.5)*3;
 			}
 			specificityShapes.add(scores);
 		}
 
 		//int numPoints = specificityShapes.get(0).getRows()/3;
-		ArrayList<double[]> trainingS = getScores(HEART_MODEL_BASE+"CCmExamples.ccm");
+		ArrayList<double[]> trainingS = getScores(HEART_MODEL_BASE+"CCmExampleScores.ccs");
 
 		double[] err = new double[specificityShapes.size()];
 

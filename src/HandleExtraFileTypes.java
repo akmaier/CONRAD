@@ -252,6 +252,10 @@ public class HandleExtraFileTypes extends ImagePlus implements PlugIn {
 		if (name.endsWith(".zip")) {
 			return tryPlugIn("ZIP_Reader", path);
 		}
+		// HDF5 Reader from Ronneberger for HDF5 format
+		if (name.endsWith(".h5")) {
+			return tryPlugIn("HDF5_Reader_Vibez", path);
+		}
 		
 		/*
 		// A. Dent: Added XYZ handler

@@ -260,6 +260,23 @@ public class PcaIO {
 		this.filename = filename;
 	}
 	
+
+	/**
+	 * Constructs the object and sets Eigenvalues, Eigenvectors and the consensus for writing operation.
+	 * @param eVal
+	 * @param eVec
+	 * @param mean
+	 * @param connectivity
+	 */
+	public PcaIO(int pointDim, double[] eVal, SimpleMatrix eVec, SimpleVector mean, SimpleMatrix connectivity){
+		this.pointDimension = pointDim;
+		this.eigenValues = eVal;
+		this.eigenVectors = eVec;
+		this.consensus = mean;
+		this.connectivity = connectivity;
+	}
+	
+	
 	/**
 	 * Constructs the object and sets Eigenvalues, Eigenvectors and the consensus for writing operation.
 	 * @param eVal
