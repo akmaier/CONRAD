@@ -171,12 +171,34 @@ public class SimpleVector implements Serializable {
 	}
 	
 	/**
+	 * Copies the elements of this vector to a float array. Warning: Possible loss of Data !
+	 * @return float array containing ordered values
+	 */
+	public float[] copyAsFloatArray(){
+		float[] array = new float[this.len];
+		this.copyTo(array);
+		return array; 
+	}
+	
+	/**
 	 * Copies the element of this vector  to the double array provided
 	 * @param other is array to be populated
 	 */
 	public void copyTo(final double[] other) {
 		assert (this.len == other.length) : new IllegalArgumentException("Copying is only possible to an array of the same size!");
 		System.arraycopy(this.buf, 0, other, 0, this.len);
+	}
+	
+	/**
+	 * Copies the element of this vector  to the float array provided
+	 * @param other is array to be populated
+	 */
+	public void copyTo(final float[] other) {
+		assert (this.len == other.length) : new IllegalArgumentException("Copying is only possible to an array of the same size!");
+		for(int i = 0; i < this.getLen();i++)
+		{
+			other[i] = (float) this.buf[i];
+		}
 	}
 	
 	/**
