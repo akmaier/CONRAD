@@ -199,7 +199,6 @@ public class SimpleVector implements Serializable {
 		{
 			other[i] = (float) this.buf[i];
 		}
-		//System.arraycopy(this.buf, 0, other, 0, this.len);
 	}
 	
 	/**
