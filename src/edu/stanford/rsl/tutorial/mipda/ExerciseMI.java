@@ -329,7 +329,7 @@ public class ExerciseMI {
 		return newStack;
 	}
 	
-	class CostFunction implements OptimizableFunction, OptimizationOutputFunction{
+	public class CostFunction implements OptimizableFunction, OptimizationOutputFunction{
 
 		private TreeMap<Integer,Double> costPerIter_map;
 		
