@@ -20,6 +20,8 @@ import ModulePreprocessing.GeoUTestClass;
 import ModulePreprocessing.UMTestClass;
 import ModuleReconstruction.PBTestClass;
 import ModuleReconstruction.FBTestClass;
+import ModuleRegistration.REGTestClass;
+import ModuleRegistration.MITestClass;
 
 /**
  * Testing tool for programming exercises
@@ -30,7 +32,7 @@ import ModuleReconstruction.FBTestClass;
 
 public class RunExerciseEvaluation {
 
-	private static final String[] exerciseNames = {"Intro","SVD","GeoU","UM","PB","FB"}; 
+	private static final String[] exerciseNames = {"Intro","SVD","GeoU","UM","PB","FB","REG","MI"}; 
 	
 	public static void main(String[] args) {
 		
@@ -58,6 +60,12 @@ public class RunExerciseEvaluation {
 		}
 		else if (choice.equals("FB")) {
 			junitCore.run(FBTestClass.class);
+		}
+		else if (choice.equals("REG")) {
+			junitCore.run(REGTestClass.class);
+		}
+		else if (choice.equals("MI")) {
+			junitCore.run(MITestClass.class);
 		}
 		else {
 			System.out.println("Aborted, no test selected.");
