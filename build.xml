@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- WARNING: Eclipse auto-generated file.
+              Any modifications will be overwritten.
+              To include a user specific buildfile here, simply create one in the same
+              directory with the processing instruction <?eclipse.ant.import?>
+              as the first entry and export the buildfile again. --><project basedir="." default="build" name="CONRAD">
+    <property environment="env"/>
+    <property name="debuglevel" value="source,lines,vars"/>
+    <property name="target" value="1.8"/>
+    <property name="source" value="1.8"/>
+    <path id="CONRAD.classpath">
+        <pathelement location="src"/>
+        <pathelement location="lib/BoneJ_.jar"/>
+        <pathelement location="lib/gluegen-rt-natives-linux-amd64.jar"/>
+        <pathelement location="lib/gluegen-rt-natives-linux-i586.jar"/>
+        <pathelement location="lib/gluegen-rt-natives-macosx-universal.jar"/>
+        <pathelement location="lib/gluegen-rt-natives-solaris-amd64.jar"/>
+        <pathelement location="lib/gluegen-rt-natives-solaris-i586.jar"/>
+        <pathelement location="lib/gluegen-rt-natives-windows-amd64.jar"/>
+        <pathelement location="lib/gluegen-rt-natives-windows-i586.jar"/>
+        <pathelement location="lib/gluegen-rt.jar"/>
+        <pathelement location="lib/hough-0.1.jar"/>
+        <pathelement location="lib/ij.jar"/>
+        <pathelement location="lib/ImageJ_SURF_2009-12-01_08.19.jar"/>
+        <pathelement location="lib/Jama-1.0.2.jar"/>
+        <pathelement location="lib/jcublas-0.3.0a.jar"/>
+        <pathelement location="lib/jcuda-0.3.0a.jar"/>
+        <pathelement location="lib/jcudpp-0.3.0a.jar"/>
+        <pathelement location="lib/jcufft-0.3.0a.jar"/>
+        <pathelement location="lib/joal-natives-linux-amd64.jar"/>
+        <pathelement location="lib/joal-natives-linux-i586.jar"/>
+        <pathelement location="lib/joal-natives-macosx-universal.jar"/>
+        <pathelement location="lib/joal-natives-solaris-amd64.jar"/>
+        <pathelement location="lib/joal-natives-solaris-i586.jar"/>
+        <pathelement location="lib/joal-natives-windows-amd64.jar"/>
+        <pathelement location="lib/joal-natives-windows-i586.jar"/>
+        <pathelement location="lib/joal.jar"/>
+        <pathelement location="lib/jocl-natives-linux-amd64.jar"/>
+        <pathelement location="lib/jocl-natives-linux-i586.jar"/>
+        <pathelement location="lib/jocl-natives-macosx-universal.jar"/>
+        <pathelement location="lib/jocl-natives-solaris-amd64.jar"/>
+        <pathelement location="lib/jocl-natives-solaris-i586.jar"/>
+        <pathelement location="lib/jocl-natives-windows-amd64.jar"/>
+        <pathelement location="lib/jocl-natives-windows-i586.jar"/>
+        <pathelement location="lib/jocl.jar"/>
+        <pathelement location="lib/jogl-all-natives-linux-amd64.jar"/>
+        <pathelement location="lib/jogl-all-natives-linux-i586.jar"/>
+        <pathelement location="lib/jogl-all-natives-macosx-universal.jar"/>
+        <pathelement location="lib/jogl-all-natives-solaris-amd64.jar"/>
+        <pathelement location="lib/jogl-all-natives-solaris-i586.jar"/>
+        <pathelement location="lib/jogl-all-natives-windows-amd64.jar"/>
+        <pathelement location="lib/jogl-all-natives-windows-i586.jar"/>
+        <pathelement location="lib/jogl-all.jar"/>
+        <pathelement location="lib/jtransforms-2.3.jar"/>
+        <pathelement location="lib/junit-4.8.2.jar"/>
+        <pathelement location="lib/jzlib-1.0.7.jar"/>
+        <pathelement location="lib/latexlet.jar"/>
+        <pathelement location="lib/qdox-1.12.1.jar"/>
+        <pathelement location="lib/yacas.1.2.2.jar"/>
+        <pathelement location="plugins/3D/Interactive_3D_Surface_Plot.jar"/>
+        <pathelement location="plugins/3D/Volume_Viewer.jar"/>
+        <pathelement location="plugins/Analyze/Cell_Counter.jar"/>
+        <pathelement location="plugins/Analyze/Color_Histogram.jar"/>
+        <pathelement location="plugins/Input-Output/Animated_Gif.jar"/>
+        <pathelement location="plugins/Input-Output/Deltavision_Opener.jar"/>
+        <pathelement location="plugins/Input-Output/loci_tools.jar"/>
+        <pathelement location="plugins/Input-Output/LSM_Reader.jar"/>
+        <pathelement location="plugins/Input-Output/nifti_io.jar"/>
+        <pathelement location="plugins/Input-Output/ome_tools.jar"/>
+        <pathelement location="plugins/Input-Output/QuickTime_Plugins.jar"/>
+        <pathelement location="plugins/VolumeJ/bij.jar"/>
+        <pathelement location="lib/weka.jar"/>
+        <pathelement location="lib/weka-src.jar"/>
+        <pathelement location="lib/trainablesegmentation.jar"/>
+        <pathelement location="lib/jmathplot.jar"/>
+        <pathelement location="lib/wekaBRF_1.jar"/>
+        <pathelement location="lib/jpop.0.7.5.jar"/>
+        <pathelement location="lib/fastica-1.11.jar"/>
+        <pathelement location="lib/sis-jhdf5-batteries_included.jar"/>
+    </path>
+    <target name="init">
+        <mkdir dir="src"/>
+        <copy includeemptydirs="false" todir="src">
+            <fileset dir="src">
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+    </target>
+    <target name="clean">
+        <delete dir="src"/>
+    </target>
+    <target depends="clean" name="cleanall"/>
+    <target depends="build-subprojects,build-project" name="build"/>
+    <target name="build-subprojects"/>
+    <target depends="init" name="build-project">
+        <echo message="${ant.project.name}: ${ant.file}"/>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="src" includeantruntime="false" source="${source}" target="${target}">
+            <src path="src"/>
+            <classpath refid="CONRAD.classpath"/>
+        </javac>
+    </target>
+    <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects"/>
+    <target description="copy Eclipse compiler jars to ant lib directory" name="init-eclipse-compiler">
+        <copy todir="${ant.library.dir}">
+            <fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar"/>
+        </copy>
+        <unzip dest="${ant.library.dir}">
+            <patternset includes="jdtCompilerAdapter.jar"/>
+            <fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar"/>
+        </unzip>
+    </target>
+    <target description="compile project with Eclipse compiler" name="build-eclipse-compiler">
+        <property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
+        <antcall target="build"/>
+    </target>
+</project>
