@@ -5,3 +5,6 @@ jdk:
   - oraclejdk9
   - openjdk7
 script: ant build
+
+notifications:
+  email: false
