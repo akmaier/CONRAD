@@ -18,16 +18,14 @@ public class CylinderVolumeMask {
 	private int sizeY;
 	private int sizeX;
 
-	public CylinderVolumeMask(int sizeX, int sizeY, int xcenter, int ycenter,
-			double radius) {
+	public CylinderVolumeMask(int sizeX, int sizeY, int xcenter, int ycenter, double radius) {
 		this.sizeX = sizeX;
 		this.sizeY = sizeY;
 		mask = new Grid2D(sizeX, sizeY);
 		initialize(radius, sizeX, sizeY, xcenter, ycenter);
 	}
 
-	private void initialize(double radius, int sizeX, int sizeY, int xcenter,
-			int ycenter) {
+	private void initialize(double radius, int sizeX, int sizeY, int xcenter, int ycenter) {
 
 		for (int i = 0; i < sizeX; i++) {
 			for (int j = 0; j < sizeY; j++) {
@@ -103,6 +101,6 @@ public class CylinderVolumeMask {
 	}
 }
 /*
- * Copyright (C) 2010-2014 Marco Bögel
+ * Copyright (C) 2010-2014 Marco BÃ¶gel
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
 */

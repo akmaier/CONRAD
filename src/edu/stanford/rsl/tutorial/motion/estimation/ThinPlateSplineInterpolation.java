@@ -48,46 +48,46 @@ public class ThinPlateSplineInterpolation {
 	private boolean debug = false;
 
 	public float[] getAsFloatPoints() {
-		float[] pts = new float[gridPoints.size()*dim];
-		for(int i = 0; i < gridPoints.size(); i++) {
-			for(int k = 0 ; k < dim; k++) {
-				pts[i*dim +k] = (float) gridPoints.get(i).get(k);
+		float[] pts = new float[gridPoints.size() * dim];
+		for (int i = 0; i < gridPoints.size(); i++) {
+			for (int k = 0; k < dim; k++) {
+				pts[i * dim + k] = (float) gridPoints.get(i).get(k);
 			}
 		}
 		return pts;
 	}
 
 	public float[] getAsFloatA() {
-		float[] Af = new float[A.getRows()*A.getCols()];
+		float[] Af = new float[A.getRows() * A.getCols()];
 
-		for(int i = 0; i < A.getCols(); i++) {
-			for(int j = 0; j < A.getRows(); j++) {
-				Af[i*A.getRows()+j] = (float) A.getElement(j, i);
+		for (int i = 0; i < A.getCols(); i++) {
+			for (int j = 0; j < A.getRows(); j++) {
+				Af[i * A.getRows() + j] = (float) A.getElement(j, i);
 			}
 		}
 		return Af;
 	}
 
 	public float[] getAsFloatB() {
-		float [] Bf = new float[b.getLen()];
+		float[] Bf = new float[b.getLen()];
 
-		for(int i = 0; i < b.getLen(); i++) {
+		for (int i = 0; i < b.getLen(); i++) {
 			Bf[i] = (float) b.getElement(i);
 		}
 		return Bf;
 	}
 
 	public float[] getAsFloatCoeffs() {
-		float [] coeff = new float[coefficients.getCols()*coefficients.getRows()];
-		for(int i = 0; i < coefficients.getCols(); i++) {
-			for(int j = 0; j < coefficients.getRows(); j++) {
-				coeff[i*coefficients.getRows()+j] = (float) coefficients.getElement(j, i);
+		float[] coeff = new float[coefficients.getCols() * coefficients.getRows()];
+		for (int i = 0; i < coefficients.getCols(); i++) {
+			for (int j = 0; j < coefficients.getRows(); j++) {
+				coeff[i * coefficients.getRows() + j] = (float) coefficients.getElement(j, i);
 			}
 		}
 		return coeff;
 	}
-	public ThinPlateSplineInterpolation(int dimension,
-			ArrayList<PointND> points, ArrayList<PointND> values) {
+
+	public ThinPlateSplineInterpolation(int dimension, ArrayList<PointND> points, ArrayList<PointND> values) {
 		this.gridPoints = points;
 		this.values = values;
 		this.dim = dimension;
@@ -106,8 +106,7 @@ public class ThinPlateSplineInterpolation {
 	 * @param dimension
 	 *            Dimension
 	 */
-	public void setNewPointsAndRecalibrate(ArrayList<PointND> points,
-			ArrayList<PointND> values, int dimension) {
+	public void setNewPointsAndRecalibrate(ArrayList<PointND> points, ArrayList<PointND> values, int dimension) {
 		this.gridPoints = points;
 		this.values = values;
 		this.dim = dimension;
@@ -130,16 +129,16 @@ public class ThinPlateSplineInterpolation {
 
 		A = new SimpleMatrix(dim, dim);
 		b = new SimpleVector(dim);
-		Matrix LJama = new Matrix(sizeL,sizeL);
+		Matrix LJama = new Matrix(sizeL, sizeL);
 		Matrix rhsJama = new Matrix(sizeL, 1);
 
 		for (int i = 0; i < n; i++) {
 			for (int j = 0; j < values.get(i).getDimension(); j++) {
-				rhsJama.set(i*dim+j, 0, values.get(i).getAbstractVector().getElement(j));
+				rhsJama.set(i * dim + j, 0, values.get(i).getAbstractVector().getElement(j));
 			}
-			for (int j = i+1; j < n; j++) {
+			for (int j = i + 1; j < n; j++) {
 				// symmetric matrix -- compute only upper triangle and write to both locations
-				double val = kernel(gridPoints.get(i), gridPoints.get(j)); 
+				double val = kernel(gridPoints.get(i), gridPoints.get(j));
 				for (int k = 0; k < dim; k++) {
 					int currI = i * dim + k;
 					int currJ = j * dim + k;
@@ -149,7 +148,7 @@ public class ThinPlateSplineInterpolation {
 			}
 		}
 
-		int offset = n*dim;
+		int offset = n * dim;
 		for (int i = 0; i < n; i++) {
 			for (int j = 0; j < dim; j++) {
 				double val = gridPoints.get(i).get(j);
@@ -165,14 +164,14 @@ public class ThinPlateSplineInterpolation {
 				LJama.set(offset + dim * dim + k, dim * i + k, 1.0);
 			}
 		}
-		if (debug){
-			System.out.println("Time for reshaping : " + (System.nanoTime()-start)/1e6);
+		if (debug) {
+			System.out.println("Time for reshaping : " + (System.nanoTime() - start) / 1e6);
 			start = System.nanoTime();
 		}
 		Jama.LUDecomposition cd = new Jama.LUDecomposition(LJama);
 		Matrix parametersJama = cd.solve(rhsJama);
-		if(debug)
-			System.out.println("Time for inversion JAMA: " + (System.nanoTime()-start)/1e6);
+		if (debug)
+			System.out.println("Time for inversion JAMA: " + (System.nanoTime() - start) / 1e6);
 
 		coefficients = new SimpleMatrix(dim, n);
 		for (int i = 0; i < n; i++) {
@@ -228,8 +227,7 @@ public class ThinPlateSplineInterpolation {
 		SimpleVector res = new SimpleVector(pt.getDimension());
 		res.zeros();
 		for (int i = 0; i < coefficients.getCols(); i++) {
-			SimpleVector Gc = SimpleOperators.multiply(
-					G(pt, gridPoints.get(i)), coefficients.getCol(i));
+			SimpleVector Gc = SimpleOperators.multiply(G(pt, gridPoints.get(i)), coefficients.getCol(i));
 
 			res = SimpleOperators.add(res, Gc);
 		}
@@ -237,7 +235,7 @@ public class ThinPlateSplineInterpolation {
 		res = SimpleOperators.add(res, Ax, b);
 		return res;
 	}
-	
+
 	public ArrayList<PointND> getGridPoints() {
 		return gridPoints;
 	}
@@ -306,24 +304,21 @@ public class ThinPlateSplineInterpolation {
 		// values.add(new PointND(0,0));
 		// }
 
-		ThinPlateSplineInterpolation tps = new ThinPlateSplineInterpolation(2,
-				points, values);
+		ThinPlateSplineInterpolation tps = new ThinPlateSplineInterpolation(2, points, values);
 
 		tps.interpolate(new PointND(30, 210));
 		Grid2D grid = new Grid2D(500, 500);
 
 		for (int i = 0; i < 500; i++) {
 			for (int j = 0; j < 500; j++) {
-				grid.setAtIndex(i, j, (float) tps
-						.interpolate(new PointND(i, j)).getElement(0));
+				grid.setAtIndex(i, j, (float) tps.interpolate(new PointND(i, j)).getElement(0));
 			}
 		}
 		grid.show();
 
-
 	}
 }
 /*
- * Copyright (C) 2010-2014 Marco B�gel
+ * Copyright (C) 2010-2014 Marco Bögel
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
  */

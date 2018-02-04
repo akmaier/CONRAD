@@ -37,7 +37,7 @@ import edu.stanford.rsl.conrad.utils.ImageGridBuffer;
  * @author Marco
  *
  */
-public class OpenCLCompensatedBackProjectorTPS extends VOIBasedReconstructionFilter implements Runnable, Citeable{
+public class OpenCLCompensatedBackProjectorTPS extends VOIBasedReconstructionFilter implements Runnable, Citeable {
 
 	/**
 	 * 
@@ -46,7 +46,7 @@ public class OpenCLCompensatedBackProjectorTPS extends VOIBasedReconstructionFil
 
 	private ImageGridBuffer inputQueue = new ImageGridBuffer();
 
-	static int bpBlockSize[] = {32, 16};
+	static int bpBlockSize[] = { 32, 16 };
 
 	private static boolean debug = false;
 	/**
@@ -72,7 +72,7 @@ public class OpenCLCompensatedBackProjectorTPS extends VOIBasedReconstructionFil
 	/**
 	 * The OpenCL command queue
 	 */
-	private CLCommandQueue commandQueue;	
+	private CLCommandQueue commandQueue;
 
 	/**
 	 * The 2D projection texture reference
@@ -125,13 +125,13 @@ public class OpenCLCompensatedBackProjectorTPS extends VOIBasedReconstructionFil
 	}
 
 	@Override
-	public void prepareForSerialization(){
+	public void prepareForSerialization() {
 		super.prepareForSerialization();
 		projectionMatrix = null;
 		volumePointer = null;
 		projectionArray = null;
 		projections = null;
-		projectionsAvailable =null;
+		projectionsAvailable = null;
 		projectionsDone = null;
 		h_volume = null;
 		initialized = false;
@@ -146,15 +146,13 @@ public class OpenCLCompensatedBackProjectorTPS extends VOIBasedReconstructionFil
 	}
 
 	@Override
-	public void configure() throws Exception{
+	public void configure() throws Exception {
 		configured = true;
 	}
 
-	protected void init(){
+	protected void init() {
 		if (!initialized) {
 			largeVolumeMode = false;
-
-
 
 			int reconDimensionX = getGeometry().getReconDimensionX();
 			int reconDimensionY = getGeometry().getReconDimensionY();
@@ -173,13 +171,14 @@ public class OpenCLCompensatedBackProjectorTPS extends VOIBasedReconstructionFil
 				device = commandQueue.getDevice();
 
 				// initialize the program
-				if (program==null || !program.getContext().equals(this.context)){
-					program = context.createProgram(OpenCLCompensatedBackProjector.class.getResourceAsStream("compensatedBackprojectCLTPS.cl")).build();
+				if (program == null || !program.getContext().equals(this.context)) {
+					program = context.createProgram(
+							OpenCLCompensatedBackProjector.class.getResourceAsStream("compensatedBackprojectCLTPS.cl"))
+							.build();
 				}
 
-
 			} catch (Exception e) {
-				if (commandQueue!=null)
+				if (commandQueue != null)
 					commandQueue.release();
 				if (kernelFunction != null)
 					kernelFunction.release();
@@ -189,14 +188,13 @@ public class OpenCLCompensatedBackProjectorTPS extends VOIBasedReconstructionFil
 			}
 
 			d_initialRigidTransform = context.createFloatBuffer(12, Mem.READ_ONLY);
-			if (initialRigidTransform==null){
-				while(d_initialRigidTransform.getBuffer().hasRemaining())
+			if (initialRigidTransform == null) {
+				while (d_initialRigidTransform.getBuffer().hasRemaining())
 					d_initialRigidTransform.getBuffer().put(0);
 				d_initialRigidTransform.getBuffer().put(0, 1);
 				d_initialRigidTransform.getBuffer().put(4, 1);
 				d_initialRigidTransform.getBuffer().put(8, 1);
-			}
-			else{
+			} else {
 				for (int i = 0; i < initialRigidTransform.length; i++) {
 					d_initialRigidTransform.getBuffer().put(initialRigidTransform[i]);
 				}
@@ -206,35 +204,39 @@ public class OpenCLCompensatedBackProjectorTPS extends VOIBasedReconstructionFil
 			// check space on device:
 			long memory = device.getMaxMemAllocSize();
 			long availableMemory = (memory);
-			long requiredMemory = (long)(((
-					((double) reconDimensionX) * reconDimensionY * ((double) reconDimensionZ) * 4) 
-					+ (((double)Configuration.getGlobalConfiguration().getGeometry().getDetectorHeight()) * Configuration.getGlobalConfiguration().getGeometry().getDetectorWidth() * 4)));
+			long requiredMemory = (long) (((((double) reconDimensionX) * reconDimensionY * ((double) reconDimensionZ)
+					* 4)
+					+ (((double) Configuration.getGlobalConfiguration().getGeometry().getDetectorHeight())
+							* Configuration.getGlobalConfiguration().getGeometry().getDetectorWidth() * 4)));
 			if (debug) {
 				System.out.println("Total available Memory on OpenCL card:" + availableMemory);
 				System.out.println("Required Memory on OpenCL card:" + requiredMemory);
 			}
-			if (requiredMemory > availableMemory){
-				nSteps = (int)OpenCLUtil.iDivUp (requiredMemory, availableMemory);
-				if (debug) System.out.println("Switching to large volume mode with nSteps = " + nSteps);
+			if (requiredMemory > availableMemory) {
+				nSteps = (int) OpenCLUtil.iDivUp(requiredMemory, availableMemory);
+				if (debug)
+					System.out.println("Switching to large volume mode with nSteps = " + nSteps);
 				largeVolumeMode = true;
 			}
 
 			// create the computing kernel
-			if(debug)
+			if (debug)
 				kernelFunction = program.createCLKernel("backprojectKernel_returnMotion");
 			else
 				kernelFunction = program.createCLKernel("backprojectKernel");
 
 			// create the reconstruction volume;
 			int memorysize = reconDimensionX * reconDimensionY * reconDimensionZ * 4;
-			if (largeVolumeMode){
+			if (largeVolumeMode) {
 				subVolumeZ = OpenCLUtil.iDivUp(reconDimensionZ, nSteps);
-				if(debug) System.out.println("SubVolumeZ: " + subVolumeZ);
+				if (debug)
+					System.out.println("SubVolumeZ: " + subVolumeZ);
 				h_volume = new float[reconDimensionX * reconDimensionY * subVolumeZ];
 				memorysize = reconDimensionX * reconDimensionY * subVolumeZ * 4;
-				if(debug)System.out.println("Memory: " + memorysize);
+				if (debug)
+					System.out.println("Memory: " + memorysize);
 			} else {
-				h_volume = new float[reconDimensionX * reconDimensionY * reconDimensionZ];	
+				h_volume = new float[reconDimensionX * reconDimensionY * reconDimensionZ];
 			}
 
 			// copy volume to device
@@ -242,17 +244,14 @@ public class OpenCLCompensatedBackProjectorTPS extends VOIBasedReconstructionFil
 			volumePointer.getBuffer().put(h_volume);
 			volumePointer.getBuffer().rewind();
 
-			commandQueue.
-			putWriteBuffer(volumePointer, true).
-			putWriteBuffer(d_initialRigidTransform,true).
-			finish();
+			commandQueue.putWriteBuffer(volumePointer, true).putWriteBuffer(d_initialRigidTransform, true).finish();
 
 			initialized = true;
 		}
 
 	}
 
-	private synchronized void unload(){
+	private synchronized void unload() {
 		if (initialized) {
 
 			if ((projectionVolume != null) && (!largeVolumeMode)) {
@@ -262,13 +261,12 @@ public class OpenCLCompensatedBackProjectorTPS extends VOIBasedReconstructionFil
 				volumePointer.getBuffer().get(h_volume);
 				volumePointer.getBuffer().rewind();
 
-
 				int width = projectionVolume.getSize()[0];
 				int height = projectionVolume.getSize()[1];
 				if (this.useVOImap) {
-					for (int k = 0; k < projectionVolume.getSize()[2]; k++){
-						for (int j = 0; j < height; j++){
-							for (int i = 0; i < width; i++){			
+					for (int k = 0; k < projectionVolume.getSize()[2]; k++) {
+						for (int j = 0; j < height; j++) {
+							for (int i = 0; i < width; i++) {
 								float value = h_volume[(((height * k) + j) * width) + i];
 								if (voiMap[i][j][k]) {
 									projectionVolume.setAtIndex(i, j, k, value);
@@ -279,9 +277,9 @@ public class OpenCLCompensatedBackProjectorTPS extends VOIBasedReconstructionFil
 						}
 					}
 				} else {
-					for (int k = 0; k < projectionVolume.getSize()[2]; k++){
-						for (int j = 0; j < height; j++){
-							for (int i = 0; i < width; i++){			
+					for (int k = 0; k < projectionVolume.getSize()[2]; k++) {
+						for (int j = 0; j < height; j++) {
+							for (int i = 0; i < width; i++) {
 								float value = h_volume[(((height * k) + j) * width) + i];
 								projectionVolume.setAtIndex(i, j, k, value);
 							}
@@ -292,9 +290,7 @@ public class OpenCLCompensatedBackProjectorTPS extends VOIBasedReconstructionFil
 				System.out.println("Check ProjectionVolume. It seems null.");
 			}
 
-
 			h_volume = null;
-
 
 			// free memory on device
 			commandQueue.release();
@@ -313,7 +309,6 @@ public class OpenCLCompensatedBackProjectorTPS extends VOIBasedReconstructionFil
 			kernelFunction.release();
 			program.release();
 
-
 			commandQueue = null;
 			projectionArray = null;
 			projectionMatrix = null;
@@ -323,17 +318,16 @@ public class OpenCLCompensatedBackProjectorTPS extends VOIBasedReconstructionFil
 			program = null;
 			context = null;
 
-
 			initialized = false;
 		}
 	}
 
-	private synchronized void initProjectionMatrix(int projectionNumber){
+	private synchronized void initProjectionMatrix(int projectionNumber) {
 		// load projection Matrix for current Projection.
 		SimpleMatrix pMat = getGeometry().getProjectionMatrix(projectionNumber).computeP();
-		float [] pMatFloat = new float[pMat.getCols() * pMat.getRows()];
-		for (int j = 0; j< pMat.getRows(); j++) {
-			for (int i = 0; i< pMat.getCols(); i++) {
+		float[] pMatFloat = new float[pMat.getCols() * pMat.getRows()];
+		for (int j = 0; j < pMat.getRows(); j++) {
+			for (int i = 0; i < pMat.getCols(); i++) {
 
 				pMatFloat[(j * pMat.getCols()) + i] = (float) pMat.getElement(j, i);
 			}
@@ -349,34 +343,36 @@ public class OpenCLCompensatedBackProjectorTPS extends VOIBasedReconstructionFil
 		commandQueue.putWriteBuffer(projectionMatrix, true).finish();
 	}
 
-	private synchronized void initProjectionData(Grid2D projection){
+	private synchronized void initProjectionData(Grid2D projection) {
 		initialize(projection);
-		if (projection != null){ 
-			float [] proj= new float[projection.getWidth() * projection.getHeight()];
+		if (projection != null) {
+			float[] proj = new float[projection.getWidth() * projection.getHeight()];
 
-			for(int i = 0; i< projection.getWidth(); i++){
-				for (int j =0; j < projection.getHeight(); j++){
-					proj[(j*projection.getWidth()) + i] = projection.getPixelValue(i, j);
+			for (int i = 0; i < projection.getWidth(); i++) {
+				for (int j = 0; j < projection.getHeight(); j++) {
+					proj[(j * projection.getWidth()) + i] = projection.getPixelValue(i, j);
 				}
 			}
 
 			if (projectionArray == null) {
 				// Create the array that will contain the
 				// projection data. 
-				projectionArray = context.createFloatBuffer(projection.getWidth()*projection.getHeight(), Mem.READ_ONLY);
+				projectionArray = context.createFloatBuffer(projection.getWidth() * projection.getHeight(),
+						Mem.READ_ONLY);
 			}
 
 			// Copy the projection data to the array 
 			projectionArray.getBuffer().put(proj);
 			projectionArray.getBuffer().rewind();
-			
-			if(projectionTex != null && !projectionTex.isReleased()){			
+
+			if (projectionTex != null && !projectionTex.isReleased()) {
 				projectionTex.release();
 			}
 
 			// set the texture
 			CLImageFormat format = new CLImageFormat(ChannelOrder.INTENSITY, ChannelType.FLOAT);
-			projectionTex = context.createImage2d(projectionArray.getBuffer(), projection.getWidth(), projection.getHeight(), format, Mem.READ_ONLY);
+			projectionTex = context.createImage2d(projectionArray.getBuffer(), projection.getWidth(),
+					projection.getHeight(), format, Mem.READ_ONLY);
 			//projectionArray.release();
 
 		} else {
@@ -384,19 +380,14 @@ public class OpenCLCompensatedBackProjectorTPS extends VOIBasedReconstructionFil
 		}
 	}
 
-
 	@Override
 	public String getBibtexCitation() {
-		String bibtex = "@inproceedings{Rohkohl08-CCR,\n" +
-				"  author = {{Scherl}, H. and {Keck}, B. and {Kowarschik}, M. and {Hornegger}, J.},\n" +
-				"  title = {{Fast GPU-Based CT Reconstruction using the Common Unified Device Architecture (CUDA)}},\n" +
-				"  booktitle = {{Nuclear Science Symposium, Medical Imaging Conference 2007}},\n" +
-				"  publisher = {IEEE},\n" +
-				"  volume={6},\n" +
-				"  address = {Honolulu, HI, United States},\n" +
-				"  year = {2007}\n" +
-				"  pages= {4464--4466},\n" +
-				"}";
+		String bibtex = "@inproceedings{Rohkohl08-CCR,\n"
+				+ "  author = {{Scherl}, H. and {Keck}, B. and {Kowarschik}, M. and {Hornegger}, J.},\n"
+				+ "  title = {{Fast GPU-Based CT Reconstruction using the Common Unified Device Architecture (CUDA)}},\n"
+				+ "  booktitle = {{Nuclear Science Symposium, Medical Imaging Conference 2007}},\n"
+				+ "  publisher = {IEEE},\n" + "  volume={6},\n" + "  address = {Honolulu, HI, United States},\n"
+				+ "  year = {2007}\n" + "  pages= {4464--4466},\n" + "}";
 		return bibtex;
 	}
 
@@ -410,26 +401,26 @@ public class OpenCLCompensatedBackProjectorTPS extends VOIBasedReconstructionFil
 	}
 
 	@Override
-	public void backproject(Grid2D projection, int projectionNumber)
-	{
+	public void backproject(Grid2D projection, int projectionNumber) {
 		appendProjection(projection, projectionNumber);
 	}
 
-	private void appendProjection(Grid2D projection, int projectionNumber){	
+	private void appendProjection(Grid2D projection, int projectionNumber) {
 		projections.add(projection, projectionNumber);
 		projectionsAvailable.add(new Integer(projectionNumber));
 	}
 
-	private synchronized void projectSingleProjection(int projectionNumber, int dimz){
+	private synchronized void projectSingleProjection(int projectionNumber, int dimz) {
 		// load projection matrix
 		initProjectionMatrix(projectionNumber);
 		// load projection
-		Grid2D projection = projections.get(projectionNumber); 
+		Grid2D projection = projections.get(projectionNumber);
 		initProjectionData(projection);
 
 		// Correct for constant part of distance weighting + For angular sampling
-		double D =  getGeometry().getSourceToDetectorDistance();
-		float projectionMultiplier = (float)(10 * D*D * 2* Math.PI * getGeometry().getPixelDimensionX() / getGeometry().getNumProjectionMatrices());
+		double D = getGeometry().getSourceToDetectorDistance();
+		float projectionMultiplier = (float) (10 * D * D * 2 * Math.PI * getGeometry().getPixelDimensionX()
+				/ getGeometry().getNumProjectionMatrices());
 
 		if (!largeVolumeMode) {
 			//projections.remove(projectionNumber);
@@ -444,8 +435,9 @@ public class OpenCLCompensatedBackProjectorTPS extends VOIBasedReconstructionFil
 		OpenCLGrid3D xdeform = null;
 		OpenCLGrid3D ydeform = null;
 		OpenCLGrid3D zdeform = null;
-		if (debug){
-			xdeform = new OpenCLGrid3D(new Grid3D(getGeometry().getReconDimensionX(),getGeometry().getReconDimensionY(),getGeometry().getReconDimensionZ()));
+		if (debug) {
+			xdeform = new OpenCLGrid3D(new Grid3D(getGeometry().getReconDimensionX(),
+					getGeometry().getReconDimensionY(), getGeometry().getReconDimensionZ()));
 			ydeform = new OpenCLGrid3D(xdeform);
 			zdeform = new OpenCLGrid3D(xdeform);
 			xdeform.getDelegate().prepareForDeviceOperation();
@@ -474,57 +466,37 @@ public class OpenCLCompensatedBackProjectorTPS extends VOIBasedReconstructionFil
 		commandQueue.putWriteBuffer(bPtr, true);
 		// write kernel parameters
 		kernelFunction.rewind();
-		kernelFunction
-		.putArg(volumePointer)
-		.putArg(coeffPtr)
-		.putNullArg((int)coeffPtr.getCLSize())
-		.putArg(ptsGlobalPtr)
-		.putNullArg((int)ptsGlobalPtr.getCLSize())
-		.putArg(APtr)
-		.putArg(bPtr)
-		.putArg((int)pts[projectionNumber].length/3)
-		.putArg(getGeometry().getReconDimensionX())
-		.putArg(getGeometry().getReconDimensionY())
-		.putArg(reconDimensionZ)
-		.putArg((int) lineOffset)
-		.putArg((float) voxelSpacingX)
-		.putArg((float) voxelSpacingY)
-		.putArg((float) voxelSpacingZ)
-		.putArg((float) offsetX)
-		.putArg((float) offsetY)
-		.putArg((float) offsetZ)
-		.putArg(projectionTex)
-		.putArg(projectionMatrix)
-		.putArg(d_initialRigidTransform)
-		.putArg(projectionMultiplier);
+		kernelFunction.putArg(volumePointer).putArg(coeffPtr).putNullArg((int) coeffPtr.getCLSize())
+				.putArg(ptsGlobalPtr).putNullArg((int) ptsGlobalPtr.getCLSize()).putArg(APtr).putArg(bPtr)
+				.putArg((int) pts[projectionNumber].length / 3).putArg(getGeometry().getReconDimensionX())
+				.putArg(getGeometry().getReconDimensionY()).putArg(reconDimensionZ).putArg((int) lineOffset)
+				.putArg((float) voxelSpacingX).putArg((float) voxelSpacingY).putArg((float) voxelSpacingZ)
+				.putArg((float) offsetX).putArg((float) offsetY).putArg((float) offsetZ).putArg(projectionTex)
+				.putArg(projectionMatrix).putArg(d_initialRigidTransform).putArg(projectionMultiplier);
 
-		if (debug){
-			kernelFunction.putArg(xdeform.getDelegate().getCLBuffer())
-			.putArg(ydeform.getDelegate().getCLBuffer())
-			.putArg(zdeform.getDelegate().getCLBuffer());
+		if (debug) {
+			kernelFunction.putArg(xdeform.getDelegate().getCLBuffer()).putArg(ydeform.getDelegate().getCLBuffer())
+					.putArg(zdeform.getDelegate().getCLBuffer());
 		}
 
 		int[] realLocalSize = new int[2];
-		realLocalSize[0] = Math.min(device.getMaxWorkGroupSize(),bpBlockSize[0]);
-		realLocalSize[1] = Math.max(1, Math.min(device.getMaxWorkGroupSize()/realLocalSize[0], bpBlockSize[1]));
-		
+		realLocalSize[0] = Math.min(device.getMaxWorkGroupSize(), bpBlockSize[0]);
+		realLocalSize[1] = Math.max(1, Math.min(device.getMaxWorkGroupSize() / realLocalSize[0], bpBlockSize[1]));
+
 		// rounded up to the nearest multiple of localWorkSize
-		int[] globalWorkSize = {getGeometry().getReconDimensionX(), getGeometry().getReconDimensionY()}; 
-		if ((globalWorkSize[0] % realLocalSize[0] ) != 0){
+		int[] globalWorkSize = { getGeometry().getReconDimensionX(), getGeometry().getReconDimensionY() };
+		if ((globalWorkSize[0] % realLocalSize[0]) != 0) {
 			globalWorkSize[0] = ((globalWorkSize[0] / realLocalSize[0]) + 1) * realLocalSize[0];
 		}
-		if ((globalWorkSize[1] % realLocalSize[1] ) != 0){
+		if ((globalWorkSize[1] % realLocalSize[1]) != 0) {
 			globalWorkSize[1] = ((globalWorkSize[1] / realLocalSize[1]) + 1) * realLocalSize[1];
 		}
 
 		// Call the OpenCL kernel, writing the results into the volume which is pointed at
-		commandQueue
-		.putWriteImage(projectionTex, true)
-		.finish()
-		.put2DRangeKernel(kernelFunction, 0, 0, globalWorkSize[0], globalWorkSize[1], realLocalSize[0], realLocalSize[1])
-		.finish();
+		commandQueue.putWriteImage(projectionTex, true).finish().put2DRangeKernel(kernelFunction, 0, 0,
+				globalWorkSize[0], globalWorkSize[1], realLocalSize[0], realLocalSize[1]).finish();
 
-		if (debug){
+		if (debug) {
 			xdeform.getDelegate().notifyDeviceChange();
 			ydeform.getDelegate().notifyDeviceChange();
 			zdeform.getDelegate().notifyDeviceChange();
@@ -544,7 +516,8 @@ public class OpenCLCompensatedBackProjectorTPS extends VOIBasedReconstructionFil
 		APtr.release();
 		bPtr.release();
 		if (showStatus)
-			IJ.showProgress(projectionNumber, Configuration.getGlobalConfiguration().getGeometry().getNumProjectionMatrices());
+			IJ.showProgress(projectionNumber,
+					Configuration.getGlobalConfiguration().getGeometry().getNumProjectionMatrices());
 	}
 
 	public void OpenCLRun() {
@@ -560,14 +533,14 @@ public class OpenCLCompensatedBackProjectorTPS extends VOIBasedReconstructionFil
 					}
 					IJ.showProgress(status);
 				}
-				if (!largeVolumeMode) {			
+				if (!largeVolumeMode) {
 					workOnProjectionData();
 				} else {
 					checkProjectionData();
 				}
 			}
 			//			System.out.println("large Volume " + largeVolumeMode);
-			if (largeVolumeMode){
+			if (largeVolumeMode) {
 				// we have collected all projections.
 				// now we can reconstruct subvolumes and stich them together.
 				int reconDimensionZ = getGeometry().getReconDimensionZ();
@@ -580,8 +553,8 @@ public class OpenCLCompensatedBackProjectorTPS extends VOIBasedReconstructionFil
 				double originalReconDimZ = reconDimensionZ;
 				reconDimensionZ = subVolumeZ;
 				int maxProjectionNumber = projections.size();
-				float all = nSteps * maxProjectionNumber*2;
-				for (int n =0; n < nSteps; n++){ // For each subvolume
+				float all = nSteps * maxProjectionNumber * 2;
+				for (int n = 0; n < nSteps; n++) { // For each subvolume
 					// set all to 0;
 					Arrays.fill(h_volume, 0);
 
@@ -590,17 +563,17 @@ public class OpenCLCompensatedBackProjectorTPS extends VOIBasedReconstructionFil
 					volumePointer.getBuffer().rewind();
 					commandQueue.putWriteBuffer(volumePointer, true).finish();
 
-					offsetZ = originalOffsetZ - (reconDimensionZ*voxelSpacingZ*n);
-					for (int p = 0; p < maxProjectionNumber; p ++){ // For all projections
-						float currentStep = (n*maxProjectionNumber*2) + p;
+					offsetZ = originalOffsetZ - (reconDimensionZ * voxelSpacingZ * n);
+					for (int p = 0; p < maxProjectionNumber; p++) { // For all projections
+						float currentStep = (n * maxProjectionNumber * 2) + p;
 						if (showStatus) {
 							IJ.showStatus("Backprojecting with OpenCL");
-							IJ.showProgress(currentStep/all);
+							IJ.showProgress(currentStep / all);
 						}
 						//System.out.println("Current: " + p);
 						try {
 							projectSingleProjection(p, reconDimensionZ);
-						} catch (Exception e){
+						} catch (Exception e) {
 							System.out.println("Backprojection of projection " + p + " was not successful.");
 							e.printStackTrace();
 						}
@@ -613,18 +586,19 @@ public class OpenCLCompensatedBackProjectorTPS extends VOIBasedReconstructionFil
 
 					// move data to ImagePlus;
 					if (projectionVolume != null) {
-						for (int k = 0; k < reconDimensionZ; k++){
-							int index = (n*subVolumeZ) + k;
+						for (int k = 0; k < reconDimensionZ; k++) {
+							int index = (n * subVolumeZ) + k;
 							if (showStatus) {
-								float currentStep = (n*maxProjectionNumber*2) + maxProjectionNumber + k;
+								float currentStep = (n * maxProjectionNumber * 2) + maxProjectionNumber + k;
 								IJ.showStatus("Fetching Volume from OpenCL");
-								IJ.showProgress(currentStep/all);
+								IJ.showProgress(currentStep / all);
 							}
 							if (index < originalReconDimZ) {
-								for (int j = 0; j < projectionVolume.getSize()[1]; j++){
-									for (int i = 0; i < projectionVolume.getSize()[0]; i++){
-										float value = h_volume[(((projectionVolume.getSize()[1] * k) + j) * projectionVolume.getSize()[0]) + i];
-										double[][] voxel = new double [4][1];
+								for (int j = 0; j < projectionVolume.getSize()[1]; j++) {
+									for (int i = 0; i < projectionVolume.getSize()[0]; i++) {
+										float value = h_volume[(((projectionVolume.getSize()[1] * k) + j)
+												* projectionVolume.getSize()[0]) + i];
+										double[][] voxel = new double[4][1];
 										voxel[0][0] = (voxelSpacingX * i) - offsetX;
 										voxel[1][0] = (voxelSpacingY * j) - offsetY;
 										voxel[2][0] = (voxelSpacingZ * index) - originalOffsetZ;
@@ -647,53 +621,51 @@ public class OpenCLCompensatedBackProjectorTPS extends VOIBasedReconstructionFil
 				}
 			}
 
-
 		} catch (InterruptedException e) {
 
 			e.printStackTrace();
 		}
-		if (showStatus) IJ.showProgress(1.0);
+		if (showStatus)
+			IJ.showProgress(1.0);
 		unload();
-		if (debug) System.out.println("Unloaded");
+		if (debug)
+			System.out.println("Unloaded");
 	}
 
-	private synchronized void workOnProjectionData(){
-		if (projectionsAvailable.size() > 0){
+	private synchronized void workOnProjectionData() {
+		if (projectionsAvailable.size() > 0) {
 			Integer current = projectionsAvailable.get(0);
 			projectionsAvailable.remove(0);
 			int p = current.intValue();
-			projectSingleProjection(p,  
-					getGeometry().getReconDimensionZ());
+			projectSingleProjection(p, getGeometry().getReconDimensionZ());
 			projectionsDone.add(current);
-		}	
+		}
 	}
 
-	private synchronized void checkProjectionData(){
-		if (projectionsAvailable.size() > 0){
+	private synchronized void checkProjectionData() {
+		if (projectionsAvailable.size() > 0) {
 			Integer current = projectionsAvailable.get(0);
 			projectionsAvailable.remove(current);
 			projectionsDone.add(current);
-		}	
+		}
 	}
 
-
-	public Grid3D reconstructCL(){
+	public Grid3D reconstructCL() {
 		init();
 		int n = inputQueue.size();
 		if (showStatus)
 			IJ.showStatus(this.getToolName());
-		for (int i = 0; i < n; i++){
+		for (int i = 0; i < n; i++) {
 			backproject(inputQueue.get(i), i);
 		}
 		waitForResult();
-		if (Configuration.getGlobalConfiguration().getUseHounsfieldScaling()) applyHounsfieldScaling();
+		if (Configuration.getGlobalConfiguration().getUseHounsfieldScaling())
+			applyHounsfieldScaling();
 
 		//projectionVolume.show();
 		return projectionVolume;
 
-
 	}
-
 
 	public void loadInputQueue(ImageGridBuffer inp) throws IOException {
 		inputQueue = inp;
@@ -733,15 +705,15 @@ public class OpenCLCompensatedBackProjectorTPS extends VOIBasedReconstructionFil
 	}
 
 	public SimpleMatrix getInitialRigidTransform() {
-		if (initialRigidTransform != null){
+		if (initialRigidTransform != null) {
 			SimpleMatrix out = SimpleMatrix.I_4.clone();
 			for (int j = 0; j < 4; j++) {
 				for (int i = 0; i < 3; i++) {
-					out.setElementValue(i, j, initialRigidTransform[j*3+i]);
+					out.setElementValue(i, j, initialRigidTransform[j * 3 + i]);
 				}
 			}
 			return out;
-		}else
+		} else
 			return null;
 	}
 
@@ -750,14 +722,13 @@ public class OpenCLCompensatedBackProjectorTPS extends VOIBasedReconstructionFil
 			initialRigidTransform = new float[12]; // no scaling is taken into account!! 6 parameter rigid only
 		for (int j = 0; j < 4; j++) {
 			for (int i = 0; i < 3; i++) {
-				initialRigidTransform[j*3+i] = (float)initTform.getElement(i, j);
+				initialRigidTransform[j * 3 + i] = (float) initTform.getElement(i, j);
 			}
 		}
 	}
 
-
 }
 /*
- * Copyright (C) 2010-2014 Marco B�gel
+ * Copyright (C) 2010-2014 Marco Bögel
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
  */

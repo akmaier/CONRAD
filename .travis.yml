@@ -1,8 +1,5 @@
 language: java
 
-install:
-  - export JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8
-
 jdk:
   - oraclejdk8
   - oraclejdk9

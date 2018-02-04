@@ -40,23 +40,23 @@ public class DisplayAtract {
 	 */
 	public static void main(String[] args) {
 		// sinogram params
-		double maxTheta=Math.PI,       // [rad]
-			   deltaTheta=Math.PI/360, // [rad]
-			   maxS=150,               // [mm]
-			   deltaS=1.0;             // [mm]
+		double maxTheta = Math.PI, // [rad]
+				deltaTheta = Math.PI / 360, // [rad]
+				maxS = 150, // [mm]
+				deltaS = 1.0; // [mm]
 		// image params
-		int imgSzXMM = 150,            // [mm]
-			imgSzYMM = imgSzXMM;       // [mm]
-		float pxSzXMM = 1.0f,          // [mm]
-			pxSzYMM = pxSzXMM;         // [mm]
+		int imgSzXMM = 150, // [mm]
+				imgSzYMM = imgSzXMM; // [mm]
+		float pxSzXMM = 1.0f, // [mm]
+				pxSzYMM = pxSzXMM; // [mm]
 
 		//float focalLength = 400, maxBeta = (float) Math.PI*2, deltaBeta = maxBeta / 200, maxT = 200, deltaT = 1;
 
 		int phantomType = 3; // 0 = circle, 1 = MickeyMouse, 2 = TestObject1,
-							// 3=DotsGrid
-		// size in grid units
+								// 3=DotsGrid
+								// size in grid units
 		int imgSzXGU = (int) Math.floor(imgSzXMM / pxSzXMM), // [GU]
-			imgSzYGU = (int) Math.floor(imgSzYMM / pxSzYMM); // [GU]
+				imgSzYGU = (int) Math.floor(imgSzYMM / pxSzYMM); // [GU]
 		new ImageJ();
 
 		ParallelProjector2D projector = new ParallelProjector2D(maxTheta, deltaTheta, maxS, deltaS);
@@ -83,66 +83,59 @@ public class DisplayAtract {
 
 		phantom.setSpacing(pxSzXMM, pxSzYMM);
 		// origin is given in (negative) world coordinates
-		phantom.setOrigin(-(imgSzXGU * phantom.getSpacing()[0]) / 2.0,
-				-(imgSzYGU * phantom.getSpacing()[1]) / 2.0);
+		phantom.setOrigin(-(imgSzXGU * phantom.getSpacing()[0]) / 2.0, -(imgSzYGU * phantom.getSpacing()[1]) / 2.0);
 		phantom.show();
 		Grid2D grid = phantom;
-		
+
 		// create projections
 		Grid2D sinoRay = projector.projectRayDriven(grid);
 		sinoRay.show("Sino CPU Ray");
-		
+
 		int maxSIndex = (int) (maxS / deltaS + 1);
 		int maxThetaIndex = (int) (maxTheta / deltaTheta + 1);
 		Kollimator koll = new Kollimator(maxThetaIndex, maxSIndex);
-		
+
 		koll.applyToGrid(sinoRay, 50);
 		sinoRay.show("Kolli");
-	
+
 		AtractFilter1D at = new AtractFilter1D();
 		at.applyToGrid(sinoRay);
-		
+
 		ParallelBackprojector2D bp = new ParallelBackprojector2D(imgSzXMM, imgSzYMM, pxSzXMM, pxSzYMM);
 		Grid2D recon = bp.backprojectRayDriven(sinoRay);
 
 		recon.show("Reconstruction");
 
-		
 		Grid2D sinoRay2 = projector.projectRayDriven(grid);
 		sinoRay2.show("Sino CPU Ray");
-		RamLakKernel ramLak = new RamLakKernel((int) (maxS / deltaS),
-				deltaS);
+		RamLakKernel ramLak = new RamLakKernel((int) (maxS / deltaS), deltaS);
 		for (int theta = 0; theta < sinoRay2.getSize()[0]; ++theta) {
-			 ramLak.applyToGrid(sinoRay2.getSubGrid(theta));
+			ramLak.applyToGrid(sinoRay2.getSubGrid(theta));
 		}
 		Grid2D recon2 = bp.backprojectRayDriven(sinoRay2);
 		recon2.show("Normal Reconstruction");
-		
+
 		Grid2D sinoRay3 = projector.projectRayDriven(grid);
 		sinoRay3.show("Sino CPU Ray");
-		
-		
+
 		koll.applyToGrid(sinoRay3, 50);
 		sinoRay3.show("Kolli");
-	
+
 		AtractFilter2D at2 = new AtractFilter2D();
 		at2.applyToGrid2D(sinoRay3);
-		
+
 		Grid2D recon3 = bp.backprojectRayDriven(sinoRay3);
 
 		recon3.show("Reconstruction");
-		
-		
-		
-		
-		@SuppressWarnings("unused")
-		double focalLength = 800, maxT = maxS, deltaT = deltaS, gammaM = Math
-				.atan2(maxT / 2.f /*- 0.5*/, focalLength), maxBeta = Math.PI * 2, deltaBeta = maxBeta / 180;
 
-Configuration.loadConfiguration();
-		
+		@SuppressWarnings("unused")
+		double focalLength = 800, maxT = maxS, deltaT = deltaS, gammaM = Math.atan2(maxT / 2.f /*- 0.5*/, focalLength),
+				maxBeta = Math.PI * 2, deltaBeta = maxBeta / 180;
+
+		Configuration.loadConfiguration();
+
 		Configuration conf = Configuration.getGlobalConfiguration();
-		
+
 		Trajectory geo = conf.getGeometry();
 		int maxU = geo.getDetectorWidth();
 		int maxV = geo.getDetectorHeight();
@@ -159,69 +152,57 @@ Configuration.loadConfiguration();
 		Grid3D sino = cbp.projectRayDrivenCL(grid3);
 
 		sino.show("sinoCL");
-		ConeBeamCosineFilter cbFilter = new ConeBeamCosineFilter(conf
-				.getGeometry().getSourceToDetectorDistance(), conf
-				.getGeometry().getDetectorWidth(), conf.getGeometry().getDetectorHeight(),1.0, 1.0);
+		ConeBeamCosineFilter cbFilter = new ConeBeamCosineFilter(conf.getGeometry().getSourceToDetectorDistance(),
+				conf.getGeometry().getDetectorWidth(), conf.getGeometry().getDetectorHeight(), 1.0, 1.0);
 
 		for (int i = 0; i < conf.getGeometry().getProjectionStackSize(); ++i) {
 			cbFilter.applyToGrid(sino.getSubGrid(i));
 
-			float D = (float) conf
-					.getGeometry().getSourceToDetectorDistance();
-			NumericPointwiseOperators.multiplyBy(sino.getSubGrid(i), (float) (D*D * Math.PI / geo.getNumProjectionMatrices()));
+			float D = (float) conf.getGeometry().getSourceToDetectorDistance();
+			NumericPointwiseOperators.multiplyBy(sino.getSubGrid(i),
+					(float) (D * D * Math.PI / geo.getNumProjectionMatrices()));
 		}
 		sino.show("sinoFilt");
-		
-	
-		
+
 		Kollimator koll3 = new Kollimator();
-		
+
 		koll3.applyToGrid(sino, 100, 100);
 		sino.show("Kolli");
-		
+
 		AtractFilter2D af = new AtractFilter2D();
 		af.applyToGrid2D(sino);
-		
-		
-		
-		
+
 		ConeBeamBackprojector cbbp = new ConeBeamBackprojector();
 		Grid3D recImage = cbbp.backprojectPixelDrivenCL(sino);
-		CylinderVolumeMask mask = new CylinderVolumeMask(imgSizeX, imgSizeY, imgSizeX/2, imgSizeY/2, 20);
+		CylinderVolumeMask mask = new CylinderVolumeMask(imgSizeX, imgSizeY, imgSizeX / 2, imgSizeY / 2, 20);
 		mask.applyToGrid(recImage);
 		recImage.show("recImage");
 
-	
-		
 		Grid3D sino2 = cbp.projectRayDrivenCL(grid3);
 
-		
 		koll3.applyToGrid(sino2, 100, 100);
 		sino2.show("Kolli");
-		
+
 		RamLakKernel ramK = new RamLakKernel(maxU, deltaU);
 		for (int i = 0; i < conf.getGeometry().getProjectionStackSize(); ++i) {
 			cbFilter.applyToGrid(sino2.getSubGrid(i));
-			for (int j = 0;j <maxV; ++j)
+			for (int j = 0; j < maxV; ++j)
 				ramK.applyToGrid(sino2.getSubGrid(i).getSubGrid(j));
-			float D = (float) conf
-					.getGeometry().getSourceToDetectorDistance();
-			NumericPointwiseOperators.multiplyBy(sino2.getSubGrid(i), (float) (D*D * Math.PI / geo.getNumProjectionMatrices()));
+			float D = (float) conf.getGeometry().getSourceToDetectorDistance();
+			NumericPointwiseOperators.multiplyBy(sino2.getSubGrid(i),
+					(float) (D * D * Math.PI / geo.getNumProjectionMatrices()));
 		}
 		sino2.show("sinoFilt");
-		
-	
+
 		Grid3D recImage2 = cbbp.backprojectPixelDrivenCL(sino2);
-		
+
 		mask.applyToGrid(recImage2);
 		recImage2.show("recImage");
 
-
-	
 	}
 
 }
 /*
- * Copyright (C) 2010-2014  Marco B�gel
+ * Copyright (C) 2010-2014  Marco Bögel
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
 */

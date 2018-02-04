@@ -150,6 +150,6 @@ public class BorderRemoval1D {
 
 }
 /*
- * Copyright (C) 2010-2014  Marco Bögel
+ * Copyright (C) 2010-2014  Marco BÃ¶gel
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
 */

@@ -21,14 +21,13 @@ import edu.stanford.rsl.conrad.rendering.PriorityRayTracer;
 import edu.stanford.rsl.conrad.utils.CONRAD;
 import edu.stanford.rsl.tutorial.physics.XRayTracer.RaytraceResult;
 
-
 /**
  * Raytraces x-rays and saves the results.
  * 
- * @author Fabian Rückert
+ * @author Fabian RÃ¼ckert
  */
 
-public class XRayWorker implements Runnable{
+public class XRayWorker implements Runnable {
 
 	private StraightLine startRay;
 	private AbstractRayTracer raytracer;
@@ -39,18 +38,20 @@ public class XRayWorker implements Runnable{
 	XRayDetector detector;
 	private boolean writeAdditionalData = true;
 	Projection proj;
-	
+
 	//set a ThreadLocalRandom generator for improved performance, 
 	//however you can't set the random seed explicitly for this one and it seems to produce the same random numbers every time for a thread
 	//TODO use a better random number generator
-	XRayTracerSampling sampler =new XRayTracerSampling(ThreadLocalRandom.current());
+	XRayTracerSampling sampler = new XRayTracerSampling(ThreadLocalRandom.current());
 	private boolean infiniteSimulation;
-	
+
 	//variables for statistics
 	private volatile long simulatedRays = 0;
 	private volatile long detectorHits = 0;
-	
-	public XRayWorker(StraightLine startRay, PriorityRayTracer raytracer, RaytraceResult res, int numRays, int startenergyEV, Grid2D grid, XRayDetector detector, Projection proj, boolean infinite, boolean writeAdditionalData){
+
+	public XRayWorker(StraightLine startRay, PriorityRayTracer raytracer, RaytraceResult res, int numRays,
+			int startenergyEV, Grid2D grid, XRayDetector detector, Projection proj, boolean infinite,
+			boolean writeAdditionalData) {
 		this.startRay = startRay;
 		this.raytracer = raytracer;
 		this.result = res;
@@ -61,9 +62,9 @@ public class XRayWorker implements Runnable{
 		this.proj = proj;
 		this.infiniteSimulation = infinite;
 		this.writeAdditionalData = writeAdditionalData;
-		
-		if (infiniteSimulation){
-			if (writeAdditionalData){
+
+		if (infiniteSimulation) {
+			if (writeAdditionalData) {
 				System.err.println("Warning: Not saving additional data in infinite simulation.");
 				this.writeAdditionalData = false;
 			}
@@ -79,41 +80,41 @@ public class XRayWorker implements Runnable{
 		//if infiniteSimulation send infinite rays until aborted by the user
 		for (simulatedRays = 0; simulatedRays < numRays || infiniteSimulation; ++simulatedRays) {
 			//print out progress after 2000 rays
-			if(!infiniteSimulation && simulatedRays%2000 == 0 && simulatedRays != 0){
-				System.out.println((float)(simulatedRays* 100*100/numRays )/100+ "%");
+			if (!infiniteSimulation && simulatedRays % 2000 == 0 && simulatedRays != 0) {
+				System.out.println((float) (simulatedRays * 100 * 100 / numRays) / 100 + "%");
 			}
-			
-			if (XRayTracer.TEST_MODE){
+
+			if (XRayTracer.TEST_MODE) {
 				//send every photon in the direction of the startray
 				raytrace(startRay, startEnergyEV, 0, 0);
 			} else {
 				//send a ray to a random pixel of the detector
-				StraightLine ray = new StraightLine(startRay.getPoint(), proj.computeRayDirection(new SimpleVector(sampler.random() * grid.getWidth(), sampler.random() *grid.getHeight())));
+				StraightLine ray = new StraightLine(startRay.getPoint(), proj.computeRayDirection(
+						new SimpleVector(sampler.random() * grid.getWidth(), sampler.random() * grid.getHeight())));
 				raytrace(ray, startEnergyEV, 0, 0);
 			}
-			
+
 		}
 	}
-	
-	public long getRayCount(){
+
+	public long getRayCount() {
 		//a lock is not needed as reading of a volatile long is atomic
 		return simulatedRays;
 	}
-	
-	public long getDetectorHits(){
+
+	public long getDetectorHits() {
 		//a lock is not needed as reading of a volatile long is atomic
 		return detectorHits;
 	}
-	
+
 	/**
 	 * Combine the results of this worker with the finalresult
 	 * @param finalResult	The combined result
 	 */
-	public void addResults(RaytraceResult finalResult){
+	public void addResults(RaytraceResult finalResult) {
 		finalResult.addResults(result);
 	}
-		
-	
+
 	/**
 	 * Trace a single photon until it is absorbed or it left the scene.
 	 * @param ray The position and direction of the photon
@@ -131,7 +132,7 @@ public class XRayWorker implements Runnable{
 
 		//check if ray is inside the scene limits
 		BoundingBox bb = new BoundingBox(raytracer.getScene().getMin(), raytracer.getScene().getMax());
-		if (!bb.isSatisfiedBy(ray.getPoint())){
+		if (!bb.isSatisfiedBy(ray.getPoint())) {
 			return;
 		}
 
@@ -175,7 +176,8 @@ public class XRayWorker implements Runnable{
 			PointND start = reversed ? e.getEnd() : e.getPoint();
 			end = reversed ? e.getPoint() : e.getEnd();
 
-			if (foundStartSegment || isBetween(start.getAbstractVector(), end.getAbstractVector(), rayPoint.getAbstractVector())) {
+			if (foundStartSegment
+					|| isBetween(start.getAbstractVector(), end.getAbstractVector(), rayPoint.getAbstractVector())) {
 				// get length between the raypoint and the next material in ray direction
 				distToNextMaterial = rayPoint.euclideanDistance(end);
 
@@ -188,12 +190,15 @@ public class XRayWorker implements Runnable{
 			if (distToNextMaterial > CONRAD.SMALL_VALUE) {
 				// get distance until next physics interaction
 				currentMaterial = currentLineSegment.getMaterial();
-				
+
 				//this lookup slows down the RayTracer because it is synchronized
-				photoAbsorption = currentMaterial.getAttenuation(energyEV / 1000, AttenuationType.PHOTOELECTRIC_ABSORPTION);
-				comptonAbsorption = currentMaterial.getAttenuation(energyEV / 1000, AttenuationType.INCOHERENT_ATTENUATION);
-				
-				double distToNextInteraction = 10 * sampler.getDistanceUntilNextInteractionCm(photoAbsorption, comptonAbsorption);
+				photoAbsorption = currentMaterial.getAttenuation(energyEV / 1000,
+						AttenuationType.PHOTOELECTRIC_ABSORPTION);
+				comptonAbsorption = currentMaterial.getAttenuation(energyEV / 1000,
+						AttenuationType.INCOHERENT_ATTENUATION);
+
+				double distToNextInteraction = 10
+						* sampler.getDistanceUntilNextInteractionCm(photoAbsorption, comptonAbsorption);
 				if (distToNextInteraction < distToNextMaterial) {
 					// ray interacts in current line segment, move the photon to the interaction point
 					SimpleVector p = rayPoint.getAbstractVector();
@@ -205,7 +210,6 @@ public class XRayWorker implements Runnable{
 					rayPoint = new PointND(end);
 					totalDistUntilNextInteraction += distToNextMaterial;
 
-
 				}
 			}
 
@@ -214,17 +218,18 @@ public class XRayWorker implements Runnable{
 
 		}
 
-		if (currentMaterial == null){
+		if (currentMaterial == null) {
 			//ray left the scene
 			return;
 		}
-		
-		writeStepResults(result, energyEV, totalDistUntilNextInteraction, rayPoint, new Edge(ray.getPoint().clone(), rayPoint.clone()));
+
+		writeStepResults(result, energyEV, totalDistUntilNextInteraction, rayPoint,
+				new Edge(ray.getPoint().clone(), rayPoint.clone()));
 
 		//if the ray hit the detector box, write the result to the grid
-		if (currentLineSegment.getNameString() != null && currentLineSegment.getNameString().equals("detector")){
+		if (currentLineSegment.getNameString() != null && currentLineSegment.getNameString().equals("detector")) {
 			synchronized (grid) {
-				((XRayDetector)currentLineSegment.getParent()).absorbPhoton(grid, rayPoint , energyEV);
+				((XRayDetector) currentLineSegment.getParent()).absorbPhoton(grid, rayPoint, energyEV);
 			}
 			detectorHits++;
 			return;
@@ -240,7 +245,7 @@ public class XRayWorker implements Runnable{
 			// calculate new energy and new direction
 			SimpleVector dir = ray.getDirection().clone();
 
-			if (XRayTracer.SAMPLE_GEANT4){
+			if (XRayTracer.SAMPLE_GEANT4) {
 				energyEV = sampler.sampleComptonScatteringGeant4(energyEV, dir);
 			} else {
 				energyEV = sampler.sampleComptonScattering(energyEV, dir);
@@ -252,8 +257,7 @@ public class XRayWorker implements Runnable{
 		}
 
 	}
-	
-	
+
 	/**
 	 * Check if a point x lies between the points a and b, when it is already know that all three points are on a straight line.
 	 * @return If x is between a and b
@@ -269,10 +273,10 @@ public class XRayWorker implements Runnable{
 		if (dot < 0)
 			return false;
 
-		double squaredlength = bminusa.getElement(0) * bminusa.getElement(0) + bminusa.getElement(1) * bminusa.getElement(1) + bminusa.getElement(2) * bminusa.getElement(2);
+		double squaredlength = bminusa.getElement(0) * bminusa.getElement(0)
+				+ bminusa.getElement(1) * bminusa.getElement(1) + bminusa.getElement(2) * bminusa.getElement(2);
 		return dot <= squaredlength;
 	}
-
 
 	/**
 	 * Saves the results for this ray interaction
@@ -282,20 +286,22 @@ public class XRayWorker implements Runnable{
 	 * @param rayPoint The point of interaction
 	 * @param e	The edge between the last interaction point and the current one
 	 */
-	private void writeStepResults(RaytraceResult result, double energyEV, double totalDistUntilNextInteraction, PointND rayPoint, Edge e) {
-		
+	private void writeStepResults(RaytraceResult result, double energyEV, double totalDistUntilNextInteraction,
+			PointND rayPoint, Edge e) {
+
 		result.pathlength += totalDistUntilNextInteraction;
-		result.pathlength2 += totalDistUntilNextInteraction*totalDistUntilNextInteraction;
+		result.pathlength2 += totalDistUntilNextInteraction * totalDistUntilNextInteraction;
 
 		result.count += 1;
 		result.x += rayPoint.get(0);
-		result.x2 += rayPoint.get(0)*rayPoint.get(0);
+		result.x2 += rayPoint.get(0) * rayPoint.get(0);
 		result.y += rayPoint.get(1);
-		result.y2 += rayPoint.get(1)*rayPoint.get(1);
+		result.y2 += rayPoint.get(1) * rayPoint.get(1);
 		result.z += rayPoint.get(2);
-		result.z2 += rayPoint.get(2)*rayPoint.get(2);
-		
-		if (!writeAdditionalData) return;
+		result.z2 += rayPoint.get(2) * rayPoint.get(2);
+
+		if (!writeAdditionalData)
+			return;
 
 		result.points.add(rayPoint);
 		float factor = (((float) energyEV / startEnergyEV));
@@ -303,5 +309,5 @@ public class XRayWorker implements Runnable{
 
 		result.edges.add(e);
 	}
-	
+
 }

@@ -23,8 +23,7 @@ public class RadialBasisFunctionInterpolation {
 
 	private RBF type;
 
-	public RadialBasisFunctionInterpolation(RBF type, int c,
-			ArrayList<PointND> points, double[] values) {
+	public RadialBasisFunctionInterpolation(RBF type, int c, ArrayList<PointND> points, double[] values) {
 		this.gridPoints = points;
 		this.values = values;
 		this.c = c;
@@ -42,11 +41,7 @@ public class RadialBasisFunctionInterpolation {
 			for (int j = 0; j < n; j++) {
 				rhs.setElementValue(j, values[j]);
 				for (int k = 0; k < n; k++) {
-					double val = Math.sqrt(c
-							* c
-							+ Math.pow(
-									gridPoints.get(j).euclideanDistance(
-											gridPoints.get(k)), 2));
+					double val = Math.sqrt(c * c + Math.pow(gridPoints.get(j).euclideanDistance(gridPoints.get(k)), 2));
 					A.setElementValue(j, k, val);
 				}
 			}
@@ -54,8 +49,7 @@ public class RadialBasisFunctionInterpolation {
 			for (int j = 0; j < n; j++) {
 				rhs.setElementValue(j, values[j]);
 				for (int k = 0; k < n; k++) {
-					double r = gridPoints.get(j).euclideanDistance(
-							gridPoints.get(k));
+					double r = gridPoints.get(j).euclideanDistance(gridPoints.get(k));
 					double val = r > 0 ? r * r + Math.log(r + 0.000001) : 0;
 					A.setElementValue(j, k, val);
 				}
@@ -65,8 +59,7 @@ public class RadialBasisFunctionInterpolation {
 			for (int j = 0; j < n; j++) {
 				rhs.setElementValue(j, values[j]);
 				for (int k = 0; k < n; k++) {
-					double r = gridPoints.get(j).euclideanDistance(
-							gridPoints.get(k));
+					double r = gridPoints.get(j).euclideanDistance(gridPoints.get(k));
 					double val = Math.exp((-r * r) / (sigmasquare));
 					A.setElementValue(j, k, val);
 				}
@@ -82,11 +75,7 @@ public class RadialBasisFunctionInterpolation {
 		if (type == RBF.MQ) {
 			for (int i = 0; i < coefficients.getLen(); i++) {
 				val += coefficients.getElement(i)
-						* Math.sqrt(c
-								* c
-								+ Math.pow(
-										pt.euclideanDistance(gridPoints.get(i)),
-										2));
+						* Math.sqrt(c * c + Math.pow(pt.euclideanDistance(gridPoints.get(i)), 2));
 			}
 		} else if (type == RBF.TPS) {
 			for (int i = 0; i < coefficients.getLen(); i++) {
@@ -98,8 +87,7 @@ public class RadialBasisFunctionInterpolation {
 			double sigmasquare = 100;
 			for (int i = 0; i < coefficients.getLen(); i++) {
 				double r = pt.euclideanDistance(gridPoints.get(i));
-				val += coefficients.getElement(i)
-						* Math.exp((-r * r) / sigmasquare);
+				val += coefficients.getElement(i) * Math.exp((-r * r) / sigmasquare);
 			}
 		}
 		return val;
@@ -133,28 +121,24 @@ public class RadialBasisFunctionInterpolation {
 			values[i + 7 + 250] = 0;
 		}
 
-		RadialBasisFunctionInterpolation rad = new RadialBasisFunctionInterpolation(
-				RBF.MQ, 1, points, values);
+		RadialBasisFunctionInterpolation rad = new RadialBasisFunctionInterpolation(RBF.MQ, 1, points, values);
 
 		Grid2D grid = new Grid2D(500, 500);
 
 		for (int i = 0; i < 500; i++) {
 			for (int j = 0; j < 500; j++) {
-				grid.setAtIndex(i, j,
-						(float) rad.interpolate(new PointND(i, j)));
+				grid.setAtIndex(i, j, (float) rad.interpolate(new PointND(i, j)));
 			}
 		}
 		grid.show();
 
-		RadialBasisFunctionInterpolation rad2 = new RadialBasisFunctionInterpolation(
-				RBF.TPS, 2, points, values);
+		RadialBasisFunctionInterpolation rad2 = new RadialBasisFunctionInterpolation(RBF.TPS, 2, points, values);
 
 		Grid2D grid2 = new Grid2D(500, 500);
 
 		for (int i = 0; i < 500; i++) {
 			for (int j = 0; j < 500; j++) {
-				grid2.setAtIndex(i, j,
-						(float) rad2.interpolate(new PointND(i, j)));
+				grid2.setAtIndex(i, j, (float) rad2.interpolate(new PointND(i, j)));
 			}
 		}
 		grid2.show();
@@ -162,6 +146,6 @@ public class RadialBasisFunctionInterpolation {
 	}
 }
 /*
- * Copyright (C) 2010-2014 Marco Bögel
+ * Copyright (C) 2010-2014 Marco BÃ¶gel
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
 */

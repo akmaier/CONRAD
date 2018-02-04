@@ -95,6 +95,6 @@ public class AtractResidual2D extends IndividualImageFilteringTool {
 }
 
 /*
- * Copyright (C) 2010-2014 - Marco Bögel, Martin Berger 
+ * Copyright (C) 2010-2014 - Marco Boegel, Martin Berger 
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
 */

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2014 - Andreas Maier, Marco B�gel 
+ * Copyright (C) 2010-2014 - Andreas Maier, Marco Bögel 
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
  */
 package edu.stanford.rsl.apps.gui;
@@ -89,292 +89,176 @@ public class TrajectoryEditor extends JFrame {
 				getContentPane().setLayout(thisLayout);
 				{
 					jLabelLeft = new JLabel();
-					getContentPane().add(
-							jLabelLeft,
-							new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
-									GridBagConstraints.CENTER,
-									GridBagConstraints.NONE, new Insets(0, 0,
-											0, 0), 0, 0));
+					getContentPane().add(jLabelLeft, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
+							GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 					jLabelLeft.setText("Matrix Left");
 				}
 				{
 					jLabelMatrixRight = new JLabel();
-					getContentPane().add(
-							jLabelMatrixRight,
-							new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0,
-									GridBagConstraints.CENTER,
-									GridBagConstraints.NONE, new Insets(0, 0,
-											0, 0), 0, 0));
+					getContentPane().add(jLabelMatrixRight, new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0,
+							GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 					jLabelMatrixRight.setText("Matrix Right");
 				}
 				{
 					JLabelPMatrix = new JLabel();
-					getContentPane().add(
-							JLabelPMatrix,
-							new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0,
-									GridBagConstraints.CENTER,
-									GridBagConstraints.NONE, new Insets(0, 0,
-											0, 0), 0, 0));
+					getContentPane().add(JLabelPMatrix, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0,
+							GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 					JLabelPMatrix.setText("Projection Matrix");
 				}
 				{
 					jLabelP = new JLabel();
-					getContentPane().add(
-							jLabelP,
-							new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0,
-									GridBagConstraints.SOUTH,
-									GridBagConstraints.NONE, new Insets(0, 0,
-											-10, 0), 0, 0));
+					getContentPane().add(jLabelP, new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0, GridBagConstraints.SOUTH,
+							GridBagConstraints.NONE, new Insets(0, 0, -10, 0), 0, 0));
 					jLabelP.setText("x P x");
 				}
 				{
 					jA11 = new JTextField();
-					getContentPane().add(
-							jA11,
-							new GridBagConstraints(2, 2, 1, 1, 0.0, 0.0,
-									GridBagConstraints.NORTHWEST,
-									GridBagConstraints.NONE, new Insets(5, 5,
-											0, 0), 0, 0));
+					getContentPane().add(jA11, new GridBagConstraints(2, 2, 1, 1, 0.0, 0.0,
+							GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(5, 5, 0, 0), 0, 0));
 					jA11.setText("1");
 				}
 				{
 					jA12 = new JTextField();
-					getContentPane().add(
-							jA12,
-							new GridBagConstraints(2, 2, 1, 1, 0.0, 0.0,
-									GridBagConstraints.NORTH,
-									GridBagConstraints.NONE, new Insets(5, 0,
-											0, 40), 0, 0));
+					getContentPane().add(jA12, new GridBagConstraints(2, 2, 1, 1, 0.0, 0.0, GridBagConstraints.NORTH,
+							GridBagConstraints.NONE, new Insets(5, 0, 0, 40), 0, 0));
 					jA12.setText("0");
 				}
 				{
 					jA13 = new JTextField();
-					getContentPane().add(
-							jA13,
-							new GridBagConstraints(2, 2, 1, 1, 0.0, 0.0,
-									GridBagConstraints.NORTH,
-									GridBagConstraints.NONE, new Insets(5, 0,
-											0, -40), 0, 0));
+					getContentPane().add(jA13, new GridBagConstraints(2, 2, 1, 1, 0.0, 0.0, GridBagConstraints.NORTH,
+							GridBagConstraints.NONE, new Insets(5, 0, 0, -40), 0, 0));
 					jA13.setText("0");
 				}
 				{
 					jA14 = new JTextField();
-					getContentPane().add(
-							jA14,
-							new GridBagConstraints(2, 2, 1, 1, 0.0, 0.0,
-									GridBagConstraints.NORTHEAST,
-									GridBagConstraints.NONE, new Insets(5, 0,
-											0, 5), 0, 0));
+					getContentPane().add(jA14, new GridBagConstraints(2, 2, 1, 1, 0.0, 0.0,
+							GridBagConstraints.NORTHEAST, GridBagConstraints.NONE, new Insets(5, 0, 0, 5), 0, 0));
 					jA14.setText("0");
 				}
 				{
 					jA24 = new JTextField();
-					getContentPane().add(
-							jA24,
-							new GridBagConstraints(2, 2, 1, 1, 0.0, 0.0,
-									GridBagConstraints.SOUTHEAST,
-									GridBagConstraints.NONE, new Insets(0, 0,
-											5, 5), 0, 0));
+					getContentPane().add(jA24, new GridBagConstraints(2, 2, 1, 1, 0.0, 0.0,
+							GridBagConstraints.SOUTHEAST, GridBagConstraints.NONE, new Insets(0, 0, 5, 5), 0, 0));
 					jA24.setText("0");
 				}
 				{
 					jA23 = new JTextField();
-					getContentPane().add(
-							jA23,
-							new GridBagConstraints(2, 2, 1, 1, 0.0, 0.0,
-									GridBagConstraints.SOUTH,
-									GridBagConstraints.NONE, new Insets(0, 0,
-											5, -40), 0, 0));
+					getContentPane().add(jA23, new GridBagConstraints(2, 2, 1, 1, 0.0, 0.0, GridBagConstraints.SOUTH,
+							GridBagConstraints.NONE, new Insets(0, 0, 5, -40), 0, 0));
 					jA23.setText("0");
 				}
 				{
 					jA22 = new JTextField();
-					getContentPane().add(
-							jA22,
-							new GridBagConstraints(2, 2, 1, 1, 0.0, 0.0,
-									GridBagConstraints.SOUTH,
-									GridBagConstraints.NONE, new Insets(0, 0,
-											5, 40), 0, 0));
+					getContentPane().add(jA22, new GridBagConstraints(2, 2, 1, 1, 0.0, 0.0, GridBagConstraints.SOUTH,
+							GridBagConstraints.NONE, new Insets(0, 0, 5, 40), 0, 0));
 					jA22.setText("1");
 				}
 				{
 					jA21 = new JTextField();
-					getContentPane().add(
-							jA21,
-							new GridBagConstraints(2, 2, 1, 1, 0.0, 0.0,
-									GridBagConstraints.SOUTHWEST,
-									GridBagConstraints.NONE, new Insets(0, 5,
-											5, 0), 0, 0));
+					getContentPane().add(jA21, new GridBagConstraints(2, 2, 1, 1, 0.0, 0.0,
+							GridBagConstraints.SOUTHWEST, GridBagConstraints.NONE, new Insets(0, 5, 5, 0), 0, 0));
 					jA21.setText("0");
 				}
 				{
 					jA44 = new JTextField();
-					getContentPane().add(
-							jA44,
-							new GridBagConstraints(2, 3, 1, 1, 0.0, 0.0,
-									GridBagConstraints.SOUTHEAST,
-									GridBagConstraints.NONE, new Insets(0, 0,
-											5, 5), 0, 0));
+					getContentPane().add(jA44, new GridBagConstraints(2, 3, 1, 1, 0.0, 0.0,
+							GridBagConstraints.SOUTHEAST, GridBagConstraints.NONE, new Insets(0, 0, 5, 5), 0, 0));
 					jA44.setText("1");
 				}
 				{
 					jA43 = new JTextField();
-					getContentPane().add(
-							jA43,
-							new GridBagConstraints(2, 3, 1, 1, 0.0, 0.0,
-									GridBagConstraints.SOUTH,
-									GridBagConstraints.NONE, new Insets(0, 0,
-											5, -40), 0, 0));
+					getContentPane().add(jA43, new GridBagConstraints(2, 3, 1, 1, 0.0, 0.0, GridBagConstraints.SOUTH,
+							GridBagConstraints.NONE, new Insets(0, 0, 5, -40), 0, 0));
 					jA43.setText("0");
 				}
 				{
 					jA42 = new JTextField();
-					getContentPane().add(
-							jA42,
-							new GridBagConstraints(2, 3, 1, 1, 0.0, 0.0,
-									GridBagConstraints.SOUTH,
-									GridBagConstraints.NONE, new Insets(0, 0,
-											5, 40), 0, 0));
+					getContentPane().add(jA42, new GridBagConstraints(2, 3, 1, 1, 0.0, 0.0, GridBagConstraints.SOUTH,
+							GridBagConstraints.NONE, new Insets(0, 0, 5, 40), 0, 0));
 					jA42.setText("0");
 				}
 				{
 					jA41 = new JTextField();
-					getContentPane().add(
-							jA41,
-							new GridBagConstraints(2, 3, 1, 1, 0.0, 0.0,
-									GridBagConstraints.SOUTHWEST,
-									GridBagConstraints.NONE, new Insets(0, 5,
-											5, 0), 0, 0));
+					getContentPane().add(jA41, new GridBagConstraints(2, 3, 1, 1, 0.0, 0.0,
+							GridBagConstraints.SOUTHWEST, GridBagConstraints.NONE, new Insets(0, 5, 5, 0), 0, 0));
 					jA41.setText("0");
 				}
 				{
 					jA34 = new JTextField();
-					getContentPane().add(
-							jA34,
-							new GridBagConstraints(2, 3, 1, 1, 0.0, 0.0,
-									GridBagConstraints.NORTHEAST,
-									GridBagConstraints.NONE, new Insets(5, 0,
-											0, 5), 0, 0));
+					getContentPane().add(jA34, new GridBagConstraints(2, 3, 1, 1, 0.0, 0.0,
+							GridBagConstraints.NORTHEAST, GridBagConstraints.NONE, new Insets(5, 0, 0, 5), 0, 0));
 					jA34.setText("0");
 				}
 				{
 					jA33 = new JTextField();
-					getContentPane().add(
-							jA33,
-							new GridBagConstraints(2, 3, 1, 1, 0.0, 0.0,
-									GridBagConstraints.NORTH,
-									GridBagConstraints.NONE, new Insets(5, 0,
-											0, -40), 0, 0));
+					getContentPane().add(jA33, new GridBagConstraints(2, 3, 1, 1, 0.0, 0.0, GridBagConstraints.NORTH,
+							GridBagConstraints.NONE, new Insets(5, 0, 0, -40), 0, 0));
 					jA33.setText("1");
 				}
 				{
 					jA32 = new JTextField();
-					getContentPane().add(
-							jA32,
-							new GridBagConstraints(2, 3, 1, 1, 0.0, 0.0,
-									GridBagConstraints.NORTH,
-									GridBagConstraints.NONE, new Insets(5, 0,
-											0, 40), 0, 0));
+					getContentPane().add(jA32, new GridBagConstraints(2, 3, 1, 1, 0.0, 0.0, GridBagConstraints.NORTH,
+							GridBagConstraints.NONE, new Insets(5, 0, 0, 40), 0, 0));
 					jA32.setText("0");
 				}
 				{
 					jA31 = new JTextField();
-					getContentPane().add(
-							jA31,
-							new GridBagConstraints(2, 3, 1, 1, 0.0, 0.0,
-									GridBagConstraints.NORTHWEST,
-									GridBagConstraints.NONE, new Insets(5, 5,
-											0, 0), 0, 0));
+					getContentPane().add(jA31, new GridBagConstraints(2, 3, 1, 1, 0.0, 0.0,
+							GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(5, 5, 0, 0), 0, 0));
 					jA31.setText("0");
 				}
 				{
 					jB11 = new JTextField();
-					getContentPane().add(
-							jB11,
-							new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0,
-									GridBagConstraints.NORTHWEST,
-									GridBagConstraints.NONE, new Insets(5, 5,
-											0, 0), 0, 0));
+					getContentPane().add(jB11, new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0,
+							GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(5, 5, 0, 0), 0, 0));
 					jB11.setText("1");
 				}
 				{
 					jB12 = new JTextField();
-					getContentPane().add(
-							jB12,
-							new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0,
-									GridBagConstraints.NORTH,
-									GridBagConstraints.NONE, new Insets(5, 0,
-											0, 0), 0, 0));
+					getContentPane().add(jB12, new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.NORTH,
+							GridBagConstraints.NONE, new Insets(5, 0, 0, 0), 0, 0));
 					jB12.setText("0");
 				}
 				{
 					jB13 = new JTextField();
-					getContentPane().add(
-							jB13,
-							new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0,
-									GridBagConstraints.NORTHEAST,
-									GridBagConstraints.NONE, new Insets(5, 0,
-											0, 5), 0, 0));
+					getContentPane().add(jB13, new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0,
+							GridBagConstraints.NORTHEAST, GridBagConstraints.NONE, new Insets(5, 0, 0, 5), 0, 0));
 					jB13.setText("0");
 				}
 				{
 					jB21 = new JTextField();
-					getContentPane().add(
-							jB21,
-							new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0,
-									GridBagConstraints.SOUTHWEST,
-									GridBagConstraints.NONE, new Insets(0, 5,
-											5, 0), 0, 0));
+					getContentPane().add(jB21, new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0,
+							GridBagConstraints.SOUTHWEST, GridBagConstraints.NONE, new Insets(0, 5, 5, 0), 0, 0));
 					jB21.setText("0");
 				}
 				{
 					jB22 = new JTextField();
-					getContentPane().add(
-							jB22,
-							new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0,
-									GridBagConstraints.SOUTH,
-									GridBagConstraints.NONE, new Insets(0, 0,
-											5, 0), 0, 0));
+					getContentPane().add(jB22, new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.SOUTH,
+							GridBagConstraints.NONE, new Insets(0, 0, 5, 0), 0, 0));
 					jB22.setText("1");
 				}
 				{
 					jB23 = new JTextField();
-					getContentPane().add(
-							jB23,
-							new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0,
-									GridBagConstraints.SOUTHEAST,
-									GridBagConstraints.NONE, new Insets(0, 0,
-											5, 5), 0, 0));
+					getContentPane().add(jB23, new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0,
+							GridBagConstraints.SOUTHEAST, GridBagConstraints.NONE, new Insets(0, 0, 5, 5), 0, 0));
 					jB23.setText("0");
 				}
 				{
 					jB31 = new JTextField();
-					getContentPane().add(
-							jB31,
-							new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0,
-									GridBagConstraints.NORTHWEST,
-									GridBagConstraints.NONE, new Insets(5, 5,
-											0, 0), 0, 0));
+					getContentPane().add(jB31, new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0,
+							GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(5, 5, 0, 0), 0, 0));
 					jB31.setText("0");
 				}
 				{
 					jB32 = new JTextField();
-					getContentPane().add(
-							jB32,
-							new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0,
-									GridBagConstraints.NORTH,
-									GridBagConstraints.NONE, new Insets(5, 0,
-											0, 0), 0, 0));
+					getContentPane().add(jB32, new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0, GridBagConstraints.NORTH,
+							GridBagConstraints.NONE, new Insets(5, 0, 0, 0), 0, 0));
 					jB32.setText("0");
 				}
 				{
 					jB33 = new JTextField();
-					getContentPane().add(
-							jB33,
-							new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0,
-									GridBagConstraints.NORTHEAST,
-									GridBagConstraints.NONE, new Insets(5, 0,
-											0, 5), 0, 0));
+					getContentPane().add(jB33, new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0,
+							GridBagConstraints.NORTHEAST, GridBagConstraints.NONE, new Insets(5, 0, 0, 5), 0, 0));
 					jB33.setText("1");
 				}
 				{
@@ -391,14 +275,9 @@ public class TrajectoryEditor extends JFrame {
 							}
 						}
 					});
-					getContentPane().add(
-							jApplyToPMatrices,
-							new GridBagConstraints(1, 4, 1, 1, 0.0, 0.0,
-									GridBagConstraints.NORTH,
-									GridBagConstraints.NONE, new Insets(insetY,
-											0, 0, 0), 0, 0));
-					jApplyToPMatrices
-							.setText("Apply to all Projection Matrices");
+					getContentPane().add(jApplyToPMatrices, new GridBagConstraints(1, 4, 1, 1, 0.0, 0.0,
+							GridBagConstraints.NORTH, GridBagConstraints.NONE, new Insets(insetY, 0, 0, 0), 0, 0));
+					jApplyToPMatrices.setText("Apply to all Projection Matrices");
 					jDeleteMatrix = new JButton();
 					jDeleteMatrix.addActionListener(new ActionListener() {
 
@@ -418,12 +297,8 @@ public class TrajectoryEditor extends JFrame {
 
 					insetY += 40;
 
-					getContentPane().add(
-							jDeleteMatrix,
-							new GridBagConstraints(1, 4, 1, 1, 0.0, 0.0,
-									GridBagConstraints.NORTH,
-									GridBagConstraints.NONE, new Insets(insetY,
-											0, 0, 0), 0, 0));
+					getContentPane().add(jDeleteMatrix, new GridBagConstraints(1, 4, 1, 1, 0.0, 0.0,
+							GridBagConstraints.NORTH, GridBagConstraints.NONE, new Insets(insetY, 0, 0, 0), 0, 0));
 					jDeleteMatrix.setText("Delete Some Projection Matrices");
 
 					jDefineRotation = new JButton();
@@ -445,12 +320,8 @@ public class TrajectoryEditor extends JFrame {
 
 					insetY += 40;
 
-					getContentPane().add(
-							jDefineRotation,
-							new GridBagConstraints(1, 4, 1, 1, 0.0, 0.0,
-									GridBagConstraints.NORTH,
-									GridBagConstraints.NONE, new Insets(insetY,
-											0, 0, 0), 0, 0));
+					getContentPane().add(jDefineRotation, new GridBagConstraints(1, 4, 1, 1, 0.0, 0.0,
+							GridBagConstraints.NORTH, GridBagConstraints.NONE, new Insets(insetY, 0, 0, 0), 0, 0));
 					jDefineRotation.setText("Define A Source Rotation");
 
 					jDefineNoise = new JButton();
@@ -472,14 +343,10 @@ public class TrajectoryEditor extends JFrame {
 
 					insetY += 40;
 
-					getContentPane().add(
-							jDefineNoise,
-							new GridBagConstraints(1, 4, 1, 1, 0.0, 0.0,
-									GridBagConstraints.NORTH,
-									GridBagConstraints.NONE, new Insets(insetY,
-											0, 0, 0), 0, 0));
+					getContentPane().add(jDefineNoise, new GridBagConstraints(1, 4, 1, 1, 0.0, 0.0,
+							GridBagConstraints.NORTH, GridBagConstraints.NONE, new Insets(insetY, 0, 0, 0), 0, 0));
 					jDefineNoise.setText("Define Trajectory Noise");
-					
+
 					jFixPrimaryAngles = new JButton();
 					jFixPrimaryAngles.addActionListener(new ActionListener() {
 
@@ -498,13 +365,8 @@ public class TrajectoryEditor extends JFrame {
 					});
 					insetY += 40;
 
-					
-					getContentPane().add(
-							jFixPrimaryAngles,
-							new GridBagConstraints(1, 4, 1, 1, 0.0, 0.0,
-									GridBagConstraints.NORTH,
-									GridBagConstraints.NONE, new Insets(insetY,
-											0, 0, 0), 0, 0));
+					getContentPane().add(jFixPrimaryAngles, new GridBagConstraints(1, 4, 1, 1, 0.0, 0.0,
+							GridBagConstraints.NORTH, GridBagConstraints.NONE, new Insets(insetY, 0, 0, 0), 0, 0));
 					jFixPrimaryAngles.setText("Fix Primary Angles");
 				}
 			}
@@ -518,35 +380,27 @@ public class TrajectoryEditor extends JFrame {
 
 	protected void fixPriamries() throws Exception {
 		double maxAngle = UserUtil.queryDouble("Enter Maximal Angular Range:", 200);
-		int numProj = Configuration.getGlobalConfiguration()
-				.getGeometry().getNumProjectionMatrices();
-		double angleStep = maxAngle / (numProj-1);
+		int numProj = Configuration.getGlobalConfiguration().getGeometry().getNumProjectionMatrices();
+		double angleStep = maxAngle / (numProj - 1);
 		double[] newPrimaries = new double[numProj];
 		double[] secondaries = null;
-		if (Configuration.getGlobalConfiguration().getGeometry()
-				.getSecondaryAngles() != null)
+		if (Configuration.getGlobalConfiguration().getGeometry().getSecondaryAngles() != null)
 			secondaries = new double[numProj];
 		for (int i = 0; i < numProj; i++) {
-			if (Configuration.getGlobalConfiguration().getGeometry()
-					.getSecondaryAngles() != null) {
-				secondaries[i] = Configuration.getGlobalConfiguration()
-						.getGeometry().getSecondaryAngles()[i];
+			if (Configuration.getGlobalConfiguration().getGeometry().getSecondaryAngles() != null) {
+				secondaries[i] = Configuration.getGlobalConfiguration().getGeometry().getSecondaryAngles()[i];
 			}
-			newPrimaries[i] = angleStep*i;
+			newPrimaries[i] = angleStep * i;
 		}
-		Configuration.getGlobalConfiguration().getGeometry()
-				.setPrimaryAngleArray(newPrimaries);
-		Configuration.getGlobalConfiguration().getGeometry()
-				.setSecondaryAngleArray(secondaries);
-		
+		Configuration.getGlobalConfiguration().getGeometry().setPrimaryAngleArray(newPrimaries);
+		Configuration.getGlobalConfiguration().getGeometry().setSecondaryAngleArray(secondaries);
+
 	}
 
 	private void deleteSome() throws Exception {
-		int maxPrimaryAngle = UserUtil.queryInt("Enter Maximum Primary Angle:",
-				180);
+		int maxPrimaryAngle = UserUtil.queryInt("Enter Maximum Primary Angle:", 180);
 		int lastValid = 0;
-		double[] primaries = Configuration.getGlobalConfiguration()
-				.getGeometry().getPrimaryAngles();
+		double[] primaries = Configuration.getGlobalConfiguration().getGeometry().getPrimaryAngles();
 		double min = DoubleArrayUtil.minOfArray(primaries);
 		while (primaries[lastValid] - min < maxPrimaryAngle) {
 			if (lastValid < primaries.length - 1)
@@ -559,27 +413,19 @@ public class TrajectoryEditor extends JFrame {
 		double[] newPrimaries = new double[lastValid];
 		Projection[] newMatrices = new Projection[lastValid];
 		double[] secondaries = null;
-		if (Configuration.getGlobalConfiguration().getGeometry()
-				.getSecondaryAngles() != null)
+		if (Configuration.getGlobalConfiguration().getGeometry().getSecondaryAngles() != null)
 			secondaries = new double[lastValid];
 		for (int i = 0; i < lastValid; i++) {
-			if (Configuration.getGlobalConfiguration().getGeometry()
-					.getSecondaryAngles() != null) {
-				secondaries[i] = Configuration.getGlobalConfiguration()
-						.getGeometry().getSecondaryAngles()[i];
+			if (Configuration.getGlobalConfiguration().getGeometry().getSecondaryAngles() != null) {
+				secondaries[i] = Configuration.getGlobalConfiguration().getGeometry().getSecondaryAngles()[i];
 			}
 			newPrimaries[i] = primaries[i];
-			newMatrices[i] = Configuration.getGlobalConfiguration()
-					.getGeometry().getProjectionMatrix(i);
+			newMatrices[i] = Configuration.getGlobalConfiguration().getGeometry().getProjectionMatrix(i);
 		}
-		Configuration.getGlobalConfiguration().getGeometry()
-				.setProjectionMatrices(newMatrices);
-		Configuration.getGlobalConfiguration().getGeometry()
-				.setPrimaryAngleArray(newPrimaries);
-		Configuration.getGlobalConfiguration().getGeometry()
-				.setSecondaryAngleArray(secondaries);
-		Configuration.getGlobalConfiguration().getGeometry()
-				.setNumProjectionMatrices(lastValid);
+		Configuration.getGlobalConfiguration().getGeometry().setProjectionMatrices(newMatrices);
+		Configuration.getGlobalConfiguration().getGeometry().setPrimaryAngleArray(newPrimaries);
+		Configuration.getGlobalConfiguration().getGeometry().setSecondaryAngleArray(secondaries);
+		Configuration.getGlobalConfiguration().getGeometry().setNumProjectionMatrices(lastValid);
 		CONRAD.log("Reduced to " + lastValid + " matrices");
 	}
 
@@ -616,35 +462,28 @@ public class TrajectoryEditor extends JFrame {
 		SimpleMatrix B = new SimpleMatrix(b);
 		SimpleMatrix A = new SimpleMatrix(a);
 
-		Projection[] pMats = Configuration.getGlobalConfiguration()
-				.getGeometry().getProjectionMatrices();
+		Projection[] pMats = Configuration.getGlobalConfiguration().getGeometry().getProjectionMatrices();
 		for (int i = 0; i < pMats.length; i++) {
-			SimpleMatrix tmp1 = SimpleOperators.multiplyMatrixProd(B,
-					pMats[i].computeP());
+			SimpleMatrix tmp1 = SimpleOperators.multiplyMatrixProd(B, pMats[i].computeP());
 			SimpleMatrix tmp2 = SimpleOperators.multiplyMatrixProd(tmp1, A);
 			pMats[i].setPMatrixSerialization(tmp2.toString());
 		}
-		Configuration.getGlobalConfiguration().getGeometry()
-				.setProjectionMatrices(pMats);
+		Configuration.getGlobalConfiguration().getGeometry().setProjectionMatrices(pMats);
 		System.out.println("Done");
 
 	}
 
-	public static BasicAxis queryAxis(String message, String messageTitle,
-			BasicAxis[] axes) throws Exception {
-		return (BasicAxis) UserUtil.chooseObject(message, messageTitle, axes,
-				axes[0]);
+	public static BasicAxis queryAxis(String message, String messageTitle, BasicAxis[] axes) throws Exception {
+		return (BasicAxis) UserUtil.chooseObject(message, messageTitle, axes, axes[0]);
 	}
 
 	private void defineRotation() {
 
 		try {
 			BasicAxis axis = queryAxis("Define Rotation Axis", "Rotation Axis",
-					new BasicAxis[] { BasicAxis.X_AXIS, BasicAxis.Y_AXIS,
-							BasicAxis.Z_AXIS });
+					new BasicAxis[] { BasicAxis.X_AXIS, BasicAxis.Y_AXIS, BasicAxis.Z_AXIS });
 			double angle = Math.PI * UserUtil.queryDouble("Rotation angle (degree)", 0.0) / 180.0;
-			SimpleMatrix rotation = Rotations.createBasicRotationMatrix(axis,
-					angle);
+			SimpleMatrix rotation = Rotations.createBasicRotationMatrix(axis, angle);
 			System.out.println(rotation);
 
 			jA11.setText("" + rotation.getElement(0, 0));
@@ -664,44 +503,35 @@ public class TrajectoryEditor extends JFrame {
 
 	}
 
-	public static double queryDistance(String message, String messageTitle,
-			String[] distances) throws Exception {
-		return Double.parseDouble((String) UserUtil.chooseObject(message,
-				messageTitle, distances, distances[0]));
+	public static double queryDistance(String message, String messageTitle, String[] distances) throws Exception {
+		return Double.parseDouble((String) UserUtil.chooseObject(message, messageTitle, distances, distances[0]));
 	}
 
 	private void defineNoise() {
 		try {
-			double d = queryDistance("Choose distance", "Distance",
-					new String[] { "1.0", "100.0" });
-			double maxAngle = Math.atan(d / (2.0 * Configuration.getGlobalConfiguration().getGeometry().getSourceToDetectorDistance()));
-			Projection[] pMats = Configuration.getGlobalConfiguration()
-					.getGeometry().getProjectionMatrices();
+			double d = queryDistance("Choose distance", "Distance", new String[] { "1.0", "100.0" });
+			double maxAngle = Math.atan(
+					d / (2.0 * Configuration.getGlobalConfiguration().getGeometry().getSourceToDetectorDistance()));
+			Projection[] pMats = Configuration.getGlobalConfiguration().getGeometry().getProjectionMatrices();
 			System.out.println(Configuration.getGlobalConfiguration().getGeometry().getSourceToDetectorDistance());
 			System.out.println(maxAngle);
 
 			for (int i = 0; i < pMats.length; i++) {
-				
+
 				double alpha = 2.0 * maxAngle * Math.random() - maxAngle;
 				double beta = 2.0 * maxAngle * Math.random() - maxAngle;
 				// Math.atan(2.0 * d / 2.0 * Math.random() - d / 2.0)
-				
-				SimpleMatrix rotation1 = Rotations.createBasicRotationMatrix(
-						BasicAxis.X_AXIS, alpha);
-				SimpleMatrix rotation2 = Rotations.createBasicRotationMatrix(
-						BasicAxis.Y_AXIS, beta);
 
-				SimpleMatrix rotation = SimpleOperators.multiplyMatrixProd(
-						rotation1, rotation2);
+				SimpleMatrix rotation1 = Rotations.createBasicRotationMatrix(BasicAxis.X_AXIS, alpha);
+				SimpleMatrix rotation2 = Rotations.createBasicRotationMatrix(BasicAxis.Y_AXIS, beta);
+
+				SimpleMatrix rotation = SimpleOperators.multiplyMatrixProd(rotation1, rotation2);
 
 				SimpleVector translation = new SimpleVector(3);
 
-				translation.setElementValue(0, 2.0 * d / 2.0 * Math.random()
-						- d / 2.0);
-				translation.setElementValue(1, 2.0 * d / 2.0 * Math.random()
-						- d / 2.0);
-				translation.setElementValue(2, 2.0 * d / 2.0 * Math.random()
-						- d / 2.0);
+				translation.setElementValue(0, 2.0 * d / 2.0 * Math.random() - d / 2.0);
+				translation.setElementValue(1, 2.0 * d / 2.0 * Math.random() - d / 2.0);
+				translation.setElementValue(2, 2.0 * d / 2.0 * Math.random() - d / 2.0);
 
 				jA11.setText("" + rotation.getElement(0, 0));
 				jA12.setText("" + rotation.getElement(0, 1));
@@ -736,12 +566,10 @@ public class TrajectoryEditor extends JFrame {
 
 				SimpleMatrix A = new SimpleMatrix(a);
 
-				SimpleMatrix tmp2 = SimpleOperators.multiplyMatrixProd(
-						pMats[i].computeP(), A);
+				SimpleMatrix tmp2 = SimpleOperators.multiplyMatrixProd(pMats[i].computeP(), A);
 				pMats[i].setPMatrixSerialization(tmp2.toString());
 			}
-			Configuration.getGlobalConfiguration().getGeometry()
-					.setProjectionMatrices(pMats);
+			Configuration.getGlobalConfiguration().getGeometry().setProjectionMatrices(pMats);
 			System.out.println("Done");
 
 		} catch (Exception e) {

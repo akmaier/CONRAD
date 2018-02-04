@@ -15,12 +15,12 @@ import edu.stanford.rsl.tutorial.filters.RamLakKernel;
 public class ProjectionLoader {
 
 	private static ImageGridBuffer projections;
-	
-	public ImageGridBuffer getProjections(){
+
+	public ImageGridBuffer getProjections() {
 		return projections;
 	}
-	
-	public void loadAndFilterImages(String filename) throws IOException{
+
+	public void loadAndFilterImages(String filename) throws IOException {
 		projections = new ImageGridBuffer();
 		Configuration.loadConfiguration();
 		Configuration c = Configuration.getGlobalConfiguration();
@@ -38,19 +38,19 @@ public class ProjectionLoader {
 		RamLakKernel ramK = new RamLakKernel(maxU_PX, deltaU);
 		ProjectionSource pSource = FileProjectionSource.openProjectionStream(filename);
 		Grid2D proj;
-		for(int i = 0; i < maxProjs; i++){
+		for (int i = 0; i < maxProjs; i++) {
 			proj = pSource.getNextProjection();
 			cbFilter.applyToGrid(proj);
 			//ramp
-			for (int j = 0;j <maxV_PX; ++j)
+			for (int j = 0; j < maxV_PX; ++j)
 				ramK.applyToGrid(proj.getSubGrid(j));
-			NumericPointwiseOperators.multiplyBy(proj, (float) (D*D * Math.PI / geo.getNumProjectionMatrices()));
-			projections.add(proj,i);
+			NumericPointwiseOperators.multiplyBy(proj, (float) (D * D * Math.PI / geo.getNumProjectionMatrices()));
+			projections.add(proj, i);
 		}
 	}
-	
+
 }
 /*
- * Copyright (C) 2010-2014 Marco B�gel
+ * Copyright (C) 2010-2014 Marco Bögel
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
 */

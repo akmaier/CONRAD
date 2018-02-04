@@ -95,9 +95,7 @@ public class EstimateCubic2DSpline {
 		for (int j = 0; j < degree; j++) {
 			double firstKnot = uKnots[index + j];
 			double secondKnot = uKnots[index + j + 1];
-			if (internalCoordinate >= firstKnot
-					&& internalCoordinate <= secondKnot
-					&& firstKnot != secondKnot) {
+			if (internalCoordinate >= firstKnot && internalCoordinate <= secondKnot && firstKnot != secondKnot) {
 				// set required coefficients to 0
 				for (int k = degree - j - 1; k >= 0; k--) {
 					coefficientArrayA[k] = 0;
@@ -124,15 +122,13 @@ public class EstimateCubic2DSpline {
 							if (p >= 0 && coefficientArrayC[p] == m) {
 								int w = index + bCounter;
 								double kd = uKnots[w + n];
-								e *= (kd - internalCoordinate)
-										/ (kd - uKnots[w + 1]);
+								e *= (kd - internalCoordinate) / (kd - uKnots[w + 1]);
 								bCounter++;
 								p--;
 							} else {
 								int w = index + coefficientArrayA[y];
 								double kw = uKnots[w];
-								e *= (internalCoordinate - kw)
-										/ (uKnots[w + n - 1] - kw);
+								e *= (internalCoordinate - kw) / (uKnots[w + n - 1] - kw);
 								y--;
 							}
 						}
@@ -199,8 +195,7 @@ public class EstimateCubic2DSpline {
 	 *            number of control points the spline should have
 	 * @return uniform cubic B-Spline
 	 */
-	private UniformCubicBSpline estimateUniformCubicInternal(
-			ArrayList<PointND> points, int ctrlPoints) {
+	private UniformCubicBSpline estimateUniformCubicInternal(ArrayList<PointND> points, int ctrlPoints) {
 
 		uPara = computeParamUniform(points.size());
 		int h = ctrlPoints - 1;
@@ -217,11 +212,9 @@ public class EstimateCubic2DSpline {
 
 		for (int k = 1; k < n; k++) {
 			SimpleVector val = points.get(k).getAbstractVector();
-			SimpleVector s1 = points.get(0).getAbstractVector()
-					.multipliedBy(N(uPara[k], 0));
+			SimpleVector s1 = points.get(0).getAbstractVector().multipliedBy(N(uPara[k], 0));
 			val.subtract(s1);
-			SimpleVector s2 = points.get(n).getAbstractVector()
-					.multipliedBy(N(uPara[k], h));
+			SimpleVector s2 = points.get(n).getAbstractVector().multipliedBy(N(uPara[k], h));
 			val.subtract(s2);
 			Qk.setRowValue(k - 1, val);
 		}
@@ -241,16 +234,14 @@ public class EstimateCubic2DSpline {
 		}
 		SimpleMatrix NT = N.transposed();
 		SimpleMatrix M = SimpleOperators.multiplyMatrixProd(NT, N);
-		SimpleMatrix inversebFuncts = M
-				.inverse(SimpleMatrix.InversionType.INVERT_SVD);
-		SimpleMatrix parameters = SimpleOperators.multiplyMatrixProd(
-				inversebFuncts, Q);
+		SimpleMatrix inversebFuncts = M.inverse(SimpleMatrix.InversionType.INVERT_SVD);
+		SimpleMatrix parameters = SimpleOperators.multiplyMatrixProd(inversebFuncts, Q);
 
 		cPoints = new ArrayList<PointND>();
 		cPoints.add(P0);
 		for (int i = 0; i < ctrlPoints - 2; i++) {
-			PointND p = new PointND(parameters.getElement(i, 0),
-					parameters.getElement(i, 1), parameters.getElement(i, 2));
+			PointND p = new PointND(parameters.getElement(i, 0), parameters.getElement(i, 1),
+					parameters.getElement(i, 2));
 			cPoints.add(p);
 		}
 		cPoints.add(PH);
@@ -261,6 +252,6 @@ public class EstimateCubic2DSpline {
 
 }
 /*
- * Copyright (C) 2010-2014 Marco Bögel
+ * Copyright (C) 2010-2014 Marco BÃ¶gel
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
 */

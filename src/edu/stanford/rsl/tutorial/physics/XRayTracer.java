@@ -29,7 +29,7 @@ import edu.stanford.rsl.conrad.utils.ImageUtil;
 /**
  * A raytracer for X-rays using the PriorityRaytracer for intersection calculation. It considers only the Compton and the Photoelectric Effect, disregarding other effects which are insignificant for X-rays.
  * 
- * @author Fabian Rückert
+ * @author Fabian RÃ¼ckert
  * 
  */
 public class XRayTracer {
@@ -41,8 +41,8 @@ public class XRayTracer {
 	private static final int numThreads = Runtime.getRuntime().availableProcessors();
 
 	//enable to use the Geant4 code for sampling of the Compton Scattering Angle/Energy
-	public static boolean SAMPLE_GEANT4 = false; 
-	
+	public static boolean SAMPLE_GEANT4 = false;
+
 	//enable to just send the rays in x-direction starting from the origin, without a detector
 	public static final boolean TEST_MODE = false;
 
@@ -72,7 +72,7 @@ public class XRayTracer {
 			this.points.addAll(res.points);
 			this.colors.addAll(res.colors);
 			this.edges.addAll(res.edges);
-			
+
 			this.count += res.count;
 			this.pathlength += res.pathlength;
 			this.pathlength2 += res.pathlength2;
@@ -88,7 +88,6 @@ public class XRayTracer {
 	public XRayTracer() {
 
 	}
-	
 
 	/**
 	 * Constructs a simple test scene for the raytracer
@@ -118,38 +117,31 @@ public class XRayTracer {
 		object2.setShape(shape2);
 		scene.add(object2, 1);
 
-//		// add water boxes inside each other
-//		int numboxes = 10;
-//		for (int i = numboxes; i >= 1; --i) {
-//			PhysicalObject object2 = new PhysicalObject();
-//			object2.setMaterial(MaterialsDB.getMaterial("water"));
-//			object2.setNameString("water");
-//			float boxsize2 = i * 100.f;
-//			AbstractShape shape2 = new Box(boxsize2, boxsize2, boxsize2);
-//			shape2.applyTransform(new Translation(-boxsize2 / 2, -boxsize2 / 2, -boxsize2 / 2));
-//			object2.setShape(shape2);
-//			scene.add(object2, numboxes + 1 - i);
-//		}
+		//		// add water boxes inside each other
+		//		int numboxes = 10;
+		//		for (int i = numboxes; i >= 1; --i) {
+		//			PhysicalObject object2 = new PhysicalObject();
+		//			object2.setMaterial(MaterialsDB.getMaterial("water"));
+		//			object2.setNameString("water");
+		//			float boxsize2 = i * 100.f;
+		//			AbstractShape shape2 = new Box(boxsize2, boxsize2, boxsize2);
+		//			shape2.applyTransform(new Translation(-boxsize2 / 2, -boxsize2 / 2, -boxsize2 / 2));
+		//			object2.setShape(shape2);
+		//			scene.add(object2, numboxes + 1 - i);
+		//		}
 
-		
-		 //add a piece of lead
-//		 PhysicalObject lead = new PhysicalObject();
-//		 lead.setMaterial(MaterialsDB.getMaterial("lead"));
-//		 lead.setNameString("air");
-//		 float boxsize2 = 200.f;
-//		 AbstractShape shape2 = new Box(boxsize2, boxsize2, boxsize2);
-//		 shape2.applyTransform(new Translation(100, -boxsize2 / 2, -boxsize2 / 2));
-//		 lead.setShape(shape2);
-//		 scene.add(lead, 1);
+		//add a piece of lead
+		//		 PhysicalObject lead = new PhysicalObject();
+		//		 lead.setMaterial(MaterialsDB.getMaterial("lead"));
+		//		 lead.setNameString("air");
+		//		 float boxsize2 = 200.f;
+		//		 AbstractShape shape2 = new Box(boxsize2, boxsize2, boxsize2);
+		//		 shape2.applyTransform(new Translation(100, -boxsize2 / 2, -boxsize2 / 2));
+		//		 lead.setShape(shape2);
+		//		 scene.add(lead, 1);
 
 		return scene;
 	}
-
-	
-
-
-
-
 
 	public static double computeMean(ArrayList<Double> array) {
 		double mean = 0;
@@ -166,32 +158,30 @@ public class XRayTracer {
 		}
 		return Math.sqrt(stddev / array.size());
 	}
-	
 
-	
-	private void showCurrentGrid(Trajectory traj, ImagePlus imp, Grid2D grid, String sceneName, long startTime){
-		if (TEST_MODE)return;
-		
+	private void showCurrentGrid(Trajectory traj, ImagePlus imp, Grid2D grid, String sceneName, long startTime) {
+		if (TEST_MODE)
+			return;
+
 		long numberOfRays = totalRayCount();
 		long detectorHits = totalDetectorHits();
-		int pixels =  traj.getDetectorWidth()*traj.getDetectorHeight();
-		String title = sceneName + ", Energy: " + startEnergyEV / 1000.f 
-				+ " keV." + ", Rays: " + numberOfRays
-				+ ", Hits/Pixel: " + (float) (detectorHits* 100/pixels)/ 100
-				+ ", Rays hit detector: " + (double) (detectorHits* 100/numberOfRays)
-				+ "%, Time: " + ((System.currentTimeMillis() - startTime) / (1000 * 60)) +"m " + ((System.currentTimeMillis() - startTime) / 1000) % 60 + "s";
-	
+		int pixels = traj.getDetectorWidth() * traj.getDetectorHeight();
+		String title = sceneName + ", Energy: " + startEnergyEV / 1000.f + " keV." + ", Rays: " + numberOfRays
+				+ ", Hits/Pixel: " + (float) (detectorHits * 100 / pixels) / 100 + ", Rays hit detector: "
+				+ (double) (detectorHits * 100 / numberOfRays) + "%, Time: "
+				+ ((System.currentTimeMillis() - startTime) / (1000 * 60)) + "m "
+				+ ((System.currentTimeMillis() - startTime) / 1000) % 60 + "s";
+
 		ImageProcessor image = ImageUtil.wrapGrid2D(grid);
 
-		ImageStack stack = new ImageStack(image.getWidth(),image.getHeight());
+		ImageStack stack = new ImageStack(image.getWidth(), image.getHeight());
 		stack.addSlice(title, image);
 		imp.setStack(title, stack);
 		imp.show();
-		
-	
+
 	}
-	
-	private long totalRayCount(){
+
+	private long totalRayCount() {
 		long sum = 0;
 		for (int i = 0; i < numThreads; ++i) {
 			sum += rayTraceThreads[i].getRayCount();
@@ -199,15 +189,13 @@ public class XRayTracer {
 		return sum;
 	}
 
-	private long totalDetectorHits(){
+	private long totalDetectorHits() {
 		long sum = 0;
 		for (int i = 0; i < numThreads; ++i) {
 			sum += rayTraceThreads[i].getDetectorHits();
 		}
 		return sum;
 	}
-
-	
 
 	public void simulateScene(int projectionIndex, PrioritizableScene scene) {
 		Trajectory traj = Configuration.getGlobalConfiguration().getGeometry();
@@ -217,37 +205,34 @@ public class XRayTracer {
 
 		Grid2D grid = detector.createDetectorGrid(width, height, traj.getProjectionMatrix(projectionIndex));
 
-		if (!TEST_MODE){
+		if (!TEST_MODE) {
 			//add the detector to the scene
 			detector.setMaterial(MaterialsDB.getMaterial("lead"));
-			detector.generateDetectorShape( traj.getProjectionMatrix(projectionIndex), 200);
+			detector.generateDetectorShape(traj.getProjectionMatrix(projectionIndex), 200);
 			detector.setNameString("detector");
-			scene.add(detector, 100000);	
+			scene.add(detector, 100000);
 		}
 
-	
 		final PriorityRayTracer raytracer = new PriorityRayTracer();
 		raytracer.setScene(scene);
 
 		final StraightLine ray;
-		
-		if (TEST_MODE){
-			ray = new StraightLine(
-					new PointND(0,0,0), 
-					new SimpleVector(1,0,0));
-		}else{
-			ray = new StraightLine(
-					new PointND(traj.getProjectionMatrix(projectionIndex).computeCameraCenter()), 
-					traj.getProjectionMatrix(projectionIndex).computeRayDirection(new SimpleVector(width/2, height/2)));
+
+		if (TEST_MODE) {
+			ray = new StraightLine(new PointND(0, 0, 0), new SimpleVector(1, 0, 0));
+		} else {
+			ray = new StraightLine(new PointND(traj.getProjectionMatrix(projectionIndex).computeCameraCenter()), traj
+					.getProjectionMatrix(projectionIndex).computeRayDirection(new SimpleVector(width / 2, height / 2)));
 		}
-		
+
 		System.out.println("Ray direction: " + ray);
-		System.out.println("Raytracing scene \"" + scene.getName() + "\" with " + numRays + " rays using " + numThreads + " threads. Energy: " + startEnergyEV / 1000000.f + " MeV.");
+		System.out.println("Raytracing scene \"" + scene.getName() + "\" with " + numRays + " rays using " + numThreads
+				+ " threads. Energy: " + startEnergyEV / 1000000.f + " MeV.");
 
 		long startTime = System.currentTimeMillis();
-		
+
 		boolean writeAdditionalData;
-		if (numRays < 50000){
+		if (numRays < 50000) {
 			writeAdditionalData = true;
 		} else {
 			writeAdditionalData = false;
@@ -257,21 +242,22 @@ public class XRayTracer {
 		// start worker threads
 		for (int i = 0; i < numThreads; ++i) {
 			int numberofrays = numRays / numThreads;
-			if (i == numThreads-1) numberofrays += (numRays % numThreads);
-			rayTraceThreads[i] = new XRayWorker(ray, raytracer, new RaytraceResult(), numberofrays, startEnergyEV, grid, detector, traj.getProjectionMatrix(projectionIndex), INFINITE_SIMULATION, writeAdditionalData);
+			if (i == numThreads - 1)
+				numberofrays += (numRays % numThreads);
+			rayTraceThreads[i] = new XRayWorker(ray, raytracer, new RaytraceResult(), numberofrays, startEnergyEV, grid,
+					detector, traj.getProjectionMatrix(projectionIndex), INFINITE_SIMULATION, writeAdditionalData);
 			threads[i] = new Thread(rayTraceThreads[i]);
 			threads[i].start();
 		}
 
 		RaytraceResult combinedResult = new RaytraceResult();
-		
-		ImagePlus imp = new ImagePlus();
 
+		ImagePlus imp = new ImagePlus();
 
 		// wait for threads to finish and combine the results
 		for (int i = 0; i < numThreads; ++i) {
 			try {
-				while(threads[i].isAlive()){
+				while (threads[i].isAlive()) {
 					threads[i].join(1000);
 					showCurrentGrid(traj, imp, grid, scene.getName(), startTime);
 				}
@@ -288,27 +274,25 @@ public class XRayTracer {
 
 		// print results
 
-		double mean = combinedResult.pathlength/combinedResult.count;
-		double mean2 = combinedResult.pathlength2/combinedResult.count;
-		double stddev = Math.sqrt(Math.abs(mean2 - mean*mean));
+		double mean = combinedResult.pathlength / combinedResult.count;
+		double mean2 = combinedResult.pathlength2 / combinedResult.count;
+		double stddev = Math.sqrt(Math.abs(mean2 - mean * mean));
 		System.out.println("pathlength = " + mean + " mm +- " + stddev + " mm");
 
-
-		mean = combinedResult.x/combinedResult.count;
-		mean2 = combinedResult.x2/combinedResult.count;
-		stddev = Math.sqrt(Math.abs(mean2 - mean*mean));
+		mean = combinedResult.x / combinedResult.count;
+		mean2 = combinedResult.x2 / combinedResult.count;
+		stddev = Math.sqrt(Math.abs(mean2 - mean * mean));
 		System.out.println("x = " + mean + " mm +- " + stddev + " mm");
 
-		mean = combinedResult.y/combinedResult.count;
-		mean2 = combinedResult.y2/combinedResult.count;
-		stddev = Math.sqrt(Math.abs(mean2 - mean*mean));
+		mean = combinedResult.y / combinedResult.count;
+		mean2 = combinedResult.y2 / combinedResult.count;
+		stddev = Math.sqrt(Math.abs(mean2 - mean * mean));
 		System.out.println("y = " + mean + " mm +- " + stddev + " mm");
 
-		mean = combinedResult.z/combinedResult.count;
-		mean2 = combinedResult.z2/combinedResult.count;
-		stddev = Math.sqrt(Math.abs(mean2 - mean*mean));
+		mean = combinedResult.z / combinedResult.count;
+		mean2 = combinedResult.z2 / combinedResult.count;
+		stddev = Math.sqrt(Math.abs(mean2 - mean * mean));
 		System.out.println("z = " + mean + " mm +- " + stddev + " mm");
-		
 
 		// show OpenGL visualization
 
@@ -316,44 +300,39 @@ public class XRayTracer {
 		XRayViewer pcv = new XRayViewer("points", combinedResult.points, null, traj.getSourceToDetectorDistance());
 		pcv.setColors(combinedResult.colors);
 
-//		 XRayViewer pcv = new XRayViewer("points",null, combinedResult.edges);
+		//		 XRayViewer pcv = new XRayViewer("points",null, combinedResult.edges);
 
 		pcv.setScene(scene);
-		
-		if (!TEST_MODE){
+
+		if (!TEST_MODE) {
 			//draw source as a simple box for now
 			double sidelength = 20;
-			Box sourceShape = new Box(sidelength,sidelength, sidelength);
-			sourceShape.applyTransform(new Translation(-sidelength/2,-sidelength/2,-sidelength/2));
+			Box sourceShape = new Box(sidelength, sidelength, sidelength);
+			sourceShape.applyTransform(new Translation(-sidelength / 2, -sidelength / 2, -sidelength / 2));
 
-			sourceShape.applyTransform(new Translation(traj.getProjectionMatrix(projectionIndex).computeCameraCenter()));
+			sourceShape
+					.applyTransform(new Translation(traj.getProjectionMatrix(projectionIndex).computeCameraCenter()));
 			pcv.setSource(sourceShape);
 		}
 
-
 		//visualize geant4 data with OpenGL
-//		XRayViewer pcv2 =  new XRayViewer("points Geant4","PATH/1000_1MeV_Air.csv", pcv.getMaxPoint());
-//		pcv2.setScene(scene);
+		//		XRayViewer pcv2 =  new XRayViewer("points Geant4","PATH/1000_1MeV_Air.csv", pcv.getMaxPoint());
+		//		pcv2.setScene(scene);
 	}
-	
-	
+
 	public static void main(String[] args) {
 		new ImageJ();
 
 		Configuration.loadConfiguration();
-		
-		
+
 		XRayTracer monteCarlo = new XRayTracer();
 
+		//		monteCarlo.simulateScene(0, XRayTracer.constructTestScene());
 
-//		monteCarlo.simulateScene(0, XRayTracer.constructTestScene());
-
-		
 		PrioritizableScene scene;
 		try {
 			scene = AnalyticPhantom.getCurrentPhantom();
-			
-			
+
 			//add a surrounding box
 			PhysicalObject surroundingBox = new PhysicalObject();
 			surroundingBox.setMaterial(scene.getBackgroundMaterial());
@@ -363,16 +342,14 @@ public class XRayTracer {
 			shape2.applyTransform(new Translation(-boxsize2 / 2, -boxsize2 / 2, -boxsize2 / 2));
 			surroundingBox.setShape(shape2);
 			scene.add(surroundingBox, -100000);
-			
+
 			//start the simulation
 			monteCarlo.simulateScene(1, scene);
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-			
-		
-		
+
 	}
-	
+
 }

@@ -13,7 +13,6 @@ import edu.stanford.rsl.conrad.fitting.PolynomialFunction;
  */
 public class AtractFilter1D {
 
-
 	/**
 	 * This method applies laplacian filtering, collimator border removal and atract filtering.
 	 * @param input Sinogram
@@ -25,11 +24,11 @@ public class AtractFilter1D {
 		LaplaceKernel1D lap = new LaplaceKernel1D(maxSIndex);
 		lap.applyToGrid(input);
 		input.show("Laplace");
-		
+
 		BorderRemoval1D bord = new BorderRemoval1D();
 		bord.applyToGridLap1D(input);
 		input.show("BorderRemoval");
-		
+
 		AtractKernel1D atract = new AtractKernel1D(maxSIndex);
 		atract.applyToGrid(input);
 		input.show("Atract");
@@ -51,8 +50,6 @@ public class AtractFilter1D {
 		//collimatorMask.show("Mask Image");
 		Grid2D tmp = new Grid2D(input);
 		tmp.show("Laplace");
-
-
 
 		/*		// Set to neighbouring pixel if exists
 		for (int i = 0; i < collimatorMask.getSize()[0]; ++i)
@@ -79,19 +76,12 @@ public class AtractFilter1D {
 
 		NumericPointwiseOperators.multiplyBy(input, collimatorMask);
 
-
-
-
 		Grid2D tmp2 = new Grid2D(input);
 		tmp2.show("Laplace Removed");
 
 		AtractKernel1D atract = new AtractKernel1D(maxSIndex);
 		atract.applyToGrid(input);
 
-		
-		
-		
-		
 		/*
 		// Martin: Extend the mask and apply to laplace without removed edges!
 		for (int i = 0; i < collimatorMask.getSize()[0]; ++i) {
@@ -113,67 +103,60 @@ public class AtractFilter1D {
 			}
 		}
 		*/
-		
+
 		// Andreas' atract repair code
 		Grid1D regressionTemplate = new Grid1D(input.getSubGrid(0));
 		float boundaryValue = input.getAtIndex(0, 0);
-		
+
 		// Set to neighbouring pixel if exists
 		for (int i = 0; i < collimatorMask.getSize()[0]; ++i) {
 			boolean applyCorrection = false;
 			int startIndex = 0;
 			for (int j = 0; j < collimatorMask.getSize()[1]; ++j) {
-				if (collimatorMask.getAtIndex(i, j)==0) {
+				if (collimatorMask.getAtIndex(i, j) == 0) {
 					applyCorrection = true;
-					startIndex=j;
+					startIndex = j;
 					break;
 				}
 			}
-			if (applyCorrection){
+			if (applyCorrection) {
 				PolynomialFunction func = new PolynomialFunction();
-				double [] inputArray = new double [startIndex];
-				double [] outputArray = new double [startIndex];
-				double [] tmpArray = new double [startIndex];
+				double[] inputArray = new double[startIndex];
+				double[] outputArray = new double[startIndex];
+				double[] tmpArray = new double[startIndex];
 				for (int j = 0; j < startIndex; ++j) {
 					tmpArray[j] = input.getAtIndex(i, j);
-					outputArray[j] = input.getAtIndex(i, j)- regressionTemplate.getAtIndex(j);
+					outputArray[j] = input.getAtIndex(i, j) - regressionTemplate.getAtIndex(j);
 					inputArray[j] = j;
 				}
 				//if (i==138) VisualizationUtil.createPlot("Original", tmpArray).show();
 				//if (i==138) VisualizationUtil.createPlot("Substraction", outputArray).show();
 				func.setDegree(5);
-				if (startIndex > 5){
+				if (startIndex > 5) {
 					func.fitToPoints(inputArray, outputArray);
 				}
 				//if (i==138) VisualizationUtil.createScatterPlot("Detector " + i, inputArray, outputArray).show();
-				for (int j=0; j< regressionTemplate.getBuffer().length; j++){
-					if (j < startIndex){
-						input.setAtIndex(i, j, input.getAtIndex(i, j) - (float)func.evaluate(j));
-						
+				for (int j = 0; j < regressionTemplate.getBuffer().length; j++) {
+					if (j < startIndex) {
+						input.setAtIndex(i, j, input.getAtIndex(i, j) - (float) func.evaluate(j));
+
 						outputArray[j] = input.getAtIndex(i, j);
 					} else {
-						input.setAtIndex(i, j, 5f*boundaryValue);
+						input.setAtIndex(i, j, 5f * boundaryValue);
 					}
 				}
 				//if (i==138) VisualizationUtil.createPlot("Corrected", outputArray).show();
 			}
 		}
-		
-		NumericPointwiseOperators.addBy(input, -boundaryValue/2);
-		
+
+		NumericPointwiseOperators.addBy(input, -boundaryValue / 2);
+
 		input.show("Laplace After Mask");
 
-		
-		
-		
-		
 	}
-
-
-
 
 }
 /*
- * Copyright (C) 2010-2014  Marco Bögel
+ * Copyright (C) 2010-2014  Marco BÃ¶gel
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
 */

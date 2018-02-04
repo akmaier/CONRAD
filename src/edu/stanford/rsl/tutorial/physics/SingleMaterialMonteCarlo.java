@@ -17,7 +17,7 @@ import edu.stanford.rsl.conrad.physics.materials.utils.AttenuationType;
 /**
  * Simple single-threaded Monte Carlo Simulation of photons passing through one material.
  * 
- * @author Fabian Rückert
+ * @author Fabian RÃ¼ckert
  * 
  */
 public class SingleMaterialMonteCarlo {
@@ -44,12 +44,11 @@ public class SingleMaterialMonteCarlo {
 	ArrayList<Double> xs = new ArrayList<Double>();
 	ArrayList<Double> ys = new ArrayList<Double>();
 	ArrayList<Double> zs = new ArrayList<Double>();
-	
+
 	XRayTracerSampling sampler = new XRayTracerSampling(new Random());
 
 	public SingleMaterialMonteCarlo() {
 		double energyEV = 1000000;
-
 
 		System.out.println("energy " + energyEV / 1000000 + " MeV");
 
@@ -59,7 +58,8 @@ public class SingleMaterialMonteCarlo {
 		System.out.println("mean free path compton " + 1 / compton + "cm");
 		System.out.println("mean free path photo " + 1 / photo + "cm");
 
-		double totalCrossSection = material.getAttenuation(energyEV / 1000, AttenuationType.TOTAL_WITHOUT_COHERENT_ATTENUATION);
+		double totalCrossSection = material.getAttenuation(energyEV / 1000,
+				AttenuationType.TOTAL_WITHOUT_COHERENT_ATTENUATION);
 		System.out.println("total attenuation " + 1 / totalCrossSection + "cm");
 		System.out.println("total attenuation sum " + 1 / (photo + compton) + "cm");
 
@@ -85,8 +85,8 @@ public class SingleMaterialMonteCarlo {
 
 		// visualize the klein-nishina angle distribution and the rejection
 		// sampling for different energies
-//		 visualizeKleinNishina(10000000*eV);
-		 visualizeKleinNishina(140000*eV);
+		//		 visualizeKleinNishina(10000000*eV);
+		visualizeKleinNishina(140000 * eV);
 
 		// visualizeKleinNishina(2.75*eV);
 		//
@@ -100,7 +100,7 @@ public class SingleMaterialMonteCarlo {
 		imp = new FloatProcessor(grid.getWidth(), grid.getHeight());
 		imp.setPixels(grid.getBuffer());
 
-//		 SimpleVector startPosition = new SimpleVector(40,grid.getHeight()/2/scale, 0);
+		//		 SimpleVector startPosition = new SimpleVector(40,grid.getHeight()/2/scale, 0);
 		SimpleVector startPosition = new SimpleVector(0, 0, 0);
 
 		for (int i = 0; i < numRays; ++i) {
@@ -116,7 +116,8 @@ public class SingleMaterialMonteCarlo {
 		sumMisses = 0;
 	}
 
-	private void followRay(SimpleVector pos, SimpleVector dir, double energyEV, FloatProcessor imp, int scatterCount, double totalDistance) {
+	private void followRay(SimpleVector pos, SimpleVector dir, double energyEV, FloatProcessor imp, int scatterCount,
+			double totalDistance) {
 		if (energyEV <= 1 || scatterCount > 20000) {
 			System.out.println("energy low, times scattered: " + scatterCount);
 			return;
@@ -147,7 +148,6 @@ public class SingleMaterialMonteCarlo {
 		} else {
 			// compton scattering
 
-
 			energyEV = sampler.sampleComptonScattering(energyEV, dir);
 
 			// send new ray
@@ -155,8 +155,6 @@ public class SingleMaterialMonteCarlo {
 		}
 
 	}
-
-
 
 	private void visualizeKleinNishina(double energyJoule) {
 		int gridWidth = 600;

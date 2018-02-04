@@ -7,46 +7,48 @@ import edu.stanford.rsl.conrad.data.numeric.Grid3D;
 import edu.stanford.rsl.conrad.utils.FFTUtil;
 import edu.stanford.rsl.conrad.utils.VisualizationUtil;
 import edu.stanford.rsl.tutorial.filters.GridKernel;
+
 /**
  * This class implements the 1-D version of the Sobel Kernel (-2 0 2)
  * @author Marco Boegel
  *
  */
 public class SobelKernel1D extends Grid1DComplex implements GridKernel {
-	private int width=0;
+	private int width = 0;
+
 	public SobelKernel1D(final int size, int width) {
 		super(FFTUtil.getNextPowerOfTwo(size));
 		this.width = width;
 		final int paddedSize = getSize()[0];
 
 		for (int i = 0; i < paddedSize / 2; ++i) {
-				setAtIndex(i, 0 );
+			setAtIndex(i, 0);
 		}
-		for (int i = paddedSize / 2; i < paddedSize ; ++i) {
-				setAtIndex(i, 0);
+		for (int i = paddedSize / 2; i < paddedSize; ++i) {
+			setAtIndex(i, 0);
 		}
 		setAtIndex(0, -2);
 		setAtIndex(1, 0);
-		setAtIndex(paddedSize-1, 2);
+		setAtIndex(paddedSize - 1, 2);
 		transformForward();
 	}
-	
+
 	public Grid1D paddGrid(Grid1D input, int width) {
-		Grid1D out = new Grid1D(input.getSize()[0]+width);
+		Grid1D out = new Grid1D(input.getSize()[0] + width);
 		int size = input.getSize()[0];
-		for(int i = 0 ; i < width/2; i++) {
+		for (int i = 0; i < width / 2; i++) {
 			out.setAtIndex(i, input.getAtIndex(0));
 		}
-		for(int i = width/2; i < width/2+size; i++) {
-			out.setAtIndex(i, input.getAtIndex(i-width/2));
+		for (int i = width / 2; i < width / 2 + size; i++) {
+			out.setAtIndex(i, input.getAtIndex(i - width / 2));
 		}
-		for(int i = width/2+size; i<size+width; i++) {
-			out.setAtIndex(i, input.getAtIndex(size-1));
+		for (int i = width / 2 + size; i < size + width; i++) {
+			out.setAtIndex(i, input.getAtIndex(size - 1));
 		}
-		
+
 		return out;
 	}
-	
+
 	/**
 	 * This method implements the Convolution in Fourier Space for a 1-D Grid.
 	 * @param input 1-D Image
@@ -58,66 +60,66 @@ public class SobelKernel1D extends Grid1DComplex implements GridKernel {
 		int size = subGrid.getSize()[0];
 		subGrid.transformForward();
 		for (int idx = 0; idx < size; ++idx) {
-			subGrid.multiplyAtIndex(idx, getRealAtIndex(idx),
-					getImagAtIndex(idx));
+			subGrid.multiplyAtIndex(idx, getRealAtIndex(idx), getImagAtIndex(idx));
 		}
 		subGrid.transformInverse();
 
-		Grid1D filteredSinoSub = subGrid.getRealSubGrid(width/2, input.getSize()[0]);
-		for(int i = 0 ; i < input.getSize()[0]; i++) {			
+		Grid1D filteredSinoSub = subGrid.getRealSubGrid(width / 2, input.getSize()[0]);
+		for (int i = 0; i < input.getSize()[0]; i++) {
 			input.setAtIndex(i, filteredSinoSub.getAtIndex(i));
 		}
 
 	}
-	
+
 	/**
 	 * This method implements the Convolution with a 2-D Image by applying the Filter to each 1-D subgrid.
 	 * @param input 2-D Image
 	 */
 	public void applyToGrid(Grid2D input) {
-		
+
 		int iter = input.getSize()[1];
-		
-		for(int i = 0; i < iter; i++) {
+
+		for (int i = 0; i < iter; i++) {
 			applyToGrid(input.getSubGrid(i));
 		}
 	}
-	
+
 	/**
 	 * This method implements the Convolution with a 3-D Image by applying the Filter recursively to each 2-D subgrid.
 	 * @param input 3-D Image
 	 */
 	public void applyToGrid(Grid3D input) {
-		
+
 		int iter = input.getSize()[2];
-			
-		for(int i = 0; i < iter; i++) {
+
+		for (int i = 0; i < iter; i++) {
 			applyToGrid(input.getSubGrid(i));
 		}
 	}
 
 	public final static void main(String[] args) {
 		final int size = 200;
-		SobelKernel1D r = new SobelKernel1D(size,9);
+		SobelKernel1D r = new SobelKernel1D(size, 9);
 		Grid1D in = new Grid1D(new float[size]);
-		
-		for(int i= 0 ; i < size; i++) in.setAtIndex(i, 0);
+
+		for (int i = 0; i < size; i++)
+			in.setAtIndex(i, 0);
 		int k = 30;
-		for(int i = 3*size/8; i< size/2; i++) {
+		for (int i = 3 * size / 8; i < size / 2; i++) {
 			in.setAtIndex(i, k);
 		}
-		for(int i = size/2; i < 5*size/8; i++) {
+		for (int i = size / 2; i < 5 * size / 8; i++) {
 			in.setAtIndex(i, k);
 		}
-		VisualizationUtil.createPlot("before",in.getBuffer()).show();
-		VisualizationUtil.createPlot("Filter",r.getSubGrid(0, FFTUtil.getNextPowerOfTwo(size)).getBuffer()).show();
+		VisualizationUtil.createPlot("before", in.getBuffer()).show();
+		VisualizationUtil.createPlot("Filter", r.getSubGrid(0, FFTUtil.getNextPowerOfTwo(size)).getBuffer()).show();
 		r.applyToGrid(in);
-		VisualizationUtil.createPlot("after",in.getBuffer()).show();
-		
+		VisualizationUtil.createPlot("after", in.getBuffer()).show();
+
 	}
 
 }
 /*
- * Copyright (C) 2010-2014 Marco B�gel
+ * Copyright (C) 2010-2014 Marco Bögel
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
 */

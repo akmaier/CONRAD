@@ -102,10 +102,8 @@ public class EstimateBSplineSurface {
 
 		ArrayList<ArrayList<PointND>> output = new ArrayList<ArrayList<PointND>>();
 
-		PointND max = new PointND(-Double.MAX_VALUE, -Double.MAX_VALUE,
-				-Double.MAX_VALUE);
-		PointND min = new PointND(Double.MAX_VALUE, Double.MAX_VALUE,
-				Double.MAX_VALUE);
+		PointND max = new PointND(-Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE);
+		PointND min = new PointND(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
 		for (PointND p : gridPoints) {
 			max.updateIfHigher(p);
 			min.updateIfLower(p);
@@ -113,9 +111,8 @@ public class EstimateBSplineSurface {
 
 		Configuration.loadConfiguration();
 		Configuration c = Configuration.getGlobalConfiguration();
-		Grid3D grid = new Grid3D(c.getGeometry().getReconDimensionX(), c
-				.getGeometry().getReconDimensionY(), c.getGeometry()
-				.getReconDimensionZ());
+		Grid3D grid = new Grid3D(c.getGeometry().getReconDimensionX(), c.getGeometry().getReconDimensionY(),
+				c.getGeometry().getReconDimensionZ());
 		double oX = c.getGeometry().getOriginX();
 		double oY = c.getGeometry().getOriginY();
 		double oZ = c.getGeometry().getOriginZ();
@@ -124,8 +121,7 @@ public class EstimateBSplineSurface {
 		double vZ = c.getGeometry().getVoxelSpacingZ();
 		// Data In NIFTI Format. x and y have reversed signs.
 		for (int i = 0; i < gridPoints.size(); i++) {
-			grid.setAtIndex(
-					-(int) Math.round((gridPoints.get(i).get(0) + oX) / vX),
+			grid.setAtIndex(-(int) Math.round((gridPoints.get(i).get(0) + oX) / vX),
 					-(int) Math.round((gridPoints.get(i).get(1) + oY) / vY),
 					(int) (Math.round(gridPoints.get(i).get(2) - oZ) / vZ), 10);
 		}
@@ -197,8 +193,7 @@ public class EstimateBSplineSurface {
 			// sample points, u first
 			for (int idx = 0; idx < uPara.length; idx++) {
 				double i = x0Max + idx * sampleDist;
-				PointND p = new PointND(i * vX + oX, j * vY + oY,
-						samples.getAtIndex((int) Math.round(i), j) * vZ + oZ);
+				PointND p = new PointND(i * vX + oX, j * vY + oY, samples.getAtIndex((int) Math.round(i), j) * vZ + oZ);
 				list.add(p);
 			}
 			output.add(list);
@@ -250,8 +245,7 @@ public class EstimateBSplineSurface {
 	 *            sampled points
 	 * @return uniform Cubic B-Spline Surface
 	 */
-	private SurfaceUniformCubicBSpline estimateUniformCubicInternal(
-			ArrayList<ArrayList<PointND>> points) {
+	private SurfaceUniformCubicBSpline estimateUniformCubicInternal(ArrayList<ArrayList<PointND>> points) {
 		// knots = ctrl +order +1
 
 		int vL = vPara.length;
@@ -266,10 +260,8 @@ public class EstimateBSplineSurface {
 		// fit u-Splines first
 		for (int d = 0; d < vL; d++) {
 
-			EstimateCubic2DSpline estimator = new EstimateCubic2DSpline(
-					points.get(d));
-			ArrayList<PointND> list = estimator.estimateUniformCubic(uCtrl)
-					.getControlPoints();
+			EstimateCubic2DSpline estimator = new EstimateCubic2DSpline(points.get(d));
+			ArrayList<PointND> list = estimator.estimateUniformCubic(uCtrl).getControlPoints();
 
 			cList.add(list);
 
@@ -290,8 +282,7 @@ public class EstimateBSplineSurface {
 
 			EstimateCubic2DSpline estimator = new EstimateCubic2DSpline(gPoints);
 
-			ControlPoints.addAll(estimator.estimateUniformCubic(vCtrl)
-					.getControlPoints());
+			ControlPoints.addAll(estimator.estimateUniformCubic(vCtrl).getControlPoints());
 
 			if (c == uCtrl - 1)
 				vKnots = estimator.getKnots();
@@ -308,16 +299,13 @@ public class EstimateBSplineSurface {
 
 		String filename = FileUtil.myFileChoose(".vtk", false);
 		vRead.readFile(filename);
-		EstimateBSplineSurface estimator = new EstimateBSplineSurface(
-				vRead.getPts());
-		SurfaceUniformCubicBSpline spline = estimator
-				.estimateUniformCubic(sampling);
+		EstimateBSplineSurface estimator = new EstimateBSplineSurface(vRead.getPts());
+		SurfaceUniformCubicBSpline spline = estimator.estimateUniformCubic(sampling);
 
 		Configuration.loadConfiguration();
 		Configuration c = Configuration.getGlobalConfiguration();
-		Grid3D grid = new Grid3D(c.getGeometry().getReconDimensionX(), c
-				.getGeometry().getReconDimensionY(), c.getGeometry()
-				.getReconDimensionZ());
+		Grid3D grid = new Grid3D(c.getGeometry().getReconDimensionX(), c.getGeometry().getReconDimensionY(),
+				c.getGeometry().getReconDimensionZ());
 
 		for (int i = 0; i < grid.getSize()[0]; i++) {
 			double u = ((double) i) / (grid.getSize()[0]);
@@ -325,28 +313,19 @@ public class EstimateBSplineSurface {
 				double v = ((double) j) / (grid.getSize()[1]);
 				PointND p = spline.evaluate(u, v);
 
-				if (0 <= -((p.get(0) + c.getGeometry().getOriginX()) / c
-						.getGeometry().getVoxelSpacingX())
-						&& 0 <= -((p.get(1) + c.getGeometry().getOriginY()) / c
-								.getGeometry().getVoxelSpacingY())
-						&& 0 <= ((p.get(2) - c.getGeometry().getOriginZ()) / c
-								.getGeometry().getVoxelSpacingZ())
-						&& -((p.get(0) + c.getGeometry().getOriginX()) / c
-								.getGeometry().getVoxelSpacingX()) < grid
+				if (0 <= -((p.get(0) + c.getGeometry().getOriginX()) / c.getGeometry().getVoxelSpacingX())
+						&& 0 <= -((p.get(1) + c.getGeometry().getOriginY()) / c.getGeometry().getVoxelSpacingY())
+						&& 0 <= ((p.get(2) - c.getGeometry().getOriginZ()) / c.getGeometry().getVoxelSpacingZ())
+						&& -((p.get(0) + c.getGeometry().getOriginX()) / c.getGeometry().getVoxelSpacingX()) < grid
 								.getSize()[0]
-						&& -((p.get(1) + c.getGeometry().getOriginY()) / c
-								.getGeometry().getVoxelSpacingY()) < grid
+						&& -((p.get(1) + c.getGeometry().getOriginY()) / c.getGeometry().getVoxelSpacingY()) < grid
 								.getSize()[1]
-						&& ((p.get(2) - c.getGeometry().getOriginZ()) / c
-								.getGeometry().getVoxelSpacingZ()) < grid
+						&& ((p.get(2) - c.getGeometry().getOriginZ()) / c.getGeometry().getVoxelSpacingZ()) < grid
 								.getSize()[2])
 					grid.setAtIndex(
-							(int) -((p.get(0) + c.getGeometry().getOriginX()) / c
-									.getGeometry().getVoxelSpacingX()),
-							(int) -((p.get(1) + c.getGeometry().getOriginY()) / c
-									.getGeometry().getVoxelSpacingY()),
-							(int) ((p.get(2) - c.getGeometry().getOriginZ()) / c
-									.getGeometry().getVoxelSpacingZ()), 10);
+							(int) -((p.get(0) + c.getGeometry().getOriginX()) / c.getGeometry().getVoxelSpacingX()),
+							(int) -((p.get(1) + c.getGeometry().getOriginY()) / c.getGeometry().getVoxelSpacingY()),
+							(int) ((p.get(2) - c.getGeometry().getOriginZ()) / c.getGeometry().getVoxelSpacingZ()), 10);
 
 			}
 		}
@@ -357,6 +336,6 @@ public class EstimateBSplineSurface {
 
 }
 /*
- * Copyright (C) 2010-2014 Marco Bögel
+ * Copyright (C) 2010-2014 Marco BÃ¶gel
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
 */
