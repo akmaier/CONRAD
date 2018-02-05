@@ -12,6 +12,7 @@ import java.util.Vector;
 /**
  * 
  * @author Andreas Keil
+ * @author Tobias Geimer (buffer linearization)
  */
 public class SimpleMatrix implements Serializable {
 
@@ -38,7 +39,7 @@ public class SimpleMatrix implements Serializable {
 	
 	protected int rows;
 	protected int cols;
-	protected double[][] buf;
+	protected double[] buf;
 
 	
 	/////////////////////////////////////////////////
@@ -78,6 +79,14 @@ public class SimpleMatrix implements Serializable {
 	}
 	
 	/**
+	 * Creates a new matrix from 2x2 float array
+	 * @param otherBuffer
+	 */
+	public SimpleMatrix(final float[][] otherBuffer) {
+		this.init(otherBuffer);
+	}
+	
+	/**
 	 * Creates a new matrix from string data
 	 * @param str is dat string
 	 */
@@ -108,7 +117,7 @@ public class SimpleMatrix implements Serializable {
 		if (this.rows != rows || this.cols != cols) {
 			this.rows = rows;
 			this.cols = cols;
-			this.buf = new double[this.rows][this.cols];
+			this.buf = new double[this.rows*this.cols];
 		}
 	}
 	
@@ -120,10 +129,9 @@ public class SimpleMatrix implements Serializable {
 		if (this.rows != otherMat.rows || this.cols != otherMat.cols) {
 			this.rows = otherMat.rows;
 			this.cols = otherMat.cols;
-			this.buf = new double[this.rows][this.cols];
+			this.buf = new double[this.rows*this.cols];
 		}
-		for (int r = 0; r < this.rows; ++r)
-			System.arraycopy(otherMat.buf[r], 0, this.buf[r], 0, this.cols);
+		System.arraycopy(otherMat.buf, 0, this.buf, 0, this.rows*this.cols);
 	}
 	
 	/**
@@ -138,11 +146,33 @@ public class SimpleMatrix implements Serializable {
 		if (this.rows != rows || this.cols != cols) {
 			this.rows = rows;
 			this.cols = cols;
-			this.buf = new double[this.rows][this.cols];
+			this.buf = new double[this.rows*this.cols];
 		}
 		for (int r = 0; r < this.rows; ++r) {
 			assert (otherBuffer[r].length == this.cols) : new IllegalArgumentException("Given Matrix is not rectangular!");
-			System.arraycopy(otherBuffer[r], 0, this.buf[r], 0, cols);
+			System.arraycopy(otherBuffer[r], 0, this.buf, r*this.cols, cols);
+		}
+	}
+	
+	/**
+	 * Initialize matrix with data from 2x2 float array
+	 * @param otherBuffer is source float array
+	 */
+	public void init(final float[][] otherBuffer) {
+		final int rows = otherBuffer.length;
+		assert rows >= 0 : new IllegalArgumentException("Number of rows has to be greater than or equal to zero!");
+		final int cols = (rows == 0) ? 0 : otherBuffer[0].length;
+		assert cols >= 0 : new IllegalArgumentException("Number of columns has to be greater than or equal to zero!");
+		if (this.rows != rows || this.cols != cols) {
+			this.rows = rows;
+			this.cols = cols;
+			this.buf = new double[this.rows*this.cols];
+		}
+		for (int r = 0; r < this.rows; ++r) {
+			assert (otherBuffer[r].length == this.cols) : new IllegalArgumentException("Given Matrix is not rectangular!");
+			for( int c = 0; c < this.cols; c++ ) {
+				this.buf[r*this.cols+c] = otherBuffer[r][c];
+			}
 		}
 	}
 	
@@ -190,7 +220,7 @@ public class SimpleMatrix implements Serializable {
 		assert (this.rows == otherBuffer.length) : new IllegalArgumentException("Copying is only possible to an array of the same size!");
 		for (int r = 0; r < this.rows; ++r) {
 			assert (otherBuffer[r].length == this.cols) : new RuntimeException("Given array is not rectangular!");
-			System.arraycopy(this.buf[r], 0, otherBuffer[r], 0, this.cols);
+			System.arraycopy(this.buf, r*this.cols, otherBuffer[r], 0, this.cols);
 		}
 	}
 	
@@ -210,8 +240,7 @@ public class SimpleMatrix implements Serializable {
 	
 	/** Sets all matrix entries to the given value. */
 	public void fill(final double value) {
-		for (int r = 0; r < this.rows; ++r)
-			java.util.Arrays.fill(this.buf[r], value);
+		java.util.Arrays.fill(this.buf, value);
 	}
 	
 	/** Sets all matrix entries to 0.0. */
@@ -234,7 +263,7 @@ public class SimpleMatrix implements Serializable {
 	public void randomize(final double min, final double max) {
 		for (int r = 0; r < this.rows; ++r)
 			for (int c = 0; c < this.cols; ++c)
-				this.buf[r][c] = (max-min)*Math.random() + min;
+				this.buf[r*this.cols+c] = (max-min)*Math.random() + min;
 	}
 	
 	/** Sets the matrix to the identity matrix, i.e. diagonal entries are set to 1.0, others to 0.0. */
@@ -242,7 +271,7 @@ public class SimpleMatrix implements Serializable {
 		assert (this.rows == this.cols) : new RuntimeException("Matrix is not square and therefore cannot be set to an identity matrix!");
 		for (int r = 0; r < this.rows; ++r)
 			for (int c = 0; c < this.cols; ++c)
-				this.buf[r][c] = (r == c) ? 1.0 : 0.0;
+				this.buf[r*this.cols+c] = (r == c) ? 1.0 : 0.0;
 	}
 	
 	/**
@@ -252,7 +281,7 @@ public class SimpleMatrix implements Serializable {
 	 * @return entry in the specified row and column
 	 */
 	public double getElement(final int row, final int col) {
-		return this.buf[row][col];
+		return this.buf[row*this.cols+col];
 	}
 	
 	/**
@@ -262,7 +291,7 @@ public class SimpleMatrix implements Serializable {
 	 * @param val is value to replace matrix entry in the specified row and column
 	 */
 	public void setElementValue(final int row, final int col, final double val) {
-		this.buf[row][col] = val;
+		this.buf[row*this.cols+col] = val;
 	}
 	
 	/**
@@ -276,7 +305,7 @@ public class SimpleMatrix implements Serializable {
 	public SimpleMatrix getSubMatrix(final int firstRow, final int firstCol, final int sizeRows, final int sizeCols) {
 		final SimpleMatrix subMatrix = new SimpleMatrix(sizeRows, sizeCols);
 		for (int r = 0; r < sizeRows; ++r)
-			System.arraycopy(this.buf[r+firstRow], firstCol, subMatrix.buf[r], 0, sizeCols); 
+			System.arraycopy(this.buf, (r+firstRow)*this.cols+firstCol, subMatrix.buf, r*sizeCols, sizeCols); 
 		return subMatrix;
 	}
 	
@@ -292,7 +321,7 @@ public class SimpleMatrix implements Serializable {
 		for (int r : selectRows) {
 			int subCol = 0;
 			for (int c : selectCols) {
-				subMatrix.buf[subRow][subCol] = this.buf[r][c];
+				subMatrix.buf[subRow*selectCols.length+subCol] = this.buf[r*this.cols+c];
 				++subCol;
 			}
 			++subRow;
@@ -300,16 +329,21 @@ public class SimpleMatrix implements Serializable {
 		return subMatrix;
 	}
 	
-
+	/**
+	 * Creates a new sub matrix where the indicated row and column are deleted
+	 * @param deleteRow the index of the row to be deleted
+	 * @param deleteCol the index of the columns to be deleted
+	 * @return a sub matrix of this matrix 
+	 */
 	public SimpleMatrix getSubMatrix(final int deleteRow, final int deleteCol) {
 		final SimpleMatrix subMatrix = new SimpleMatrix(this.rows-1, this.cols-1);
 		for (int r = 0; r < deleteRow; ++r) {
-			System.arraycopy(this.buf[r], 0, subMatrix.buf[r], 0, deleteCol);
-			System.arraycopy(this.buf[r], deleteCol+1, subMatrix.buf[r], deleteCol, this.cols-deleteCol-1);
+			System.arraycopy(this.buf, r*this.cols+0, subMatrix.buf, r*(this.cols-1), deleteCol);
+			System.arraycopy(this.buf, r*this.cols+deleteCol+1, subMatrix.buf, r*(this.cols-1)+deleteCol, this.cols-deleteCol-1);
 		}
 		for (int r = deleteRow+1; r < this.rows; ++r) {
-			System.arraycopy(this.buf[r], 0, subMatrix.buf[r-1], 0, deleteCol);
-			System.arraycopy(this.buf[r], deleteCol+1, subMatrix.buf[r-1], deleteCol, this.cols-deleteCol-1);
+			System.arraycopy(this.buf, r*this.cols, subMatrix.buf, (r-1)*(this.cols-1), deleteCol);
+			System.arraycopy(this.buf, r*this.cols+deleteCol+1, subMatrix.buf, (r-1)*(this.cols-1) + deleteCol, this.cols-deleteCol-1);
 		}
 		return subMatrix;
 	}
@@ -323,7 +357,7 @@ public class SimpleMatrix implements Serializable {
 	public void setSubMatrixValue(final int firstRow, final int firstCol, final SimpleMatrix subMatrix) {
 		for (int r = 0; r < subMatrix.rows; ++r)
 			for (int c = 0; c < subMatrix.cols; ++c)
-				this.buf[r+firstRow][c+firstCol] = subMatrix.buf[r][c];
+				this.buf[(r+firstRow)*this.cols+c+firstCol] = subMatrix.buf[r*subMatrix.cols+c];
 	}
 	
 	/**
@@ -336,7 +370,7 @@ public class SimpleMatrix implements Serializable {
 	public SimpleVector getSubRow(final int row, final int firstCol, final int sizeCols) {
 		final SimpleVector subVector = new SimpleVector(sizeCols);
 		for (int c = 0; c < sizeCols; ++c)
-			subVector.buf[c] = this.buf[row][firstCol+c];
+			subVector.buf[c] = this.buf[row*this.cols+firstCol+c];
 		return subVector;
 	}
 	
@@ -348,7 +382,7 @@ public class SimpleMatrix implements Serializable {
 	 */
 	public void setSubRowValue(final int row, final int firstCol, final SimpleVector subRow) {
 		for (int c = 0; c < subRow.getLen(); ++c)
-			this.buf[row][firstCol+c] = subRow.buf[c];
+			this.buf[row*this.cols+firstCol+c] = subRow.buf[c];
 	}
 	
 	/**
@@ -380,7 +414,7 @@ public class SimpleMatrix implements Serializable {
 	public SimpleVector getSubCol(final int firstRow, final int col, final int sizeRows) {
 		final SimpleVector subVector = new SimpleVector(sizeRows);
 		for (int r = 0; r < sizeRows; ++r)
-			subVector.buf[r] = this.buf[firstRow+r][col];
+			subVector.buf[r] = this.buf[(firstRow+r)*this.cols+col];
 		return subVector;
 	}
 	
@@ -392,7 +426,7 @@ public class SimpleMatrix implements Serializable {
 	 */
 	public void setSubColValue(final int firstRow, final int col, final SimpleVector subCol) {
 		for (int r = 0; r < subCol.getLen(); ++r)
-			this.buf[firstRow+r][col] = subCol.buf[r];
+			this.buf[(firstRow+r)*this.cols+col] = subCol.buf[r];
 	}
 	
 	/**
@@ -422,7 +456,7 @@ public class SimpleMatrix implements Serializable {
 		final int min_rc = Math.min(this.rows, this.cols);
 		final SimpleVector diag = new SimpleVector(min_rc);
 		for (int i = 0; i < min_rc; ++i)
-			diag.buf[i] = this.buf[i][i];
+			diag.buf[i] = this.buf[i*this.cols+i];
 		return diag;
 	}
 	
@@ -432,7 +466,7 @@ public class SimpleMatrix implements Serializable {
 	 */
 	public void setDiagValue(final SimpleVector diag) {
 		for (int i = 0; i < diag.getLen(); ++i)
-			this.buf[i][i] = diag.buf[i];
+			this.buf[i*this.cols+i] = diag.buf[i];
 	}
 	
 	/**
@@ -442,7 +476,7 @@ public class SimpleMatrix implements Serializable {
 	 * @param addend is value to be added to entry at [row,col]
 	 */
 	public void addToElement(final int row, final int col, final double addend) {
-		this.buf[row][col] += addend;
+		this.buf[row*this.cols+col] += addend;
 	}
 	
 	/**
@@ -452,7 +486,7 @@ public class SimpleMatrix implements Serializable {
 	 * @param subtrahend is value to be subtracted from entry at [row,col]
 	 */
 	public void subtractFromElement(final int row, final int col, final double subtrahend) {
-		this.buf[row][col] -= subtrahend;
+		this.buf[row*this.cols+col] -= subtrahend;
 	}
 	
 	/**
@@ -462,7 +496,7 @@ public class SimpleMatrix implements Serializable {
 	 * @param factor is value to be multiplied to entry at [row,col]
 	 */
 	public void multiplyElementBy(final int row, final int col, final double factor) {
-		this.buf[row][col] *= factor;
+		this.buf[row*this.cols+col] *= factor;
 	}
 	
 	/**
@@ -472,7 +506,7 @@ public class SimpleMatrix implements Serializable {
 	 * @param divisor is value to be divided from entry at [row,col]
 	 */
 	public void divideElementBy(final int row, final int col, final double divisor) {
-		this.buf[row][col] /= divisor;
+		this.buf[row*this.cols+col] /= divisor;
 	}
 	
 	/**
@@ -482,7 +516,7 @@ public class SimpleMatrix implements Serializable {
 	public void add(final double addend) {
 		for (int r = 0; r < this.rows; ++r)
 			for (int c = 0; c < this.cols; ++c)
-				this.buf[r][c] += addend;
+				this.buf[r*this.cols+c] += addend;
 	}
 	
 	/**
@@ -492,7 +526,7 @@ public class SimpleMatrix implements Serializable {
 	public void subtract(final double subtrahend) {
 		for (int r = 0; r < this.rows; ++r)
 			for (int c = 0; c < this.cols; ++c)
-				this.buf[r][c] -= subtrahend;
+				this.buf[r*this.cols+c] -= subtrahend;
 	}
 	
 	/**
@@ -502,7 +536,7 @@ public class SimpleMatrix implements Serializable {
 	public void multiplyBy(final double factor) {
 		for (int r = 0; r < this.rows; ++r)
 			for (int c = 0; c < this.cols; ++c)
-				this.buf[r][c] *= factor;
+				this.buf[r*this.cols+c] *= factor;
 	}
 	
 	
@@ -515,7 +549,7 @@ public class SimpleMatrix implements Serializable {
 		final SimpleMatrix result = new SimpleMatrix(this.rows, this.cols);
 		for (int r = 0; r < this.rows; ++r)
 			for (int c = 0; c < this.cols; ++c)
-				result.buf[r][c] = this.buf[r][c] * factor;
+				result.buf[r*this.cols+c] = this.buf[r*this.cols+c] * factor;
 		return result;
 	}
 	
@@ -547,7 +581,7 @@ public class SimpleMatrix implements Serializable {
 			assert addend.cols == this.cols;
 			for (int r = 0; r < this.rows; ++r)
 				for (int c = 0; c < this.cols; ++c)
-					this.buf[r][c] += addend.buf[r][c];
+					this.buf[r*this.cols+c] += addend.buf[r*this.cols+c];
 		}
 	}
 	
@@ -562,7 +596,7 @@ public class SimpleMatrix implements Serializable {
 			assert subtrahend.cols == this.cols;
 			for (int r = 0; r < this.rows; ++r)
 				for (int c = 0; c < this.cols; ++c)
-					this.buf[r][c] -= subtrahend.buf[r][c];
+					this.buf[r*this.cols+c] -= subtrahend.buf[r*this.cols+c];
 		}
 	}
 	
@@ -574,7 +608,7 @@ public class SimpleMatrix implements Serializable {
 		assert (other.rows == this.rows) && (other.cols == this.cols);
 		for (int r = 0; r < this.rows; ++r)
 			for (int c = 0; c < this.cols; ++c)
-				this.buf[r][c] *= other.buf[r][c];
+				this.buf[r*this.cols+c] *= other.buf[r*this.cols+c];
 	}
 	
 	/**
@@ -585,7 +619,7 @@ public class SimpleMatrix implements Serializable {
 		assert (other.rows == this.rows) && (other.cols == this.cols);
 		for (int r = 0; r < this.rows; ++r)
 			for (int c = 0; c < this.cols; ++c)
-				this.buf[r][c] /= other.buf[r][c];
+				this.buf[r*this.cols+c] /= other.buf[r*this.cols+c];
 	}
 	
 	/**
@@ -594,7 +628,7 @@ public class SimpleMatrix implements Serializable {
 	public void negate() {
 		for (int r = 0; r < this.rows; ++r)
 			for (int c = 0; c < this.cols; ++c)
-				this.buf[r][c] = -this.buf[r][c];
+				this.buf[r*this.cols+c] = -this.buf[r*this.cols+c];
 	}
 	
 	/**
@@ -604,7 +638,7 @@ public class SimpleMatrix implements Serializable {
 		final SimpleMatrix result = new SimpleMatrix(this.rows, this.cols);
 		for (int r = 0; r < this.rows; ++r)
 			for (int c = 0; c < this.cols; ++c)
-				result.buf[r][c] = -this.buf[r][c];
+				result.buf[r*this.cols+c] = -this.buf[r*this.cols+c];
 		return result;
 	}
 	
@@ -616,9 +650,10 @@ public class SimpleMatrix implements Serializable {
 		double tmp;
 		for (int r = 0; r < this.rows; ++r) {
 			for (int c = r+1; c < this.cols; ++c) {
-				tmp = this.buf[r][c];
-				this.buf[r][c] = this.buf[c][r];
-				this.buf[c][r] = tmp;
+				// Addressing with this.cols and this.rows is arbitrary, as the matrix is assumed to be quadratic
+				tmp = this.buf[r*this.cols+c];
+				this.buf[r*this.cols+c] = this.buf[c*this.rows+r];
+				this.buf[c*this.rows+r] = tmp;
 			}
 		}
 	}
@@ -630,7 +665,7 @@ public class SimpleMatrix implements Serializable {
 		final SimpleMatrix result = new SimpleMatrix(this.cols, this.rows);
 		for (int r = 0; r < result.getRows(); ++r) {
 			for (int c = 0; c < result.getCols(); ++c) {
-				result.buf[r][c] = this.buf[c][r];
+				result.buf[r*result.cols+c] = this.buf[c*result.rows+r];
 			}
 		}
 		return result;
@@ -667,7 +702,7 @@ public class SimpleMatrix implements Serializable {
 			double result = 0.0;
 			for (int r = 0; r < this.rows; ++r)
 				for (int c = 0; c < this.cols; ++c)
-					result +=  this.buf[r][c]*this.buf[r][c];
+					result +=  this.buf[r*this.cols+c]*this.buf[r*this.cols+c];
 			return Math.sqrt(result);
 		default:
 			throw new RuntimeException("Matrix norm type not implemented yet!");
@@ -682,18 +717,19 @@ public class SimpleMatrix implements Serializable {
 		assert (this.rows >= 1) : new IllegalArgumentException("The matrix must be at least 1x1!");
 		switch (this.rows) {
 		case 1:
-			return this.buf[0][0];
+			return this.buf[0*this.cols+0];
 		case 2:
-			return this.buf[0][0]*this.buf[1][1] - this.buf[0][1]*this.buf[1][0];
+			return this.buf[0*this.cols+0]*this.buf[1*this.cols+1] - this.buf[0*this.cols+1]*this.buf[1*this.cols+0];
 		case 3:
-			return this.buf[0][0]*this.buf[1][1]*this.buf[2][2] + this.buf[0][1]*this.buf[1][2]*this.buf[2][0] + this.buf[0][2]*this.buf[1][0]*this.buf[2][1]
-			- this.buf[2][0]*this.buf[1][1]*this.buf[0][2] - this.buf[2][1]*this.buf[1][2]*this.buf[0][0] - this.buf[2][2]*this.buf[1][0]*this.buf[0][1];
+			return this.buf[0*this.cols+0]*this.buf[1*this.cols+1]*this.buf[2*this.cols+2] + this.buf[0*this.cols+1]*this.buf[1*this.cols+2]*this.buf[2*this.cols+0]
+				 + this.buf[0*this.cols+2]*this.buf[1*this.cols+0]*this.buf[2*this.cols+1] - this.buf[2*this.cols+0]*this.buf[1*this.cols+1]*this.buf[0*this.cols+2]
+				 - this.buf[2*this.cols+1]*this.buf[1*this.cols+2]*this.buf[0*this.cols+0] - this.buf[2*this.cols+2]*this.buf[1*this.cols+0]*this.buf[0*this.cols+1];
 		default:
 			// TODO: use an LU decomposition for big matrices (of a size greater then 5-10)
 			double det = 0.0;
 			double factor = 1.0;
 			for (int i = 0; i < this.cols; ++i) {
-				det += factor * this.buf[0][i] * this.getSubMatrix(0, i).determinant();
+				det += factor * this.buf[0*this.cols+i] * this.getSubMatrix(0, i).determinant();
 				factor *= -1.0;
 			}
 			return det;
@@ -737,7 +773,7 @@ public class SimpleMatrix implements Serializable {
 		if (!this.isSquare()) throw new IllegalArgumentException("Only square matrices can be tested for identity!");
 		for (int r = 0; r < this.rows; ++r) {
 			for (int c = 0; c < this.cols; ++c) {
-				double el = this.buf[r][c];
+				double el = this.buf[r*this.cols+c];
 				if (r == c) {
 					if (Math.abs(el - 1.0) > delta) return false;
 				} else {
@@ -767,7 +803,7 @@ public class SimpleMatrix implements Serializable {
 		for (int r = 1; r < this.rows; ++r) {
 			final int cMax = Math.min(this.cols, r);
 			for (int c = 0; c < cMax; ++c) {
-				if (this.buf[r][c] != 0.0) return false;
+				if (this.buf[r*this.cols+c] != 0.0) return false;
 			}
 		}
 		return true;
@@ -784,7 +820,7 @@ public class SimpleMatrix implements Serializable {
 		final SimpleMatrix MtM = SimpleOperators.multiplyMatrixProd(this.transposed(), this);
 		for (int r = 0; r < n; ++r)
 			for (int c = 0; c < n; ++c)
-				if (Math.abs(MtM.buf[r][c] - ((r == c) ? 1.0 : 0.0)) > maxErr) return false;
+				if (Math.abs(MtM.buf[r*this.cols+c] - ((r == c) ? 1.0 : 0.0)) > maxErr) return false;
 		return true;
 	}
 
@@ -822,8 +858,8 @@ public class SimpleMatrix implements Serializable {
 	public boolean isRigidMotion2D(final double maxErr) {
 		if (this.rows != 3) throw new IllegalArgumentException("Only 3x3 matrices can be tested whether they are 2D rigid motion matrices!");
 		if (!this.isSquare()) return false;
-		final double scale = this.buf[2][2];
-		if (Math.abs(this.buf[2][0]) > maxErr || Math.abs(this.buf[2][1]) > maxErr || Math.abs(scale) < CONRAD.DOUBLE_EPSILON) return false;
+		final double scale = this.buf[2*this.cols+2];
+		if (Math.abs(this.buf[2*this.cols+0]) > maxErr || Math.abs(this.buf[2*this.cols+1]) > maxErr || Math.abs(scale) < CONRAD.DOUBLE_EPSILON) return false;
 		return this.getSubMatrix(0, 0, 2, 2).dividedBy(scale).isRotation2D(maxErr);
 	}
 	
@@ -835,8 +871,8 @@ public class SimpleMatrix implements Serializable {
 	public boolean isRigidMotion3D(final double maxErr) {
 		if (this.rows != 4) throw new IllegalArgumentException("Only 4x4 matrices can be tested whether they are 3D rigid motion matrices!");
 		if (!this.isSquare()) return false;
-		final double scale = this.buf[3][3];
-		if (Math.abs(this.buf[3][0]) > maxErr || Math.abs(this.buf[3][1]) > maxErr || Math.abs(this.buf[3][2]) > maxErr || Math.abs(scale) < CONRAD.DOUBLE_EPSILON) return false;
+		final double scale = this.buf[3*this.cols+3];
+		if (Math.abs(this.buf[3*this.cols+0]) > maxErr || Math.abs(this.buf[3*this.cols+1]) > maxErr || Math.abs(this.buf[3*this.cols+2]) > maxErr || Math.abs(scale) < CONRAD.DOUBLE_EPSILON) return false;
 		return this.getSubMatrix(0, 0, 3, 3).dividedBy(scale).isRotation3D(maxErr);
 	}
 
@@ -883,47 +919,47 @@ public class SimpleMatrix implements Serializable {
 			SimpleMatrix Minv_triang = new SimpleMatrix(this.rows, this.cols);
 			for (int col = 0; col < this.cols; ++col) {
 				// set diagonal element
-				Minv_triang.buf[col][col] = 1.0/this.buf[col][col];
+				Minv_triang.buf[col*Minv_triang.cols+col] = 1.0/this.buf[col*this.cols+col];
 				for (int row = col-1; row >= 0; --row) {
 					// compute unknown in position (row, col) from inner product of the respective row and column in the matrix product U * Uinv = I
 					double sum = 0.0;
 					for (int l = row+1; l <= col ; ++l)
-						sum += this.buf[row][l] * Minv_triang.buf[l][col];
-					Minv_triang.buf[row][col] = -sum*Minv_triang.buf[row][row];
+						sum += this.buf[row*this.cols+l] * Minv_triang.buf[l*Minv_triang.cols+col];
+					Minv_triang.buf[row*Minv_triang.cols+col] = -sum*Minv_triang.buf[row*Minv_triang.cols+row];
 				}
 			}
 			return Minv_triang;
 		case INVERT_RT:
 			if (this.rows == 4) {
 				assert this.isRigidMotion3D(Math.sqrt(CONRAD.DOUBLE_EPSILON)) : new IllegalArgumentException("The matrix must be square!");
-				final double scale = this.buf[3][3]; // Attention: Don't just normalize the input matrix and invert it, because M*Minv would not be equal identity!
+				final double scale = this.buf[3*this.cols+3]; // Attention: Don't just normalize the input matrix and invert it, because M*Minv would not be equal identity!
 				if (scale == 0) throw new IllegalArgumentException("The matrix must be a rigid motion matrix with [0 0 0 a] (with a != 0) in the last row!");
-				if (this.buf[3][0] != 0 || this.buf[3][1] != 0 || this.buf[3][2] != 0) throw new IllegalArgumentException("The matrix must be a rigid motion matrix with [0 0 0 a] in the last row!");
+				if (this.buf[3*this.cols+0] != 0 || this.buf[3*this.cols+1] != 0 || this.buf[3*this.cols+2] != 0) throw new IllegalArgumentException("The matrix must be a rigid motion matrix with [0 0 0 a] in the last row!");
 				///TODO: check that R really is a matrix from SO(3)
 				SimpleMatrix Rinverse = this.getSubMatrix(0, 0, 3, 3).transposed().dividedBy(scale);
 				SimpleVector t = this.getSubCol(0, 3, 3).dividedBy(scale); // last column
 				SimpleMatrix Minv_rt = new SimpleMatrix(4, 4);
 				Minv_rt.setSubMatrixValue(0, 0, Rinverse.dividedBy(scale));
 				Minv_rt.setSubColValue(0, 3, SimpleOperators.multiply(Rinverse.negated(), t).dividedBy(scale));
-				Minv_rt.buf[3][0] = 0;
-				Minv_rt.buf[3][1] = 0;
-				Minv_rt.buf[3][2] = 0;
-				Minv_rt.buf[3][3] = 1/scale;				
+				Minv_rt.buf[3*Minv_rt.cols+0] = 0;
+				Minv_rt.buf[3*Minv_rt.cols+1] = 0;
+				Minv_rt.buf[3*Minv_rt.cols+2] = 0;
+				Minv_rt.buf[3*Minv_rt.cols+3] = 1/scale;				
 				return Minv_rt;
 			} else if (this.rows == 3) {
 				assert this.isRigidMotion2D(Math.sqrt(CONRAD.DOUBLE_EPSILON)) : new IllegalArgumentException("The matrix must be square!");
-				final double scale = this.buf[2][2]; // Attention: Don't just normalize the input matrix and invert it, because M*Minv would not be equal identity!
+				final double scale = this.buf[2*this.cols+2]; // Attention: Don't just normalize the input matrix and invert it, because M*Minv would not be equal identity!
 				if (scale == 0) throw new IllegalArgumentException("The matrix must be a rigid motion matrix with [0 0 a] (with a != 0) in the last row!");
-				if (this.buf[2][0] != 0 || this.buf[2][1] != 0) throw new IllegalArgumentException("The matrix must be a rigid motion matrix with [0 0 a] in the last row!");
+				if (this.buf[2*this.cols+0] != 0 || this.buf[2*this.cols+1] != 0) throw new IllegalArgumentException("The matrix must be a rigid motion matrix with [0 0 a] in the last row!");
 				///TODO: check that R really is a matrix from SO(3)
 				SimpleMatrix Rinverse = this.getSubMatrix(0, 0, 2, 2).transposed().dividedBy(scale);
 				SimpleVector t = this.getSubCol(0, 2, 2).dividedBy(scale); // last column
 				SimpleMatrix Minv_rt = new SimpleMatrix(3, 3);
 				Minv_rt.setSubMatrixValue(0, 0, Rinverse.dividedBy(scale));
 				Minv_rt.setSubColValue(0, 2, SimpleOperators.multiply(Rinverse.negated(), t).dividedBy(scale));
-				Minv_rt.buf[2][0] = 0;
-				Minv_rt.buf[2][1] = 0;
-				Minv_rt.buf[2][2] = 1/scale;
+				Minv_rt.buf[2*Minv_rt.cols+0] = 0;
+				Minv_rt.buf[2*Minv_rt.cols+1] = 0;
+				Minv_rt.buf[2*Minv_rt.cols+2] = 1/scale;
 				return Minv_rt;
 			} else
 				throw new IllegalArgumentException("The matrix must have dimensions 3x3 or 4x4!");
@@ -961,7 +997,7 @@ public class SimpleMatrix implements Serializable {
 			result += "[";
 			for (int c = 0; c < this.cols; ++c) {
 				if (c != 0) result += " ";
-				result += new Double(this.buf[r][c]);
+				result += new Double(this.buf[r*this.cols+c]);
 			}
 			result += "]";
 		}

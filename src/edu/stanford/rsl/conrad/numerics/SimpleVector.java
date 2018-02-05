@@ -417,7 +417,7 @@ public class SimpleVector implements Serializable {
 	public SimpleMatrix transposed() {
 		final SimpleMatrix result = new SimpleMatrix(1, this.len);
 		for (int i = 0; i < result.cols; ++i)
-			result.buf[0][i] = this.buf[i];
+			result.buf[0*result.cols+i] = this.buf[i];
 		return result;
 	}
 
