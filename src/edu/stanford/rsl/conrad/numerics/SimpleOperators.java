@@ -178,7 +178,21 @@ public abstract class SimpleOperators {
 		return result;
 	}
 	
-
+	/**
+	 * 
+	 * @param in The vector to process
+	 * @param fct A generic function, e.g. the absolute value
+	 * @return a vector with the function applied to all elements
+	 */
+	public static SimpleVector elementWiseOperator(final SimpleVector in, DoubleFunction fct){
+		SimpleVector out = in.clone();
+		for (int i = 0; i < out.getLen(); i++) {
+			out.setElementValue(i, fct.f(out.getElement(i)));
+			
+		}
+		return out;
+	}
+	
 	// **************************************************************** //
 	// ******************* Matrix/Matrix operators ******************** //
 	// **************************************************************** //

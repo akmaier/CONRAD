@@ -1,6 +1,7 @@
-/**
- * 
- */
+/*
+ * Copyright (C) 2018 Benedikt Lorch, Jennifer Maier
+ * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
+*/
 package edu.stanford.rsl.conrad.filtering.opencl;
 
 import ij.IJ;
@@ -30,7 +31,6 @@ import edu.stanford.rsl.conrad.utils.UserUtil;
  */
 public class BilateralFiltering3DTool extends OpenCLFilteringTool3D {
 	
-
 	private static final long serialVersionUID = 8268932618986579399L;
 	protected double sigmaPhoto = 1;
 	protected double[] sigmaGeom = { 5.d, 5.d, 5.d };
@@ -45,64 +45,14 @@ public class BilateralFiltering3DTool extends OpenCLFilteringTool3D {
 	protected CLBuffer<FloatBuffer> template;
 	
 	
-	// Accessors and mutators for configuration variables
-	public void setSigmaPhoto(double sigmaPhoto) {
-		this.sigmaPhoto = sigmaPhoto;
+	public BilateralFiltering3DTool() {
+		this.kernelName = kernelname.BILATERAL_FILTER_3D;
 	}
-	
-	public void setSigmaGeom(double[] sigmaGeom) {
-		this.sigmaGeom = sigmaGeom;
-	}
-	
-	public void setKernelWidth() {
-		
-		assert(this.sigmaGeom.length == 3);
-		assert(this.sigmaGeom[0] != 0.d);
-		assert(this.sigmaGeom[1] != 0.d);
-		assert(this.sigmaGeom[2] != 0.d);
-		assert(this.sigmaPhoto != 0.d);
-		
-		this.kernelWidth = computeKernelWidth();
-	}
-	
-	public void setKernelWidth(int kernelWidth) {
-		this.kernelWidth = kernelWidth;
-	}
-	
-	public double getSigmaPhoto() {
-		return this.sigmaPhoto;
-	}
-	
-	public double[] getSigmaGeom() {
-		return this.sigmaGeom;
-	}
-	
-	
-	public void setConfigured(boolean configured) {
-		this.configured = configured;
-	}
-	
-	
-	/**
-	 * Configure whether to ask for a guidance image
-	 * @param askForGuidance
-	 */
-	public void setAskForGuidance(boolean askForGuidance) {
-		this.askForGuidance = askForGuidance;
-	}
-	
-	
-	/**
-	 * Gets the kernel width
-	 * @return kernelWidth
-	 */
-	public int getKernelWidth() {
-		return kernelWidth;
-	}
-	
 	
 	@Override
 	public void configure() throws Exception {
+		
+		this.kernelName = kernelname.BILATERAL_FILTER_3D;
 		
 		double[] sGeom = UserUtil.queryArray("Enter geometric sigma (for each dimension)", sigmaGeom);
 		if (sGeom.length == 3) {
@@ -143,6 +93,113 @@ public class BilateralFiltering3DTool extends OpenCLFilteringTool3D {
 		
 		configured = true;
 
+	}
+	
+	/**
+	 * Called by process() before the processing begins. Put your write buffers to the queue here.
+	 * @param input Grid 3-D to be processed
+	 * @param queue CommandQueue for the specific device
+	 */
+	@SuppressWarnings("unused")
+	@Override
+	protected void prepareProcessing(Grid3D input, CLCommandQueue queue) {
+		
+		// Check for errors with guidance grid
+		if (showGuidance) {
+			if (null == guidanceGrid) {
+				throw new IllegalArgumentException("The user claimed to add a guidance image but the guidance image could not be found.");
+			}
+			else {
+				// Assure equal dimensions
+				int[] guidanceSize = guidanceGrid.getSize();
+				if (width != guidanceSize[0]
+						|| height != guidanceSize[1]
+						|| depth != guidanceSize[2]) {
+					throw new IllegalArgumentException("The given guidence image's dimensions are not equal to the sizes which this filter has been configured for.");
+				}
+			}
+		}
+		else if (null != guidanceGrid) {
+			// Guidance image given but not used
+			String message = "You passed a template image to process() but claimed not to use a guidance image. Your template image will be ignored. In order to use the template image with Joint Bilateral Filter, click 'yes' when prompted whether to use a guidance image.";
+			if (debug > 0) {
+				System.err.println(message);
+			}
+		}
+		
+		// Copy image data into linear floatBuffer
+		gridToBuffer(image.getBuffer(), input);
+		image.getBuffer().rewind();
+		queue.putWriteBuffer(image, true);
+		
+		// Copy guidance image
+		if (showGuidance && null != guidanceGrid) {
+			template = clContext.createFloatBuffer(this.width * this.height * this.depth, CLMemory.Mem.READ_ONLY);
+			gridToBuffer(template.getBuffer(), guidanceGrid);
+			template.getBuffer().rewind();
+			queue.putWriteBuffer(template, true);
+		}
+		
+		// Compute geometric kernel: If the kernel is a sphere, then use symmetric properties to speed up processing
+		Grid3D geometricKernelGrid = (sigmaGeom[0] == sigmaGeom[1] && sigmaGeom[1] == sigmaGeom[2]) ? computeSymmetricGeometricKernel() : computeGeometricKernel();
+		geometricKernel = clContext.createFloatBuffer(kernelWidth * kernelWidth * kernelWidth, CLMemory.Mem.READ_ONLY);
+		gridToBuffer(geometricKernel.getBuffer(), geometricKernelGrid);
+		geometricKernel.getBuffer().rewind();
+		queue.putWriteBuffer(geometricKernel, true);
+	}
+	
+	// Accessors and mutators for configuration variables
+	public void setSigmaPhoto(double sigmaPhoto) {
+		this.sigmaPhoto = sigmaPhoto;
+	}
+	
+	public void setSigmaGeom(double[] sigmaGeom) {
+		this.sigmaGeom = sigmaGeom;
+	}
+	
+	public void setKernelWidth() {
+		
+		assert(this.sigmaGeom.length == 3);
+		assert(this.sigmaGeom[0] != 0.d);
+		assert(this.sigmaGeom[1] != 0.d);
+		assert(this.sigmaGeom[2] != 0.d);
+		assert(this.sigmaPhoto != 0.d);
+		
+		this.kernelWidth = computeKernelWidth();
+	}
+	
+	public void setKernelWidth(int kernelWidth) {
+		this.kernelWidth = kernelWidth;
+	}
+	
+	public double getSigmaPhoto() {
+		return this.sigmaPhoto;
+	}
+	
+	public double[] getSigmaGeom() {
+		return this.sigmaGeom;
+	}
+	
+	public void setConfigured(boolean configured) {
+		this.configured = configured;
+	}
+	
+	
+	/**
+	 * Configure whether to ask for a guidance image
+	 * @param askForGuidance
+	 */
+	public void setAskForGuidance(boolean askForGuidance) {
+		this.askForGuidance = askForGuidance;
+	}
+	
+	
+	/**
+	 * Gets the kernel width
+	 * @return kernelWidth
+	 */
+	public int getKernelWidth() {
+		return kernelWidth;
 	}
 	
 	
@@ -230,9 +287,6 @@ public class BilateralFiltering3DTool extends OpenCLFilteringTool3D {
 		
 		return geometricKernel;
 	}
-	
-	
-	
 
 	@Override
 	protected void configureKernel() {
@@ -257,60 +311,7 @@ public class BilateralFiltering3DTool extends OpenCLFilteringTool3D {
 		}
 	}
 	
-	
-	/**
-	 * Called by process() before the processing begins. Put your write buffers to the queue here.
-	 * @param input Grid 3-D to be processed
-	 * @param queue CommandQueue for the specific device
-	 */
-	@Override
-	protected void prepareProcessing(Grid3D input, CLCommandQueue queue) {
-		
-		// Check for errors with guidance grid
-		if (showGuidance) {
-			if (null == guidanceGrid) {
-				throw new IllegalArgumentException("The user claimed to add a guidance image but the guidance image could not be found.");
-			}
-			else {
-				// Assure equal dimensions
-				int[] guidanceSize = guidanceGrid.getSize();
-				if (width != guidanceSize[0]
-						|| height != guidanceSize[1]
-						|| depth != guidanceSize[2]) {
-					throw new IllegalArgumentException("The given guidence image's dimensions are not equal to the sizes which this filter has been configured for.");
-				}
-			}
-		}
-		else if (null != guidanceGrid) {
-			// Guidance image given but not used
-			String message = "You passed a template image to process() but claimed not to use a guidance image. Your template image will be ignored. In order to use the template image with Joint Bilateral Filter, click 'yes' when prompted whether to use a guidance image.";
-			if (debug > 0) {
-				System.err.println(message);
-			}
-		}
-		
-		// Copy image data into linear floatBuffer
-		gridToBuffer(image.getBuffer(), input);
-		image.getBuffer().rewind();
-		queue.putWriteBuffer(image, true);
-		
-		// Copy guidance image
-		if (showGuidance && null != guidanceGrid) {
-			template = clContext.createFloatBuffer(this.width * this.height * this.depth, CLMemory.Mem.READ_ONLY);
-			gridToBuffer(template.getBuffer(), guidanceGrid);
-			template.getBuffer().rewind();
-			queue.putWriteBuffer(template, true);
-		}
-		
-		// Compute geometric kernel: If the kernel is a sphere, then use symmetric properties to speed up processing
-		Grid3D geometricKernelGrid = (sigmaGeom[0] == sigmaGeom[1] && sigmaGeom[1] == sigmaGeom[2]) ? computeSymmetricGeometricKernel() : computeGeometricKernel();
-		geometricKernel = clContext.createFloatBuffer(kernelWidth * kernelWidth * kernelWidth, CLMemory.Mem.READ_ONLY);
-		gridToBuffer(geometricKernel.getBuffer(), geometricKernelGrid);
-		geometricKernel.getBuffer().rewind();
-		queue.putWriteBuffer(geometricKernel, true);
-	}
-	
-	
+
 	
 	@Override
 	public void cleanup() {
@@ -320,8 +321,6 @@ public class BilateralFiltering3DTool extends OpenCLFilteringTool3D {
 		super.cleanup();
 	}
 	
-	
-
 	@Override
 	public String getBibtexCitation() {
 		String bibtex = "@inproceedings{Tomasi98-BFF,\n" +
@@ -352,7 +351,7 @@ public class BilateralFiltering3DTool extends OpenCLFilteringTool3D {
 
 	@Override
 	public String getToolName() {
-		return "OpenCL Bilateral Filter 3-D";
+		return "OpenCL Bilateral Filter 3D";
 	}
 
 
@@ -375,3 +374,8 @@ public class BilateralFiltering3DTool extends OpenCLFilteringTool3D {
 	}
 
 }
+
+/*
+ * Copyright (C) 2018 Benedikt Lorch, Jennifer Maier
+ * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
+*/

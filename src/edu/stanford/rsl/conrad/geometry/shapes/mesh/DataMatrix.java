@@ -101,10 +101,8 @@ public class DataMatrix extends SimpleMatrix{
 	public DataMatrix(DataMatrix otherMat) {
 		this.setDimensions(otherMat.getRows()/otherMat.dimension,otherMat.dimension,otherMat.getCols());
 		
-		this.buf = new double[otherMat.buf.length][otherMat.buf[0].length];
-		for( int i = 0; i < otherMat.buf.length; i++ ) {
-			System.arraycopy(otherMat.buf[i], 0, this.buf[i], 0, otherMat.buf[i].length);
-		}
+		this.buf = new double[otherMat.buf.length];
+		System.arraycopy(otherMat.buf, 0, this.buf, 0, otherMat.buf.length);
 		this.scaling = otherMat.scaling;
 		this.consensus = otherMat.consensus;
 		this.centers = otherMat.centers;
@@ -269,7 +267,7 @@ public class DataMatrix extends SimpleMatrix{
 		if (this.rows != rows || this.cols != cols) {
 			this.rows = rows;
 			this.cols = cols;
-			this.buf = new double[this.rows][this.cols];
+			this.buf = new double[this.rows*this.cols];
 			
 			if(!USE_GPA){
 				this.centers = new ArrayList<PointND>(cols);
@@ -311,7 +309,7 @@ public class DataMatrix extends SimpleMatrix{
 		for (int r : selectRows) {
 			int subCol = 0;
 			for (int c : selectCols) {
-				subMatrix.buf[subRow][subCol] = this.buf[r][c];
+				subMatrix.buf[subRow*selectCols.length+subCol] = this.buf[r*this.cols+c];
 				++subCol;
 			}
 			++subRow;

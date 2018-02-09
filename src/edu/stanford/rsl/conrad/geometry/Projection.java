@@ -1776,7 +1776,8 @@ public class Projection implements Serializable {
 
 		// transformation (rotation only) from (PLANE) system to angulation-aligned (AA)
 		double outOfPlaneAngle = 0;
-		if (Configuration.getGlobalConfiguration().getRegistryEntry(RegKeys.TRAJECTORY_OUT_OF_PLANE_ROTATION) != null){
+		if (Configuration.getGlobalConfiguration() != null) 
+			if (Configuration.getGlobalConfiguration().getRegistryEntry(RegKeys.TRAJECTORY_OUT_OF_PLANE_ROTATION) != null){
 			outOfPlaneAngle = General.toRadians(Double.parseDouble(Configuration.getGlobalConfiguration().getRegistryEntry(RegKeys.TRAJECTORY_OUT_OF_PLANE_ROTATION)));
 		}
 		SimpleVector rotAxis = SimpleOperators.multiply(PLANE_T_CENT.getSubMatrix(3, 3).transposed(), General.crossProduct(rotationAxis, SimpleOperators.multiply(PLANE_T_CENT.getSubMatrix(3, 3), rot.getCol(2))));
