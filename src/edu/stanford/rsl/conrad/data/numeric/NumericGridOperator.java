@@ -649,7 +649,7 @@ public class NumericGridOperator {
 		return idx;
 	}
 
-	/** gets value at a certain point commmited as int array; */
+	/** gets value at a certain point commited as int array; */
 	public float getValAtPoint(final NumericGrid grid, int[] point) {
 		long idx = op.getIndex(grid, point);
 		NumericPointwiseIteratorND it = new NumericPointwiseIteratorND(grid);
@@ -692,9 +692,9 @@ public class NumericGridOperator {
 	}
 
 	/**
-	 * Gets sum and squared sum of all grid elements in given roi. Ignores NaNs or infinity;
-	 * (dimension of roi) < (dimension of grid), therefore an index-array is
-	 * submitted to create subgrids
+	 * Gets sum and squared sum of all grid elements in given roi (region of
+	 * interest). Ignores NaNs or infinity; (dimension of roi) < (dimension of
+	 * grid), therefore an index-array is submitted to create subgrids
 	 */
 	public double[] computeSumSquaredSum(final NumericGrid grid, final NumericGrid roi, int[] indices) {
 		int[] sizeGrid = grid.getSize();
@@ -740,7 +740,7 @@ public class NumericGridOperator {
 	}
 
 	/**
-	 * Get number of elements in roi. Ignores NaN and infinity
+	 * Gets number of elements in roi; Ignores NaN and infinity
 	 */
 	public long getNumRoiElements(final NumericGrid roi) {
 		NumericPointwiseIteratorND it = new NumericPointwiseIteratorND(roi);
@@ -784,7 +784,7 @@ public class NumericGridOperator {
 		return sum / numRoiValues;
 	}
 
-	/** Compute dot product between grid1 and grid2 in given roi */
+	/** Computes dot product between first and second in given roi */
 	public float dotProduct(final NumericGrid first, final NumericGrid second, final NumericGrid roi) {
 		double value = 0.0d;
 		NumericPointwiseIteratorND it1 = new NumericPointwiseIteratorND(first);
@@ -799,7 +799,6 @@ public class NumericGridOperator {
 			}
 		return (float) value;
 	}
-
 
 	/**
 	 * @param first
@@ -863,8 +862,12 @@ public class NumericGridOperator {
 		return (float) Math.sqrt(sum / numRoiValues);
 	}
 
-	public float rmse(final NumericGrid original, final NumericGrid reference, final NumericGrid roi,
-			int[] indices) {
+	/**
+	 * Computes root mean square error of two grids in a roi. Dimension of roi
+	 * is smaller than dimension of grids to be compared. Therefore subgrids
+	 * will be generated at indices.
+	 */
+	public float rmse(final NumericGrid original, final NumericGrid reference, final NumericGrid roi, int[] indices) {
 		NumericGrid cloneOri = original.clone();
 		NumericGrid cloneRef = reference.clone();
 		NumericGrid cloneRoi = roi.clone();
@@ -895,7 +898,6 @@ public class NumericGridOperator {
 	}
 
 	/**
-	 * 
 	 * @param grid
 	 *            grid to be analyzed
 	 * @return standard deviation
@@ -922,8 +924,10 @@ public class NumericGridOperator {
 	}
 
 	/**
-	 * Don't use this method in case of different dimensions of roi and original
-	 * image
+	 * This method expects the original grid to have the same dimension as the
+	 * roi (e.g. two 3-dimensional grids); otherwise use StdDev(NumericGrid,
+	 * NumericGrid, int[]) which first will compute subgrids of roi, depending
+	 * on submitted indices array, in order to match dimension
 	 * 
 	 * @param grid
 	 *            grid to be analyzed
@@ -982,9 +986,9 @@ public class NumericGridOperator {
 
 	/**
 	 * Use this method in case dimension of original image is bigger than
-	 * dimension of roi. Subgrid(s) will be created depending on indices
+	 * dimension of roi. Subgrid(s) will be created depending on indices.
 	 * 
-	 * @param indices:
+	 * @param indices
 	 *            indices should contain (dimension of original image -
 	 *            dimension of roi) elements
 	 */
@@ -1031,6 +1035,8 @@ public class NumericGridOperator {
 	/**
 	 * returns an array containing the mean and variance of two grids, as well
 	 * as the covariance in a given roi
+	 * 
+	 * @roi region of interest in which mean and variance should be computed
 	 */
 	public double[] computeMeanVarianceCovariance(final NumericGrid original, final NumericGrid reference,
 			final NumericGrid roi) {
@@ -1093,21 +1099,27 @@ public class NumericGridOperator {
 	}
 
 	/**
-	 * Implementation of SSIM based on the paper "Image Quality Assesment - From
-	 * Error Visibility to Structural Similarity" by Wang et. al. - pp. 600-612
-	 * alpha, beta and gamma are set 1 --> same weighting for luminance,
-	 * contrast and structure; in order to match SSIM-implementation in class
-	 * "Arithmetics" submitted bit-depth has to be 0
+	 * Implementation of SSIM (structural similarity) based on the paper "Image
+	 * Quality Assessment - From Error Visibility to Structural Similarity" by
+	 * Wang et. al. - pp. 600-612 alpha, beta and gamma are set 1 --> same
+	 * weighting for luminance, contrast and structure; in order to match
+	 * SSIM-implementation in class "Arithmetics" submitted bit-depth has to be
+	 * 0
 	 */
 
 	static final double k1 = 0.01;
 	static final double k2 = 0.03;
 
+	/** computes structural similarity of the whole grid */
 	public float computeSSIM(final NumericGrid image, final NumericGrid reference) {
 		// set bit depth 1 by default --> Constants C1 and C2 are 1
 		return op.computeSSIM(image, reference, 1);
 	}
 
+	/**
+	 * computes SSIM (structural similarity) in the whole grid, while bit-depth
+	 * is set manually
+	 */
 	public float computeSSIM(final NumericGrid image, final NumericGrid reference, int bitDepth) {
 		double[] measurements = op.computeMeanVarianceCovariance(image, reference);
 		double meanImage = measurements[0];
@@ -1131,12 +1143,18 @@ public class NumericGridOperator {
 		return (float) (Math.pow(luminance, alpha) * Math.pow(contrast, beta) * Math.pow(structure, gamma));
 	}
 
-	/** computes SSIM in a given roi */
+	/**
+	 * computes SSIM (strucural similarity) in a given roi (region of interest)
+	 */
 	public float computeSSIM(final NumericGrid image, final NumericGrid reference, final NumericGrid roi) {
 		// set bit depth 1 by default --> Constants C1 and C2 are 1
 		return op.computeSSIM(image, reference, roi, 1);
 	}
 
+	/**
+	 * computes SSIM (strucural similarity) in a given roi (region of interest),
+	 * while bit-depth is set manually
+	 */
 	public float computeSSIM(final NumericGrid image, final NumericGrid reference, final NumericGrid roi,
 			int bitDepth) {
 		double[] measurements = op.computeMeanVarianceCovariance(image, reference, roi);
