@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2014 - Andreas Maier, Martin Berger, Maro Bögel
+ * Copyright (C) 2010-2014 - Andreas Maier, Martin Berger, Maro Bï¿½gel
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
 */
 package edu.stanford.rsl.conrad.data.numeric;
@@ -71,9 +71,19 @@ public class Grid1DComplex extends Grid1D {
 		super.addAtIndex(index*2, val);
 	}
 	
+	public void addAtIndex(int index, float real, float imag) {
+		super.addAtIndex(index*2, real);
+		super.addAtIndex(index*2+1, imag);
+	}
+	
 	public void setAtIndex(int index, float val){
 		super.setAtIndex(index*2,val);
 		super.setAtIndex(index*2+1,0);
+	}
+	
+	public void setAtIndex(int index, float real, float imag){
+		super.setAtIndex(index*2,real);
+		super.setAtIndex(index*2+1,imag);
 	}
 	
 	public float getRealAtIndex(int index){
@@ -137,6 +147,16 @@ public class Grid1DComplex extends Grid1D {
 		}
 		return subgrid;
 	}
+	
+	public void show(){
+		show("");
+	}
+	
+	public void show(String title){
+		this.getRealSubGrid(0, this.getNumberOfElements()/2).show(title + " Real Part");
+		this.getImagSubGrid(0, this.getNumberOfElements()/2).show(title + " Imaginary Part");
+	}
+	
 	
 	@Override
 	public int[] getSize() {

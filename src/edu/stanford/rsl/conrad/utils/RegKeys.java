@@ -339,6 +339,12 @@ public abstract class RegKeys {
 	 */
 	public static final String CONRAD_WINDOW_DEFAULT_LOCATION = "CONRAD_WINDOW_DEFAULT_LOCATION";
 	
+	/**
+	 * Entry to set an additional out-of-plane-rotation for Circular Trajectories. 
+	 * The key is a string that specifies the out-of-plane-angle in degrees. Center of rotation is the object. Rotation axis is the cross product of principal ray and rotation axis. Default is 0 degrees that relates to an in-plane rotation, i.e. the source remains in the center plane. 
+	 */
+	public static final String TRAJECTORY_OUT_OF_PLANE_ROTATION = "TRAJECTORY_OUT_OF_PLANE_ROTATION";
+	
 	static {
 		defaultValues = new HashMap<String, String>();
 		defaultValues.put(SLOW_DOWN_MS, "10");

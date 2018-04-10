@@ -3,7 +3,6 @@ package edu.stanford.rsl.tutorial.filters;
 import edu.stanford.rsl.conrad.data.numeric.Grid1D;
 import edu.stanford.rsl.conrad.data.numeric.Grid1DComplex;
 import edu.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators;
-import edu.stanford.rsl.conrad.utils.FFTUtil;
 import edu.stanford.rsl.conrad.utils.VisualizationUtil;
 
 /**
@@ -47,7 +46,7 @@ public class RamLakKernel extends Grid1DComplex implements GridKernel {
 
 	}
 
-	public final static void main(String[] args) {
+	public static void main(String[] args) {
 		RamLakKernel r = new RamLakKernel(320, 2);
 		VisualizationUtil.createPlot(r.getSubGrid(0, 512).getBuffer()).show();
 	}

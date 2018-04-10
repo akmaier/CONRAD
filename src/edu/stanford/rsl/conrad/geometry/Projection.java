@@ -10,6 +10,7 @@ import edu.stanford.rsl.conrad.numerics.SimpleVector;
 import edu.stanford.rsl.conrad.numerics.Solvers;
 import edu.stanford.rsl.conrad.utils.CONRAD;
 import edu.stanford.rsl.conrad.utils.Configuration;
+import edu.stanford.rsl.conrad.utils.RegKeys;
 
 
 /**
@@ -281,9 +282,9 @@ public class Projection implements Serializable {
 				SimpleMatrix.I_3.clone(),
 				SimpleMatrix.I_3.clone(),
 				new SimpleVector(3)
-		);
+				);
 	}
-	
+
 	/**
 	 * Copy constructor.
 	 */
@@ -331,13 +332,13 @@ public class Projection implements Serializable {
 		this.initFromSKRT(
 				1.0,
 				new SimpleMatrix(new double[][] {
-						{1000.0,   0.0,  500.0},
-						{   0.0, 1000.0, 500.0},
-						{   0.0,    0.0,   1.0}
+					{1000.0,   0.0,  500.0},
+					{   0.0, 1000.0, 500.0},
+					{   0.0,    0.0,   1.0}
 				}),
 				SimpleMatrix.I_3.clone(),
 				new SimpleVector(0.0, 0.0, 500.0)
-		);
+				);
 	}
 
 	/**
@@ -550,9 +551,9 @@ public class Projection implements Serializable {
 		// this is the the viewport transform (keeping in mind that OpenGL floors the floating
 		// point pixel coordinates, resulting in the pixel centers from [-1+1/w, 1-1/w]*[-1+1/h, 1-1/h]
 		final SimpleMatrix normalized2Image = new SimpleMatrix(new double[][]{
-				{imgSizeU/2.0, 0.0, (imgSizeU-1)/2.0+imgMinU},
-				{0.0, imgSizeV/2.0, (imgSizeV-1)/2.0+imgMinV},
-				{0.0, 0.0, 1.0}
+			{imgSizeU/2.0, 0.0, (imgSizeU-1)/2.0+imgMinU},
+			{0.0, imgSizeV/2.0, (imgSizeV-1)/2.0+imgMinV},
+			{0.0, 0.0, 1.0}
 		});
 
 		// set the final 3x4 projection matrix
@@ -903,7 +904,7 @@ public class Projection implements Serializable {
 	public SimpleMatrix computePMetric() {
 		return computePMetric(Configuration.getGlobalConfiguration().getGeometry().getSourceToAxisDistance());
 	}
-	
+
 	/**
 	 * Computes the 3x4 projection matrix
 	 * {@latex.inline $\\mathbf{P} = s \\cdot \\mathbf{K} \\cdot \\left(\\begin{array}{c|c} \\mathbf{R} & \\mathbf{t} \\end{array}\\right)$}
@@ -1144,7 +1145,7 @@ public class Projection implements Serializable {
 			final double distanceFar,
 			final double[] glProjectionGlVec,
 			final double[] glModelviewGlVec
-	) {
+			) {
 		// input checks
 		if (imgSizeU < 1 || imgSizeV < 1)
 			throw new IllegalArgumentException("Error: The given image size would yield an empty image!");
@@ -1160,29 +1161,29 @@ public class Projection implements Serializable {
 		// is performed using the specified viewport (which should correspond to the
 		// imgMinU, imgSizeU, imgMinV, imgSizeV coordinates given here);
 		final SimpleMatrix image2Normalized = new SimpleMatrix(new double[][]{
-				{2.0/imgSizeU, 0.0, (1.0-2.0*imgMinU)/imgSizeU-1.0},
-				{0.0, 2.0/imgSizeV, (1.0-2.0*imgMinV)/imgSizeV-1.0},
-				{0.0, 0.0, 1.0}
+			{2.0/imgSizeU, 0.0, (1.0-2.0*imgMinU)/imgSizeU-1.0},
+			{0.0, 2.0/imgSizeV, (1.0-2.0*imgMinV)/imgSizeV-1.0},
+			{0.0, 0.0, 1.0}
 		});
 
 		// the z coordinate is negated for the clip coordinate system since OpenGL assumes
 		// a camera coordinate system viewing in negative z direction but we use the
 		// convention that we get positive z values for points in front of the camera
 		final SimpleMatrix flipZ = new SimpleMatrix(new double[][]{
-				{1.0, 0.0, 0.0, 0.0},
-				{0.0, 1.0, 0.0, 0.0},
-				{0.0, 0.0, -1.0, 0.0},
-				{0.0, 0.0, 0.0, 1.0}
+			{1.0, 0.0, 0.0, 0.0},
+			{0.0, 1.0, 0.0, 0.0},
+			{0.0, 0.0, -1.0, 0.0},
+			{0.0, 0.0, 0.0, 1.0}
 		});
 
 		// output transform for computing the depth coordinate (third row) for OpenGL
 		// this matrix is generated from the one resulting from an application of
 		// glFrustum() or gluPerspective)(
 		final SimpleMatrix addDepthInfo = new SimpleMatrix(new double[][]{
-				{1.0, 0.0, 0.0, 0.0},
-				{0.0, 1.0, 0.0, 0.0},
-				{0.0, 0.0, -(distanceFar + distanceNear)/(distanceFar - distanceNear), -2.0*distanceFar*distanceNear/(distanceFar - distanceNear)},
-				{0.0, 0.0, -1.0, 0.0}
+			{1.0, 0.0, 0.0, 0.0},
+			{0.0, 1.0, 0.0, 0.0},
+			{0.0, 0.0, -(distanceFar + distanceNear)/(distanceFar - distanceNear), -2.0*distanceFar*distanceNear/(distanceFar - distanceNear)},
+			{0.0, 0.0, -1.0, 0.0}
 		});
 
 		// compute projection from world coordinates to normalized device coordinates and
@@ -1313,7 +1314,7 @@ public class Projection implements Serializable {
 			final SimpleVector cubmax,
 			final double[] glProjectionGlVec,
 			final double[] glModelviewGlVec
-	) {
+			) {
 		// output checks
 		if (glProjectionGlVec.length != 16 || glModelviewGlVec.length != 16) throw new IllegalArgumentException("Output vectors have to be allocated 16-vectors!");
 
@@ -1379,7 +1380,7 @@ public class Projection implements Serializable {
 			final SimpleVector cubmin,
 			final SimpleVector cubmax,
 			final double[] distanceNearFar
-	) {
+			) {
 		// check input
 		if (distanceNearFar.length != 2) throw new IllegalArgumentException("tntf has to be a 2-vector!");
 
@@ -1501,7 +1502,7 @@ public class Projection implements Serializable {
 			final double[] distanceNearFar,
 			final SimpleVector C,
 			final SimpleVector d
-	) {
+			) {
 		// input checks
 		assert (distanceNearFar.length == 2) : new IllegalArgumentException("tntf has to be a 2-vector!");
 
@@ -1573,7 +1574,7 @@ public class Projection implements Serializable {
 			final SimpleVector offset,
 			final double dir,
 			final double skew
-	) {
+			) {
 		// input checks
 		if (sourceToDetector <= 0.0) throw new IllegalArgumentException("Source-to-detector has to be positive!");
 		if (spacingUV.getLen() != 2) throw new IllegalArgumentException("Pixel spacing has to be a 2-vector!");
@@ -1672,7 +1673,7 @@ public class Projection implements Serializable {
 			final CameraAxisDirection uDirection,
 			final CameraAxisDirection vDirection,
 			final double rotationAngle
-	) {
+			) {
 		// input checks
 		if (rotationCenter.getLen() != 3) throw new IllegalArgumentException("Rotation center has to be a 3-vector!");
 		if (rotationAxis.getLen() != 3) throw new IllegalArgumentException("Rotation axis has to be a 3-vector!");
@@ -1686,14 +1687,14 @@ public class Projection implements Serializable {
 						(uDirection == CameraAxisDirection.DETECTORMOTION_PLUS || uDirection == CameraAxisDirection.DETECTORMOTION_MINUS)
 						&&
 						(vDirection == CameraAxisDirection.DETECTORMOTION_PLUS || vDirection == CameraAxisDirection.DETECTORMOTION_MINUS)
-				)
+						)
 				||
 				(
 						(uDirection == CameraAxisDirection.ROTATIONAXIS_PLUS || uDirection == CameraAxisDirection.ROTATIONAXIS_MINUS)
 						&&
 						(vDirection == CameraAxisDirection.ROTATIONAXIS_PLUS || vDirection == CameraAxisDirection.ROTATIONAXIS_MINUS)
-				)
-		) throw new IllegalArgumentException("u and v direction are colinear but must be perpendicular!");
+						)
+				) throw new IllegalArgumentException("u and v direction are colinear but must be perpendicular!");
 
 		// normalize axes
 		rotationAxis.normalizeL2();
@@ -1713,19 +1714,16 @@ public class Projection implements Serializable {
 		PLANE_T_CENT.setSubRowValue(1, 0, General.crossProduct(rotationAxis, centerToCameraAtZeroAngle));
 		PLANE_T_CENT.setSubRowValue(2, 0, centerToCameraAtZeroAngle.negated());
 
-		// transformation (rotation only) from (PLANE) system to angulation-aligned (AA)
-		final SimpleMatrix AA_T_PLANE = General.createHomAffineMotionMatrix(Rotations.createBasicXRotationMatrix(-rotationAngle));  
-
 		// transformation (rotation only) from (AA) to imageaxes-aligned system (IA)
 		final SimpleMatrix rot = new SimpleMatrix(3, 3);
-		
+
 		double beta = 0;
 		if(Configuration.getGlobalConfiguration() != null){
 			beta = (double)Configuration.getGlobalConfiguration().getGeometry().getDetectorWidth()/
-							(double)Configuration.getGlobalConfiguration().getGeometry().getDetectorHeight();
+					(double)Configuration.getGlobalConfiguration().getGeometry().getDetectorHeight();
 			beta = Math.atan(beta);
 		} 
-		
+
 		switch (uDirection) {
 		case DETECTORMOTION_PLUS:
 			rot.setColValue(0, General.E_Y.negated());
@@ -1775,6 +1773,16 @@ public class Projection implements Serializable {
 		rot.setColValue(2, General.crossProduct(rot.getCol(0), rot.getCol(1)));
 		rot.transpose();
 		final SimpleMatrix IA_T_AA = General.createHomAffineMotionMatrix(rot);
+
+		// transformation (rotation only) from (PLANE) system to angulation-aligned (AA)
+		double outOfPlaneAngle = 0;
+		if (Configuration.getGlobalConfiguration() != null) 
+			if (Configuration.getGlobalConfiguration().getRegistryEntry(RegKeys.TRAJECTORY_OUT_OF_PLANE_ROTATION) != null){
+			outOfPlaneAngle = General.toRadians(Double.parseDouble(Configuration.getGlobalConfiguration().getRegistryEntry(RegKeys.TRAJECTORY_OUT_OF_PLANE_ROTATION)));
+		}
+		SimpleVector rotAxis = SimpleOperators.multiply(PLANE_T_CENT.getSubMatrix(3, 3).transposed(), General.crossProduct(rotationAxis, SimpleOperators.multiply(PLANE_T_CENT.getSubMatrix(3, 3), rot.getCol(2))));
+		rotAxis.normalizeL2();
+		final SimpleMatrix AA_T_PLANE = General.createHomAffineMotionMatrix(SimpleOperators.multiplyMatrixProd(Rotations.createRotationMatrixAboutAxis(rotAxis, outOfPlaneAngle), Rotations.createBasicXRotationMatrix(-rotationAngle)));  
 
 		// compute viewing direction by transforming CA's z axis (which is the zero camera's viewing direction) into the C0 system 
 		final double viewingDirection = SimpleOperators.multiplyInnerProd(rot.getRow(2), General.E_Z);
