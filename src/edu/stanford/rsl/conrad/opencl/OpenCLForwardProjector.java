@@ -90,7 +90,7 @@ public class OpenCLForwardProjector implements GUIConfigurable, Citeable {
 	private CLBuffer<FloatBuffer> gProjection = null;
 	
 	private SimpleVector originShift = null;
-	private boolean obtainGeometryFromVolume = false;
+	private Boolean obtainGeometryFromVolume = null;
 	private boolean flipProjections = false;
 
 	protected Projection[] projectionMatrices = null;
@@ -665,12 +665,15 @@ public class OpenCLForwardProjector implements GUIConfigurable, Citeable {
 
 		if (gVolumeEdgeMaxPoint == null){
 			gVolumeEdgeMaxPoint = context.createFloatBuffer(volumeEdgeMaxPoint.length, Mem.READ_ONLY);
+		}else {
+			gVolumeEdgeMaxPoint.getBuffer().rewind();
 		}
 		if (gVolumeEdgeMinPoint == null){
 			gVolumeEdgeMinPoint = context.createFloatBuffer(volumeEdgeMinPoint.length, Mem.READ_ONLY);
+		}else {
+			gVolumeEdgeMinPoint.getBuffer().rewind();
 		}
-
-		//} else {
+		
 		gVolumeEdgeMaxPoint.getBuffer().put(volumeEdgeMaxPoint);
 		gVolumeEdgeMinPoint.getBuffer().put(volumeEdgeMinPoint);
 		//}  
@@ -693,14 +696,24 @@ public class OpenCLForwardProjector implements GUIConfigurable, Citeable {
 		prepareAllProjections();
 		
 	}
-
-
+	
+	/*
+	 * Define if geometry should be obtained from volume or from configuration.
+	 * true : obtain geometry from volume information
+	 * false: obtain geometry from configuration
+	 */
+	public void setTakeGeometryFromVolume(boolean set) {
+		obtainGeometryFromVolume = set;
+	}
+	
 	/**
 	 * Start GUI configuration. Reads from global Configuration.
 	 */
 	@Override
 	public void configure() throws Exception {
-		obtainGeometryFromVolume = UserUtil.queryBoolean("Try to obtain volume parameters from ImagePlus/Grid3D (Otherwise from configuration)?");
+		if(obtainGeometryFromVolume == null) {
+			obtainGeometryFromVolume = UserUtil.queryBoolean("Try to obtain volume parameters from ImagePlus/Grid3D (Otherwise from configuration)?");
+		}
 		Configuration config = Configuration.getGlobalConfiguration();
 		
 		if (!obtainGeometryFromVolume){
