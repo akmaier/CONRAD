@@ -3,11 +3,11 @@ package edu.stanford.rsl.tutorial.mipda;
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
 import edu.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators;
 import edu.stanford.rsl.conrad.utils.ImageUtil;
-import edu.stanford.rsl.conrad.utils.VisualizationUtil;
+//import edu.stanford.rsl.conrad.utils.VisualizationUtil;
 import ij.IJ;
 import ij.ImageJ;
 import edu.stanford.rsl.conrad.data.numeric.InterpolationOperators;
-import edu.stanford.rsl.conrad.data.numeric.NumericGridOperator;
+//import edu.stanford.rsl.conrad.data.numeric.NumericGridOperator;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
 import edu.stanford.rsl.conrad.numerics.SimpleOperators;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
@@ -34,8 +34,10 @@ public class ExerciseGeoU {
 	Grid2D distortedImage; // do not edit, generated in the main method
 	Grid2D undistortedImage; // do not edit, member variable for the output image
 	
-	int nx;
-	int ny;
+	// number of lattice points
+	final int nx = 0;//TODO: define the number of lattice point: nx (Positive number and less than 20)
+	final int ny = 0;//TODO: define the number of lattice point: ny (Positive number and less than 20)
+	
 	float fx;
 	float fy;
 	SimpleMatrix Xu; 
@@ -103,19 +105,37 @@ public class ExerciseGeoU {
 			System.err.println("Error in doImageUndistortion(): called before initialization of members.");
 			return grid;
 		}
-
 		
-		/** 1. Number of lattice points (this only works for symmetric images):
-		 *  nx, ny feature points: usually provided by tracking point
-		 *  correspondences in the phantom during the calibration step.
-		 *  Here, we use the distorted and undistorted coordinates generated
-		 *  in the course of the distortion simulation.
-		 */ 
 		
-		// number of lattice points
-		// define the number of lattice points: nx and ny (Positive number and less than 20)
-		nx = 0; //TODO
-		ny = 0; //TODO
+		getLatticePoints(distortedImage);// There are TODOs here 
+		
+		
+		int degree = 5; // polynomial's degree: 2,...,10
+		calcPolynomial(degree, Xd);// There are TODOs here
+		
+		
+		
+		computeMatrixA(degree, numCorresp, numCoeff);// There are TODOs here
+		
+		
+		computeDistortionCoeff(A, XuVector, YuVector);// There are TODOs here
+		
+		
+		grid = computeDistortedGrid(distortedImage, grid, degree);// There are TODOs here
+		
+		return grid;
+	}
+	
+	
+	
+	/** 1. Number of lattice points (this only works for symmetric images):
+	 *  nx, ny feature points: usually provided by tracking point
+	 *  correspondences in the phantom during the calibration step.
+	 *  Here, we use the distorted and undistorted coordinates generated
+	 *  in the course of the distortion simulation.
+	 */ 
+	public void getLatticePoints (Grid2D distortedImage){
+		
 		
 		int imageWidth = distortedImage.getWidth();
 		int imageHeight = distortedImage.getHeight();
@@ -137,25 +157,25 @@ public class ExerciseGeoU {
 			for(int j = 0; j < ny; j++){
 
 				// sample the distorted and undistorted grid points at the lattice points
-				//TODO 
-				//TODO
-				//TODO
-				//TODO
+				//TODO: fill matrix Xu
+				//TODO: fill matrix Yu
+				//TODO: fill matrix Xd
+				//TODO: fill matrix Yd
 			}
 		}
-
-
-		/** 2. Polynomial of degree d
-		 * Polynomial of degree d -> (d-1): extrema (e.g., d=5: 4 extrema)
-		 * d=0: constant (horizontal line with y-intercept a_0 -> f(x)=a_0)
-		 * d=1: oblique line with y-intercept a_0 & slope a_1 -> f(x)=a_0 + a_1 x
-		 * d=2: parabola
-		 * d>=2: continuous non-linear curve
-		 * ...
-		 * d = 10 -> NumKoeff: 66 -> but only 64 lattice points are known (nx, ny = 8)
-		 */
-
-		int degree = 5; // polynomial's degree: 2,...,10 // jUnit tests valid for degree = 5 only
+	}
+	
+	/** 2. Polynomial of degree d
+	 * Polynomial of degree d -> (d-1): extrema (e.g., d=5: 4 extrema)
+	 * d=0: constant (horizontal line with y-intercept a_0 -> f(x)=a_0)
+	 * d=1: oblique line with y-intercept a_0 & slope a_1 -> f(x)=a_0 + a_1 x
+	 * d=2: parabola
+	 * d>=2: continuous non-linear curve
+	 * ...
+	 * d = 10 -> NumCoeff: 66 -> but only 64 lattice points are known (nx, ny = 8)
+	 */
+	
+	public void calcPolynomial(int degree, SimpleMatrix Xd){
 		
 		// number of coefficients: numCoeff
 		// (hint: this is NOT the total number of multiplications!)
@@ -169,11 +189,14 @@ public class ExerciseGeoU {
 		System.out.println("Number of Coefficients: " + numCoeff);
 		System.out.println("Number of Correspondences: " + numCorresp);
 		
+	}
+	
+	/**
+	 * 3. Create the matrix A
+	 */
+	
+	public void computeMatrixA(int degree, int numCorresp, int numCoeff){
 		
-		/**
-		 * 3. Create the matrix A
-		 */
-
 		A = new SimpleMatrix(numCorresp, numCoeff);
 		A.zeros();
 		
@@ -201,12 +224,15 @@ public class ExerciseGeoU {
 			for(int k = 0; k <= degree; k++){
 				for(int l = 0; l <= (degree-k); l++){
 					
-					// TODO
+					// TODO: fill matrix A
 					cc++;
 					
 				}
 			}
 		}
+	}
+	
+	public void computeDistortionCoeff(SimpleMatrix A, SimpleVector XuVector, SimpleVector YuVector){
 		
 		// Compute the pseudo-inverse of A with the help of the SVD (class: DecompositionSVD)
 		svd = null; // TODO
@@ -215,15 +241,19 @@ public class ExerciseGeoU {
 		// Compute the distortion coefficients (solve for known corresponding undistorted points)
 		u_vec = null;// TODO
 		v_vec = null;// TODO
+	}
+	
+	/**
+	 * 4. Compute the distorted grid points (xDist, yDist) which are used to sample the
+	 * distorted image to get the undistorted image
+	 * (xprime,yprime) is the position in the undistorted image
+	 * (xDist,yDist) is the position in the distorted (observed) X-ray image.
+	 */
+	public Grid2D computeDistortedGrid(Grid2D distortedImage, Grid2D grid_out, int degree){
 		
+		int imageWidth = distortedImage.getWidth();
+		int imageHeight = distortedImage.getHeight();
 		
-		/**
-		 * 4. Compute the distorted grid points (xDist, yDist) which are used to sample the
-		 * distorted image to get the undistorted image
-		 * (xprime,yprime) is the position in the undistorted image
-		 * (xDist,yDist) is the position in the distorted (observed) X-ray image.
-		 */
-
 		xDist = new Grid2D(imageWidth,imageHeight);  
 		yDist = new Grid2D(imageWidth,imageHeight); 
 		
@@ -240,8 +270,8 @@ public class ExerciseGeoU {
 						val1 = 0;// TODO
 						val2 = 0;// TODO
 						
-						// TODO
-						// TODO
+						// TODO: fill xDist
+						// TODO: fill yDist
 						
 						cc++;
 					}
@@ -256,12 +286,14 @@ public class ExerciseGeoU {
 				
 				// hint: consider the fact that the coordinate origin is in the center of the image
 				val = 0;//TODO
-				//TODO
+				//TODO: fill grid_out
 			}
 		}
 		
-		return grid;
+		return grid_out;
+		
 	}
+	
 	
 	
 	/**

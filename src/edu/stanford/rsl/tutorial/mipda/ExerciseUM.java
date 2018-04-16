@@ -45,12 +45,15 @@ public class ExerciseUM {
 		/** 
 		 * preprocessing
 		 */
+		
+		
 		ImagePlus imp = new ImagePlus("",ImageUtil.wrapGrid2D(biased));
 		IJ.run(imp, "Gaussian Blur...", "sigma=1.5"); // imp works on image directly
 		
 		exObject.correctedHUM = extClone(biased); // remark: extClone() is implemented only for this exercise!
 		exObject.correctedF = extClone(biased);
 		exObject.correctedCut = extClone(biased);
+		
 		
 		/**
 		 * implement homomorphic unsharp masking 
@@ -92,7 +95,7 @@ public class ExerciseUM {
 		
 		Grid2D corrected = (Grid2D) grid.clone();
 		
-		Grid2D mu_ij = null; //TODO
+		Grid2D mu_ij = null; //TODO: clone grid
 		
 		MeanFilteringTool localMeanFilter = new MeanFilteringTool();
 		try {
@@ -122,7 +125,7 @@ public class ExerciseUM {
 					tempVal = 0; // TODO
 				}
 				
-				// TODO: apply the bias field correction for the multiplicative model
+				 // TODO: apply the bias field correction for the multiplicative model
 			}
 		}
 		
@@ -135,8 +138,8 @@ public class ExerciseUM {
 		Grid2DComplex fftimage = new Grid2DComplex(grid); // check the Grid size and look up zero-padding
 
 		// transform into Fourier domain		
-		// TODO
-		// TODO
+		// TODO: Fourier Forward Transform
+		// TODO: Shift origin point to the center
 
 		for (int k = 0; k < fftimage.getHeight(); k++){
 			for (int l = 0; l < fftimage.getWidth(); l++){	
@@ -145,15 +148,15 @@ public class ExerciseUM {
 				double fl = (l-fftimage.getWidth()/2.0d)/fftimage.getHeight()/grid.getSpacing()[1];
 				
 				/* Apply the reverse Gaussian filter from the lecture */
-				// TODO
-				// TODO
-				// TODO
+				float val =  0;  // TODO
+				// TODO: setRealAtIndex for fftimage
+				// TODO: setImageAtIndex for fftimage
 			}
 		}
 
 		// transform back into spatial domain
-		// TODO
-		// TODO
+		// TODO: inverse shift origin for fftimage
+		// TODO: inverse Fourier Transform for fftimage
 			
 		for (int i = 0; i < corrected.getHeight(); i++){
 			for (int j = 0; j < corrected.getWidth(); j++){
@@ -165,8 +168,8 @@ public class ExerciseUM {
 
 	public Grid2D frequencyCutoff(Grid2D grid,double cutoff) {
 		
-		Grid2D returnGrid = null; // TODO: apply a hard frequency cut-off (high pass filter), ...
-		// ... look for the appropriate class method in this file
+		Grid2D returnGrid = new Grid2D(grid); // TODO: apply a hard frequency cut-off (high pass filter), ...
+		returnGrid = null; // ... look for the appropriate class method in this file
 		
 		return returnGrid;
 	}
@@ -178,6 +181,8 @@ public class ExerciseUM {
 	public Grid2D highPass(Grid2D grid, double cutoff){
 		return passFilter(grid,false,cutoff);
 	}
+	
+	
 	
 	/**
 	* 
