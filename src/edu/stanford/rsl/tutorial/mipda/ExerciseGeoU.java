@@ -198,6 +198,8 @@ public class ExerciseGeoU {
 	public void computeMatrixA(int degree, int numCorresp, int numCoeff){
 		
 		A = new SimpleMatrix(numCorresp, numCoeff);
+		if (numCorresp <= 0 && numCoeff <= 0)
+			return;
 		A.zeros();
 		
 		// Realign the grid matrix into a vector for easier access in the next step
