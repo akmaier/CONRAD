@@ -1,0 +1,2 @@
+This folder is used for output data from MIPDA exercises.
+Do not put anything else here because it might get overwritten!
