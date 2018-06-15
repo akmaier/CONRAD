@@ -25,7 +25,7 @@ public class ProjectionRawIOUtil {
     //method reading "".matrices files which are used by the rigid motion creator GUI
     //read projection matrices with 6 byte header, decoding the widht(2 byte) height (2 byte) and length (2 byte) of
     //the projection matrix stack. The projection matirx values are decoded in 8 byte length. Encoding is little endian
-    public static Projection[] readProjectionMatrices_raw(String filename){
+    public static Projection[] readProjectionMatricesRaw(String filename){
         //notes on load raw:
         //you might also use for loops and reading the data manually, however using these
         //predefined function is way way way faster...
@@ -86,7 +86,7 @@ public class ProjectionRawIOUtil {
     //method writing "".matrices files which are used by the rigid motion creator GUI
     //write projection matrices with 6 byte header, decoding the widht(2 byte) height (2 byte) and length (2 byte) of
     //the projection matrix stack. The projection matirx values are decoded in 8 byte length. Encoding is little endian
-    public static void writeProjectionMatrices_raw(Projection[] pMat, String filename){
+    public static void writeProjectionMatricesRaw(Projection[] pMat, String filename){
         short numProj = (short)pMat.length;
         short width = 4;
         short height = 3;
