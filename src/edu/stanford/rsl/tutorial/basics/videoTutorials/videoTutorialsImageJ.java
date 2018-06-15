@@ -1,4 +1,4 @@
-package edu.stanford.rsl.tutorial.mipda;
+package edu.stanford.rsl.tutorial.basics.videoTutorials;
 
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
 import edu.stanford.rsl.conrad.numerics.DecompositionSVD;
