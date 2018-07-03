@@ -97,7 +97,6 @@ public abstract class ImageUtil {
 	public static ImagePlus wrapGrid4D(Grid4D grid, String title){
 		if (grid != null) {						
 			if (grid.getSubGrid(0) instanceof MultiChannelGrid3D){
-				ImageStack stack = new ImageStack(grid.getSize()[0], grid.getSize()[1], grid.getSize()[2]);
 				MultiChannelGrid3D first = (MultiChannelGrid3D) grid.getSubGrid(0);
 				String [] names = first.getChannelNames();
 				// finalize the hyperstack
