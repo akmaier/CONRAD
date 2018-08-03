@@ -23,7 +23,7 @@ public class videoTutorialsFilterTools {
 	public static void main(String[] args) {
 	
 		String filename = "C:/vessel.jpg";
-		
+ 		
 		
 		// Open the image using ImageJ
 		ImagePlus imp = IJ.openImage(filename);
