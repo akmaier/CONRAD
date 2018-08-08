@@ -9,6 +9,10 @@ import java.util.ArrayList;
 import edu.stanford.rsl.conrad.geometry.shapes.simple.PointND;
 import edu.stanford.rsl.conrad.geometry.transforms.Transform;
 import edu.stanford.rsl.conrad.geometry.transforms.Transformable;
+import edu.stanford.rsl.conrad.parallel.ParallelThreadExecutor;
+import edu.stanford.rsl.conrad.parallel.ParallelizableRunnable;
+import edu.stanford.rsl.conrad.parallel.SimpleParallelThread;
+import edu.stanford.rsl.conrad.utils.CONRAD;
 import edu.stanford.rsl.conrad.utils.ImageUtil;
 
 /**
@@ -62,6 +66,41 @@ public class Grid3D extends NumericGrid implements Transformable  {
 		}
 	}
 
+	private class RotationThread extends SimpleParallelThread{
+		Grid3D outputImage;
+		Grid3D inputImage;
+		Transform transform;
+		int maxThreads;
+		
+		public RotationThread(int threadNum, int maxThreads, Grid3D inputImage, Grid3D outputImage, Transform transform) {
+			super(threadNum);
+			this.maxThreads = maxThreads;
+			this.outputImage = outputImage;
+			this.inputImage = inputImage;
+			this.transform = transform;
+		}
+
+		@Override
+		public void execute() {
+			int blockSize = (int)Math.ceil(((double)outputImage.getSize()[2]) / maxThreads);
+			int start = this.threadNum * blockSize;
+			int end = (this.threadNum+1) * (blockSize);
+			if (end > outputImage.getSize()[2]) end = outputImage.getSize()[2];
+			for (int k=start; k < end; ++k) {
+				for (int j=0; j < outputImage.getSize()[1]; ++j){
+					for (int i=0; i < outputImage.getSize()[0]; ++i){
+						PointND newPos = new PointND(outputImage.indexToPhysical(i, j, k));
+						newPos.applyTransform(transform);
+						double[] pos = inputImage.physicalToIndex(newPos.get(0),newPos.get(1), newPos.get(2));
+						float val = InterpolationOperators.interpolateLinear(inputImage, pos[2], pos[0], pos[1]);
+						outputImage.setAtIndex(i, j, k, val);
+					}
+				}
+			}
+		}
+		
+	}
+	
 	/**
 	 * Allocate the memory for all slices
 	 */
@@ -114,21 +153,26 @@ public class Grid3D extends NumericGrid implements Transformable  {
 		//System.out.println(newOrigin);
 		tmp.setOrigin(newOrigin.getCoordinates());
 		Transform inverse = t.inverse();
-		for (int k=0; k < tmp.getSize()[2]; ++k) {
-			for (int j=0; j < tmp.getSize()[1]; ++j){
-				for (int i=0; i < tmp.getSize()[0]; ++i){
-					PointND newPos = new PointND(tmp.indexToPhysical(i, j, k));
-					newPos.applyTransform(inverse);
-					double[] pos = physicalToIndex(newPos.get(0),newPos.get(1), newPos.get(2));
-					float val = InterpolationOperators.interpolateLinear(this, pos[2], pos[0], pos[1]);
-					tmp.setAtIndex(i, j, k, val);
-				}
-			}
+
+		int numThreads = CONRAD.getNumberOfThreads();
+		ParallelizableRunnable [] runnables = new ParallelizableRunnable[numThreads];
+		for (int j= 0; j<numThreads; j++) {
+			runnables[j]= new RotationThread(j, numThreads, this, tmp, inverse);
 		}
+		ParallelThreadExecutor executor = new ParallelThreadExecutor(runnables);
+		try {
+			executor.execute();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
 		this.origin = tmp.origin;
 		this.buffer = tmp.buffer;
 		this.size = tmp.size;
 		this.spacing = tmp.spacing;
+		tmp = null;
 		notifyAfterWrite();
 	}
 
