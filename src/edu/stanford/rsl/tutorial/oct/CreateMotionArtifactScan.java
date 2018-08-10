@@ -18,9 +18,21 @@ import ij.ImagePlus;
  *
  */
 public class CreateMotionArtifactScan {
+	
+	static class Saccade {
+		int location;
+		Translation translation;
+		public Saccade (int loc, Translation trans) {
+			location = loc;
+			translation = trans;
+		}
+	}
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
+		Saccade [] saccadesXFast = {new Saccade(100,  new Translation (5,0,0)), new Saccade(400,  new Translation (0,0,-5))};
+		Saccade [] saccadesYFast = {new Saccade(200, new Translation (20,0,-20))};
+		
 		new ImageJ();
 		ImagePlus ip = IJ.openImage("E:\\Andreas\\MotionCorrection\\head_rotation_test\\unthresholded_input\\Angio.tif");
 		ImagePlus ipStruct = IJ.openImage("E:\\Andreas\\MotionCorrection\\head_rotation_test\\unthresholded_input\\Struct.tif");
@@ -37,78 +49,100 @@ public class CreateMotionArtifactScan {
 		boolean doXFAST = false;
 		if (doXFAST) {
 			System.out.println("Running XFAST");
-			Grid3D artifactFree = new Grid3D (newImageBounds[0],newImageBounds[1],newImageBounds[2]);
-			Grid3D artifactFreeStruct = new Grid3D (newImageBounds[0],newImageBounds[1],newImageBounds[2]);		
-			artifactFree.setOrigin(-newImageBounds[0]/2,-newImageBounds[1]/2,-newImageBounds[2]/2);
-			artifactFree.setSpacing(1,1,1);
+			Grid3D xFastImage = new Grid3D (newImageBounds[0],newImageBounds[1],newImageBounds[2]);
+			Grid3D xFastStruct = new Grid3D (newImageBounds[0],newImageBounds[1],newImageBounds[2]);		
+			xFastImage.setOrigin(-newImageBounds[0]/2,-newImageBounds[1]/2,-newImageBounds[2]/2);
+			xFastImage.setSpacing(1,1,1);
 
-			for (int k=0; k < artifactFree.getSize()[2]; ++k) {
-				for (int j=0; j < artifactFree.getSize()[1]; ++j){
-					for (int i=0; i < artifactFree.getSize()[0]; ++i){
-						PointND newPos = new PointND(artifactFree.indexToPhysical(i, j, k));
-						double[] posNoSaccade = image.physicalToIndex(newPos.get(0),newPos.get(1), newPos.get(2));
-						float valNoSaccade = InterpolationOperators.interpolateLinear(image, posNoSaccade[2], posNoSaccade[0], posNoSaccade[1]);
-						float valNoSaccadeStruct = InterpolationOperators.interpolateLinear(imageStruct, posNoSaccade[2], posNoSaccade[0], posNoSaccade[1]);
-						artifactFree.setAtIndex(i, j, k, valNoSaccade);
-						artifactFreeStruct.setAtIndex(i, j, k, valNoSaccadeStruct);
+			for (int k=0; k < xFastImage.getSize()[2]; ++k) {
+				int currentSaccadeIndex = -100;
+				Translation currentSaccadeTranslation = new Translation(0,0,0);
+				for (int s = 0; s< saccadesXFast.length; s++) {
+					if (k> saccadesXFast[s].location-2) {
+						currentSaccadeIndex = saccadesXFast[s].location;
+						currentSaccadeTranslation = saccadesXFast[s].translation;
+					}
+				}
+				for (int j=0; j < xFastImage.getSize()[1]; ++j){	
+					for (int i=0; i < xFastImage.getSize()[0]; ++i){
+						PointND newPos = new PointND(xFastImage.indexToPhysical(i, j, k));
+						newPos.applyTransform(currentSaccadeTranslation);
+						double[] posSaccade = image.physicalToIndex(newPos.get(0),newPos.get(1), newPos.get(2));
+						float valSaccade = InterpolationOperators.interpolateLinear(image, posSaccade[2], posSaccade[0], posSaccade[1]);
+						float valSaccadeStruct = InterpolationOperators.interpolateLinear(imageStruct, posSaccade[2], posSaccade[0], posSaccade[1]);
+						if ((Math.abs(k- currentSaccadeIndex) <= 1.5)) valSaccade = (float) (20000 + (Math.random() * 45000)); 
+						xFastImage.setAtIndex(i, j, k, valSaccade);
+						xFastStruct.setAtIndex(i, j, k, valSaccadeStruct);
 					}
 				}
 			}
-			artifactFree.show("artifactFree (X-FAST)");
-			artifactFreeStruct.show("artifactFreeStruct (X-FAST)");
-			artifactFree = null;
-			artifactFreeStruct = null;
+			xFastImage.show("X-FAST Angio");
+			xFastStruct.show("X-FAST Struct");
+			xFastImage = null;
+			xFastStruct = null;
 		}
 		// Y-FAST Rotation
-		AffineTransform rot = new AffineTransform(Rotations.createBasicYRotationMatrix(Math.PI/180.0 * 5.0), new SimpleVector(0,0,0));
+		AffineTransform rot = new AffineTransform(Rotations.createBasicYRotationMatrix(Math.PI/180.0 * 10.0), new SimpleVector(0,0,0));
 		// Saccade Tranlation:
-		Translation translat = new Translation (20,0,-20);
 		image.applyTransform(rot);
 		image.show("the rotated image");
 
 		// resample to motion artifact volume.
 		// image contains the data after head rotation; now we still need to introduce a saccade at position saccade;
-		int saccadeIndex = 200;
-		Grid3D motionArtifact = new Grid3D (newImageBounds[0],newImageBounds[1],newImageBounds[2]);
-		motionArtifact.setOrigin(-newImageBounds[0]/2,-newImageBounds[1]/2,-newImageBounds[2]/2);
-		motionArtifact.setSpacing(1,1,1);
-		for (int k=0; k < motionArtifact.getSize()[2]; ++k) {
-			for (int j=0; j < motionArtifact.getSize()[1]; ++j){
-				for (int i=0; i < motionArtifact.getSize()[0]; ++i){
-					PointND newPos = new PointND(motionArtifact.indexToPhysical(i, j, k));
+		Grid3D yFastImage = new Grid3D (newImageBounds[0],newImageBounds[1],newImageBounds[2]);
+		yFastImage.setOrigin(-newImageBounds[0]/2,-newImageBounds[1]/2,-newImageBounds[2]/2);
+		yFastImage.setSpacing(1,1,1);
+		for (int k=0; k < yFastImage.getSize()[2]; ++k) {
+			for (int j=0; j < yFastImage.getSize()[1]; ++j){
+				for (int i=0; i < yFastImage.getSize()[0]; ++i){
+					PointND newPos = new PointND(yFastImage.indexToPhysical(i, j, k));
 					// sacade
-					if (i > saccadeIndex) newPos.applyTransform(translat);
+					int currentSaccadeIndex = -100;
+					Translation currentSaccadeTranslation = new Translation(0,0,0);
+					for (int s = 0; s< saccadesYFast.length; s++) {
+						if (i> saccadesYFast[s].location-2) {
+							currentSaccadeIndex = saccadesYFast[s].location;
+							currentSaccadeTranslation = saccadesYFast[s].translation;
+						}
+					}
+					newPos.applyTransform(currentSaccadeTranslation);
 					double[] pos = image.physicalToIndex(newPos.get(0),newPos.get(1), newPos.get(2));
 					float val = InterpolationOperators.interpolateLinear(image, pos[2], pos[0], pos[1]);
-					if ((Math.abs(i- saccadeIndex) <= 1.5)) val = (float) (20000 + (Math.random() * 45000)); 
-					motionArtifact.setAtIndex(i, j, k, val);
+					if ((Math.abs(i- currentSaccadeIndex) <= 1.5)) val = (float) (20000 + (Math.random() * 45000)); 
+					yFastImage.setAtIndex(i, j, k, val);
 				}
 			}
 		}
-		motionArtifact.show("motionArtifact");
-		motionArtifact = null;
+		yFastImage.show("Y-Fast Angio");
+		yFastImage = null;
 		image = null;
 		
 		imageStruct.applyTransform(rot);
 		imageStruct.show("the rotated image");
 		
-		Grid3D motionArtifactStruct = new Grid3D (newImageBounds[0],newImageBounds[1],newImageBounds[2]);
-		motionArtifactStruct.setOrigin(-newImageBounds[0]/2,-newImageBounds[1]/2,-newImageBounds[2]/2);
-		motionArtifactStruct.setSpacing(1,1,1);
-		for (int k=0; k < motionArtifactStruct.getSize()[2]; ++k) {
-			for (int j=0; j < motionArtifactStruct.getSize()[1]; ++j){
-				for (int i=0; i < motionArtifactStruct.getSize()[0]; ++i){
-					PointND newPos = new PointND(motionArtifactStruct.indexToPhysical(i, j, k));
+		Grid3D yFastStruct = new Grid3D (newImageBounds[0],newImageBounds[1],newImageBounds[2]);
+		yFastStruct.setOrigin(-newImageBounds[0]/2,-newImageBounds[1]/2,-newImageBounds[2]/2);
+		yFastStruct.setSpacing(1,1,1);
+		for (int k=0; k < yFastStruct.getSize()[2]; ++k) {
+			for (int j=0; j < yFastStruct.getSize()[1]; ++j){
+				for (int i=0; i < yFastStruct.getSize()[0]; ++i){
+					PointND newPos = new PointND(yFastStruct.indexToPhysical(i, j, k));
 					// sacade
-					if (i > saccadeIndex) newPos.applyTransform(translat);
+					Translation currentSaccadeTranslation = new Translation(0,0,0);
+					for (int s = 0; s< saccadesYFast.length; s++) {
+						if (i> saccadesYFast[s].location-2) {
+							currentSaccadeTranslation = saccadesYFast[s].translation;
+						}
+					}
+					newPos.applyTransform(currentSaccadeTranslation);
 					double[] pos = imageStruct.physicalToIndex(newPos.get(0),newPos.get(1), newPos.get(2));
 					float valStruct = InterpolationOperators.interpolateLinear(imageStruct, pos[2], pos[0], pos[1]);
-					motionArtifactStruct.setAtIndex(i, j, k, valStruct);
+					yFastStruct.setAtIndex(i, j, k, valStruct);
 				}
 			}
 		}
 		
-		motionArtifactStruct.show("motionArtifactStruct");
+		yFastStruct.show("motionArtifactStruct");
 
 	}
 
