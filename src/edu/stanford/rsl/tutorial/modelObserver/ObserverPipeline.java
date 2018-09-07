@@ -10,11 +10,13 @@ import edu.stanford.rsl.tutorial.modelObserver.TestModelGenerator;
 import edu.stanford.rsl.tutorial.modelObserver.TestModelGenerator.VariationType;
 
 /**
- * @author Iris Kellermann
+ * @author Iris Kellermann, Frank Schebesch, Yiling Xu
  */
 
 public class ObserverPipeline {
 
+	ROC roc;
+	
 	public static void main(String args[])
 	{
 		int imageSize = 200;
@@ -46,7 +48,8 @@ public class ObserverPipeline {
         
         // create ROC curve
 		//ShowROC(testImages, emptyTestImages, Ntest, template, channelMatrix); // use of deprecated method
-        (new ObserverPipeline()).computeStats(testImages, emptyTestImages, Ntest, template, channelMatrix); // recommended call for ROC computation
+        ObserverPipeline obsPipe = new ObserverPipeline();
+        obsPipe.roc = obsPipe.computeStats(testImages, emptyTestImages, Ntest, template, channelMatrix); // recommended call for ROC computation
 	}
 
 	/**
@@ -59,16 +62,15 @@ public class ObserverPipeline {
 	 * @param template The template of the observer.
 	 * @param channelMatrix The matrix with the channel images.
 	 */
-	public void computeStats(Grid2D[] testImages, Grid2D[] emptyTestImages, int Ntest, SimpleVector template, SimpleMatrix channelMatrix)
+	public ROC computeStats(Grid2D[] testImages, Grid2D[] emptyTestImages, int Ntest, SimpleVector template, SimpleMatrix channelMatrix)
 	{
-		SimpleVector valsImage = new SimpleVector(2 * Ntest);
-		SimpleVector valsEmpty = new SimpleVector(2 * Ntest); 
+		SimpleVector vals = new SimpleVector(2 * Ntest); 
         
 		// get observer result values
         for(int i = 0; i < Ntest; ++i) 
         {   	
-        	valsImage.setElementValue(i,Observer.GetResultValue(testImages[i], template, channelMatrix));
-        	valsEmpty.setElementValue(i+Ntest,Observer.GetResultValue(emptyTestImages[i], template, channelMatrix));
+        	vals.setElementValue(i,Observer.GetResultValue(testImages[i], template, channelMatrix));
+        	vals.setElementValue(i+Ntest,Observer.GetResultValue(emptyTestImages[i], template, channelMatrix));
         }
         
         // compute SNR
@@ -78,8 +80,8 @@ public class ObserverPipeline {
         double sumEmp = 0;
         for(int i = 0; i < Ntest; ++i)
         {
-        	sumObj += valsImage.getElement(i);
-        	sumEmp += valsEmpty.getElement(i+Ntest);
+        	sumObj += vals.getElement(i);
+        	sumEmp += vals.getElement(i+Ntest);
         }
         
         double meanObj = sumObj / Ntest;
@@ -90,8 +92,8 @@ public class ObserverPipeline {
         double sumVarEmp = 0;
         for(int i = 0; i < Ntest; ++i)
         {
-        	sumVarObj += (meanObj - valsImage.getElement(i)) * (meanObj - valsImage.getElement(i));
-        	sumVarEmp += (meanEmp - valsEmpty.getElement(i + Ntest)) * (meanEmp - valsEmpty.getElement(i + Ntest));
+        	sumVarObj += (meanObj - vals.getElement(i)) * (meanObj - vals.getElement(i));
+        	sumVarEmp += (meanEmp - vals.getElement(i + Ntest)) * (meanEmp - vals.getElement(i + Ntest));
         }
         
         double varObj = sumVarObj / Ntest;
@@ -102,10 +104,20 @@ public class ObserverPipeline {
         System.out.println("SNR="+SNR);
         
         // compute ROC curve (and statistics)
+        double[] c1scores = new double[Ntest];
+        double[] c2scores = new double[Ntest];
         
-		ROC roc = new ROC(valsEmpty.copyAsDoubleArray(), valsImage.copyAsDoubleArray());
+        for(int i = 0; i < Ntest; ++i) {
+        	
+        	c1scores[i] = vals.getElement(i);
+        	c2scores[i] = vals.getElement(i + Ntest);
+        }
+        
+		ROC roc = new ROC(c1scores, c2scores);
 		roc.computeFractions();		
 		roc.show();
+		
+		return roc;
 	}
 	
 	/**
