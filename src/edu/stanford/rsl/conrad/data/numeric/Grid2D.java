@@ -335,33 +335,6 @@ public class Grid2D extends NumericGrid implements Transformable {
 		setAtIndex(idx[0], idx[1], val);
 	}
 
-	public static void main(String[] args) {
-        // test setSubGrid
-        Grid2D a = new Grid2D(10,10);
-        a.show();
-        for(int j = 0; j< a.getHeight(); j++)
-            System.out.println(a.getSubGrid(j));
-       
-        Grid1D b = new Grid1D(10);
-        for (int i = 0; i<b.getBuffer().length; i++) b.setAtIndex(i, i+1);
-        System.out.println();
-        System.out.println(b);
-        System.out.println();
-       
-        a.setSubGrid(3, b);
-        a.show();
-        for(int j = 0; j< a.getHeight(); j++)
-            System.out.println(a.getSubGrid(j)); 
-        
-        b.setAtIndex(0, 15);
-        System.out.println("\n" + b.toString() + "\n");
-        
-        for(int j = 0; j< a.getHeight(); j++)
-            System.out.println(a.getSubGrid(j)); 
-        
-        
-        System.out.println();
-	}
 }
 
 
