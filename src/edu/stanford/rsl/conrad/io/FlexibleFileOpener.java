@@ -74,10 +74,12 @@ public class FlexibleFileOpener extends FileOpener {
 		* END of legacy code.
 		* 2018-09-19:  	According to
 		* 				http://www.cas.miamioh.edu/~meicenrd/anatomy/Ch14_IndependentInvestigation/ImageJ/ij-docs/ij-docs/notes.html
-		* 				version 1.38s and beyond should handle gzipü automatically.
-		* 				However, this doesn't seem to work for IJ 1.49v currently used in CONRAD and {@link GZIPInputStream} is needed.
+		* 				version 1.38s and beyond should handle gzip automatically.
+		* 				However, the library class {@link ij.io.FileOpener} only recognizes files of .gz and .gzip ending as GZIP compressed.
+		* 				This is not the case for .nrrd files, which have encoding information in their header.
+		* 				Consequently, a GZIPInputStream is needed here regardless of version.
 		*/
-		if(gunzipMode==GZIP) return new GZIPInputStream(is);
+		if(gunzipMode==GZIP) return new GZIPInputStream(is,50000);
 		
 		// or put a ZInputStream on top (from jzlib)
 		if(gunzipMode==ZLIB) return new ZInputStream(is);
