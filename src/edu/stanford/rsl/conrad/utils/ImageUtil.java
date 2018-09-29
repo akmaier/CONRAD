@@ -188,7 +188,9 @@ public abstract class ImageUtil {
 	 */
 	public static ImagePlus wrapGrid(NumericGrid grid, String title) {
 		if (grid != null) {
-			if (grid instanceof Grid3D)
+			if (grid instanceof Grid4D)
+				return wrapGrid4D((Grid4D) grid, title);
+			else if (grid instanceof Grid3D)
 				return wrapGrid3D((Grid3D) grid, title);
 			else if (grid instanceof Grid2D) {
 				if (grid instanceof MultiChannelGrid2D) {
