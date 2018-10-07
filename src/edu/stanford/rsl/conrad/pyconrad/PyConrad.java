@@ -8,6 +8,7 @@ import edu.stanford.rsl.conrad.pyconrad.PythonCallback;
 public class PyConrad {
 	
 	private boolean autoConvertConradGrids = true;
+	private boolean throwIfPythonIsNotAvailable = true;
 	private static PythonCallback pythonCallback; // this is set by pyconrad
 
 	
@@ -25,9 +26,11 @@ public class PyConrad {
 	{
 		if(pythonCallback != null) {
 			return pythonCallback.eval(this, code, args);
-		} else {
+		} else if(throwIfPythonIsNotAvailable) {
 			throw new RuntimeException("JVM must be launched by pyconrad!\n" +
 					"Use \"pyconrad_run\" in your shell to launch Java by pyconrad.");
+		} else {
+			return null;
 		}
 	}
 	
@@ -35,7 +38,7 @@ public class PyConrad {
 	{
 		if(pythonCallback != null) {
 			pythonCallback.exec(this, code, args);
-		} else {
+		} else if(throwIfPythonIsNotAvailable) {
 			throw new RuntimeException("JVM must be launched by pyconrad!\n" +
 					"Use \"pyconrad_run\" in your shell to launch Java by pyconrad.");
 		}
@@ -52,5 +55,13 @@ public class PyConrad {
 	public boolean isPyConradAvailable() 
 	{
 		return (pythonCallback != null);
+	}
+
+	public boolean getThrowIfPythonIsNotAvailable() {
+		return throwIfPythonIsNotAvailable;
+	}
+
+	public void setThrowIfPythonIsNotAvailable(boolean throwIfPythonIsNotAvailable) {
+		this.throwIfPythonIsNotAvailable = throwIfPythonIsNotAvailable;
 	}
 }
