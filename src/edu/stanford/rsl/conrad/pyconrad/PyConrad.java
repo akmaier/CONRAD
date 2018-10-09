@@ -17,11 +17,6 @@ public class PyConrad {
 		
 	}
 	
-	public void importModule(String module)
-	{
-		pythonCallback.importModule(this, module);
-	}
-	
 	public Object eval(String code, Object... args)
 	{
 		if(pythonCallback != null) {
