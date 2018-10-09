@@ -44,7 +44,7 @@ public class PyConrad {
 		}
 	}
 
-	public boolean isAutoConvertConardGrids() {
+	public boolean getAutoConvertConardGrids() {
 		return autoConvertConradGrids;
 	}
 
