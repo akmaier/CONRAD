@@ -222,7 +222,7 @@ public abstract class ImageUtil {
 				}
 			}
 			else {
-				throw new IllegalArgumentException("grid must be either a Grid1D, Grid2D, Grid3D or Grid4D!");
+				throw new IllegalArgumentException("grid must be either a Grid2D, Grid3D or Grid4D!");
 			}
 		}
 		return null;
