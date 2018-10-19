@@ -34,6 +34,7 @@ import ij.measure.Calibration;
 import ij.plugin.HyperStackConverter;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
+import java.lang.IllegalArgumentException;
 
 public abstract class ImageUtil {
 
@@ -188,7 +189,9 @@ public abstract class ImageUtil {
 	 */
 	public static ImagePlus wrapGrid(NumericGrid grid, String title) {
 		if (grid != null) {
-			if (grid instanceof Grid3D)
+			if (grid instanceof Grid4D)
+				return wrapGrid4D((Grid4D) grid, title);
+			else if (grid instanceof Grid3D)
 				return wrapGrid3D((Grid3D) grid, title);
 			else if (grid instanceof Grid2D) {
 				if (grid instanceof MultiChannelGrid2D) {
@@ -217,6 +220,9 @@ public abstract class ImageUtil {
 					setCalibrationToImagePlus2D(iPlus, grid);
 					return iPlus;
 				}
+			}
+			else {
+				throw new IllegalArgumentException("grid must be either a Grid2D, Grid3D or Grid4D!");
 			}
 		}
 		return null;
