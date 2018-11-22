@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2010-2018 Stefan Seitz
+ * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
+*/
 package edu.stanford.rsl.conrad.pyconrad;
 
 import java.lang.Object;
