@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2010-2018 Eric Goppert
+ * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
+*/
 package edu.stanford.rsl.conrad.angio.graphs.connectedness.components;
 
 import java.util.ArrayList;

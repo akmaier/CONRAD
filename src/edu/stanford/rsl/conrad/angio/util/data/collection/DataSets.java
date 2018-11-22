@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2010-2018 Mathias Unberath
+ * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
+*/
 package edu.stanford.rsl.conrad.angio.util.data.collection;
 
 import ij.gui.Roi;

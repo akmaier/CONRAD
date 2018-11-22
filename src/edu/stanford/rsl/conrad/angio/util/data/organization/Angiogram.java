@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2010-2018 Mathias Unberath
+ * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
+*/
 package edu.stanford.rsl.conrad.angio.util.data.organization;
 
 import java.util.ArrayList;
@@ -11,7 +15,8 @@ import edu.stanford.rsl.conrad.angio.graphs.skeleton.Skeleton;
 /**
  * Class to store an angiographic acquisition using a Grid3D to store the projection images, a projection array to 
  * store the projection matrices and a double array to store the heart phase obtained using ECG signals.
- * @author Mathias
+ * 
+ * @author Mathias Unberath
  *
  */
 public class Angiogram {

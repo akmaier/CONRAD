@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2010-2018 Mathias Unberath
+ * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
+*/
 package edu.stanford.rsl.conrad.angio.preprocessing.segmentation.gradient;
 
 import ij.IJ;
@@ -26,7 +30,7 @@ import edu.stanford.rsl.conrad.angio.graphs.connectedness.Dijkstra2D.EightConnec
 /**
  * Implements the Medialness measure as proposed by Gülsün et al. for the 2D case.
  * Here, we 
- * @author Mathias
+ * @author Mathias Unberath
  *
  */
 public class Medialness2D {

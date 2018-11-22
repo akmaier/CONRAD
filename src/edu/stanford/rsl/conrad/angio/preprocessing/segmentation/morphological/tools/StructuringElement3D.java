@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2010-2018 Maximilian Dankbar
+ * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
+*/
 package edu.stanford.rsl.conrad.angio.preprocessing.segmentation.morphological.tools;
 
 import ij.ImagePlus;
@@ -8,6 +12,7 @@ import ij.process.ImageProcessor;
 
 /**
  * 3-D structuring element.
+ * 
  * @author Maximilian Dankbar
  *
  */

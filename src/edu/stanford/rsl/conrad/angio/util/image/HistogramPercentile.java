@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2010-2018 Mathias Unberath
+ * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
+*/
 package edu.stanford.rsl.conrad.angio.util.image;
 
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
@@ -25,7 +29,7 @@ public class HistogramPercentile {
 	
 	
 	public static void main(String[] args) {
-		Grid2D img = ImageUtil.wrapImageProcessor(IJ.openImage("C:/Users/Mathias/Desktop/sinogram.tif").getProcessor());
+		Grid2D img = ImageUtil.wrapImageProcessor(IJ.openImage(".../sinogram.tif").getProcessor());
 		HistogramPercentile perc = new HistogramPercentile(img);
 		float p = perc.getPercentile(0.5);
 		System.out.println(p);

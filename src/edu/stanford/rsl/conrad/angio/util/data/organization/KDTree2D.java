@@ -18,7 +18,7 @@ import java.util.TreeSet;
  * searches). k-d trees are a special case of binary space partitioning trees.
  * 
  * 
- * 
+ *
  * @author Justin Wetherell <phishman3579@gmail.com>
  */
 public class KDTree2D<T extends ComparablePoint2D> {

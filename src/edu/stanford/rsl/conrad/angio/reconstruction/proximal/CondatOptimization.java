@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2010-2018 Mathias Unberath, Oliver Taubmann
+ * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
+*/
 package edu.stanford.rsl.conrad.angio.reconstruction.proximal;
 
 import ij.ImageJ;
