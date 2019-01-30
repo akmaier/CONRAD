@@ -1,7 +1,10 @@
 package edu.stanford.rsl.tutorial.physics;
 
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
+import edu.stanford.rsl.conrad.geometry.General;
+import edu.stanford.rsl.conrad.geometry.shapes.simple.PointND;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
 import edu.stanford.rsl.conrad.numerics.SimpleOperators;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
@@ -35,7 +38,7 @@ import edu.stanford.rsl.conrad.physics.materials.utils.AttenuationType;
 
 /**
  * Does the Monte Carlo sampling using a given Random object (for example ThreadLocalRandom)
- * @author Fabian Rückert
+ * @author Fabian Rï¿½ckert, Tobias Miksch
  */
 public class XRayTracerSampling {
 	
@@ -46,12 +49,52 @@ public class XRayTracerSampling {
 	public static final double electronRadius = 2.8179E-15; // m
 	private Random myRandom;
 	
+//	(width*pixelDimX * height*pixelDimY)
+	double xDimension;
+	double yDimension;
+	SimpleVector normalDetector;
+	
+	/**
+	 * 
+	 * @param Generating random numbers. Initialize in run time enviroment and not at creation time.
+	 */
 	public XRayTracerSampling(Random random){
 		this.myRandom = random;
 	}
 	
+	/**
+	 * 
+	 * @param random - Generating random numbers. Initialize in run time enviroment and not at creation time.
+	 * @param xDimension = (width * pixelDimX)
+	 * @param yDimension = (height * pixelDimY)
+	 * @param normalDetector = normal of detector - corssproduct
+	 */
+	public XRayTracerSampling(Random random, double xDimension, double yDimension, SimpleVector normalDetector){
+		this.myRandom = random;
+		this.xDimension = xDimension;
+		this.yDimension = yDimension; 
+		this.normalDetector = normalDetector;
+	}
+	 /**
+	  * @return random double value [0.0d;1.0d[
+	  */
 	public double random(){
-		return myRandom.nextDouble();
+		return myRandom.nextDouble();	
+	}
+	
+	/**
+	 * @param bound
+	 * @return  random int value between [0;bound[
+	 */
+	public int random(int bound){
+		return myRandom.nextInt(bound);
+	}
+	
+	/**
+	 * Fkt to describe the probability of connecting pixels with a surface size
+	 */
+	public double probabilityDensityOfArea() {
+		return 1.0 / (xDimension * yDimension);
 	}
 	
 	
@@ -106,7 +149,7 @@ public class XRayTracerSampling {
 		//Geant4 Code ---------------------
 		
 		// transform scattered photon direction vector to world coordinate system		
-		SimpleVector resultdir = transformToWorldCoordinateSystem(gamDirection1, dir);
+		SimpleVector resultdir = nHelperFkt.transformToWorldCoordinateSystem(gamDirection1, dir);
 		dir.setSubVecValue(0, resultdir);
 
 		//convert back to eV
@@ -120,22 +163,47 @@ public class XRayTracerSampling {
 	 * @return The resulting energy of the photon
 	 */
 	public double sampleComptonScattering(double energyEV, SimpleVector dir){
-		double theta = getComptonAngleTheta(energyEV * eV);
-
+		
+		//Dumb Version 1
+		double theta = getComptonAngleTheta(energyEV);
 		double phi = 2 * Math.PI * random();
+		
 		double dirx = Math.sin(theta) * Math.cos(phi);
 		double diry = Math.sin(theta) * Math.sin(phi);
 		double dirz = Math.cos(theta);
-		
-		
+	
 		SimpleVector gamDirection1 = new SimpleVector(dirx, diry, dirz);
 		gamDirection1.normalizeL2();
 		
 		// transform scattered photon direction vector to world coordinate system
-		SimpleVector ret = transformToWorldCoordinateSystem(gamDirection1, dir);
+		SimpleVector ret = nHelperFkt.transformToWorldCoordinateSystem(gamDirection1, dir);
+		double radians = nHelperFkt.getAngleInRad(dir, ret);
 		dir.setSubVecValue(0, ret);
 		
-		return getScatteredPhotonEnergy(energyEV, theta);
+		return getScatteredPhotonEnergy(energyEV, radians);
+	}
+	
+	/**
+	 * Fkt returns a random direction limited by the value of the cone lot.
+	 * @param Starting direction in 3D - used to map the scattering direction to
+	 * @param value limiting the possible directions of the sampling -  1 = sphere-shaped, 0 = straight ahead
+	 * @return	Random vector in 3D based on the preceding direction
+	 */
+	public SimpleVector samplingDirection(SimpleVector dir, double coneLot) {
+		
+		double theta = 2 * Math.PI *  random();
+		double u = coneLot * random() + (1-coneLot);
+		
+		double dirx = Math.sqrt(1-u*u) * Math.cos(theta);
+		double diry = Math.sqrt(1-u*u) * Math.sin(theta);
+		double dirz = u;
+		
+		SimpleVector unitPoint = new SimpleVector(dirx, diry, dirz);
+		
+		SimpleVector ret = new SimpleVector(0.0, 0.0, 0.0);
+		ret = nHelperFkt.transformToWorldCoordinateSystem(unitPoint, dir);
+
+		return ret;
 	}
 	
 	/**
@@ -146,7 +214,6 @@ public class XRayTracerSampling {
 	 */
 	public static double getScatteredPhotonEnergy(double energyEV, double theta) {
 		double energyJoule = energyEV * eV;
-
 		return (energyJoule / (1 + (energyJoule / (electronMass * c * c)) * (1 - Math.cos(theta)))) / eV;
 	}
 	
@@ -156,9 +223,11 @@ public class XRayTracerSampling {
 	 * @param theta	The scattering angle
 	 * @return	The Klein-Nishina differential cross section
 	 */
-	private static double kleinNishinaDifferentialCrossSection(double energyJoule, double theta) {
+	public static double kleinNishinaDifferentialCrossSection(double energyEV, double theta) {
+		double energyJoule = energyEV * eV;
 		double PE0 = 1 / (1 + (energyJoule / (electronMass * c * c)) * (1 - Math.cos(theta)));
 
+		//Bereits vereinfachter differentieller Wirkungsquerschnitt -> in der Klammer (* 1/PE0)
 		return ((electronRadius * electronRadius) / 2) * PE0 * (1 - PE0 * Math.sin(theta) * Math.sin(theta) + PE0 * PE0);
 	}
 	
@@ -168,8 +237,8 @@ public class XRayTracerSampling {
 	 * @param theta The scattering angle
 	 * @return The relative probability for scattering with this angle
 	 */
-	public static double comptonAngleProbability(double energyJoule, double theta) {
-		return kleinNishinaDifferentialCrossSection(energyJoule, theta)  * 2 * Math.PI * Math.sin(theta);
+	public static double comptonAngleProbability(double energyEV, double theta) {
+		return (kleinNishinaDifferentialCrossSection(energyEV, theta)  * 2 * Math.PI * Math.sin(theta));
 	}
 
 	/**
@@ -177,12 +246,13 @@ public class XRayTracerSampling {
 	 * @param energyJoule The incident photon energy in joule
 	 * @return	A random scattering angle (radians) following the klein-nishina distribution
 	 */
-	public double getComptonAngleTheta(double energyJoule) {
+	public double getComptonAngleTheta(double energyEV) {
 		// find approximate maximum
 		double min = Double.MAX_VALUE;
 		double max = Double.MIN_VALUE;
+		
 		for (int i = 0; i < 180; ++i) {
-			double value = comptonAngleProbability(energyJoule, Math.toRadians(i));
+			double value = comptonAngleProbability(energyEV, Math.toRadians(i));
 
 			if (value < min) {
 				min = value;
@@ -191,51 +261,54 @@ public class XRayTracerSampling {
 				max = value;
 			}
 		}
-		
+
 		//rejection sampling
 		while (true) {
 			double r1 = random() * Math.PI;
 			double r2 = random() * max;
 
-			if (r2 < comptonAngleProbability(energyJoule, r1)) {
+			if (r2 < comptonAngleProbability(energyEV, r1)) {
 				return r1;
 			}
 		}
-
 	}
 	
 	/**
-	 * Rotate the reference frame such that the original Z-axis will lie in the direction of ref
-	 * @see http://proj-clhep.web.cern.ch/proj-clhep/manual/UserGuide/VectorDefs/node49.html
-	 * @param v
-	 * @param ref
-	 * @return The rotated vector
+	 * @param Energy of the photon when it interacts
+	 * @param Resulting angle of the interaction
+	 * @return The probability that a photon is scattered in the given angle 
 	 */
-	public static SimpleVector transformToWorldCoordinateSystem(SimpleVector v, SimpleVector ref) {
-
-		 
-		double ux = ref.getElement(0);
-		double uy = ref.getElement(1);
-		double uz = ref.getElement(2);
-		
-		double uPar = ux*ux + uy*uy;
-		if (uPar > 0){
-			uPar = Math.sqrt(uPar);
-			SimpleMatrix mat = new SimpleMatrix(3,3);
-			mat.setColValue(0, new SimpleVector(ux*uz/uPar, uy*uz/uPar, -uPar));
-			mat.setColValue(1, new SimpleVector(-uy/uPar, ux/uPar, 0));
-			mat.setColValue(2, ref);
-			SimpleVector a = SimpleOperators.multiply(mat,v);
-			return a;
-		}
-		else if (ref.getElement(2) < 0){
-			//rotate by 180 degrees about the y axis
-			return new SimpleVector(-v.getElement(0),v.getElement(1),-v.getElement(2));
-		}
-		return v;
+	public static double comptonAngleCrossSection(double energy, double theta) {
+		//We transform the angle into a deflection direction
+		//double theta = nHelperFkt.transformToScatterAngle(angleRad);
+		double r0 = electronRadius;
+		double energyEV = energy * eV;
+	    double gamma = energyEV / (electronMass * c * c);
+	    
+	    double qE = 1 / (1 + gamma * ( 1 - Math.cos(theta)));
+	    double dsigma = r0 * r0 /2 * qE * qE * ( 1 / qE + qE - Math.sin(theta)* Math.sin(theta));;
+	  
+	    //r0^2 / 2 wurde hier bereits abgezogen
+	    double sigma = 2*Math.PI*r0*r0*((1+gamma)/(gamma*gamma)*(2*(1+gamma)/(1+2*gamma)-Math.log(1+2*gamma)/gamma)+ Math.log(1+2*gamma)/(2*gamma)-(1+3*gamma)/(1+2*gamma)/(1+2*gamma));
+	    //conq  cancels out back here
+		return dsigma / sigma;
+	}
+	
+	/**
+	 * @param photo The attenuation for the photoelectric effect
+	 * @param compton The attenuation for the compton effect
+	 * @param length of the material 
+	 * @return Probability that the photon does NOT react with the specified material ( 1 - absorption)
+	 */
+	public static double getTransmittanceOfMaterial(double photoAbsorption, double comptonAbsorption, double distToNextMaterial) {
+		return (photoAbsorption + comptonAbsorption) * 0.1 * distToNextMaterial;
 	}
 
-
+	/**
+	 * @param material type of the discrete event
+	 * @param energy of the individual photon
+	 * @return The distance the photon travels
+	 */
 	public double getDistanceUntilNextInteractionCm(Material material, double energyEV) {
 		double photo = material.getAttenuation(energyEV / 1000, AttenuationType.PHOTOELECTRIC_ABSORPTION);
 		double compton = material.getAttenuation(energyEV / 1000, AttenuationType.INCOHERENT_ATTENUATION);
@@ -244,13 +317,31 @@ public class XRayTracerSampling {
 		//because only these effects are simulated
 		return getDistanceUntilNextInteractionCm(photo, compton);
 	}
-
+	
 	/**
 	 * @param photo The attenuation for the photoelectric effect
 	 * @param compton The attenuation for the compton effect
 	 * @return The distance the photon travels
 	 */
 	public double getDistanceUntilNextInteractionCm(double photo, double compton) {
-		return  -Math.log(random()) / (photo + compton);
+		return  10 * (-Math.log(random()) / (photo + compton));
+	}
+	
+	/**
+	 * @param detectorPoint is the point on the detector that is used for the connection
+	 * @param scatterPoint is a discrete event in the scene for which the G-Term is evaluated
+	 * @param endPoint value indicates if both interactions are within a participating media. Specify as false if the connections happens with a detector pixel
+	 * @return Weighting of geometric properties implicitly included in path tracing
+	 */
+	public double gTerm(PointND detectorPoint, PointND scatterPoint, boolean endPoint) {
+		SimpleVector rayDirection = SimpleOperators.subtract(scatterPoint.getAbstractVector(), detectorPoint.getAbstractVector());
+		rayDirection.normalizeL2();
+		
+		double dist = detectorPoint.euclideanDistance(scatterPoint);
+		double dX = 1.0;
+		if(endPoint) {
+			dX 	= Math.cos( nHelperFkt.getAngleInRad(rayDirection, normalDetector) );
+		}
+		return (dX * 1.0 / (dist * dist));
 	}
 }
