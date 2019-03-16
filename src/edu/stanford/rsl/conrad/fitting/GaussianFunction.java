@@ -79,4 +79,10 @@ public class GaussianFunction extends Function {
 		return new double[]{mu, sigma};
 	}
 
+	@Override
+	public void setParametersFromDoubleArray(double[] param) {
+		mu = param[0];
+		sigma = param[1];
+	}
+
 }

@@ -1,10 +1,7 @@
 package edu.stanford.rsl.conrad.fitting;
 
-import java.util.Random;
 
-import edu.stanford.rsl.conrad.utils.DoubleArrayUtil;
-
-public class LogarithmicFunction extends Function{
+public class LogarithmicFunction extends Function {
 
 	/**
 	 * 
@@ -14,7 +11,8 @@ public class LogarithmicFunction extends Function{
 	private double b;
 	private double c;
 	private double d;
-	
+
+
 	public LogarithmicFunction(){
 		numberOfParameters = 4;
 	}
@@ -43,7 +41,7 @@ public class LogarithmicFunction extends Function{
 
 	@Override
 	public double evaluate(double x){
-		return (a * Math.log((x - b) / c)) + d;
+		return (a * Math.log((x - b) / Math.abs(c))) + d;
 	}
 
 	private static double estimateB(double x1, double x2, double x3, double y1, double y2, double y3){
@@ -64,9 +62,9 @@ public class LogarithmicFunction extends Function{
 	public String toString(){
 		if (fittingDone){
 			return "y = (" + a + " * log((x - " +
-			b + ") / " +
-			c + ")) + " +
-			d;
+					b + ") / |" +
+					c + "|)) + " +
+					d;
 		} else {
 			return "y = (a * log((x - b) / c)) + d";
 		}
@@ -80,7 +78,7 @@ public class LogarithmicFunction extends Function{
 		fittingDone = true;
 	}
 
-	private boolean isValidEstimate(){
+	protected boolean isValidEstimate(){
 		boolean revan = true;
 		if (Double.isInfinite(a) || Double.isNaN(a)) revan = false;
 		if (Double.isInfinite(b) || Double.isNaN(b)) revan = false;
@@ -123,40 +121,17 @@ public class LogarithmicFunction extends Function{
 	}
 
 	@Override
+	protected double [] getInitialX(){
+		return new double []{1,1,1,0};
+	}
+
+
+	@Override
 	public void fitToPoints(double[] x, double [] y) {
 		if (x.length == 3) {
 			fitToThreePoints(x[0], x[1], x[2], y[0], y[1], y[2]);
 		} else {
-			Random random = new Random();
-			double [] stats = DoubleArrayUtil.minAndMaxOfArray(x);
-			double range = stats[1] - stats[0];
-			int tries = 20;
-			double a = 0;
-			double b = 0;
-			double c = 0;
-			double d = 0;
-			for (int i = 0; i < tries; i ++){
-				// select three random indices in the first the second and the third third
-				int fraction = 10;
-				int one = DoubleArrayUtil.findClosestIndex(stats[0] + (random.nextDouble() * (range / fraction)), x);
-				int two = DoubleArrayUtil.findClosestIndex(stats[0] + (range/2) +(random.nextDouble() * (range / fraction)), x);
-				int three = DoubleArrayUtil.findClosestIndex(stats[0] + range - (random.nextDouble() * (range / fraction)), x);
-				fitToThreePoints(x[one], x[two], x[three], y[one], y[two], y[three]);
-				if (isValidEstimate()){
-					a += this.a / tries;
-					b += this.b / tries;
-					c += this.c / tries;
-					d += this.d / tries;
-				} else {
-					// retry
-					i--;
-				}
-			}
-			this.a = a;
-			this.b = b;
-			this.c = c;
-			this.d = d;
-			fittingDone = true;
+			super.fitToPoints(x, y);
 		}
 	}
 
@@ -168,6 +143,27 @@ public class LogarithmicFunction extends Function{
 	@Override
 	public double[] getParametersAsDoubleArray() {
 		return new double[]{a,b,c,d};
+	}
+
+	public static void main(String [] args){
+		LogarithmicFunction func = new LogarithmicFunction();
+		double [] x = {10000, 50000, 100000, 2000000, 600000000};
+		double [] y = {10, 20, 30, 500, 3000};
+		func.fitToPoints(x, y);
+		System.out.println(func 
+				+ "\n" + func.evaluate(10000)
+				+ "\n" + func.evaluate(50000)
+				+ "\n" + func.evaluate(2000000)
+				+ "\n" + func.evaluate(600000000)
+				+ "\n" + func.evaluate(83000000*1000));
+	}
+
+	@Override
+	public void setParametersFromDoubleArray(double[] param) {
+		this.a = param[0];
+		this.b = param[1];
+		this.c = param[2];
+		this.d = param[3];
 	}
 
 }

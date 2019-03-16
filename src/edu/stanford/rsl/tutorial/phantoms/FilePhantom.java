@@ -1,5 +1,6 @@
 package edu.stanford.rsl.tutorial.phantoms;
 
+import ij.IJ;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 
@@ -13,31 +14,32 @@ public class FilePhantom extends Phantom {
 
 	public FilePhantom(int imgSzXGU, int imgSzYGU, String filename) {
 		super(imgSzXGU, imgSzYGU, filename);
+		FloatProcessor fip =null;
 		try {
 			ProjectionSource pSource = FileProjectionSource.openProjectionStream(filename);
 			Grid2D iProcessor = pSource.getNextProjection();
-			FloatProcessor fip = new FloatProcessor(iProcessor.getWidth(), iProcessor.getHeight(), iProcessor.getBuffer(), null);
-			if (iProcessor.getWidth()!= imgSzXGU || iProcessor.getHeight()!=imgSzYGU){
-				ImageProcessor resize = fip.resize(imgSzXGU, imgSzXGU);
-				for (int j=0;j<imgSzYGU; j++){
-					for (int i=0;i<imgSzXGU; i++){
-						setAtIndex(i, j, resize.getf(i, j));
-					}
-				}
-			}
-			else
-			{
-				for (int j=0;j<imgSzYGU; j++){
-					for (int i=0;i<imgSzXGU; i++){
-						setAtIndex(i, j, fip.getf(i,j));
-					}
-				}
-			}
+			fip =  new FloatProcessor(iProcessor.getWidth(), iProcessor.getHeight(), iProcessor.getBuffer(), null);
+
 		} catch (IOException e1) {
-			e1.printStackTrace();
+			IJ.open(filename);
+			fip = IJ.getImage().getProcessor().toFloat(0, null);
 		}
-
-
+		if (fip.getWidth()!= imgSzXGU || fip.getHeight()!=imgSzYGU){
+			ImageProcessor resize = fip.resize(imgSzXGU, imgSzXGU);
+			for (int j=0;j<imgSzYGU; j++){
+				for (int i=0;i<imgSzXGU; i++){
+					setAtIndex(i, j, resize.getf(i, j));
+				}
+			}
+		}
+		else
+		{
+			for (int j=0;j<imgSzYGU; j++){
+				for (int i=0;i<imgSzXGU; i++){
+					setAtIndex(i, j, fip.getf(i,j));
+				}
+			}
+		}
 	}
 
 }
