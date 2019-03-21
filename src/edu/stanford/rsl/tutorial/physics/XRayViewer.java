@@ -165,7 +165,7 @@ public class XRayViewer extends OpenGLViewer {
 		gl.glTranslated(0, 0, -10);
 		gl.glTranslatef(-translationX, -translationY, -translationZ);
 		gl.glRotatef(-rotationX, 1.0f, 0.0f, 0.0f);
-		gl.glRotatef(-(rotationY), 0.0f, 1.0f, 0.0f);
+		gl.glRotatef((rotationY), 0.0f, 1.0f, 0.0f); //Changed a - in front of rotationY
 
 		//draw the scene layout
 
@@ -216,7 +216,7 @@ public class XRayViewer extends OpenGLViewer {
 					AbstractSurface b = (AbstractSurface)obj.getShape();
 					Color c;
 					if (obj.getNameString() != null && obj.getNameString().equals("detector")){
-						c = new Color(1,0,0);
+						c = new Color(1,0,0);//Color of detector
 					} else {
 						c = new Color(1,1,1);
 					}
