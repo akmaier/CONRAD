@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2017  Andreas Maier
+ * Copyright (C) 2010-2019  Andreas Maier
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
  */
 package edu.stanford.rsl.conrad.utils;
@@ -25,7 +25,7 @@ import ij.ImageJ;
 import edu.stanford.rsl.apps.gui.RawDataOpener;
 
 public abstract class CONRAD {
-	public static final String VersionString = "Version 1.0.9";
+	public static final String VersionString = "Version 1.1.0";
 	public static final String CONRADBibtex = "@article{Maier13-CSF," +
 			"  author = {A. Maier, H. G. Hofmann, M. Berger, P. Fischer, C. Schwemmer, H. Wu, K. Müller, J. Hornegger, J. H. Choi, C. Riess, A. Keil, and R. Fahrig},\n" +
 			"  title={{CONRAD - A software framework for cone-beam imaging in radiology}},\n" +
