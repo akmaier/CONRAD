@@ -37,8 +37,8 @@ import edu.stanford.rsl.conrad.physics.materials.utils.AttenuationType;
 // ********************************************************************
 
 /**
- * Does the Monte Carlo sampling using a given Random object (for example ThreadLocalRandom)
- * @author Fabian R�ckert, Tobias Miksch
+ * Performs Monte Carlo sampling using a given Random object (for example ThreadLocalRandom)
+ * @author Fabian Rückert, Tobias Miksch
  */
 public class XRayTracerSampling {
 	
@@ -149,7 +149,7 @@ public class XRayTracerSampling {
 		//Geant4 Code ---------------------
 		
 		// transform scattered photon direction vector to world coordinate system		
-		SimpleVector resultdir = nHelperFkt.transformToWorldCoordinateSystem(gamDirection1, dir);
+		SimpleVector resultdir = NHelperFkt.transformToWorldCoordinateSystem(gamDirection1, dir);
 		dir.setSubVecValue(0, resultdir);
 
 		//convert back to eV
@@ -176,8 +176,8 @@ public class XRayTracerSampling {
 		gamDirection1.normalizeL2();
 		
 		// transform scattered photon direction vector to world coordinate system
-		SimpleVector ret = nHelperFkt.transformToWorldCoordinateSystem(gamDirection1, dir);
-		double radians = nHelperFkt.getAngleInRad(dir, ret);
+		SimpleVector ret = NHelperFkt.transformToWorldCoordinateSystem(gamDirection1, dir);
+		double radians = NHelperFkt.getAngleInRad(dir, ret);
 		dir.setSubVecValue(0, ret);
 		
 		return getScatteredPhotonEnergy(energyEV, radians);
@@ -201,7 +201,7 @@ public class XRayTracerSampling {
 		SimpleVector unitPoint = new SimpleVector(dirx, diry, dirz);
 		
 		SimpleVector ret = new SimpleVector(0.0, 0.0, 0.0);
-		ret = nHelperFkt.transformToWorldCoordinateSystem(unitPoint, dir);
+		ret = NHelperFkt.transformToWorldCoordinateSystem(unitPoint, dir);
 
 		return ret;
 	}
@@ -340,7 +340,7 @@ public class XRayTracerSampling {
 		double dist = detectorPoint.euclideanDistance(scatterPoint);
 		double dX = 1.0;
 		if(endPoint) {
-			dX 	= Math.cos( nHelperFkt.getAngleInRad(rayDirection, normalDetector) );
+			dX 	= Math.cos( NHelperFkt.getAngleInRad(rayDirection, normalDetector) );
 		}
 		return (dX * 1.0 / (dist * dist));
 	}

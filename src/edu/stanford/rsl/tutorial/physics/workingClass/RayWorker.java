@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - Andreas Maier, Fabian R�ckert, Tobias Miksch
+ * Copyright (C) 2014 - Andreas Maier, Fabian Rückert, Tobias Miksch
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
 */
 
@@ -19,18 +19,18 @@ import edu.stanford.rsl.conrad.physics.materials.Material;
 import edu.stanford.rsl.conrad.rendering.PriorityRayTracer;
 import edu.stanford.rsl.tutorial.physics.XRayHitVertex;
 import edu.stanford.rsl.tutorial.physics.XRayTracerSampling;
-import edu.stanford.rsl.tutorial.physics.nHelperFkt;
+import edu.stanford.rsl.tutorial.physics.NHelperFkt;
 import edu.stanford.rsl.tutorial.physics.XRayTracer.RaytraceResult;
 
 /**
  * Implementation of the ray tracing and bidirectional path tracing algorithms for the calculation of indirect illumination
- * @author Tobias Miksch based on work of Fabian R�ckert
+ * @author Tobias Miksch based on work of Fabian Rückert
  */
-public class rayWorker extends AbstractWorker {
+public class RayWorker extends AbstractWorker {
 
 	private int bdptConnections = 2;
 	
-	public rayWorker(PriorityRayTracer raytracer, RaytraceResult res, long numRays, int startenergyEV, Grid2D grid,
+	public RayWorker(PriorityRayTracer raytracer, RaytraceResult res, long numRays, int startenergyEV, Grid2D grid,
 			XRayDetector detector, Projection proj, boolean infinite, boolean writeAdditionalData,
 			double sourceDetectorDist, double pixelDimensionX, double pixelDimensionY, Material background,
 			int versionNumber, int threadNumber, Random random, int lightRayLength) {
@@ -214,7 +214,7 @@ public class rayWorker extends AbstractWorker {
 							StraightLine camRay = new StraightLine(randomDetectorPoint, vertexHit.getEndPoint());
 							camRay.normalize();
 
-							double theta = nHelperFkt.getAngleInRad(camRay.getDirection().multipliedBy(-1.0), vertexHit.getRayDir());
+							double theta = NHelperFkt.getAngleInRad(camRay.getDirection().multipliedBy(-1.0), vertexHit.getRayDir());
 							double lightPhaseFkt = XRayTracerSampling.comptonAngleCrossSection(energyEV, theta);
 
 							double energy = XRayTracerSampling.getScatteredPhotonEnergy(energyEV, theta);
@@ -245,7 +245,7 @@ public class rayWorker extends AbstractWorker {
 					StraightLine camRay = new StraightLine(randomDetectorPoint, vertexHit.getEndPoint());
 					camRay.normalize();
 
-					double theta = nHelperFkt.getAngleInRad(camRay.getDirection().multipliedBy(-1.0),
+					double theta = NHelperFkt.getAngleInRad(camRay.getDirection().multipliedBy(-1.0),
 							vertexHit.getRayDir());
 					double lightPhaseFkt = XRayTracerSampling.comptonAngleCrossSection(energyEV, theta);
 

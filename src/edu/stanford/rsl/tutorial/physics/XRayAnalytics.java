@@ -120,7 +120,7 @@ public class XRayAnalytics {
 			return -1;
 		}
 		
-		return nHelperFkt.computeRMSE(first, second);
+		return NHelperFkt.computeRMSE(first, second);
 	}
 	
 	public static double averageRMSE(String firstFileName, String secondFileName){
@@ -136,10 +136,10 @@ public class XRayAnalytics {
 			return -1;
 		}
 		
-		Grid2D a = nHelperFkt.compareToAveragePixel(first);
-		Grid2D b = nHelperFkt.compareToAveragePixel(second);
+		Grid2D a = NHelperFkt.compareToAveragePixel(first);
+		Grid2D b = NHelperFkt.compareToAveragePixel(second);
 		
-		return nHelperFkt.computeRMSE(a, b);
+		return NHelperFkt.computeRMSE(a, b);
 	}
 	
 	/**

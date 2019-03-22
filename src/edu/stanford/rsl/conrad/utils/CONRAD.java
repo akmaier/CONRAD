@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2017  Andreas Maier
+ * Copyright (C) 2010-2019  Andreas Maier
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
  */
 package edu.stanford.rsl.conrad.utils;
@@ -9,19 +9,23 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 import ij.IJ;
 import ij.ImageJ;
 import edu.stanford.rsl.apps.gui.RawDataOpener;
 
 public abstract class CONRAD {
-	public static final String VersionString = "Version 1.0.9";
+	public static final String VersionString = "Version 1.1.0";
 	public static final String CONRADBibtex = "@article{Maier13-CSF," +
 			"  author = {A. Maier, H. G. Hofmann, M. Berger, P. Fischer, C. Schwemmer, H. Wu, K. Müller, J. Hornegger, J. H. Choi, C. Riess, A. Keil, and R. Fahrig},\n" +
 			"  title={{CONRAD - A software framework for cone-beam imaging in radiology}},\n" +
@@ -275,6 +279,39 @@ public abstract class CONRAD {
 		while (resources.hasMoreElements()) {
 			URL resource = resources.nextElement();
 			String filename = resource.getFile();
+			
+			// Get URI from resource
+			URI uri = null;
+			try {
+				uri = resource.toURI();
+			} catch (URISyntaxException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			// Check whether CONRAD was executed from jar file
+			if(uri.getScheme().equals("jar")) {
+				// System.out.println("Parsing style: Conrad jar version.");
+				
+				// Find the path to the root jar file
+				String jarFileName = filename.split("!")[0];
+				JarFile jar = null;
+				try {
+					jar = new JarFile(new File(new URI(jarFileName)));
+				} catch (URISyntaxException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				// Extract the classes
+				ArrayList<Class<? extends Object>> classes = findClassesInJar(jar,path);
+				jar.close();
+				
+				return classes;
+				// We're done with the jar case, everything below is non-jar parsing
+			}
+			// System.out.println("Parsing style: Conrad eclipse version.");
+			
 			if (filename.contains("%20")) filename = filename.replace("%20", " ");
 			dirs.add(new File(filename));
 		}
@@ -322,6 +359,42 @@ public abstract class CONRAD {
 		return classes;
 	}
 
+	/**
+	 * Iterative method used to find all classes in a given directory and subdirs packed in a *.jar file.
+	 *
+	 * @param jar   The directory location of the jar file
+	 * @param packageName The package name for classes found inside the base directory
+	 * @return The classes
+	 * @throws ClassNotFoundException
+	 */
+	private static ArrayList<Class<? extends Object>> findClassesInJar(JarFile jar, String packageName) throws ClassNotFoundException {
+		ArrayList<Class<? extends Object>> classes = new ArrayList<Class<? extends Object>>();
+		Enumeration<JarEntry> jarIterator = jar.entries();
+		
+		while (jarIterator.hasMoreElements()) {
+			JarEntry entr = jarIterator.nextElement();
+			if (entr != null && entr.getName().contains(packageName)) {
+				// System.out.println(entr.getName() + " " + entr.isDirectory());
+				if(!entr.isDirectory() && entr.getName().endsWith(".class")) {
+					try{
+						classes.add(Class.forName(entr.getName().substring(0, entr.getName().length() - 6).replace("/", ".")));
+					} catch (UnsatisfiedLinkError e){
+						/**
+						 * We skip over classes that cannot be loaded (compilation errors, etc.).
+						 */
+						//System.out.println("skipping " + file);
+					} catch (NoClassDefFoundError e2){
+						/**
+						 * We skip over classes that cannot be loaded (compilation errors, etc.).
+						 */
+						//System.out.println("skipping " + file);
+					}
+				}
+			}
+		}
+		return classes;
+	}
+	
 	/**
 	 * Method to log something in a log file.
 	 * Currently it just redirects to IJ.log method.

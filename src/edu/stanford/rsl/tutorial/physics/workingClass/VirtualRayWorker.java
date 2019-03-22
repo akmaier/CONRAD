@@ -30,14 +30,14 @@ import edu.stanford.rsl.tutorial.physics.XRayHitVertex;
 import edu.stanford.rsl.tutorial.physics.XRayTracerSampling;
 import edu.stanford.rsl.tutorial.physics.XRayVPL;
 import edu.stanford.rsl.tutorial.physics.XRayVRay;
-import edu.stanford.rsl.tutorial.physics.nHelperFkt;
+import edu.stanford.rsl.tutorial.physics.NHelperFkt;
 import edu.stanford.rsl.tutorial.physics.XRayTracer.RaytraceResult;
 
 /**
  * Implementation of the two step algorithm using virtual point lights for the calculation of indirect illumination
  * @author Tobias Miksch
  */
-public class virtualRayWorker extends AbstractWorker {
+public class VirtualRayWorker extends AbstractWorker {
 
 	// For VRL
 	private double vrlCreation = 0.3;
@@ -54,7 +54,7 @@ public class virtualRayWorker extends AbstractWorker {
 	private final CyclicBarrier barrierVRL;
 	private volatile XRayVRay allVirtualRayLights[];
 	
-	public virtualRayWorker(PriorityRayTracer raytracer, RaytraceResult res, long numRays, int startenergyEV,
+	public VirtualRayWorker(PriorityRayTracer raytracer, RaytraceResult res, long numRays, int startenergyEV,
 			Grid2D grid, XRayDetector detector, Projection proj, boolean infinite, boolean writeAdditionalData,
 			double sourceDetectorDist, double pixelDimensionX, double pixelDimensionY, Material background,
 			int versionNumber, int threadNumber, Random random, int lightRayLength,
@@ -278,7 +278,7 @@ public class virtualRayWorker extends AbstractWorker {
 			end = reversed ? e.getPoint() : e.getEnd();
 
 			// Search for the segment containing the rayPoint
-			if (foundStartSegment != -1 || nHelperFkt.isBetween(start.getAbstractVector(), end.getAbstractVector(),
+			if (foundStartSegment != -1 || NHelperFkt.isBetween(start.getAbstractVector(), end.getAbstractVector(),
 					rayPoint.getAbstractVector())) {
 				if (foundStartSegment == -1) {
 					foundStartSegment = i;
@@ -407,7 +407,7 @@ public class virtualRayWorker extends AbstractWorker {
 			end = reversed ? e.getPoint() : e.getEnd();
 
 			// Search for the segment containing the rayPoint
-			if (foundStartSegment != -1 || nHelperFkt.isBetween(start.getAbstractVector(), end.getAbstractVector(),
+			if (foundStartSegment != -1 || NHelperFkt.isBetween(start.getAbstractVector(), end.getAbstractVector(),
 					rayPoint.getAbstractVector())) {
 				if (foundStartSegment == -1) {
 					foundStartSegment = i;
@@ -522,7 +522,7 @@ public class virtualRayWorker extends AbstractWorker {
 			PointND start = reversed ? e.getEnd() : e.getPoint();
 			end = reversed ? e.getPoint() : e.getEnd();
 
-			if (foundStartSegment || nHelperFkt.isBetween(start.getAbstractVector(), end.getAbstractVector(), rayPoint.getAbstractVector())) {
+			if (foundStartSegment || NHelperFkt.isBetween(start.getAbstractVector(), end.getAbstractVector(), rayPoint.getAbstractVector())) {
 			
 				distToNextMaterial = rayPoint.euclideanDistance(end);
 				if (distToNextMaterial < 0.0) {
@@ -642,7 +642,7 @@ public class virtualRayWorker extends AbstractWorker {
 					StraightLine camera = new StraightLine(randomDetectorPoint, rayLightPoint);
 					camera.normalize();
 					
-					double theta = nHelperFkt.getAngleInRad(camera.getDirection().multipliedBy(-1.0), vRayLight.getDirection()); // .multipliedBy(-1.0)
+					double theta = NHelperFkt.getAngleInRad(camera.getDirection().multipliedBy(-1.0), vRayLight.getDirection()); // .multipliedBy(-1.0)
 					double lightPhaseFkt = XRayTracerSampling.comptonAngleCrossSection(vRayLight.getEnergyEV(), theta);
 
 					double energy = XRayTracerSampling.getScatteredPhotonEnergy(vRayLight.getEnergyEV(), theta);
@@ -757,12 +757,12 @@ public class virtualRayWorker extends AbstractWorker {
 
 					double throughputVRL = vRayLight.getTransmittance(fraction);
 					// Theta = Scatter angle
-					double theta = nHelperFkt.getAngleInRad(vRayLight.getDirection(), shadowRay.getDirection()); // .multipliedBy(-1.0)
+					double theta = NHelperFkt.getAngleInRad(vRayLight.getDirection(), shadowRay.getDirection()); // .multipliedBy(-1.0)
 					double lightPhaseFkt = XRayTracerSampling.comptonAngleCrossSection(vRayLight.getEnergyEV(), theta);
 					double energy = XRayTracerSampling.getScatteredPhotonEnergy(vRayLight.getEnergyEV(), theta);
 					double throughputShadowRay = calculateTransmittance(rayLightPoint, cameraPoint, energy);
 
-					theta = nHelperFkt.getAngleInRad(shadowRay.getDirection(),
+					theta = NHelperFkt.getAngleInRad(shadowRay.getDirection(),
 							camPathVertex.getRayDir().multipliedBy(-1.0)); // .multipliedBy(-1.0)
 					double cameraPhaseFkt = XRayTracerSampling.comptonAngleCrossSection(vRayLight.getEnergyEV(), theta);
 					energy = XRayTracerSampling.getScatteredPhotonEnergy(energy, theta);

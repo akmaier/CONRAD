@@ -22,14 +22,14 @@ import edu.stanford.rsl.conrad.rendering.PriorityRayTracer;
 import edu.stanford.rsl.tutorial.physics.XRayHitVertex;
 import edu.stanford.rsl.tutorial.physics.XRayTracerSampling;
 import edu.stanford.rsl.tutorial.physics.XRayVPL;
-import edu.stanford.rsl.tutorial.physics.nHelperFkt;
+import edu.stanford.rsl.tutorial.physics.NHelperFkt;
 import edu.stanford.rsl.tutorial.physics.XRayTracer.RaytraceResult;
 
 /**
  * Implementation of the two step algorithm using virtual point lights for the calculation of indirect illumination
  * @author Tobias Miksch
  */
-public class virtualPointWorker extends AbstractWorker {
+public class VirtualPointWorker extends AbstractWorker {
 
 	
 	// For VPL
@@ -45,7 +45,7 @@ public class virtualPointWorker extends AbstractWorker {
 	private final CyclicBarrier barrierVPL;
 	private volatile XRayVPL collectionOfAllVPLs[];
 	
-	public virtualPointWorker(PriorityRayTracer raytracer, RaytraceResult res, long numRays, int startenergyEV,
+	public VirtualPointWorker(PriorityRayTracer raytracer, RaytraceResult res, long numRays, int startenergyEV,
 			Grid2D grid, XRayDetector detector, Projection proj, boolean infinite, boolean writeAdditionalData,
 			double sourceDetectorDist, double pixelDimensionX, double pixelDimensionY, Material background,
 			int versionNumber, int threadNumber, Random random, int lightRayLength,
@@ -262,7 +262,7 @@ public class virtualPointWorker extends AbstractWorker {
 				StraightLine camera = new StraightLine(randomDetectorPoint, vpLight.getVplPos());
 				camera.normalize();
 
-				double theta = nHelperFkt.getAngleInRad(camera.getDirection().multipliedBy(-1.0), vpLight.getDirection()); // .multipliedBy(-1.0)
+				double theta = NHelperFkt.getAngleInRad(camera.getDirection().multipliedBy(-1.0), vpLight.getDirection()); // .multipliedBy(-1.0)
 				double lightPhaseFkt = XRayTracerSampling.comptonAngleCrossSection(vpLight.getEnergyEV(), theta);
 
 				double energy = XRayTracerSampling.getScatteredPhotonEnergy(vpLight.getEnergyEV(), theta);
