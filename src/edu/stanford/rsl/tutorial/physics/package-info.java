@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2014 Andreas Maier, Tobias Miksch, Fabian R�ckert
+ * Copyright (C) 2010-2014 Andreas Maier, Tobias Miksch, Fabian Rückert
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
 */
 package edu.stanford.rsl.tutorial.physics;
@@ -18,5 +18,5 @@ package edu.stanford.rsl.tutorial.physics;
  * Files created by this method can than be compared and analyzed with the XRayComperator. It can compare the values, the absolute values or use the 
  *  Root-Mean-Square Error or structural similarity index(SSIM) methods. 
  * 
- * @author Tobias Miksch based on the work of Fabian R�ckert
+ * @author Tobias Miksch based on the work of Fabian Rückert
  */

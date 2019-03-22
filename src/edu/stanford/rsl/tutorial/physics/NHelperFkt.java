@@ -10,7 +10,7 @@ import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
 import edu.stanford.rsl.conrad.numerics.SimpleOperators;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
 
-public abstract class nHelperFkt {
+public abstract class NHelperFkt {
 
 	/**
 	 * Helper Function calculating the cross product of 2 3D vectors a x b

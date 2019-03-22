@@ -17,7 +17,7 @@ import edu.stanford.rsl.conrad.physics.materials.utils.AttenuationType;
 /**
  * Simple single-threaded Monte Carlo Simulation of photons passing through one material.
  * 
- * @author Fabian Rückert
+ * @author Fabian RÃ¼ckert
  * 
  */
 public class SingleMaterialMonteCarlo {
@@ -89,9 +89,7 @@ public class SingleMaterialMonteCarlo {
 		 visualizeKleinNishina(140000*eV);
 
 		// visualizeKleinNishina(2.75*eV);
-		//
 		// visualizeKleinNishina(55000*eV);
-
 	}
 
 	private void raytrace(double energyEV, int numRays) {
@@ -146,8 +144,6 @@ public class SingleMaterialMonteCarlo {
 			return;
 		} else {
 			// compton scattering
-
-
 			energyEV = sampler.sampleComptonScattering(energyEV, dir);
 
 			// send new ray

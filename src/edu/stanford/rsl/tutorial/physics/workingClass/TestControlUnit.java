@@ -31,7 +31,7 @@ import edu.stanford.rsl.tutorial.physics.XRayHitVertex;
 import edu.stanford.rsl.tutorial.physics.XRayTracer;
 import edu.stanford.rsl.tutorial.physics.XRayTracerSampling;
 import edu.stanford.rsl.tutorial.physics.XRayVPL;
-import edu.stanford.rsl.tutorial.physics.nHelperFkt;
+import edu.stanford.rsl.tutorial.physics.NHelperFkt;
 import edu.stanford.rsl.tutorial.physics.XRayTracer.RaytraceResult;
 
 
@@ -41,8 +41,8 @@ import edu.stanford.rsl.tutorial.physics.XRayTracer.RaytraceResult;
  */
 public class TestControlUnit extends AbstractWorker {
 
-	rayWorker rayTracer;
-	virtualPointWorker vplTracer;
+	RayWorker rayTracer;
+	VirtualPointWorker vplTracer;
 	
 	private volatile int attempting[];
 	private int vplPathNumber = 0;
@@ -74,8 +74,8 @@ public class TestControlUnit extends AbstractWorker {
 			sampler = new XRayTracerSampling(random, (width * pixelDimX), (height * pixelDimY), normalOfDetector);
 		}
 		
-		rayTracer = new rayWorker((PriorityRayTracer) raytracer, result, numRays, startEnergyEV, grid, detector, proj, infiniteSimulation, writeAdditionalData, sourceDetectorDistance, pixelDimX, pixelDimY, background, version, threadNumber, random, lightRayLength);
-		vplTracer = new virtualPointWorker((PriorityRayTracer) raytracer, result, numRays, startEnergyEV, grid, detector, proj, infiniteSimulation, writeAdditionalData, sourceDetectorDistance, pixelDimX, pixelDimY, background, version, threadNumber, random, lightRayLength, virtualLightsPerThread, collectionOfAllVPLs, attempting, barrierVPL);
+		rayTracer = new RayWorker((PriorityRayTracer) raytracer, result, numRays, startEnergyEV, grid, detector, proj, infiniteSimulation, writeAdditionalData, sourceDetectorDistance, pixelDimX, pixelDimY, background, version, threadNumber, random, lightRayLength);
+		vplTracer = new VirtualPointWorker((PriorityRayTracer) raytracer, result, numRays, startEnergyEV, grid, detector, proj, infiniteSimulation, writeAdditionalData, sourceDetectorDistance, pixelDimX, pixelDimY, background, version, threadNumber, random, lightRayLength, virtualLightsPerThread, collectionOfAllVPLs, attempting, barrierVPL);
 		
 		double energyEV = startEnergyEV;
 
@@ -315,9 +315,9 @@ public class TestControlUnit extends AbstractWorker {
 		gamDirection1.normalizeL2();
 		
 		// transform scattered photon direction vector to world coordinate system
-		SimpleVector ret = nHelperFkt.transformToWorldCoordinateSystem(gamDirection1, dir);
+		SimpleVector ret = NHelperFkt.transformToWorldCoordinateSystem(gamDirection1, dir);
 		
-		double testingTheta = nHelperFkt.getAngleInRad(dir, ret);
+		double testingTheta = NHelperFkt.getAngleInRad(dir, ret);
 		if( Math.abs(theta - testingTheta) > 0.01 ) {
 			System.out.println("We have different angles in out function: " + theta + " & " + testingTheta);
 		}
@@ -355,12 +355,12 @@ public class TestControlUnit extends AbstractWorker {
 
 			System.out.print("\nWe iterate: " + currentLineSegment.getNameString());
 
-			if (nHelperFkt.isBetween(start.getAbstractVector(), end.getAbstractVector(),
+			if (NHelperFkt.isBetween(start.getAbstractVector(), end.getAbstractVector(),
 					startPoint.getAbstractVector())) {
 				System.out.print(" --->  with startPoint");
 			}
 
-			if (nHelperFkt.isBetween(start.getAbstractVector(), end.getAbstractVector(),
+			if (NHelperFkt.isBetween(start.getAbstractVector(), end.getAbstractVector(),
 					endPoint.getAbstractVector())) {
 				System.out.print(" --->  with endPoint");
 			}
@@ -438,7 +438,7 @@ public class TestControlUnit extends AbstractWorker {
 
 		System.out.println("Vectors: " + simple01 + " and " + simple10);
 
-		SimpleVector normal = nHelperFkt.crossProduct3D(simple01, simple10);
+		SimpleVector normal = NHelperFkt.crossProduct3D(simple01, simple10);
 
 		System.out.println("CrossProduct: " + normal);
 
@@ -829,7 +829,7 @@ public class TestControlUnit extends AbstractWorker {
 			for (int i = 0; i < count; ++i) {
 				SimpleVector dir = ray.getDirection().clone();
 				sampler.sampleComptonScattering(energyEV, dir);
-				double radians = nHelperFkt.getAngleInRad(ray.getDirection(), dir);
+				double radians = NHelperFkt.getAngleInRad(ray.getDirection(), dir);
 				int slot = (int) Math.floor((Math.toDegrees(radians)));
 				numberOfangles[slot] += 1;
 			}
@@ -960,7 +960,7 @@ public class TestControlUnit extends AbstractWorker {
 
 					double energy = testScattering(energyEV, dir, theta, phi);
 
-					double radians = nHelperFkt.getAngleInRad(ray.getDirection(), dir); // .multipliedBy(-1.0)
+					double radians = NHelperFkt.getAngleInRad(ray.getDirection(), dir); // .multipliedBy(-1.0)
 					double u = XRayTracerSampling.comptonAngleCrossSection(energy, radians);
 					// if(u>max) {
 					// max = u;
@@ -992,7 +992,7 @@ public class TestControlUnit extends AbstractWorker {
 			for (int i = 0; i < count; ++i) {
 				SimpleVector dir = ray.getDirection().clone();
 				sampler.sampleComptonScattering(energyEV, dir);
-				double radians = nHelperFkt.getAngleInRad(ray.getDirection(), dir);
+				double radians = NHelperFkt.getAngleInRad(ray.getDirection(), dir);
 				int slot = (int) Math.floor((samplingSize * Math.toDegrees(radians)));
 				numberOfangles[slot] += 1;
 			}
@@ -1051,7 +1051,7 @@ public class TestControlUnit extends AbstractWorker {
 			for (int i = 0; i < count; ++i) {
 				SimpleVector dir = ray.getDirection().clone();
 				sampler.sampleComptonScattering(energyEV, dir);
-				double radians = nHelperFkt.getAngleInRad(ray.getDirection(), dir);
+				double radians = NHelperFkt.getAngleInRad(ray.getDirection(), dir);
 				int slot = (int) Math.floor((samplingSize * Math.toDegrees(radians)));
 				numberOfangles[slot] += 1;
 			}
@@ -1099,7 +1099,7 @@ public class TestControlUnit extends AbstractWorker {
 
 				energy = testScattering(energyEV, dir, theta, phi);
 
-				double radians = nHelperFkt.getAngleInRad(ray.getDirection(), dir); // .multipliedBy(-1.0)
+				double radians = NHelperFkt.getAngleInRad(ray.getDirection(), dir); // .multipliedBy(-1.0)
 				double u = XRayTracerSampling.comptonAngleCrossSection(energy, radians);
 
 				// System.out.println("Point: " + t +":" + p + " has an angle of " +
@@ -1169,7 +1169,7 @@ public class TestControlUnit extends AbstractWorker {
 				StraightLine camera = new StraightLine(randomDetectorPoint, vpLight.getVplPos());
 				camera.normalize();
 
-				double theta = nHelperFkt.getAngleInRad(vpLight.getDirection(), camera.getDirection()); // .multipliedBy(-1.0)
+				double theta = NHelperFkt.getAngleInRad(vpLight.getDirection(), camera.getDirection()); // .multipliedBy(-1.0)
 				double lightPhaseFkt = XRayTracerSampling.comptonAngleCrossSection(vpLight.getEnergyEV(), theta);
 
 				double energy = XRayTracerSampling.getScatteredPhotonEnergy(vpLight.getEnergyEV(), theta);
@@ -1254,13 +1254,13 @@ public class TestControlUnit extends AbstractWorker {
 				SimpleVector v1 = shadowRay.getDirection();
 				SimpleVector v2 = lightVertex.getRayDir().multipliedBy(-1.0);
 
-				double radians = nHelperFkt.getAngleInRad(v1, v2);
-				double degree = nHelperFkt.getAngleInDeg(v1, v2);
+				double radians = NHelperFkt.getAngleInRad(v1, v2);
+				double degree = NHelperFkt.getAngleInDeg(v1, v2);
 
 				double changedEnergy = XRayTracerSampling.getScatteredPhotonEnergy(energyEV, radians);
 				double divison = changedEnergy / energyEV;
 
-				double scatterRad = nHelperFkt.transformToScatterAngle(radians);
+				double scatterRad = NHelperFkt.transformToScatterAngle(radians);
 				double scatterDeg = Math.toDegrees(scatterRad);
 
 				double crossRad = XRayTracerSampling.comptonAngleCrossSection(energyEV, scatterRad);
@@ -1444,7 +1444,7 @@ public class TestControlUnit extends AbstractWorker {
 				StraightLine camRay = new StraightLine(randomDetectorPoint, var);
 				camRay.normalize();
 
-				double theta = nHelperFkt.getAngleInRad(camRay.getDirection().multipliedBy(-1.0), ray.getDirection());
+				double theta = NHelperFkt.getAngleInRad(camRay.getDirection().multipliedBy(-1.0), ray.getDirection());
 				double lightPhaseFkt = XRayTracerSampling.comptonAngleCrossSection(energyEV, theta);
 				// double probability = XRayTracerSampling.angleProbabilityCompton(energyEV,
 				// theta);
@@ -1462,13 +1462,13 @@ public class TestControlUnit extends AbstractWorker {
 				// System.err.println("What is wrong with the transmittance?" + transmittance);
 
 				double dist = randomDetectorPoint.euclideanDistance(var); // * XRayTracer.milli
-				double phi = nHelperFkt.getAngleInRad(camRay.getDirection(), normalOfDetector);
+				double phi = NHelperFkt.getAngleInRad(camRay.getDirection(), normalOfDetector);
 				double dX = Math.cos(phi);
 				double dY = Math
-						.cos(nHelperFkt.getAngleInRad(camRay.getDirection().multipliedBy(-1.0), ray.getDirection()));
+						.cos(NHelperFkt.getAngleInRad(camRay.getDirection().multipliedBy(-1.0), ray.getDirection()));
 
 				StraightLine toMiddle = new StraightLine(middle, var);
-				double dZ = Math.cos(nHelperFkt.getAngleInRad(toMiddle.getDirection(), normalOfDetector));
+				double dZ = Math.cos(NHelperFkt.getAngleInRad(toMiddle.getDirection(), normalOfDetector));
 
 				// double g0erm = (pixelDimX * pixelDimY) * dX / dist / dist;
 				// double g1erm = (width * height) * dX / dist / dist ;
@@ -1558,7 +1558,7 @@ public class TestControlUnit extends AbstractWorker {
 				if (simulatedRays < 20) //
 					vizualizeRay(result, firstScatterPoint.getEndPoint(), randomDetectorPoint, Color.YELLOW, 10);
 
-				double theta = nHelperFkt.getAngleInRad(camRay.getDirection().multipliedBy(-1.0),
+				double theta = NHelperFkt.getAngleInRad(camRay.getDirection().multipliedBy(-1.0),
 						firstScatterPoint.getRayDir());
 				double lightPhaseFkt = XRayTracerSampling.comptonAngleCrossSection(energyEV, theta);
 
@@ -1567,7 +1567,7 @@ public class TestControlUnit extends AbstractWorker {
 						energy);
 
 				double dist = randomDetectorPoint.euclideanDistance(firstScatterPoint.getEndPoint());
-				double phi = nHelperFkt.getAngleInRad(camRay.getDirection(), normalOfDetector);
+				double phi = NHelperFkt.getAngleInRad(camRay.getDirection(), normalOfDetector);
 				double dX = Math.cos(phi);
 				double gTerm = ((width * pixelDimX * height * pixelDimY) * dX) / (dist * dist);
 
@@ -1663,7 +1663,7 @@ public class TestControlUnit extends AbstractWorker {
 						StraightLine camRay = new StraightLine(randomDetectorPoint, firstScatterPoint.getEndPoint());
 						camRay.normalize();
 
-						double theta = nHelperFkt.getAngleInRad(camRay.getDirection().multipliedBy(-1.0), firstScatterPoint.getRayDir());
+						double theta = NHelperFkt.getAngleInRad(camRay.getDirection().multipliedBy(-1.0), firstScatterPoint.getRayDir());
 						double lightPhaseFkt = XRayTracerSampling.comptonAngleCrossSection(energyEV, theta);
 
 						double energy = XRayTracerSampling.getScatteredPhotonEnergy(energyEV, theta);
@@ -1690,7 +1690,7 @@ public class TestControlUnit extends AbstractWorker {
 			StraightLine lightRay = new StraightLine(camPathVertex.getEndPoint(), emitterPoint);
 			lightRay.normalize();
 			
-			double theta = nHelperFkt.getAngleInRad(camRay.getDirection(), lightRay.getDirection());
+			double theta = NHelperFkt.getAngleInRad(camRay.getDirection(), lightRay.getDirection());
 			double lightPhaseFkt = XRayTracerSampling.comptonAngleCrossSection(energyEV, theta);
 
 			double energy = XRayTracerSampling.getScatteredPhotonEnergy(energyEV, theta);
@@ -1736,7 +1736,7 @@ public class TestControlUnit extends AbstractWorker {
 				StraightLine camRay = new StraightLine(randomDetectorPoint, firstScatterPoint.getEndPoint());
 				camRay.normalize();
 
-				double theta = nHelperFkt.getAngleInRad(camRay.getDirection().multipliedBy(-1.0), firstScatterPoint.getRayDir());
+				double theta = NHelperFkt.getAngleInRad(camRay.getDirection().multipliedBy(-1.0), firstScatterPoint.getRayDir());
 				double lightPhaseFkt = XRayTracerSampling.comptonAngleCrossSection(energyEV, theta);
 
 				double energy = XRayTracerSampling.getScatteredPhotonEnergy(energyEV, theta);
@@ -1817,7 +1817,7 @@ public class TestControlUnit extends AbstractWorker {
 
 						// This should be equal for all testcases
 						double distance = vertexHit.getEndPoint().euclideanDistance(resulting) * XRayTracer.milli;
-						double phi = nHelperFkt.getAngleInRad(newRay.getDirection().multipliedBy(-1.0),
+						double phi = NHelperFkt.getAngleInRad(newRay.getDirection().multipliedBy(-1.0),
 								normalOfDetector);
 						double dX = Math.cos(phi);
 						double gTerm = 1.0 / distance / distance;

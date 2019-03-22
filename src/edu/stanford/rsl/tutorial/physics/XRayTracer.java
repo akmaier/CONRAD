@@ -44,7 +44,7 @@ import edu.stanford.rsl.tutorial.physics.workingClass.*;
 /**
  * A raytracer for X-rays using the PriorityRaytracer for intersection calculation. It considers only the Compton and the Photoelectric Effect, disregarding other effects which are insignificant for X-rays.
  *
- * @author Fabian R�ckert, Tobias Miksch
+ * @author Fabian Rückert, Tobias Miksch
  *
  */
 public class XRayTracer {
@@ -413,16 +413,16 @@ public class XRayTracer {
 			}
 			
 			if (tracingVersion == 0 || tracingVersion == 1) {
-				rayTraceThreads[i] = new rayWorker(raytracer, new RaytraceResult(), numberofrays, startEnergyEV, grid,
+				rayTraceThreads[i] = new RayWorker(raytracer, new RaytraceResult(), numberofrays, startEnergyEV, grid,
 						detector, traj.getProjectionMatrix(projectionIndex), INFINITE_SIMULATION, writeAdditionalData,
 						sourceDetectorDistance, pixelDimX, pixelDimY, background, tracingVersion, i, null, lightRayLength);
 			} else if (tracingVersion == 2) {
-				rayTraceThreads[i] = new virtualPointWorker(raytracer, new RaytraceResult(), numberofrays,
+				rayTraceThreads[i] = new VirtualPointWorker(raytracer, new RaytraceResult(), numberofrays,
 						startEnergyEV, grid, detector, traj.getProjectionMatrix(projectionIndex), INFINITE_SIMULATION,
 						writeAdditionalData, sourceDetectorDistance, pixelDimX, pixelDimY, background, tracingVersion,
 						i, null, lightRayLength, virtualLightsPerThread, collection, attempting, barrier);
 			} else if (tracingVersion == 3) {
-				rayTraceThreads[i] = new virtualRayWorker(raytracer, new RaytraceResult(), numberofrays,
+				rayTraceThreads[i] = new VirtualRayWorker(raytracer, new RaytraceResult(), numberofrays,
 						startEnergyEV, grid, detector, traj.getProjectionMatrix(projectionIndex), INFINITE_SIMULATION,
 						writeAdditionalData, sourceDetectorDistance, pixelDimX, pixelDimY, background, tracingVersion,
 						i, null, lightRayLength, virtualLightsPerThread, vrlColl, attempting, barrier);

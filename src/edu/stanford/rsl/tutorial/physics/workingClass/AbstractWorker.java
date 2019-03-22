@@ -27,12 +27,12 @@ import edu.stanford.rsl.conrad.rendering.PriorityRayTracer;
 import edu.stanford.rsl.conrad.utils.CONRAD;
 import edu.stanford.rsl.tutorial.physics.XRayHitVertex;
 import edu.stanford.rsl.tutorial.physics.XRayTracerSampling;
-import edu.stanford.rsl.tutorial.physics.nHelperFkt;
+import edu.stanford.rsl.tutorial.physics.NHelperFkt;
 import edu.stanford.rsl.tutorial.physics.XRayTracer.RaytraceResult;
 
 /**
  * Abstract class as a base for the different variations of the light transport algorithm
- * @author Tobias Miksch based on work of Fabian R�ckert
+ * @author Tobias Miksch based on work of Fabian Rückert
  */
 public abstract class AbstractWorker implements Runnable {
 
@@ -256,7 +256,7 @@ public abstract class AbstractWorker implements Runnable {
 			// System.out.print("\nCurrentLineSegment: " +
 			// currentLineSegment.getNameString());
 
-			if (foundStartSegment || nHelperFkt.isBetween(start.getAbstractVector(), end.getAbstractVector(),
+			if (foundStartSegment || NHelperFkt.isBetween(start.getAbstractVector(), end.getAbstractVector(),
 					rayPoint.getAbstractVector())) {
 				// get length between the raypoint and the next material in ray direction
 
@@ -478,7 +478,7 @@ public abstract class AbstractWorker implements Runnable {
 			end = reversed ? e.getPoint() : e.getEnd();
 
 			// Test if we are already behind the Detector or still out of the scene
-			if (foundStartSegment || nHelperFkt.isBetween(start.getAbstractVector(), end.getAbstractVector(),
+			if (foundStartSegment || NHelperFkt.isBetween(start.getAbstractVector(), end.getAbstractVector(),
 					rayPoint.getAbstractVector())) {
 
 				foundStartSegment = true;
@@ -493,7 +493,7 @@ public abstract class AbstractWorker implements Runnable {
 			}
 
 			// We went past the emitter and could not find an interaction point!
-			if (foundStartSegment && !nHelperFkt.isBetween(ray.getPoint().getAbstractVector(),
+			if (foundStartSegment && !NHelperFkt.isBetween(ray.getPoint().getAbstractVector(),
 					emitterPoint.getAbstractVector(), rayPoint.getAbstractVector())) {
 				// Case 2
 				return null;
@@ -637,7 +637,7 @@ public abstract class AbstractWorker implements Runnable {
 			// }
 
 			// if we are not between the two points any longer
-			if (foundStartSegment && !nHelperFkt.isBetween(startPoint.getAbstractVector(), endPoint.getAbstractVector(),
+			if (foundStartSegment && !NHelperFkt.isBetween(startPoint.getAbstractVector(), endPoint.getAbstractVector(),
 					start.getAbstractVector())) {
 				// System.out.println(currentLineSegment.getNameString() + " leaving
 				// Finished!\n");
@@ -648,7 +648,7 @@ public abstract class AbstractWorker implements Runnable {
 				return Math.exp(-throughput);
 			}
 
-			if (foundStartSegment || nHelperFkt.isBetween(start.getAbstractVector(), end.getAbstractVector(),
+			if (foundStartSegment || NHelperFkt.isBetween(start.getAbstractVector(), end.getAbstractVector(),
 					startPoint.getAbstractVector())) {
 				// get length between the raypoint and the next material in ray direction
 				if (!foundStartSegment) {
@@ -661,7 +661,7 @@ public abstract class AbstractWorker implements Runnable {
 					// System.out.println("Distance: " +
 					// shadowRay.getPoint().euclideanDistance(end));
 
-					if (nHelperFkt.isBetween(start.getAbstractVector(), end.getAbstractVector(),
+					if (NHelperFkt.isBetween(start.getAbstractVector(), end.getAbstractVector(),
 							endPoint.getAbstractVector())) {
 						// System.out.println("We end it here!");
 						distToNextMaterial = startPoint.euclideanDistance(endPoint);
@@ -678,7 +678,7 @@ public abstract class AbstractWorker implements Runnable {
 					// System.out.println(currentLineSegment.getNameString() + "-- starting the
 					// process!");
 				} else {
-					if (nHelperFkt.isBetween(start.getAbstractVector(), end.getAbstractVector(),
+					if (NHelperFkt.isBetween(start.getAbstractVector(), end.getAbstractVector(),
 							endPoint.getAbstractVector())) {
 						// System.out.println(" and add a little bit of: " +
 						// currentLineSegment.getNameString());
