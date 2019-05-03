@@ -200,7 +200,7 @@ public abstract class ImageUtil {
 			else if (grid instanceof Grid3D)
 				return wrapGrid3D((Grid3D) grid, title);
 			else if (grid instanceof Grid2D) {
-				
+				return wrapGrid2D((Grid2D) grid, title);
 			}
 			else {
 				throw new IllegalArgumentException("grid must be either a Grid2D, Grid3D or Grid4D!");
