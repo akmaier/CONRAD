@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2014  Andreas Maier
+ * Copyright (C) 2010-2019  Andreas Maier
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
  */
 package edu.stanford.rsl.conrad.utils;
@@ -31,7 +31,6 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.ImageWindow;
 import ij.measure.Calibration;
-import ij.plugin.HyperStackConverter;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 import java.lang.IllegalArgumentException;
@@ -44,8 +43,45 @@ public abstract class ImageUtil {
 	}
 
 	/**
-	 * Method to display 3DGrids properly. This method is also able to handle multi
-	 * channel data.
+	 * Method to display 2D grids properly.
+	 * This method is also able to handle multi-channel data (as a hyperstack).
+	 * 
+	 * @param grid  the grid
+	 * @param title the title
+	 * @return the ImagePlus
+	 */	
+	public static ImagePlus wrapGrid2D(Grid2D grid, String title) {
+		if (grid instanceof MultiChannelGrid2D) {
+			MultiChannelGrid2D mcgrid = (MultiChannelGrid2D) grid;
+			String[] names = ((MultiChannelGrid2D) grid).getChannelNames();
+			// finalize the hyperstack
+			ImagePlus hyper = new ImagePlus();
+			ImageStack hyperStack = new ImageStack(grid.getSize()[0], grid.getSize()[1]);
+			for (int c = 0; c < mcgrid.getNumberOfChannels(); c++) {
+				String frameTitle = "";
+				if (names != null) {
+					frameTitle += "Channel: " + names[c];
+				} else {
+					frameTitle += "Channel: " + (c + 1);;
+				}
+				hyperStack.addSlice(frameTitle, ImageUtil.wrapGrid2D(mcgrid.getChannel(c)));
+			}
+			setCalibrationToImagePlus2D(hyper, grid);
+			hyper.setStack(title, hyperStack);
+			hyper.setDimensions(1, 1, mcgrid.getNumberOfChannels());
+			hyper.setOpenAsHyperStack(true);
+			return hyper;
+		} else {
+			FloatProcessor proc = wrapGrid2D((Grid2D) grid);
+			ImagePlus iPlus = new ImagePlus(title, proc);
+			setCalibrationToImagePlus2D(iPlus, grid);
+			return iPlus;
+		}
+	}
+	
+	/**
+	 * Method to display 3D grids properly.
+	 * This method is also able to handle multi-channel data (as a hyperstack).
 	 * 
 	 * @param grid  the grid
 	 * @param title the title
@@ -59,28 +95,28 @@ public abstract class ImageUtil {
 			else
 				stack = new ImageStack(grid.getSize()[0], grid.getSize()[1], grid.getSize()[2]);
 
-			if (grid.getSubGrid(0) instanceof MultiChannelGrid2D) {
-				MultiChannelGrid2D first = (MultiChannelGrid2D) grid.getSubGrid(0);
-				String[] names = first.getChannelNames();
+			if (grid instanceof MultiChannelGrid3D) {
+				MultiChannelGrid3D mcgrid = (MultiChannelGrid3D) grid;
+				String[] names = mcgrid.getChannelNames();
 				// finalize the hyperstack
 				ImagePlus hyper = new ImagePlus();
 				ImageStack hyperStack = new ImageStack(grid.getSize()[0], grid.getSize()[1]);
 				int dimz = grid.getSize()[2];
-				for (int c = 0; c < first.getNumberOfChannels(); c++) {
+				for (int c = 0; c < mcgrid.getNumberOfChannels(); c++) {
+					Grid3D channelGrid = mcgrid.getChannel(c);
 					for (int i = 0; i < dimz; i++) {
-						MultiChannelGrid2D current = (MultiChannelGrid2D) grid.getSubGrid(i);
-						String frameTitle = "Slice z = " + (i - 1);
+						String frameTitle = "Slice z = " + (i + 1);
 						if (names != null) {
 							frameTitle += " Channel: " + names[c];
 						} else {
-							frameTitle += " Channel: " + c;
+							frameTitle += " Channel: " + (c + 1);
 						}
-						hyperStack.addSlice(frameTitle, ImageUtil.wrapGrid2D(current.getChannel(c)));
+						hyperStack.addSlice(frameTitle, ImageUtil.wrapGrid2D(channelGrid.getSubGrid(i)));
 					}
 				}
-				setCalibrationToImagePlus(hyper);
+				setCalibrationToImagePlus(hyper,grid);
 				hyper.setStack(title, hyperStack);
-				hyper.setDimensions(1, dimz, first.getNumberOfChannels());
+				hyper.setDimensions(1, dimz, mcgrid.getNumberOfChannels());
 				hyper.setOpenAsHyperStack(true);
 				return hyper;
 			} else {
@@ -96,69 +132,28 @@ public abstract class ImageUtil {
 			return null;
 	}
 
+	/**
+	 * Method to display 4D grids properly.
+	 * 
+	 * @param grid  the grid
+	 * @param title the title
+	 * @return the ImagePlus
+	 */
 	public static ImagePlus wrapGrid4D(Grid4D grid, String title) {
 		if (grid != null) {
-			if (grid.getSubGrid(0) instanceof MultiChannelGrid3D) {
-				MultiChannelGrid3D first = (MultiChannelGrid3D) grid.getSubGrid(0);
-				String[] names = first.getChannelNames();
-				// finalize the hyperstack
-				ImagePlus hyper = new ImagePlus();
-				ImageStack hyperStack = new ImageStack(grid.getSize()[0], grid.getSize()[1]);
-				int dimz = grid.getSize()[2];
-				int dimy = grid.getSize()[1];
-				for (int c = 0; c < first.getNumberOfChannels(); c++) {
-					for (int i = 0; i < dimz; i++) {
-						for (int j = 0; j < dimy; j++) {
-							MultiChannelGrid3D current = (MultiChannelGrid3D) grid.getSubGrid(i);
-							String frameTitle = "Slice z = " + (i - 1);
-							if (names != null) {
-								frameTitle += " Channel: " + names[c];
-							} else {
-								frameTitle += " Channel: " + c;
-							}
-							hyperStack.addSlice(frameTitle, ImageUtil.wrapGrid2D(current.getChannel(c).getSubGrid(j)));
-						}
-					}
+			ImageStack stack = new ImageStack(grid.getSize()[0], grid.getSize()[1]);
+			ImagePlus imagePlus = IJ.createHyperStack(title, grid.getSize()[0], grid.getSize()[1], 1,
+					grid.getSize()[2], grid.getSize()[3], 32);
+			for (int i = 0; i < grid.getSize()[3]; i++) {
+				for (int j = 0; j < grid.getSize()[2]; j++) {
+					stack.addSlice(ImageUtil.wrapGrid2D(grid.getSubGrid(i).getSubGrid(j)));
 				}
-				setCalibrationToImagePlus(hyper);
-				hyper.setStack(title, hyperStack);
-				hyper.setDimensions(1, dimz, first.getNumberOfChannels());
-				hyper.setOpenAsHyperStack(true);
-				return hyper;
-			} else {
-				ImageStack stack = new ImageStack(grid.getSize()[0], grid.getSize()[1]);
-				ImagePlus imagePlus = IJ.createHyperStack(title, grid.getSize()[0], grid.getSize()[1], 1,
-						grid.getSize()[2], grid.getSize()[3], 32);
-				for (int i = 0; i < grid.getSize()[3]; i++) {
-					for (int j = 0; j < grid.getSize()[2]; j++) {
-						stack.addSlice(ImageUtil.wrapGrid2D(grid.getSubGrid(i).getSubGrid(j)));
-					}
-				}
-				imagePlus.setStack(stack);
-				setCalibrationToImagePlus(imagePlus, grid);
-				return imagePlus;
 			}
-
+			imagePlus.setStack(stack);
+			setCalibrationToImagePlus(imagePlus, grid);
+			return imagePlus;
 		} else
 			return null;
-	}
-
-	private static void setCalibrationToImagePlus(ImagePlus image) {
-		Calibration calibration = image.getCalibration();
-		calibration.xOrigin = Configuration.getGlobalConfiguration().getGeometry().getOriginInPixelsX();
-		calibration.yOrigin = Configuration.getGlobalConfiguration().getGeometry().getOriginInPixelsY();
-		calibration.zOrigin = Configuration.getGlobalConfiguration().getGeometry().getOriginInPixelsZ();
-		calibration.pixelWidth = Configuration.getGlobalConfiguration().getGeometry().getVoxelSpacingX();
-		calibration.pixelHeight = Configuration.getGlobalConfiguration().getGeometry().getVoxelSpacingY();
-		calibration.pixelDepth = Configuration.getGlobalConfiguration().getGeometry().getVoxelSpacingZ();
-	}
-
-	private static void setCalibrationToImagePlus2D(ImagePlus image) {
-		Calibration calibration = image.getCalibration();
-		calibration.xOrigin = Configuration.getGlobalConfiguration().getGeometry().getOriginInPixelsX();
-		calibration.yOrigin = Configuration.getGlobalConfiguration().getGeometry().getOriginInPixelsY();
-		calibration.pixelWidth = Configuration.getGlobalConfiguration().getGeometry().getVoxelSpacingX();
-		calibration.pixelHeight = Configuration.getGlobalConfiguration().getGeometry().getVoxelSpacingY();
 	}
 
 	private static void setCalibrationToImagePlus(ImagePlus imagePlus, Grid grid) {
@@ -169,6 +164,10 @@ public abstract class ImageUtil {
 		calibration.pixelWidth = grid.getSpacing()[0];
 		calibration.pixelHeight = grid.getSpacing()[1];
 		calibration.pixelDepth = grid.getSpacing()[2];
+		// Assume this for the moment
+		calibration.setXUnit("mm");
+		calibration.setYUnit("mm");
+		calibration.setZUnit("mm");
 	}
 
 	private static void setCalibrationToImagePlus2D(ImagePlus imagePlus, Grid grid) {
@@ -177,6 +176,13 @@ public abstract class ImageUtil {
 		calibration.yOrigin = General.worldToVoxel(-grid.getOrigin()[1], grid.getSpacing()[1], 0);
 		calibration.pixelWidth = grid.getSpacing()[0];
 		calibration.pixelHeight = grid.getSpacing()[1];
+		// Assume this for the moment
+		calibration.setXUnit("mm");
+		calibration.setYUnit("mm");
+		if( grid instanceof MultiChannelGrid2D ) {
+			calibration.setZUnit("");
+			calibration.pixelDepth = 0.0;
+		}
 	}
 
 	/**
@@ -194,32 +200,7 @@ public abstract class ImageUtil {
 			else if (grid instanceof Grid3D)
 				return wrapGrid3D((Grid3D) grid, title);
 			else if (grid instanceof Grid2D) {
-				if (grid instanceof MultiChannelGrid2D) {
-					MultiChannelGrid2D first = (MultiChannelGrid2D) grid;
-					String[] names = first.getChannelNames();
-					// finalize the hyperstack
-					ImagePlus hyper = new ImagePlus();
-					ImageStack hyperStack = new ImageStack(grid.getSize()[0], grid.getSize()[1]);
-					for (int c = 0; c < first.getNumberOfChannels(); c++) {
-						String frameTitle = "";
-						if (names != null) {
-							frameTitle += "Channel: " + names[c];
-						} else {
-							frameTitle += "Channel: " + c;
-						}
-						hyperStack.addSlice(frameTitle, ImageUtil.wrapGrid2D(first.getChannel(c)));
-					}
-					setCalibrationToImagePlus2D(hyper);
-					hyper.setStack(title, hyperStack);
-					hyper.setDimensions(1, 1, first.getNumberOfChannels());
-					hyper.setOpenAsHyperStack(true);
-					return hyper;
-				} else {
-					FloatProcessor proc = wrapGrid2D((Grid2D) grid);
-					ImagePlus iPlus = new ImagePlus(title, proc);
-					setCalibrationToImagePlus2D(iPlus, grid);
-					return iPlus;
-				}
+				
 			}
 			else {
 				throw new IllegalArgumentException("grid must be either a Grid2D, Grid3D or Grid4D!");
