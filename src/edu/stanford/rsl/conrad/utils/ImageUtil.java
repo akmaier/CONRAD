@@ -81,7 +81,8 @@ public abstract class ImageUtil {
 	
 	/**
 	 * Method to display 3D grids properly.
-	 * This method is also able to handle multi-channel data (as a hyperstack).
+	 * This method is also able to handle multi-channel data (as a hyperstack)
+	 * and Grid3D used as a container for multi-channel slices.
 	 * 
 	 * @param grid  the grid
 	 * @param title the title
@@ -119,7 +120,36 @@ public abstract class ImageUtil {
 				hyper.setDimensions(1, dimz, mcgrid.getNumberOfChannels());
 				hyper.setOpenAsHyperStack(true);
 				return hyper;
+			} else if (grid.getSubGrid(0) instanceof MultiChannelGrid2D) {
+				// In some cases, Grid3D is used as a container for MultiChannelGrid2Ds without being of multi-channel type itself.
+				// Operating on the subGrid is necessary.
+				MultiChannelGrid2D first = (MultiChannelGrid2D) grid.getSubGrid(0);
+				String[] names = first.getChannelNames();
+				// finalize the hyperstack
+				ImagePlus hyper = new ImagePlus();
+				ImageStack hyperStack = new ImageStack(grid.getSize()[0], grid.getSize()[1]);
+				int dimz = grid.getSize()[2];
+				for (int c = 0; c < first.getNumberOfChannels(); c++) {
+					for (int i = 0; i < dimz; i++) {
+						MultiChannelGrid2D current = (MultiChannelGrid2D) grid.getSubGrid(i);
+						String frameTitle = "Slice z = " + (i + 1);
+						if (names != null) {
+							frameTitle += " Channel: " + names[c];
+						} else {
+							frameTitle += " Channel: " + (c + 1);
+						}
+						hyperStack.addSlice(frameTitle, ImageUtil.wrapGrid2D(current.getChannel(c)));
+					}
+				}
+				// Grid3D is just a container, potentially without any information about spacing, origin, and channel names.
+				// Thus we draw that information from the MultiChannelGrid2D instead.
+				setCalibrationToImagePlus2D(hyper,first);
+				hyper.setStack(title, hyperStack);
+				hyper.setDimensions(1, dimz, first.getNumberOfChannels());
+				hyper.setOpenAsHyperStack(true);
+				return hyper;
 			} else {
+				// Default Grid3D case
 				for (int i = 0; i < stack.getSize(); i++) {
 					stack.setPixels(grid.getSubGrid(i).getBuffer(), i + 1);
 				}
