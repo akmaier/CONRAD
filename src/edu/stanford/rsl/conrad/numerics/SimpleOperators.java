@@ -344,7 +344,57 @@ public abstract class SimpleOperators {
 		return result;
 	}
 	
-
+	/**
+	 * Creates a new matrix which is composed of all input matrices, stacked on top of each other. 
+	 * All input matrices need to have the same number of columns.
+	 * @param parts  The matrices to concatenate.
+	 * @return  The vertically concatenated matrix.
+	 */
+	public static SimpleMatrix concatenateVertically(SimpleMatrix... parts) {
+		final int noParts = parts.length;
+		assert noParts >= 1 : new IllegalArgumentException("Supply at least one matrix to concatenate!");
+		final int[] noRows = new int[noParts];
+		final int noCols = parts[0].getCols();
+		final int[] accumulatedRowPosition = new int[noParts];
+		int totalLength = 0;
+		for (int i = 0; i < noParts; ++i) {
+			assert noCols != parts[i].getCols() : new IllegalArgumentException("Number of columns in all provided matrices needs to be the save for vertical concatenation!");
+			
+			noRows[i] = parts[i].getRows();
+			accumulatedRowPosition[i] = (i == 0) ? 0 : (accumulatedRowPosition[i-1] + noRows[i-1]);
+			totalLength += noRows[i];
+		}
+		SimpleMatrix result = new SimpleMatrix(totalLength, noCols);
+		for (int i = 0; i < noParts; ++i) result.setSubMatrixValue(accumulatedRowPosition[i],0,parts[i]);
+		return result;
+	}
+	
+	/**
+	 * Creates a new matrix which is composed of all input matrices, positioned next to each other. 
+	 * All input matrices need to have the same number of rows.
+	 * @param parts  The matrices to concatenate.
+	 * @return  The vertically concatenated matrix.
+	 */
+	public static SimpleMatrix concatenateHorizontally(SimpleMatrix... parts) {
+		final int noParts = parts.length;
+		assert noParts >= 1 : new IllegalArgumentException("Supply at least one matrix to concatenate!");
+		final int[] noCols = new int[noParts];
+		final int noRows = parts[0].getRows();
+		final int[] accumulatedColPosition = new int[noParts];
+		int totalLength = 0;
+		for (int i = 0; i < noParts; ++i) {
+			assert noRows != parts[i].getRows() : new IllegalArgumentException("Number of columns in all provided matrices needs to be the save for vertical concatenation!");
+			
+			noCols[i] = parts[i].getCols();
+			accumulatedColPosition[i] = (i == 0) ? 0 : (accumulatedColPosition[i-1] + noCols[i-1]);
+			totalLength += noCols[i];
+		}
+		SimpleMatrix result = new SimpleMatrix(totalLength, noRows);
+		for (int i = 0; i < noParts; ++i) result.setSubMatrixValue(0,accumulatedColPosition[i],parts[i]);
+		return result;
+	}
+	
+	
 	// **************************************************************** //
 	// ******************* Matrix/Vector operators ******************** //
 	// **************************************************************** //
