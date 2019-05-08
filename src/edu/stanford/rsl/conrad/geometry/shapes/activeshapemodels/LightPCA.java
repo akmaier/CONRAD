@@ -516,6 +516,21 @@ public class LightPCA {
 		return mat;
 	}
 	
+	/**
+	 * Without retraining, further reduces the dimensionality of the PC basis,
+	 * by removing all but the first numComp eigenvalues and eigenvectors.
+	 * The new number of principal components needs to be smaller than current {@link this.numComponents}. Throws an {@link IllegalArgumentException} otherwise.
+	 * 
+	 * @param numComp number of principal components
+	 */
+	public void reduceDimensionalityWithoutRetraining(int numComp) {
+		if(this.numComponents > numComp) {
+			throw new IllegalArgumentException("Can only ever decrease number of components, which is currently " + this.numComponents);
+		}
+		
+		this.numComponents = numComp;
+		this.reduceDimensionality(this.eigenValues, this.eigenVectors);
+	}
 }
 
 /*
