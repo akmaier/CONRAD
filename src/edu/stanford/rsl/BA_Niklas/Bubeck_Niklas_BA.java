@@ -7,7 +7,7 @@ import edu.stanford.rsl.conrad.numerics.SimpleVector;
 import edu.stanford.rsl.BA_Niklas.PhaseContrastImages;
 import edu.stanford.rsl.BA_Niklas.ProjectorAndBackprojector;
 import ij.ImageJ;
-
+import java.util.Random;
 
 /**
  * Bachelor thesis of Niklas Bubeck
@@ -110,7 +110,19 @@ public class Bubeck_Niklas_BA {
 		return pci;
 	}
 	
-	public static PhaseContrastImages fake_truncation(PhaseContrastImages pci_sino, int min, int max){
+    /**
+     * simulates truncation
+     * @param pci_sino - sinograms 
+     * @param min - minimum on coordinate-axes 
+     * @param max - maximum on coordinate-axes
+     * @param axes - determines the used axe 
+     * @param value - determines the value that will be set in range of min - max on Axes - axe
+     * @param random - generates a random value that will be set. @param value will be overwritten
+     * @param filter - filters the image with given filter (gauss, sobel, ....)
+     * @return  Phase contrast images containing absorption (phase) and dark-field phantoms with artifacts
+     */
+//	TODO: filters
+	public static PhaseContrastImages fake_truncation(PhaseContrastImages pci_sino, int min, int max, String axes, int value, boolean random, String filter){
 		int width = pci_sino.getWidth();
 		int height = pci_sino.getHeight();
 		Grid2D fake_amp = (Grid2D) pci_sino.getAmp();
@@ -118,15 +130,60 @@ public class Bubeck_Niklas_BA {
 		Grid2D fake_phase = (Grid2D) pci_sino.getPhase();
 		for (int i= 0; i< width; i++){
 			for(int j =0; j < height; j++){
-				if (i > min && i < max){
-					fake_amp.setAtIndex(i, j, 0);
-					fake_dark.setAtIndex(i, j, 0);
-					fake_phase.setAtIndex(i, j, 0);
+				if (axes == "x"){
+					if (i > min && i < max){
+						if (random == true){
+							value = (int) (Math.random() * 255);
+						}
+						
+						fake_amp.setAtIndex(i, j, value);
+						fake_dark.setAtIndex(i, j, value);
+						fake_phase.setAtIndex(i, j, value);
+					}
+				}else if (axes == "y"){
+					if (j > min && j < max){
+						if (random == true){
+							value = (int) (Math.random() * 255);
+						}
+						fake_amp.setAtIndex(i, j, value);
+						fake_dark.setAtIndex(i, j, value);
+						fake_phase.setAtIndex(i, j, value);
+					}
 				}
+				
 			}
 		}
 		PhaseContrastImages pci_sino_fake = new PhaseContrastImages(fake_amp,  fake_phase, fake_dark);
 		return pci_sino_fake;
+	}
+	
+	public static PhaseContrastImages calculate_difference(PhaseContrastImages original, PhaseContrastImages truncated){
+		int width = original.getWidth();
+		int height = original.getHeight();
+		Grid2D original_amp = (Grid2D) original.getAmp();
+		Grid2D original_dark = (Grid2D) original.getDark();
+		Grid2D original_phase = (Grid2D) original.getPhase();
+		Grid2D truncated_amp = (Grid2D) truncated.getAmp();
+		Grid2D truncated_dark = (Grid2D) truncated.getDark();
+		Grid2D truncated_phase = (Grid2D) truncated.getPhase();
+		
+		Grid2D diff_amp = new Grid2D(size, size);
+		Grid2D diff_phase = new Grid2D(size,size);
+		Grid2D diff_dark = new Grid2D(size, size);
+		
+		for (int i= 0; i< width; i++){
+			for(int j =0; j < height; j++){
+				float difference_amp = truncated_amp.getPixelValue(i, j) - original_amp.getPixelValue(i, j);
+				float difference_dark = truncated_dark.getPixelValue(i, j) - original_dark.getPixelValue(i, j);
+				float difference_phase = truncated_phase.getPixelValue(i, j) - original_phase.getPixelValue(i, j);
+				
+				diff_amp.setAtIndex(i, j, difference_amp);
+				diff_dark.setAtIndex(i, j, difference_dark);
+				diff_phase.setAtIndex(i, j, difference_phase);
+			}
+		}
+		PhaseContrastImages pci_diff = new PhaseContrastImages(diff_amp,  diff_phase, diff_dark);
+		return pci_diff;
 	}
 
 	/**
@@ -147,15 +204,19 @@ public class Bubeck_Niklas_BA {
 		
 		// project
 		PhaseContrastImages pci_sino = p.project(pci, new Grid2D(detector_width, nr_of_projections));
-		pci_sino.show("sinograms");
+//		pci_sino.show("sinograms");
 		
 		// fake truncation	
-		PhaseContrastImages pci_sino_fake = fake_truncation(pci_sino, 25, 50);
-		pci_sino_fake.show("fake_sinograms");
+		PhaseContrastImages pci_sino_fake = fake_truncation(pci_sino, 25, 50, "x", 0, false, "pending");
+		PhaseContrastImages pci_sino_fake2 = fake_truncation(pci_sino_fake, 150, 175, "x", 0, false, "pending");
+//		pci_sino_fake2.show("fake_sinograms");
 		
 		// backproject (reconstruct)
-		PhaseContrastImages pci_reko = p.filtered_backprojection(pci_sino_fake, size);
+		PhaseContrastImages pci_reko = p.filtered_backprojection(pci_sino_fake2, size);
 		pci_reko.show("reconstruction");
+		
+		PhaseContrastImages pci_diff = calculate_difference(pci, pci_reko);
+		pci_diff.show("difference");
 		
 		System.out.println("done");
 	}
