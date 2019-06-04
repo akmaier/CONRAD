@@ -208,6 +208,12 @@ public class Bubeck_Niklas_BA {
 	}
 	
 	
+	public static void initial_estimation(NumericGrid absorption, NumericGrid dark){
+		
+	}
+	
+	public static void refinement()
+	
 	public static PhaseContrastImages iterative_reconstruction(PhaseContrastImages pci_sino, int iter_num, int error){		
 		
 		// Build empty picture 
@@ -229,6 +235,17 @@ public class Bubeck_Niklas_BA {
 			NumericPointwiseOperators.subtractBy(sino_recon.getPhase(), pci_sino.getPhase());
 			NumericPointwiseOperators.subtractBy(sino_recon.getDark(), pci_sino.getDark());
 //			sino_recon.show("sino_difference");
+			
+			//calc absolute
+			NumericPointwiseOperators.abs(sino_recon.getAmp());
+			NumericPointwiseOperators.abs(sino_recon.getPhase());
+			NumericPointwiseOperators.abs(sino_recon.getDark());
+			
+			
+			//Todo: refinement and the other stuff ...
+			
+			
+			
 			
 			// Backproject to reconstruct 
 			PhaseContrastImages pci_reko = p.filtered_backprojection(sino_recon, size);
