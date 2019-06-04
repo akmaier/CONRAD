@@ -1,11 +1,12 @@
 package edu.stanford.rsl.BA_Niklas;
 
-import edu.stanford.rsl.conrad.data.numeric.Grid2D;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
 import edu.stanford.rsl.conrad.numerics.SimpleOperators;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
 import edu.stanford.rsl.BA_Niklas.PhaseContrastImages;
 import edu.stanford.rsl.BA_Niklas.ProjectorAndBackprojector;
+import edu.stanford.rsl.apps.Conrad;
+import edu.stanford.rsl.conrad.data.numeric.*;
 import ij.ImageJ;
 import java.util.Random;
 
@@ -27,6 +28,8 @@ public class Bubeck_Niklas_BA {
     static double[][] ab; 	// the length of the principal axes.    
     static double[] rho; 	// signal intensity.
     static double[] df; 	// dark-field signal intensity.
+	static int detector_width = 200;
+	static int nr_of_projections = 360;
     
     /**
      * creates random ellipses
@@ -153,11 +156,14 @@ public class Bubeck_Niklas_BA {
 				
 			}
 		}
+		
+		NumericGridOperator test = new NumericGridOperator();
+		
 		PhaseContrastImages pci_sino_fake = new PhaseContrastImages(fake_amp,  fake_phase, fake_dark);
 		return pci_sino_fake;
 	}
 	
-	public static PhaseContrastImages calculate_difference(PhaseContrastImages original, PhaseContrastImages truncated){
+	public static PhaseContrastImages calculate_PCI(PhaseContrastImages original, PhaseContrastImages truncated, boolean addition){
 		int width = original.getWidth();
 		int height = original.getHeight();
 		Grid2D original_amp = (Grid2D) original.getAmp();
@@ -171,19 +177,75 @@ public class Bubeck_Niklas_BA {
 		Grid2D diff_phase = new Grid2D(size,size);
 		Grid2D diff_dark = new Grid2D(size, size);
 		
-		for (int i= 0; i< width; i++){
-			for(int j =0; j < height; j++){
-				float difference_amp = truncated_amp.getPixelValue(i, j) - original_amp.getPixelValue(i, j);
-				float difference_dark = truncated_dark.getPixelValue(i, j) - original_dark.getPixelValue(i, j);
-				float difference_phase = truncated_phase.getPixelValue(i, j) - original_phase.getPixelValue(i, j);
-				
-				diff_amp.setAtIndex(i, j, difference_amp);
-				diff_dark.setAtIndex(i, j, difference_dark);
-				diff_phase.setAtIndex(i, j, difference_phase);
+		
+		if(addition == true){
+			for (int i= 0; i< width; i++){
+				for(int j =0; j < height; j++){
+					float difference_amp = truncated_amp.getPixelValue(i, j) + original_amp.getPixelValue(i, j);
+					float difference_dark = truncated_dark.getPixelValue(i, j) + original_dark.getPixelValue(i, j);
+					float difference_phase = truncated_phase.getPixelValue(i, j) + original_phase.getPixelValue(i, j);
+					
+					diff_amp.setAtIndex(i, j, difference_amp);
+					diff_dark.setAtIndex(i, j, difference_dark);
+					diff_phase.setAtIndex(i, j, difference_phase);
+				}
+			}
+		}else{
+			for (int i= 0; i< width; i++){
+				for(int j =0; j < height; j++){
+					float difference_amp = truncated_amp.getPixelValue(i, j) - original_amp.getPixelValue(i, j);
+					float difference_dark = truncated_dark.getPixelValue(i, j) - original_dark.getPixelValue(i, j);
+					float difference_phase = truncated_phase.getPixelValue(i, j) - original_phase.getPixelValue(i, j);
+					
+					diff_amp.setAtIndex(i, j, difference_amp);
+					diff_dark.setAtIndex(i, j, difference_dark);
+					diff_phase.setAtIndex(i, j, difference_phase);
+				}
 			}
 		}
 		PhaseContrastImages pci_diff = new PhaseContrastImages(diff_amp,  diff_phase, diff_dark);
 		return pci_diff;
+	}
+	
+	
+	public static PhaseContrastImages iterative_reconstruction(PhaseContrastImages pci_sino, int iter_num, int error){		
+		
+		// Build empty picture 
+		Grid2D recon_amp = new Grid2D(size, size);
+		Grid2D recon_phase = new Grid2D(size,size);
+		Grid2D recon_dark = new Grid2D(size, size);
+		PhaseContrastImages pci_recon = new PhaseContrastImages(recon_amp,  recon_phase, recon_dark);
+//		pci_recon.show("old pci_recon");
+		
+		int i =0;
+		while( i < iter_num || error == 5){
+			//Project picture 
+			ProjectorAndBackprojector p = new ProjectorAndBackprojector(360, 2*Math.PI); 
+			PhaseContrastImages sino_recon = p.project(pci_recon, new Grid2D(200, 360));
+//			sino_recon.show("sino_recon");
+			
+			//Build difference of recon_sino and given sino
+			NumericPointwiseOperators.subtractBy(sino_recon.getAmp(), pci_sino.getAmp());
+			NumericPointwiseOperators.subtractBy(sino_recon.getPhase(), pci_sino.getPhase());
+			NumericPointwiseOperators.subtractBy(sino_recon.getDark(), pci_sino.getDark());
+//			sino_recon.show("sino_difference");
+			
+			// Backproject to reconstruct 
+			PhaseContrastImages pci_reko = p.filtered_backprojection(sino_recon, size);
+//			pci_reko.show("backprojected");
+			
+			// Adding on empty picture
+			NumericPointwiseOperators.addBy(pci_recon.getAmp(), pci_reko.getAmp());
+			NumericPointwiseOperators.addBy(pci_recon.getPhase(), pci_reko.getPhase());
+			NumericPointwiseOperators.addBy(pci_recon.getDark(), pci_reko.getDark());
+//			pci_recon.show("recon");
+			
+			i++;
+		}
+		
+
+		
+		return pci_recon;
 	}
 
 	/**
@@ -204,20 +266,27 @@ public class Bubeck_Niklas_BA {
 		
 		// project
 		PhaseContrastImages pci_sino = p.project(pci, new Grid2D(detector_width, nr_of_projections));
-//		pci_sino.show("sinograms");
+		pci_sino.show("sinograms");
 		
 		// fake truncation	
-		PhaseContrastImages pci_sino_fake = fake_truncation(pci_sino, 25, 50, "x", 0, false, "pending");
-		PhaseContrastImages pci_sino_fake2 = fake_truncation(pci_sino_fake, 150, 175, "x", 0, false, "pending");
+//		PhaseContrastImages pci_sino_fake = fake_truncation(pci_sino, 25, 50, "x", 0, false, "pending");
+//		PhaseContrastImages pci_sino_fake2 = fake_truncation(pci_sino_fake, 150, 175, "x", 0, false, "pending");
 //		pci_sino_fake2.show("fake_sinograms");
 		
 		// backproject (reconstruct)
-		PhaseContrastImages pci_reko = p.filtered_backprojection(pci_sino_fake2, size);
-		pci_reko.show("reconstruction");
+//		PhaseContrastImages pci_reko = p.filtered_backprojection(pci_sino_fake2, size);
+//		pci_reko.show("reconstruction");
 		
-		PhaseContrastImages pci_diff = calculate_difference(pci, pci_reko);
-		pci_diff.show("difference");
+//		PhaseContrastImages pci_diff = calculate_PCI(pci, pci_reko, false);
+//		pci_diff.show("difference");
+			
+	
+	
+	
+//		NumericPointwiseOperators.subtractBy(pci_reko.getAmp(), pci_reko.getAmp());
 		
+		PhaseContrastImages end = iterative_reconstruction(pci_sino, 2, 0);
+		end.show("end");
 		System.out.println("done");
 	}
 
