@@ -208,11 +208,36 @@ public class Bubeck_Niklas_BA {
 	}
 	
 	
-	public static void initial_estimation(NumericGrid absorption, NumericGrid dark){
+	public static NumericGrid initial_estimation(NumericGrid absorption, NumericGrid dark){
+		NumericGrid initial = NumericPointwiseOperators.subtractedBy(absorption, dark);
+		NumericPointwiseOperators.abs(initial);
+		
+		return initial;
 		
 	}
 	
-	public static void refinement()
+	public static NumericGrid thresholding_map(NumericGrid absorption, NumericGrid dark, float thresh){
+		Grid2D thresh_map = new Grid2D(size, size);
+		for (int i = 0; i < size; i++){
+			for(int j = 0; j < size; j++){
+				int idx[] = {i, j};
+				if((absorption.getValue(idx) - dark.getValue(idx)) < (thresh * NumericPointwiseOperators.max(dark))){
+					thresh_map.setAtIndex(i, j, 1);
+				}else{
+					thresh_map.setAtIndex(i, j, 0);	
+				}
+				
+			}
+		}
+		
+		return thresh_map;
+	}
+	
+	public static NumericGrid refinement(NumericGrid thresh_map, NumericGrid absorption, NumericGrid dark){
+		NumericPointwiseOperators.subtractBy(absorption, dark);
+		NumericPointwiseOperators.multipliedBy(absorption, thresh_map);
+		return absorption ;
+	}
 	
 	public static PhaseContrastImages iterative_reconstruction(PhaseContrastImages pci_sino, int iter_num, int error){		
 		
