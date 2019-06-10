@@ -113,10 +113,10 @@ public abstract class NumericPointwiseOperators {
 		grid.getGridOperator().subtractBy(grid, a);
 	}
 	
-	public static NumericGrid dividedBy(NumericGrid input, NumericGrid divisor) {
-		NumericGridOperator op = selectGridOperator(input, divisor);
+	public static NumericGrid dividedBy(NumericGrid input, Comparable comparable) {
+		NumericGridOperator op = selectGridOperator(input, comparable);
 		NumericGrid output = input.clone();
-		op.divideBy(output, divisor);
+		op.divideBy(output, comparable);
 		return output;
 	}
 	
