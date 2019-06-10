@@ -239,6 +239,22 @@ public class Bubeck_Niklas_BA {
 		return absorption ;
 	}
 	
+	public static PhaseContrastImages iterative_region_of_interest(PhaseContrastImages sino_original, PhaseContrastImages sino_roi, int iter_num){
+		ProjectorAndBackprojector p = new ProjectorAndBackprojector(360, 2*Math.PI);
+		Grid2D roi_amp = new Grid2D(size, size);
+		Grid2D roi_phase = new Grid2D(size, size);
+		Grid2D roi_dark = new Grid2D(size, size);
+		PhaseContrastImages pci_recon = new PhaseContrastImages(roi_amp,  roi_phase, roi_dark);
+		
+		NumericPointwiseOperators.subtractBy(sino_original.getAmp(), sino_roi.getAmp());
+		NumericPointwiseOperators.subtractBy(sino_original.getPhase(), sino_roi.getPhase());
+		NumericPointwiseOperators.subtractBy(sino_original.getDark(), sino_roi.getDark());
+//		sino_original.show("sino_original");
+			
+		PhaseContrastImages pci_reko = p.filtered_backprojection(sino_original, size);
+		return pci_reko;
+	}
+	
 	public static PhaseContrastImages iterative_reconstruction(PhaseContrastImages pci_sino, int iter_num, int error){		
 		
 		// Build empty picture 
@@ -248,8 +264,9 @@ public class Bubeck_Niklas_BA {
 		PhaseContrastImages pci_recon = new PhaseContrastImages(recon_amp,  recon_phase, recon_dark);
 //		pci_recon.show("old pci_recon");
 		
-		int i =0;
-		while( i < iter_num || error == 5){
+		int i = 1;
+		while( i <= iter_num || error == 5){
+			System.out.println("Iteration Nr: "+ i);
 			//Project picture 
 			ProjectorAndBackprojector p = new ProjectorAndBackprojector(360, 2*Math.PI); 
 			PhaseContrastImages sino_recon = p.project(pci_recon, new Grid2D(200, 360));
@@ -265,28 +282,32 @@ public class Bubeck_Niklas_BA {
 			NumericPointwiseOperators.abs(sino_recon.getAmp());
 			NumericPointwiseOperators.abs(sino_recon.getPhase());
 			NumericPointwiseOperators.abs(sino_recon.getDark());
-			
-			
+//			sino_recon.show("abs");
+			// scaling
+			NumericPointwiseOperators.divideBy(sino_recon.getAmp(), size);
+			NumericPointwiseOperators.divideBy(sino_recon.getPhase(), size);
+			NumericPointwiseOperators.divideBy(sino_recon.getDark(), size);
+//			sino_recon.show("scaled");
 			//Todo: refinement and the other stuff ...
 			
 			
 			
 			
 			// Backproject to reconstruct 
-			PhaseContrastImages pci_reko = p.filtered_backprojection(sino_recon, size);
-//			pci_reko.show("backprojected");
+			PhaseContrastImages pci_reko = p.backprojection_pixel(sino_recon, size);
+			pci_reko.show("backprojected");
 			
 			// Adding on empty picture
 			NumericPointwiseOperators.addBy(pci_recon.getAmp(), pci_reko.getAmp());
 			NumericPointwiseOperators.addBy(pci_recon.getPhase(), pci_reko.getPhase());
 			NumericPointwiseOperators.addBy(pci_recon.getDark(), pci_reko.getDark());
-//			pci_recon.show("recon");
+			pci_recon.show("recon");
 			
 			i++;
 		}
 		
 
-		
+		System.out.println("iterative reconstruction done");
 		return pci_recon;
 	}
 
@@ -299,16 +320,26 @@ public class Bubeck_Niklas_BA {
 		
 		// create phantoms
 		PhaseContrastImages pci = simulate_data();
-		pci.show("simulated data");
+		pci.show("pci");
 		
 		// define geometry
 		int detector_width = 200;
 		int nr_of_projections = 360;	
 		ProjectorAndBackprojector p = new ProjectorAndBackprojector(nr_of_projections, 2*Math.PI); 
 		
-		// project
 		PhaseContrastImages pci_sino = p.project(pci, new Grid2D(detector_width, nr_of_projections));
-		pci_sino.show("sinograms");
+//		pci_sino.show("pci_sino");
+		
+		
+		PhaseContrastImages pci_fake = fake_truncation(pci, 25, 50, "x", 0, false, "pending");
+//		pci_fake.show("pci-fake");
+		// project
+		
+		
+		PhaseContrastImages pci_sino_fake = p.project(pci_fake, new Grid2D(detector_width, nr_of_projections));
+//		pci_sino_fake.show("pci_sino_fake");
+		PhaseContrastImages pci_roi_reko = iterative_region_of_interest(pci_sino, pci_sino_fake, 5);
+		pci_roi_reko.show("pci_roi_reko");
 		
 		// fake truncation	
 //		PhaseContrastImages pci_sino_fake = fake_truncation(pci_sino, 25, 50, "x", 0, false, "pending");
@@ -316,7 +347,7 @@ public class Bubeck_Niklas_BA {
 //		pci_sino_fake2.show("fake_sinograms");
 		
 		// backproject (reconstruct)
-//		PhaseContrastImages pci_reko = p.filtered_backprojection(pci_sino_fake2, size);
+//		PhaseContrastImages pci_reko = p.backprojection_pixel(pci_sino, size);
 //		pci_reko.show("reconstruction");
 		
 //		PhaseContrastImages pci_diff = calculate_PCI(pci, pci_reko, false);
@@ -327,8 +358,8 @@ public class Bubeck_Niklas_BA {
 	
 //		NumericPointwiseOperators.subtractBy(pci_reko.getAmp(), pci_reko.getAmp());
 		
-		PhaseContrastImages end = iterative_reconstruction(pci_sino, 2, 0);
-		end.show("end");
+//		PhaseContrastImages end = iterative_reconstruction(pci_sino, 2, 0);
+//		end.show("end");
 		System.out.println("done");
 	}
 
