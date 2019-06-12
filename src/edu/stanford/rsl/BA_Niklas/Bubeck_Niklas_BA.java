@@ -338,7 +338,7 @@ public class Bubeck_Niklas_BA {
 			PhaseContrastImages pci_reko = p.backprojection_pixel(sino_recon, size);
 //			pci_reko.show("backprojected");
 			
-			// scaling
+			// scale/normalise
 			NumericPointwiseOperators.divideBy(pci_reko.getAmp(), ones_reko.getAmp());
 			NumericPointwiseOperators.divideBy(pci_reko.getPhase(), ones_reko.getPhase());
 			NumericPointwiseOperators.divideBy(pci_reko.getDark(), ones_reko.getDark());
@@ -348,7 +348,7 @@ public class Bubeck_Niklas_BA {
 			NumericPointwiseOperators.addBy(pci_recon.getAmp(), pci_reko.getAmp());
 			NumericPointwiseOperators.addBy(pci_recon.getPhase(), pci_reko.getPhase());
 			NumericPointwiseOperators.addBy(pci_recon.getDark(), pci_reko.getDark());
-			pci_recon.show("recon");
+//			pci_recon.show("recon");
 			if(i == 1 || i == iter_num){
 //				pci_recon.show("recon");
 			}
@@ -476,7 +476,7 @@ public class Bubeck_Niklas_BA {
 	
 //		NumericPointwiseOperators.subtractBy(pci_reko.getAmp(), pci_reko.getAmp());
 		
-		PhaseContrastImages end = iterative_reconstruction(pci_sino, 20, 0);
+		PhaseContrastImages end = iterative_reconstruction(pci_sino, 1, 0);
 //		end.show("end");
 		System.out.println("done");
 	}
