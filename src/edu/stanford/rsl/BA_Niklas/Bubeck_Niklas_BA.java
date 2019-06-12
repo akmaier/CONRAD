@@ -260,6 +260,7 @@ public class Bubeck_Niklas_BA {
 		return pci_reko;
 	}
 	
+
 	
 	/**
 	 * 
@@ -275,9 +276,30 @@ public class Bubeck_Niklas_BA {
 	    }
 	    return max;
 	}
-	
-	
+
 	public static PhaseContrastImages iterative_reconstruction(PhaseContrastImages pci_sino, int iter_num, int error){		
+		
+		// Build picture with ones		
+		Grid2D ones_amp = new Grid2D(size, size);
+		Grid2D ones_phase = new Grid2D(size, size);
+		Grid2D ones_dark = new Grid2D(size, size);
+		
+		for(int i = 0; i < size; i++){
+			for(int j = 0; j < size; j++){
+				ones_amp.setAtIndex(i, j, 1);
+				ones_phase.addAtIndex(i, j, 1);
+				ones_dark.setAtIndex(i, j, 1);
+			}
+		}
+		
+		// forward + back projection 
+		PhaseContrastImages ones = new PhaseContrastImages(ones_amp, ones_phase, ones_dark);
+//		ones.show("ones");
+		ProjectorAndBackprojector o = new ProjectorAndBackprojector(360, 2*Math.PI);
+		PhaseContrastImages sino_ones = o.project(ones, new Grid2D(200, 360));
+//		sino_ones.show("sino_ones");
+		PhaseContrastImages ones_reko = o.backprojection_pixel(sino_ones, size);
+//		ones_reko.show("ones_reko");
 		
 		// Build empty picture 
 		Grid2D recon_amp = new Grid2D(size, size);
@@ -286,62 +308,17 @@ public class Bubeck_Niklas_BA {
 		PhaseContrastImages pci_recon = new PhaseContrastImages(recon_amp,  recon_phase, recon_dark);
 //		pci_recon.show("old pci_recon");
 		
-		//transpose sino matrix
-		Grid2D transpose_amp = new Grid2D(pci_sino.getWidth(), pci_sino.getHeight());
-		Grid2D transpose_phase = new Grid2D(pci_sino.getWidth(), pci_sino.getHeight());
-		Grid2D transpose_dark = new Grid2D(pci_sino.getWidth(), pci_sino.getHeight());
-		
-		Grid2D original_amp = (Grid2D) pci_sino.getAmp();
-		Grid2D original_dark = (Grid2D) pci_sino.getDark();
-		Grid2D original_phase = (Grid2D) pci_sino.getPhase();
-		
-		for(int i = 0; i<pci_sino.getWidth(); i++){
-			for(int j = 0; j < pci_sino.getHeight(); j++){
-				transpose_amp.setAtIndex(i, j, original_amp.getAtIndex(j, i));
-				transpose_phase.setAtIndex(i, j, original_phase.getAtIndex(j, i));
-				transpose_dark.setAtIndex(i, j, original_dark.getAtIndex(j, i));
-			}
-		}
-		PhaseContrastImages pci_transpose = new PhaseContrastImages(transpose_amp,  transpose_phase, transpose_dark);
-		
-		// AtA
-		
-		NumericPointwiseOperators.multiplyBy(pci_transpose.getAmp(), pci_sino.getAmp());
-		NumericPointwiseOperators.multiplyBy(pci_transpose.getPhase(), pci_sino.getPhase());
-		NumericPointwiseOperators.multiplyBy(pci_transpose.getDark(), pci_sino.getDark());
-		float max_amp = NumericPointwiseOperators.max(pci_transpose.getAmp());
-		pci_transpose.show("pci_AtA");
-		
-		Grid2D ata_amp_grid = (Grid2D) pci_transpose.getAmp();
-		Grid2D ata_dark_grid = (Grid2D) pci_transpose.getDark();
-		Grid2D ata_phase_grid = (Grid2D) pci_transpose.getPhase();
-		
-		SimpleMatrix ata_amp = new SimpleMatrix(pci_transpose.getWidth(),pci_transpose.getHeight());
-		SimpleMatrix ata_phase = new SimpleMatrix(pci_transpose.getWidth(),pci_transpose.getHeight());
-		SimpleMatrix ata_dark = new SimpleMatrix(pci_transpose.getWidth(),pci_transpose.getHeight());
-		for(int i = 0; i<pci_sino.getWidth(); i++){
-			for(int j = 0; j < pci_sino.getHeight(); j++){
-				ata_amp.setElementValue(i, j, ata_amp_grid.getAtIndex(i, j));
-				ata_phase.setElementValue(i, j, ata_phase_grid.getAtIndex(i, j));
-				ata_dark.setElementValue(i, j, ata_dark_grid.getAtIndex(i, j));
-			}
-		}
-		DecompositionSVD decompose = new DecompositionSVD(ata_amp, true, true, true);
-		double [] sv = decompose.getSingularValues();
-		double max = maxValue(sv);
-		System.out.println("Max Eigenvalue: "+ max);
-		
-		
+		//iteration
 		int i = 1;
 		while( i <= iter_num || error == 5){
 			
-			
 			System.out.println("Iteration Nr: "+ i);
+			
 			//Project picture 
 			ProjectorAndBackprojector p = new ProjectorAndBackprojector(360, 2*Math.PI); 
 			PhaseContrastImages sino_recon = p.project(pci_recon, new Grid2D(200, 360));
 //			sino_recon.show("sino_recon");
-			
+
 			//Build difference of recon_sino and given sino
 			NumericPointwiseOperators.subtractBy(sino_recon.getAmp(), pci_sino.getAmp());
 			NumericPointwiseOperators.subtractBy(sino_recon.getPhase(), pci_sino.getPhase());
@@ -353,29 +330,28 @@ public class Bubeck_Niklas_BA {
 			NumericPointwiseOperators.abs(sino_recon.getPhase());
 			NumericPointwiseOperators.abs(sino_recon.getDark());
 //			sino_recon.show("abs");
-			// scaling
-			NumericPointwiseOperators.divideBy(sino_recon.getAmp(), (float) max/2);
-			NumericPointwiseOperators.divideBy(sino_recon.getPhase(), (float) max/2);
-			NumericPointwiseOperators.divideBy(sino_recon.getDark(), (float) max/2);
-//			sino_recon.show("scaled");
+
 			//Todo: refinement and the other stuff ...
 			
-			
-			
-			
+				
 			// Backproject to reconstruct 
 			PhaseContrastImages pci_reko = p.backprojection_pixel(sino_recon, size);
 //			pci_reko.show("backprojected");
+			
+			// scaling
+			NumericPointwiseOperators.divideBy(pci_reko.getAmp(), ones_reko.getAmp());
+			NumericPointwiseOperators.divideBy(pci_reko.getPhase(), ones_reko.getPhase());
+			NumericPointwiseOperators.divideBy(pci_reko.getDark(), ones_reko.getDark());
+//			pci_recon.show("scaled");
 			
 			// Adding on empty picture
 			NumericPointwiseOperators.addBy(pci_recon.getAmp(), pci_reko.getAmp());
 			NumericPointwiseOperators.addBy(pci_recon.getPhase(), pci_reko.getPhase());
 			NumericPointwiseOperators.addBy(pci_recon.getDark(), pci_reko.getDark());
-			if(i == 1 || i == 30){
-				pci_recon.show("recon");
+			pci_recon.show("recon");
+			if(i == 1 || i == iter_num){
+//				pci_recon.show("recon");
 			}
-			
-			
 			i++;
 		}
 		
@@ -395,6 +371,52 @@ public class Bubeck_Niklas_BA {
 //		PhaseContrastImages pci_recon = new PhaseContrastImages(recon_amp,  recon_phase, recon_dark);
 //		
 ////		pci_recon.show("old pci_recon");
+	
+//	//transpose sino matrix
+//	Grid2D transpose_amp = new Grid2D(pci_sino.getWidth(), pci_sino.getHeight());
+//	Grid2D transpose_phase = new Grid2D(pci_sino.getWidth(), pci_sino.getHeight());
+//	Grid2D transpose_dark = new Grid2D(pci_sino.getWidth(), pci_sino.getHeight());
+//	
+//	Grid2D original_amp = (Grid2D) pci_sino.getAmp();
+//	Grid2D original_dark = (Grid2D) pci_sino.getDark();
+//	Grid2D original_phase = (Grid2D) pci_sino.getPhase();
+//	
+//	for(int i = 0; i<pci_sino.getWidth(); i++){
+//		for(int j = 0; j < pci_sino.getHeight(); j++){
+//			transpose_amp.setAtIndex(i, j, original_amp.getAtIndex(j, i));
+//			transpose_phase.setAtIndex(i, j, original_phase.getAtIndex(j, i));
+//			transpose_dark.setAtIndex(i, j, original_dark.getAtIndex(j, i));
+//		}
+//	}
+//	PhaseContrastImages pci_transpose = new PhaseContrastImages(transpose_amp,  transpose_phase, transpose_dark);
+//	
+//	// AtA
+//	
+//	NumericPointwiseOperators.multiplyBy(pci_transpose.getAmp(), pci_sino.getAmp());
+//	NumericPointwiseOperators.multiplyBy(pci_transpose.getPhase(), pci_sino.getPhase());
+//	NumericPointwiseOperators.multiplyBy(pci_transpose.getDark(), pci_sino.getDark());
+//	float max_amp = NumericPointwiseOperators.max(pci_transpose.getAmp());
+//	pci_transpose.show("pci_AtA");
+//	
+//	Grid2D ata_amp_grid = (Grid2D) pci_transpose.getAmp();
+//	Grid2D ata_dark_grid = (Grid2D) pci_transpose.getDark();
+//	Grid2D ata_phase_grid = (Grid2D) pci_transpose.getPhase();
+//	
+//	SimpleMatrix ata_amp = new SimpleMatrix(pci_transpose.getWidth(),pci_transpose.getHeight());
+//	SimpleMatrix ata_phase = new SimpleMatrix(pci_transpose.getWidth(),pci_transpose.getHeight());
+//	SimpleMatrix ata_dark = new SimpleMatrix(pci_transpose.getWidth(),pci_transpose.getHeight());
+//	for(int i = 0; i<pci_sino.getWidth(); i++){
+//		for(int j = 0; j < pci_sino.getHeight(); j++){
+//			ata_amp.setElementValue(i, j, ata_amp_grid.getAtIndex(i, j));
+//			ata_phase.setElementValue(i, j, ata_phase_grid.getAtIndex(i, j));
+//			ata_dark.setElementValue(i, j, ata_dark_grid.getAtIndex(i, j));
+//		}
+//	}
+//	DecompositionSVD decompose = new DecompositionSVD(ata_amp, true, true, true);
+//	double [] sv = decompose.getSingularValues();
+//	double max = maxValue(sv);
+//	System.out.println("Max Eigenvalue: "+ max);
+//	
 //		
 //		int i = 1;
 //		while( i <= iter_num || error == 5){
@@ -454,7 +476,7 @@ public class Bubeck_Niklas_BA {
 	
 //		NumericPointwiseOperators.subtractBy(pci_reko.getAmp(), pci_reko.getAmp());
 		
-		PhaseContrastImages end = iterative_reconstruction(pci_sino, 30, 0);
+		PhaseContrastImages end = iterative_reconstruction(pci_sino, 20, 0);
 //		end.show("end");
 		System.out.println("done");
 	}
