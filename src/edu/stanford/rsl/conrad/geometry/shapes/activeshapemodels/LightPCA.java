@@ -524,8 +524,8 @@ public class LightPCA {
 	 * @param numComp number of principal components
 	 */
 	public void reduceDimensionalityWithoutRetraining(int numComp) {
-		if(this.numComponents > numComp) {
-			throw new IllegalArgumentException("Can only ever decrease number of components, which is currently " + this.numComponents);
+		if(this.numComponents <= numComp) {
+			throw new IllegalArgumentException("Can only decrease the number of components, which is currently " + this.numComponents + " (numComp = " + numComp + " was given).");
 		}
 		
 		this.numComponents = numComp;
