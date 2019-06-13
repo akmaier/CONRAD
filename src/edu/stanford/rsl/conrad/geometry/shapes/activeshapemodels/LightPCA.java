@@ -530,6 +530,16 @@ public class LightPCA {
 		
 		this.numComponents = numComp;
 		this.reduceDimensionality(this.eigenValues, this.eigenVectors);
+		
+		// Cut off the appropriate rows from the training features.
+		this.features = this.features.getSubMatrix(0, 0, this.numComponents, this.features.getCols());
+		
+		if(DEBUG) {
+			System.out.println("Reduced Dimensionality without Retraining:");
+			System.out.println("#eigenvalues: " + this.eigenValues.length);
+			System.out.println("eigenVectors: " + this.eigenVectors.getRows() + " x " + this.eigenVectors.getCols());
+			System.out.println("features: " + this.features.getRows() + " x " + this.features.getCols());
+		}
 	}
 }
 
