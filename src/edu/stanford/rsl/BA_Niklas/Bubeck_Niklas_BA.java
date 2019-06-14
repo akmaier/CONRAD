@@ -353,13 +353,27 @@ public class Bubeck_Niklas_BA {
 			NumericPointwiseOperators.divideBy(pci_reko.getDark(), ones_reko.getDark());
 //			pci_recon.show("scaled");
 			
-			// Adding on empty picture
-			NumericPointwiseOperators.addBy(pci_recon.getAmp(), pci_reko.getAmp());
-			NumericPointwiseOperators.addBy(pci_recon.getPhase(), pci_reko.getPhase());
-			NumericPointwiseOperators.addBy(pci_recon.getDark(), pci_reko.getDark());
+			// scale with alpha
+			double alpha = 0.25;
+			NumericPointwiseOperators.multiplyBy(pci_reko.getAmp(), (float) alpha);
+			NumericPointwiseOperators.multiplyBy(pci_reko.getPhase(), (float) alpha);
+			NumericPointwiseOperators.multiplyBy(pci_reko.getDark(), (float) alpha);
+			
+			
+			//subtrackt on picture
+			NumericPointwiseOperators.subtractBy(pci_recon.getAmp(), pci_reko.getAmp());
+			NumericPointwiseOperators.subtractBy(pci_recon.getPhase(), pci_reko.getPhase());
+			NumericPointwiseOperators.subtractBy(pci_recon.getDark(), pci_reko.getDark());
+//			pci_recon.show("recon");
+			
+			
+			// Adding on picture
+//			NumericPointwiseOperators.addBy(pci_recon.getAmp(), pci_reko.getAmp());
+//			NumericPointwiseOperators.addBy(pci_recon.getPhase(), pci_reko.getPhase());
+//			NumericPointwiseOperators.addBy(pci_recon.getDark(), pci_reko.getDark());
 //			pci_recon.show("recon");
 			if(i == 1 || i == iter_num){
-//				pci_recon.show("recon");
+				pci_recon.show("recon");
 			}
 			i++;
 		}
@@ -485,7 +499,7 @@ public class Bubeck_Niklas_BA {
 	
 //		NumericPointwiseOperators.subtractBy(pci_reko.getAmp(), pci_reko.getAmp());
 		
-		PhaseContrastImages end = iterative_reconstruction(pci_sino, 1, 0);
+		PhaseContrastImages end = iterative_reconstruction(pci_sino, 50, 0);
 //		end.show("end");
 		System.out.println("done");
 	}
