@@ -168,83 +168,83 @@ public class Bubeck_Niklas_BA {
 		return pci_sino_fake;
 	}
 	
-	public static PhaseContrastImages calculate_PCI(PhaseContrastImages original, PhaseContrastImages truncated, boolean addition){
-		int width = original.getWidth();
-		int height = original.getHeight();
-		Grid2D original_amp = (Grid2D) original.getAmp();
-		Grid2D original_dark = (Grid2D) original.getDark();
-		Grid2D original_phase = (Grid2D) original.getPhase();
-		Grid2D truncated_amp = (Grid2D) truncated.getAmp();
-		Grid2D truncated_dark = (Grid2D) truncated.getDark();
-		Grid2D truncated_phase = (Grid2D) truncated.getPhase();
-		
-		Grid2D diff_amp = new Grid2D(size, size);
-		Grid2D diff_phase = new Grid2D(size,size);
-		Grid2D diff_dark = new Grid2D(size, size);
-		
-		
-		if(addition == true){
-			for (int i= 0; i< width; i++){
-				for(int j =0; j < height; j++){
-					float difference_amp = truncated_amp.getPixelValue(i, j) + original_amp.getPixelValue(i, j);
-					float difference_dark = truncated_dark.getPixelValue(i, j) + original_dark.getPixelValue(i, j);
-					float difference_phase = truncated_phase.getPixelValue(i, j) + original_phase.getPixelValue(i, j);
-					
-					diff_amp.setAtIndex(i, j, difference_amp);
-					diff_dark.setAtIndex(i, j, difference_dark);
-					diff_phase.setAtIndex(i, j, difference_phase);
-				}
-			}
-		}else{
-			for (int i= 0; i< width; i++){
-				for(int j =0; j < height; j++){
-					float difference_amp = truncated_amp.getPixelValue(i, j) - original_amp.getPixelValue(i, j);
-					float difference_dark = truncated_dark.getPixelValue(i, j) - original_dark.getPixelValue(i, j);
-					float difference_phase = truncated_phase.getPixelValue(i, j) - original_phase.getPixelValue(i, j);
-					
-					diff_amp.setAtIndex(i, j, difference_amp);
-					diff_dark.setAtIndex(i, j, difference_dark);
-					diff_phase.setAtIndex(i, j, difference_phase);
-				}
-			}
-		}
-		PhaseContrastImages pci_diff = new PhaseContrastImages(diff_amp,  diff_phase, diff_dark);
-		return pci_diff;
-	}
+//	public static PhaseContrastImages calculate_PCI(PhaseContrastImages original, PhaseContrastImages truncated, boolean addition){
+//		int width = original.getWidth();
+//		int height = original.getHeight();
+//		Grid2D original_amp = (Grid2D) original.getAmp();
+//		Grid2D original_dark = (Grid2D) original.getDark();
+//		Grid2D original_phase = (Grid2D) original.getPhase();
+//		Grid2D truncated_amp = (Grid2D) truncated.getAmp();
+//		Grid2D truncated_dark = (Grid2D) truncated.getDark();
+//		Grid2D truncated_phase = (Grid2D) truncated.getPhase();
+//		
+//		Grid2D diff_amp = new Grid2D(size, size);
+//		Grid2D diff_phase = new Grid2D(size,size);
+//		Grid2D diff_dark = new Grid2D(size, size);
+//		
+//		
+//		if(addition == true){
+//			for (int i= 0; i< width; i++){
+//				for(int j =0; j < height; j++){
+//					float difference_amp = truncated_amp.getPixelValue(i, j) + original_amp.getPixelValue(i, j);
+//					float difference_dark = truncated_dark.getPixelValue(i, j) + original_dark.getPixelValue(i, j);
+//					float difference_phase = truncated_phase.getPixelValue(i, j) + original_phase.getPixelValue(i, j);
+//					
+//					diff_amp.setAtIndex(i, j, difference_amp);
+//					diff_dark.setAtIndex(i, j, difference_dark);
+//					diff_phase.setAtIndex(i, j, difference_phase);
+//				}
+//			}
+//		}else{
+//			for (int i= 0; i< width; i++){
+//				for(int j =0; j < height; j++){
+//					float difference_amp = truncated_amp.getPixelValue(i, j) - original_amp.getPixelValue(i, j);
+//					float difference_dark = truncated_dark.getPixelValue(i, j) - original_dark.getPixelValue(i, j);
+//					float difference_phase = truncated_phase.getPixelValue(i, j) - original_phase.getPixelValue(i, j);
+//					
+//					diff_amp.setAtIndex(i, j, difference_amp);
+//					diff_dark.setAtIndex(i, j, difference_dark);
+//					diff_phase.setAtIndex(i, j, difference_phase);
+//				}
+//			}
+//		}
+//		PhaseContrastImages pci_diff = new PhaseContrastImages(diff_amp,  diff_phase, diff_dark);
+//		return pci_diff;
+//	}
+//	
+//	
+//	public static NumericGrid initial_estimation(NumericGrid absorption, NumericGrid dark){
+//		NumericGrid initial = NumericPointwiseOperators.subtractedBy(absorption, dark);
+//		NumericPointwiseOperators.abs(initial);
+//		
+//		return initial;
+//		
+//	}
+//	
+//	public static NumericGrid thresholding_map(NumericGrid absorption, NumericGrid dark, float thresh){
+//		Grid2D thresh_map = new Grid2D(size, size);
+//		for (int i = 0; i < size; i++){
+//			for(int j = 0; j < size; j++){
+//				int idx[] = {i, j};
+//				if((absorption.getValue(idx) - dark.getValue(idx)) < (thresh * NumericPointwiseOperators.max(dark))){
+//					thresh_map.setAtIndex(i, j, 1);
+//				}else{
+//					thresh_map.setAtIndex(i, j, 0);	
+//				}
+//				
+//			}
+//		}
+//		
+//		return thresh_map;
+//	}
+//	
+//	public static NumericGrid refinement(NumericGrid thresh_map, NumericGrid absorption, NumericGrid dark){
+//		NumericPointwiseOperators.subtractBy(absorption, dark);
+//		NumericPointwiseOperators.multipliedBy(absorption, thresh_map);
+//		return absorption ;
+//	}
 	
-	
-	public static NumericGrid initial_estimation(NumericGrid absorption, NumericGrid dark){
-		NumericGrid initial = NumericPointwiseOperators.subtractedBy(absorption, dark);
-		NumericPointwiseOperators.abs(initial);
-		
-		return initial;
-		
-	}
-	
-	public static NumericGrid thresholding_map(NumericGrid absorption, NumericGrid dark, float thresh){
-		Grid2D thresh_map = new Grid2D(size, size);
-		for (int i = 0; i < size; i++){
-			for(int j = 0; j < size; j++){
-				int idx[] = {i, j};
-				if((absorption.getValue(idx) - dark.getValue(idx)) < (thresh * NumericPointwiseOperators.max(dark))){
-					thresh_map.setAtIndex(i, j, 1);
-				}else{
-					thresh_map.setAtIndex(i, j, 0);	
-				}
-				
-			}
-		}
-		
-		return thresh_map;
-	}
-	
-	public static NumericGrid refinement(NumericGrid thresh_map, NumericGrid absorption, NumericGrid dark){
-		NumericPointwiseOperators.subtractBy(absorption, dark);
-		NumericPointwiseOperators.multipliedBy(absorption, thresh_map);
-		return absorption ;
-	}
-	
-	public static PhaseContrastImages iterative_region_of_interest(PhaseContrastImages sino_original, PhaseContrastImages sino_roi, int iter_num){
+	public static PhaseContrastImages region_of_interest(PhaseContrastImages sino_original, PhaseContrastImages sino_roi, int iter_num){
 		ProjectorAndBackprojector p = new ProjectorAndBackprojector(360, 2*Math.PI);
 		Grid2D roi_amp = new Grid2D(size, size);
 		Grid2D roi_phase = new Grid2D(size, size);
@@ -267,16 +267,25 @@ public class Bubeck_Niklas_BA {
 	 * @param chars
 	 * @return the max value in the array of chars
 	 */
-	private static double maxValue(double[] chars) {
-	    double max = chars[0];
-	    for (int ktr = 0; ktr < chars.length; ktr++) {
-	        if (chars[ktr] > max) {
-	            max = chars[ktr];
-	        }
-	    }
-	    return max;
-	}
+//	private static double maxValue(double[] chars) {
+//	    double max = chars[0];
+//	    for (int ktr = 0; ktr < chars.length; ktr++) {
+//	        if (chars[ktr] > max) {
+//	            max = chars[ktr];
+//	        }
+//	    }
+//	    return max;
+//	}
 
+	
+	/**
+	 * 
+	 * @param pci_sino - sinogram
+	 * @param iter_num - number of iterations
+	 * @param error - error threshold to stop iteration
+	 * @return reconstructed image to the given sinogram
+	 */
+	
 	public static PhaseContrastImages iterative_reconstruction(PhaseContrastImages pci_sino, int iter_num, int error){		
 		
 		// Build picture with ones		
@@ -326,9 +335,9 @@ public class Bubeck_Niklas_BA {
 //			sino_recon.show("sino_difference");
 			
 			//calc absolute
-			NumericPointwiseOperators.abs(sino_recon.getAmp());
-			NumericPointwiseOperators.abs(sino_recon.getPhase());
-			NumericPointwiseOperators.abs(sino_recon.getDark());
+//			NumericPointwiseOperators.abs(sino_recon.getAmp());
+//			NumericPointwiseOperators.abs(sino_recon.getPhase());
+//			NumericPointwiseOperators.abs(sino_recon.getDark());
 //			sino_recon.show("abs");
 
 			//Todo: refinement and the other stuff ...
