@@ -69,5 +69,6 @@
 	<classpathentry kind="lib" path="lib/jpop.0.7.5.jar"/>
 	<classpathentry kind="lib" path="lib/fastica-1.11.jar" sourcepath="lib/fastica-1.11-src.zip"/>
 	<classpathentry kind="lib" path="lib/sis-jhdf5-batteries_included.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Plots"/>
 	<classpathentry kind="output" path="src"/>
 </classpath>

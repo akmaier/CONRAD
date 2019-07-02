@@ -1,5 +1,6 @@
 package edu.stanford.rsl.BA_Niklas;
 
+import com.zetcode.linechartex.ScatterPlot;
 import edu.stanford.rsl.conrad.numerics.DecompositionSVD;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
 import edu.stanford.rsl.conrad.numerics.SimpleOperators;
@@ -12,6 +13,7 @@ import ij.ImageJ;
 import java.util.Random;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 
 import java.util.*; 
 
@@ -26,7 +28,6 @@ import java.util.*;
 public class Bubeck_Niklas_BA {
 	
 	static int size = 128;
-	
 	static int nr_ellipses = 5;
     static SimpleMatrix[] R; 	// rotation matrices. 
     static double[][] t; 	// displacement vectors.   
@@ -168,81 +169,36 @@ public class Bubeck_Niklas_BA {
 		return pci_sino_fake;
 	}
 	
-//	public static PhaseContrastImages calculate_PCI(PhaseContrastImages original, PhaseContrastImages truncated, boolean addition){
-//		int width = original.getWidth();
-//		int height = original.getHeight();
-//		Grid2D original_amp = (Grid2D) original.getAmp();
-//		Grid2D original_dark = (Grid2D) original.getDark();
-//		Grid2D original_phase = (Grid2D) original.getPhase();
-//		Grid2D truncated_amp = (Grid2D) truncated.getAmp();
-//		Grid2D truncated_dark = (Grid2D) truncated.getDark();
-//		Grid2D truncated_phase = (Grid2D) truncated.getPhase();
-//		
-//		Grid2D diff_amp = new Grid2D(size, size);
-//		Grid2D diff_phase = new Grid2D(size,size);
-//		Grid2D diff_dark = new Grid2D(size, size);
-//		
-//		
-//		if(addition == true){
-//			for (int i= 0; i< width; i++){
-//				for(int j =0; j < height; j++){
-//					float difference_amp = truncated_amp.getPixelValue(i, j) + original_amp.getPixelValue(i, j);
-//					float difference_dark = truncated_dark.getPixelValue(i, j) + original_dark.getPixelValue(i, j);
-//					float difference_phase = truncated_phase.getPixelValue(i, j) + original_phase.getPixelValue(i, j);
-//					
-//					diff_amp.setAtIndex(i, j, difference_amp);
-//					diff_dark.setAtIndex(i, j, difference_dark);
-//					diff_phase.setAtIndex(i, j, difference_phase);
-//				}
-//			}
-//		}else{
-//			for (int i= 0; i< width; i++){
-//				for(int j =0; j < height; j++){
-//					float difference_amp = truncated_amp.getPixelValue(i, j) - original_amp.getPixelValue(i, j);
-//					float difference_dark = truncated_dark.getPixelValue(i, j) - original_dark.getPixelValue(i, j);
-//					float difference_phase = truncated_phase.getPixelValue(i, j) - original_phase.getPixelValue(i, j);
-//					
-//					diff_amp.setAtIndex(i, j, difference_amp);
-//					diff_dark.setAtIndex(i, j, difference_dark);
-//					diff_phase.setAtIndex(i, j, difference_phase);
-//				}
-//			}
-//		}
-//		PhaseContrastImages pci_diff = new PhaseContrastImages(diff_amp,  diff_phase, diff_dark);
-//		return pci_diff;
-//	}
-//	
-//	
-//	public static NumericGrid initial_estimation(NumericGrid absorption, NumericGrid dark){
-//		NumericGrid initial = NumericPointwiseOperators.subtractedBy(absorption, dark);
+
+	public static NumericGrid initial_estimation(NumericGrid absorption, NumericGrid dark){
+		NumericGrid initial = NumericPointwiseOperators.subtractedBy(absorption, dark);
 //		NumericPointwiseOperators.abs(initial);
-//		
-//		return initial;
-//		
-//	}
-//	
-//	public static NumericGrid thresholding_map(NumericGrid absorption, NumericGrid dark, float thresh){
-//		Grid2D thresh_map = new Grid2D(size, size);
-//		for (int i = 0; i < size; i++){
-//			for(int j = 0; j < size; j++){
-//				int idx[] = {i, j};
-//				if((absorption.getValue(idx) - dark.getValue(idx)) < (thresh * NumericPointwiseOperators.max(dark))){
-//					thresh_map.setAtIndex(i, j, 1);
-//				}else{
-//					thresh_map.setAtIndex(i, j, 0);	
-//				}
-//				
-//			}
-//		}
-//		
-//		return thresh_map;
-//	}
-//	
-//	public static NumericGrid refinement(NumericGrid thresh_map, NumericGrid absorption, NumericGrid dark){
-//		NumericPointwiseOperators.subtractBy(absorption, dark);
-//		NumericPointwiseOperators.multipliedBy(absorption, thresh_map);
-//		return absorption ;
-//	}
+		
+		return initial;
+		
+	}
+	
+	public static NumericGrid thresholding_map(NumericGrid fabso, NumericGrid dark, float thresh){
+		Grid2D thresh_map = new Grid2D(size, size);
+		for (int i = 0; i < size; i++){
+			for(int j = 0; j < size; j++){
+				int idx[] = {i, j};
+				if(fabso.getValue(idx) < (thresh * NumericPointwiseOperators.max(dark))){
+					thresh_map.setAtIndex(i, j, 1);
+				}else{
+					thresh_map.setAtIndex(i, j, 0);	
+				}
+				
+			}
+		}
+		
+		return thresh_map;
+	}
+	
+	public static NumericGrid refinement(NumericGrid fabso, NumericGrid thresh_map){
+		NumericPointwiseOperators.multipliedBy(fabso, thresh_map);
+		return fabso ;
+	}
 	
 	public static PhaseContrastImages region_of_interest(PhaseContrastImages sino_original, PhaseContrastImages sino_roi, int iter_num){
 		ProjectorAndBackprojector p = new ProjectorAndBackprojector(360, 2*Math.PI);
@@ -285,6 +241,26 @@ public class Bubeck_Niklas_BA {
 	 * @param error - error threshold to stop iteration
 	 * @return reconstructed image to the given sinogram
 	 */
+	
+	public static float[][] get_comp_points(NumericGrid abso, NumericGrid dark){
+		float[][] points = new float[size*size][2];
+		Grid2D abs = (Grid2D) abso;
+		Grid2D dar = (Grid2D) dark;
+		
+		for(int i = 0; i < size; i++){
+			for(int j = 0; j < size; j++){
+//				for(int k = 0; k < size*size; k++){
+					System.out.print(", "+ dar.getAtIndex(i, j));
+					points[k][0] = dar.getAtIndex(i, j);
+					points[k][1] = abs.getAtIndex(i, j);
+				}
+			}
+		}
+		
+		
+		return points;
+	}
+	
 	
 	public static PhaseContrastImages iterative_reconstruction(PhaseContrastImages pci_sino, int iter_num, int error){		
 		
@@ -499,9 +475,26 @@ public class Bubeck_Niklas_BA {
 	
 //		NumericPointwiseOperators.subtractBy(pci_reko.getAmp(), pci_reko.getAmp());
 		
-		PhaseContrastImages end = iterative_reconstruction(pci_sino, 50, 0);
+//		PhaseContrastImages end = iterative_reconstruction(pci_sino, 300, 0);
 //		end.show("end");
-		System.out.println("done");
+		NumericGrid dark = pci.getDark();
+		NumericGrid amp = pci.getAmp();
+		
+//		NumericGrid fabso = initial_estimation(amp, dark);
+//		for(int i = 1; i <= 5; i++){
+//			System.out.println("iteration: "+ i);
+//			NumericGrid thresh_map = thresholding_map(fabso, dark, (float) 0.0001);
+////			thresh_map.show("thresh_map");
+//			fabso = refinement(fabso, thresh_map);
+////			fabso.show("fabso");
+//		}
+//		NumericPointwiseOperators.subtractBy(dark, fabso);
+//		dark.show("dabso");
+//		System.out.println("done");
+//		int[][] test = {{1, 20}, {2, 30}, {3, 40}, {5, 60}};
+		float [][] points = get_comp_points(amp, dark);
+		System.out.println(ReflectionToStringBuilder.toString(points));
+		ScatterPlot.plot(points);
 	}
 
 }
