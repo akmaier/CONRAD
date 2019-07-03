@@ -1,5 +1,8 @@
 package edu.stanford.rsl.BA_Niklas;
 
+import edu.stanford.rsl.BA_Niklas.Regression;
+import edu.stanford.rsl.BA_Niklas.PolynomialRegression;
+import edu.stanford.rsl.BA_Niklas.ListInFile;
 import com.zetcode.linechartex.ScatterPlot;
 import edu.stanford.rsl.conrad.numerics.DecompositionSVD;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
@@ -28,7 +31,7 @@ import java.util.*;
 public class Bubeck_Niklas_BA {
 	
 	static int size = 128;
-	static int nr_ellipses = 5;
+	static int nr_ellipses = 20;
     static SimpleMatrix[] R; 	// rotation matrices. 
     static double[][] t; 	// displacement vectors.   
     static double[][] ab; 	// the length of the principal axes.    
@@ -234,30 +237,34 @@ public class Bubeck_Niklas_BA {
 //	}
 
 	
-	/**
-	 * 
-	 * @param pci_sino - sinogram
-	 * @param iter_num - number of iterations
-	 * @param error - error threshold to stop iteration
-	 * @return reconstructed image to the given sinogram
-	 */
-	
-	public static float[][] get_comp_points(NumericGrid abso, NumericGrid dark){
-		float[][] points = new float[size*size][2];
+
+
+	public static double[][] get_comp_points(NumericGrid abso, NumericGrid dark){
+	    List<Float> abslist = new ArrayList<Float>();
+	    List<Float> darklist = new ArrayList<Float>();
+
 		Grid2D abs = (Grid2D) abso;
 		Grid2D dar = (Grid2D) dark;
 		
 		for(int i = 0; i < size; i++){
 			for(int j = 0; j < size; j++){
-//				for(int k = 0; k < size*size; k++){
-					System.out.print(", "+ dar.getAtIndex(i, j));
-					points[k][0] = dar.getAtIndex(i, j);
-					points[k][1] = abs.getAtIndex(i, j);
-				}
+				
+				abslist.add(abs.getAtIndex(i, j));
+				darklist.add(dar.getAtIndex(i, j));
 			}
 		}
+		ListInFile.export(darklist, "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Files/dark.csv");
+		ListInFile.export(abslist, "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Files/abso.csv");
+
+//		while(abslist.remove("0.0")) {}
+//		while(darklist.remove("0.0")) {}
 		
-		
+		double[][] points = new double[abslist.size()][2];
+	    for (int i = 0; i < points.length; i++) {
+	        points[i][0] = darklist.get(i);
+	        points[i][1] = abslist.get(i);
+	    }
+
 		return points;
 	}
 	
@@ -491,10 +498,15 @@ public class Bubeck_Niklas_BA {
 //		NumericPointwiseOperators.subtractBy(dark, fabso);
 //		dark.show("dabso");
 //		System.out.println("done");
-//		int[][] test = {{1, 20}, {2, 30}, {3, 40}, {5, 60}};
-		float [][] points = get_comp_points(amp, dark);
+//		double[][] points = {{1.0, 20.0}, {2.0, 30.0}, {3.0, 40}, {5, 60}};
+		double [][] points = get_comp_points(amp, dark);
 		System.out.println(ReflectionToStringBuilder.toString(points));
 		ScatterPlot.plot(points);
+		Regression.deg1(points);
+		PolynomialRegression.calc_regression(points, 2);
+		PolynomialRegression.calc_regression(points, 3);
+		
+
 	}
 
 }
