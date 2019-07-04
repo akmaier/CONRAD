@@ -173,36 +173,6 @@ public class Bubeck_Niklas_BA {
 	}
 	
 
-	public static NumericGrid initial_estimation(NumericGrid absorption, NumericGrid dark){
-		NumericGrid initial = NumericPointwiseOperators.subtractedBy(absorption, dark);
-//		NumericPointwiseOperators.abs(initial);
-		
-		return initial;
-		
-	}
-	
-	public static NumericGrid thresholding_map(NumericGrid fabso, NumericGrid dark, float thresh){
-		Grid2D thresh_map = new Grid2D(size, size);
-		for (int i = 0; i < size; i++){
-			for(int j = 0; j < size; j++){
-				int idx[] = {i, j};
-				if(fabso.getValue(idx) < (thresh * NumericPointwiseOperators.max(dark))){
-					thresh_map.setAtIndex(i, j, 1);
-				}else{
-					thresh_map.setAtIndex(i, j, 0);	
-				}
-				
-			}
-		}
-		
-		return thresh_map;
-	}
-	
-	public static NumericGrid refinement(NumericGrid fabso, NumericGrid thresh_map){
-		NumericPointwiseOperators.multipliedBy(fabso, thresh_map);
-		return fabso ;
-	}
-	
 	public static PhaseContrastImages region_of_interest(PhaseContrastImages sino_original, PhaseContrastImages sino_roi, int iter_num){
 		ProjectorAndBackprojector p = new ProjectorAndBackprojector(360, 2*Math.PI);
 		Grid2D roi_amp = new Grid2D(size, size);
@@ -220,27 +190,15 @@ public class Bubeck_Niklas_BA {
 	}
 	
 
-	
-	/**
-	 * 
-	 * @param chars
-	 * @return the max value in the array of chars
-	 */
-//	private static double maxValue(double[] chars) {
-//	    double max = chars[0];
-//	    for (int ktr = 0; ktr < chars.length; ktr++) {
-//	        if (chars[ktr] > max) {
-//	            max = chars[ktr];
-//	        }
-//	    }
-//	    return max;
-//	}
 
-	
-
-
-	public static double[][] get_comp_points(NumericGrid abso, NumericGrid dark){
-	    List<Float> abslist = new ArrayList<Float>();
+	public static double[][] get_comp_points(NumericGrid abso, NumericGrid dark, NumericGrid thresh_map, boolean thresh){
+	    
+		if(thresh == true){
+			NumericPointwiseOperators.multiplyBy(dark, thresh_map);
+			NumericPointwiseOperators.multiplyBy(abso, thresh_map);
+		}
+		
+		List<Float> abslist = new ArrayList<Float>();
 	    List<Float> darklist = new ArrayList<Float>();
 
 		Grid2D abs = (Grid2D) abso;
@@ -268,6 +226,53 @@ public class Bubeck_Niklas_BA {
 		return points;
 	}
 	
+	public static NumericGrid correct_absorption(NumericGrid dark, NumericGrid abso, double thresh, int iter_num){
+		
+		Grid2D thresh_map = new Grid2D(size, size);
+		Grid2D dabso = new Grid2D(size, size);
+
+		// calc inital fabso
+		double [][] points = get_comp_points(abso, dark, thresh_map, false);
+		PolynomialRegression regression = PolynomialRegression.calc_regression(points, 3);
+		
+		// calc thresholding map
+		int iter = 1;
+		while(iter <= iter_num){
+			for (int i = 0; i < size; i++){
+				for(int j = 0; j < size; j++){
+					int idx[] = {i, j};
+					float temp = abso.getValue(idx) - dark.getValue(idx);
+					if(regression.beta(2) * Math.pow(temp, 2) + regression.beta(1) * temp + regression.beta(0) <
+							(thresh * NumericPointwiseOperators.max(dark))){
+						thresh_map.setAtIndex(i, j, 1);
+					}else{
+						thresh_map.setAtIndex(i, j, 0);	
+					}
+					
+				}
+			}
+			// calc new fabso
+			points = get_comp_points(abso, dark, thresh_map, true);
+			regression = PolynomialRegression.calc_regression(points, 3);
+			
+		}
+		
+		Grid2D end = new Grid2D(size, size);
+		for (int i = 0; i < size; i++){
+			for(int j = 0; j < size; j++){
+				int idx[] = {i, j};
+				float temp = abso.getValue(idx);
+				double value = regression.beta(2) * Math.pow(temp, 2) + regression.beta(1) * temp + regression.beta(0);
+				end.addAtIndex(i, j, (float) value);
+			}
+		}
+				
+			
+
+		dabso = (Grid2D) NumericPointwiseOperators.subtractedBy(dark, end);
+		
+		return dabso;
+	}
 	
 	public static PhaseContrastImages iterative_reconstruction(PhaseContrastImages pci_sino, int iter_num, int error){		
 		
@@ -317,11 +322,6 @@ public class Bubeck_Niklas_BA {
 			NumericPointwiseOperators.subtractBy(sino_recon.getDark(), pci_sino.getDark());
 //			sino_recon.show("sino_difference");
 			
-			//calc absolute
-//			NumericPointwiseOperators.abs(sino_recon.getAmp());
-//			NumericPointwiseOperators.abs(sino_recon.getPhase());
-//			NumericPointwiseOperators.abs(sino_recon.getDark());
-//			sino_recon.show("abs");
 
 			//Todo: refinement and the other stuff ...
 			
@@ -350,11 +350,6 @@ public class Bubeck_Niklas_BA {
 //			pci_recon.show("recon");
 			
 			
-			// Adding on picture
-//			NumericPointwiseOperators.addBy(pci_recon.getAmp(), pci_reko.getAmp());
-//			NumericPointwiseOperators.addBy(pci_recon.getPhase(), pci_reko.getPhase());
-//			NumericPointwiseOperators.addBy(pci_recon.getDark(), pci_reko.getDark());
-//			pci_recon.show("recon");
 			if(i == 1 || i == iter_num){
 				pci_recon.show("recon");
 			}
@@ -366,73 +361,6 @@ public class Bubeck_Niklas_BA {
 		return pci_recon;
 	}
 
-	
-	
-//	public static PhaseContrastImages iterative_landweber(PhaseContrastImages pci_sino, int iter_num, int error){		
-//		
-//		// Build empty picture 
-//		Grid2D recon_amp = new Grid2D(size, size);
-//		Grid2D recon_phase = new Grid2D(size,size);
-//		Grid2D recon_dark = new Grid2D(size, size);
-//		PhaseContrastImages pci_recon = new PhaseContrastImages(recon_amp,  recon_phase, recon_dark);
-//		
-////		pci_recon.show("old pci_recon");
-	
-//	//transpose sino matrix
-//	Grid2D transpose_amp = new Grid2D(pci_sino.getWidth(), pci_sino.getHeight());
-//	Grid2D transpose_phase = new Grid2D(pci_sino.getWidth(), pci_sino.getHeight());
-//	Grid2D transpose_dark = new Grid2D(pci_sino.getWidth(), pci_sino.getHeight());
-//	
-//	Grid2D original_amp = (Grid2D) pci_sino.getAmp();
-//	Grid2D original_dark = (Grid2D) pci_sino.getDark();
-//	Grid2D original_phase = (Grid2D) pci_sino.getPhase();
-//	
-//	for(int i = 0; i<pci_sino.getWidth(); i++){
-//		for(int j = 0; j < pci_sino.getHeight(); j++){
-//			transpose_amp.setAtIndex(i, j, original_amp.getAtIndex(j, i));
-//			transpose_phase.setAtIndex(i, j, original_phase.getAtIndex(j, i));
-//			transpose_dark.setAtIndex(i, j, original_dark.getAtIndex(j, i));
-//		}
-//	}
-//	PhaseContrastImages pci_transpose = new PhaseContrastImages(transpose_amp,  transpose_phase, transpose_dark);
-//	
-//	// AtA
-//	
-//	NumericPointwiseOperators.multiplyBy(pci_transpose.getAmp(), pci_sino.getAmp());
-//	NumericPointwiseOperators.multiplyBy(pci_transpose.getPhase(), pci_sino.getPhase());
-//	NumericPointwiseOperators.multiplyBy(pci_transpose.getDark(), pci_sino.getDark());
-//	float max_amp = NumericPointwiseOperators.max(pci_transpose.getAmp());
-//	pci_transpose.show("pci_AtA");
-//	
-//	Grid2D ata_amp_grid = (Grid2D) pci_transpose.getAmp();
-//	Grid2D ata_dark_grid = (Grid2D) pci_transpose.getDark();
-//	Grid2D ata_phase_grid = (Grid2D) pci_transpose.getPhase();
-//	
-//	SimpleMatrix ata_amp = new SimpleMatrix(pci_transpose.getWidth(),pci_transpose.getHeight());
-//	SimpleMatrix ata_phase = new SimpleMatrix(pci_transpose.getWidth(),pci_transpose.getHeight());
-//	SimpleMatrix ata_dark = new SimpleMatrix(pci_transpose.getWidth(),pci_transpose.getHeight());
-//	for(int i = 0; i<pci_sino.getWidth(); i++){
-//		for(int j = 0; j < pci_sino.getHeight(); j++){
-//			ata_amp.setElementValue(i, j, ata_amp_grid.getAtIndex(i, j));
-//			ata_phase.setElementValue(i, j, ata_phase_grid.getAtIndex(i, j));
-//			ata_dark.setElementValue(i, j, ata_dark_grid.getAtIndex(i, j));
-//		}
-//	}
-//	DecompositionSVD decompose = new DecompositionSVD(ata_amp, true, true, true);
-//	double [] sv = decompose.getSingularValues();
-//	double max = maxValue(sv);
-//	System.out.println("Max Eigenvalue: "+ max);
-//	
-//		
-//		int i = 1;
-//		while( i <= iter_num || error == 5){
-//			//ax = pci_sino * pci_recon
-//					
-//			// p = 
-//
-//		return pci_recon;
-//	}
-	
 	
 	
 	/**
@@ -487,24 +415,18 @@ public class Bubeck_Niklas_BA {
 		NumericGrid dark = pci.getDark();
 		NumericGrid amp = pci.getAmp();
 		
-//		NumericGrid fabso = initial_estimation(amp, dark);
-//		for(int i = 1; i <= 5; i++){
-//			System.out.println("iteration: "+ i);
-//			NumericGrid thresh_map = thresholding_map(fabso, dark, (float) 0.0001);
-////			thresh_map.show("thresh_map");
-//			fabso = refinement(fabso, thresh_map);
-////			fabso.show("fabso");
-//		}
+
 //		NumericPointwiseOperators.subtractBy(dark, fabso);
 //		dark.show("dabso");
 //		System.out.println("done");
 //		double[][] points = {{1.0, 20.0}, {2.0, 30.0}, {3.0, 40}, {5, 60}};
-		double [][] points = get_comp_points(amp, dark);
+		Grid2D thresh_map = new Grid2D(size, size);
+		double [][] points = get_comp_points(amp, dark, thresh_map, false);
 		System.out.println(ReflectionToStringBuilder.toString(points));
 		ScatterPlot.plot(points);
 		Regression.deg1(points);
 		PolynomialRegression.calc_regression(points, 2);
-		PolynomialRegression.calc_regression(points, 3);
+		PolynomialRegression regression = PolynomialRegression.calc_regression(points, 3);
 		
 
 	}

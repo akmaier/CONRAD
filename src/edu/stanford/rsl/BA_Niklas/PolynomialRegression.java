@@ -146,7 +146,7 @@ public class PolynomialRegression {
         return s + "  (R^2 = " + String.format("%.3f", R2()) + ")";
     }
 
-    public static void calc_regression(double[][] points, int deg) {
+    public static PolynomialRegression calc_regression(double[][] points, int deg) {
         double[] x = new double[points.length];
         double[] y = new double[points.length];
         System.out.println("length: "+ points[1].length);
@@ -156,6 +156,8 @@ public class PolynomialRegression {
         }
         
         PolynomialRegression regression = new PolynomialRegression(x, y, deg);
-        System.out.println(regression);
+//        System.out.println(regression);
+//        System.out.println(regression.beta(1));
+        return regression;
     }
 }
