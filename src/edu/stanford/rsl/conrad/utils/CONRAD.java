@@ -45,7 +45,7 @@ public abstract class CONRAD {
 	public static boolean useGarbageCollection;
 	public static final String EOL = System.getProperty("line.separator");
 	public static final long INPUT_QUEUE_DELAY = 0;
-	private static ClassLoader classLoaderForPyconrad = null; /// Regular ClassLoader doesnot work with pyconrad since Thread is detached from JVM
+	public static ClassLoader classLoaderForPyconrad = null; /// Regular ClassLoader doesnot work with pyconrad since Thread is detached from JVM
 	/**
 	 * This flag can be used to control debug outputs.
 	 * 0: No Debug output
