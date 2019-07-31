@@ -6,6 +6,8 @@ import java.util.*;
 public class ListInFile {
 	
     public static void export(List<Float> darklist, String string) { 
+    	final long timeStart = System.currentTimeMillis();
+    	
         PrintWriter printWriter = null; 
         try { 
             printWriter = new PrintWriter(new FileWriter(string)); 
@@ -19,6 +21,7 @@ public class ListInFile {
         } finally { 
             if(printWriter != null) printWriter.close(); 
         }
-        System.out.println("export Done");
+        final long timeEnd = System.currentTimeMillis(); 
+	     System.out.println("Export done in: " + (timeEnd - timeStart) + " Millisek.");
     } 
 }

@@ -1,9 +1,11 @@
 package edu.stanford.rsl.BA_Niklas;
 
+import edu.stanford.rsl.BA_Niklas.UserInterface;
 import edu.stanford.rsl.BA_Niklas.Regression;
 import edu.stanford.rsl.BA_Niklas.PolynomialRegression;
 import edu.stanford.rsl.BA_Niklas.ListInFile;
 import com.zetcode.linechartex.ScatterPlot;
+import com.zetcode.linechartex.LineChartEx;
 import edu.stanford.rsl.conrad.numerics.DecompositionSVD;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
 import edu.stanford.rsl.conrad.numerics.SimpleOperators;
@@ -13,11 +15,13 @@ import edu.stanford.rsl.BA_Niklas.ProjectorAndBackprojector;
 import edu.stanford.rsl.apps.Conrad;
 import edu.stanford.rsl.conrad.data.numeric.*;
 import ij.ImageJ;
-import java.util.Random;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*; 
 
 /**
@@ -31,7 +35,14 @@ import java.util.*;
 public class Bubeck_Niklas_BA {
 	
 	static int size = 128;
-	static int nr_ellipses = 20;
+	static int xstart;
+	static int xend;
+	static int ystart;
+	static int yend;
+	static int value;
+	static int nr_ellipses;
+	static int iter_num;
+	static float error_val;
     static SimpleMatrix[] R; 	// rotation matrices. 
     static double[][] t; 	// displacement vectors.   
     static double[][] ab; 	// the length of the principal axes.    
@@ -39,7 +50,11 @@ public class Bubeck_Niklas_BA {
     static double[] df; 	// dark-field signal intensity.
 	static int detector_width = 200;
 	static int nr_of_projections = 360;
-    
+    static List<Float> errorlist = new ArrayList<Float>();
+    static PhaseContrastImages pci;
+    static PhaseContrastImages pci_sino;
+    static PhaseContrastImages pci_reko;
+	
     /**
      * creates random ellipses
      */
@@ -211,14 +226,33 @@ public class Bubeck_Niklas_BA {
 				darklist.add(dar.getAtIndex(i, j));
 			}
 		}
+		
+		// get rid of duplicates
+		// TODO cut duplicates with new sorting  
+		//        List<Float> newAbs = new ArrayList<Float>();  
+//        for (Float element : abslist) {  
+//            if (!newAbs.contains(element)) { 
+//                newAbs.add(element); 
+//            } 
+//        } 
+//		
+//      
+//        ArrayList<Float> newDark = new ArrayList<Float>(); 
+//        for (Float element : darklist) { 
+//            if (!newDark.contains(element)) { 
+//                newDark.add(element); 
+//            } 
+//        } 
+        
+        
 		ListInFile.export(darklist, "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Files/dark.csv");
 		ListInFile.export(abslist, "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Files/abso.csv");
 
-//		while(abslist.remove("0.0")) {}
-//		while(darklist.remove("0.0")) {}
-		
+
 		double[][] points = new double[abslist.size()][2];
-	    for (int i = 0; i < points.length; i++) {
+//		System.out.println(newAbs.size());
+//		System.out.println(points.length);
+		for (int i = 0; i < points.length; i++) {
 	        points[i][0] = darklist.get(i);
 	        points[i][1] = abslist.get(i);
 	    }
@@ -251,6 +285,7 @@ public class Bubeck_Niklas_BA {
 					
 				}
 			}
+			
 			// calc new fabso
 			points = get_comp_points(abso, dark, thresh_map, true);
 			regression = PolynomialRegression.calc_regression(points, 3);
@@ -274,7 +309,7 @@ public class Bubeck_Niklas_BA {
 		return dabso;
 	}
 	
-	public static PhaseContrastImages iterative_reconstruction(PhaseContrastImages pci_sino, int iter_num, int error){		
+	public static PhaseContrastImages iterative_reconstruction(NumericGrid orig_dark, PhaseContrastImages pci_sino, int iter_num, int error){		
 		
 		// Build picture with ones		
 		Grid2D ones_amp = new Grid2D(size, size);
@@ -350,13 +385,29 @@ public class Bubeck_Niklas_BA {
 //			pci_recon.show("recon");
 			
 			
-			if(i == 1 || i == iter_num){
+			if(i == 1 || i == 20 || i == 50 || i == 100 || i == 300){
+				
 				pci_recon.show("recon");
 			}
+			
+			// Errorfunction
+			NumericGrid orig_dark_copy = orig_dark;
+			NumericGrid pci_recon_dark_copy = pci_recon.getDark();
+
+			NumericPointwiseOperators.multiplyBy(orig_dark_copy, orig_dark_copy);
+			NumericPointwiseOperators.multiplyBy(pci_recon_dark_copy, pci_recon_dark_copy);
+			NumericPointwiseOperators.addBy(orig_dark_copy, pci_recon_dark_copy);
+			NumericPointwiseOperators.sqrt(orig_dark_copy);
+			
+			float mean = NumericPointwiseOperators.mean(orig_dark_copy);
+			errorlist.add(mean);
+			
 			i++;
 		}
 		
-
+		
+		ListInFile.export(errorlist, "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Files/error.csv");
+		
 		System.out.println("iterative reconstruction done");
 		return pci_recon;
 	}
@@ -368,67 +419,158 @@ public class Bubeck_Niklas_BA {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+
+		// time
+		final long timeStart = System.currentTimeMillis();
+		
+/*
+ * ------------------------------------------------------------------------------------------------------
+ * + initializing args values from userinterface frame 
+ * ------------------------------------------------------------------------------------------------------
+ */
+		
+		Boolean simchecked = Boolean.parseBoolean(args[0]);
+		if(simchecked) {
+			nr_ellipses = Integer.parseInt(args[1]);
+		}
+			
+		Boolean trcchecked = Boolean.parseBoolean(args[2]);
+		if(trcchecked) {
+			xstart = Integer.parseInt(args[3]);
+			xend = Integer.parseInt(args[4]);
+			ystart = Integer.parseInt(args[5]);
+			yend = Integer.parseInt(args[6]);
+			value = Integer.parseInt(args[7]);
+		}
+		
+		Boolean iterchecked = Boolean.parseBoolean(args[8]);
+		if (iterchecked) {
+			iter_num = Integer.parseInt(args[9]);
+			error_val = Integer.parseInt(args[10]);
+		}
+		
+		Boolean vischecked = Boolean.parseBoolean(args[11]);
+		if(vischecked) {
+			
+		}
+		
+		
+		// start ImageJ
 		new ImageJ();
 		
-		// create phantoms
-		PhaseContrastImages pci = simulate_data();
-		pci.show("pci");
+
+/*
+ * ------------------------------------------------------------------------------------------------------
+ 
+ * + Simulate the data
+ * ------------------------------------------------------------------------------------------------------
+ */	
 		
-		// define geometry
-		int detector_width = 200;
-		int nr_of_projections = 360;	
-		ProjectorAndBackprojector p = new ProjectorAndBackprojector(nr_of_projections, 2*Math.PI); 
-		
-		PhaseContrastImages pci_sino = p.project(pci, new Grid2D(detector_width, nr_of_projections));
-//		pci_sino.show("pci_sino");
-		
-		
-//		PhaseContrastImages pci_fake = fake_truncation(pci, 25, 50, "x", 0, false, "pending");
-//		pci_fake.show("pci-fake");
-		// project
-		
-		
-//		PhaseContrastImages pci_sino_fake = p.project(pci_fake, new Grid2D(detector_width, nr_of_projections));
-//		pci_sino_fake.show("pci_sino_fake");
-//		PhaseContrastImages pci_roi_reko = iterative_region_of_interest(pci_sino, pci_sino_fake, 5);
-//		pci_roi_reko.show("pci_roi_reko");
-		
-		// fake truncation	
-//		PhaseContrastImages pci_sino_fake = fake_truncation(pci_sino, 25, 50, "x", 0, false, "pending");
-//		PhaseContrastImages pci_sino_fake2 = fake_truncation(pci_sino_fake, 150, 175, "x", 0, false, "pending");
-//		pci_sino_fake2.show("fake_sinograms");
-		
-		// backproject (reconstruct)
-//		PhaseContrastImages pci_reko = p.backprojection_pixel(pci_sino, size);
-//		pci_reko.show("reconstruction");
-		
-//		PhaseContrastImages pci_diff = calculate_PCI(pci, pci_reko, false);
-//		pci_diff.show("difference");
+		if(simchecked) {
 			
-	
-	
-	
-//		NumericPointwiseOperators.subtractBy(pci_reko.getAmp(), pci_reko.getAmp());
-		
-//		PhaseContrastImages end = iterative_reconstruction(pci_sino, 300, 0);
-//		end.show("end");
-		NumericGrid dark = pci.getDark();
-		NumericGrid amp = pci.getAmp();
-		
+			// create phantoms
+			pci = simulate_data();
+			pci.show("pci");
+			
+			// define geometry
+			int detector_width = 200;
+			int nr_of_projections = 360;	
+			ProjectorAndBackprojector p = new ProjectorAndBackprojector(nr_of_projections, 2*Math.PI); 
+			
+			pci_sino = p.project(pci, new Grid2D(detector_width, nr_of_projections));
+			//pci_sino.show();
 
-//		NumericPointwiseOperators.subtractBy(dark, fabso);
-//		dark.show("dabso");
-//		System.out.println("done");
-//		double[][] points = {{1.0, 20.0}, {2.0, 30.0}, {3.0, 40}, {5, 60}};
-		Grid2D thresh_map = new Grid2D(size, size);
-		double [][] points = get_comp_points(amp, dark, thresh_map, false);
-		System.out.println(ReflectionToStringBuilder.toString(points));
-		ScatterPlot.plot(points);
-		Regression.deg1(points);
-		PolynomialRegression.calc_regression(points, 2);
-		PolynomialRegression regression = PolynomialRegression.calc_regression(points, 3);
-		
+			
+			/*
+			 * ------------------------------------------------------------------------------------------------------
+			 
+			 * + Truncate data 
+			 * ------------------------------------------------------------------------------------------------------
+			 */				
+			
+			if(trcchecked) {
+				pci_sino = fake_truncation(pci_sino, xstart, xend, "x", value, false, "pending");
+				pci_sino = fake_truncation(pci_sino, ystart, yend, "y", value, false, "pending");
+				//pci_sino.show("pci-fake");
 
+				
+			}
+			
+			// backproject (reconstruct)
+			pci_reko = p.filtered_backprojection(pci_sino, size);
+//			pci_reko.show("reconstruction");
+			
+			// calculate the difference 
+//			PhaseContrastImages pci_diff = calculate_PCI(pci, pci_reko, false);
+//			pci_diff.show("difference");
+				
+		}
+
+/*
+ * ------------------------------------------------------------------------------------------------------
+ * compute iterative reconstruction
+ * ------------------------------------------------------------------------------------------------------	
+ */
+		if (iterchecked) {
+			PhaseContrastImages end = iterative_reconstruction(pci.getDark(), pci_sino, iter_num, 0);
+//			end.show("end");
+		}
+
+
+/*
+ * ------------------------------------------------------------------------------------------------------
+ * + Compute values for the comparison and export them to csv to do some calculations in python 
+ * + Calculate the Polynomial regression function matching to the comparison points  
+ * 
+ * ------------------------------------------------------------------------------------------------------
+ */
+		if(vischecked) {
+			Grid2D thresh_map = new Grid2D(size, size);
+			double [][] points = get_comp_points(pci_sino.getAmp(), pci_sino.getDark(), thresh_map, false);
+			PolynomialRegression regression = PolynomialRegression.calc_regression(points, 3);
+			System.out.println(regression);
+			List<Float> reglist = new ArrayList<Float>();
+			for(int i = 0; i <= 3; i++) {
+				reglist.add((float) regression.beta(i));
+			}
+			ListInFile.export(reglist, "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Files/reg.csv");
+
+		}
+		
+/*
+ * -------------------------------------------------------------------------------------------------------
+ * + execute BA.py to visualize the comparison points and the calculated polynom
+ * -------------------------------------------------------------------------------------------------------
+ */
+		
+		String command = "py C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Files/BA.py";
+		try {
+			Process p = Runtime.getRuntime().exec(command);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+/*
+ * ------------------------------------------------------------------------------------------------------
+ * + dont know what to do with this, think its to do the visualization with the jFreechart 
+ * 
+ * 	This is depracated due to the python solution
+ * 
+ * ------------------------------------------------------------------------------------------------------
+*/		
+		
+		
+//		double[][] line = new double[128][2];
+//		for(int i = 0; i < 128; i ++){
+//			double temp = regression.beta(2) * Math.pow(i/64, 2) + regression.beta(1) * (i/64) + regression.beta(0);
+//			line[i][0] = i/64;
+//			line[i][1] = temp;
+//		}
+//		LineChartEx.calc_linechart(line);
+		
+		 final long timeEnd = System.currentTimeMillis(); 
+	     System.out.println("Done in : " + (timeEnd - timeStart) + " Millisek.");
 	}
 
 }

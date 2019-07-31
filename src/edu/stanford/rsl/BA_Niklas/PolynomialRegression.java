@@ -13,25 +13,7 @@ package edu.stanford.rsl.BA_Niklas;
 import Jama.Matrix;
 import Jama.QRDecomposition;
 
-/**
- *  The <tt>PolynomialRegression</tt> class performs a polynomial regression
- *  on an set of <em>N</em> data points (<em>y<sub>i</sub></em>, <em>x<sub>i</sub></em>).
- *  That is, it fits a polynomial
- *  <em>y</em> = &beta;<sub>0</sub> +  &beta;<sub>1</sub> <em>x</em> +
- *  &beta;<sub>2</sub> <em>x</em><sup>2</sup> + ... +
- *  &beta;<sub><em>d</em></sub> <em>x</em><sup><em>d</em></sup>
- *  (where <em>y</em> is the response variable, <em>x</em> is the predictor variable,
- *  and the &beta;<sub><em>i</em></sub> are the regression coefficients)
- *  that minimizes the sum of squared residuals of the multiple regression model.
- *  It also computes associated the coefficient of determination <em>R</em><sup>2</sup>.
- *  <p>
- *  This implementation performs a QR-decomposition of the underlying
- *  Vandermonde matrix, so it is not the fastest or most numerically
- *  stable way to perform the polynomial regression.
- *
- *  @author Robert Sedgewick
- *  @author Kevin Wayne
- */
+
 public class PolynomialRegression {
     private final int N;         // number of observations
     private final int degree;    // degree of the polynomial regression
