@@ -10,6 +10,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.awt.event.ActionEvent;
 
 import edu.stanford.rsl.BA_Niklas.Bubeck_Niklas_BA;
@@ -175,7 +176,12 @@ public class Frame1 {
 				// perfom computing action
 				
 				String[] args = {Boolean.toString(simCheckbox.isSelected()), nr_ellipses.getText(), Boolean.toString(trcCheckbox.isSelected()), xstart.getText(), xend.getText(), ystart.getText(), yend.getText(), value.getText(), Boolean.toString(iterCheckbox.isSelected()), iter_num.getText(), error_val.getText(), Boolean.toString(visCheckbox.isSelected())}; 
-				Bubeck_Niklas_BA.main(args);
+				try {
+					Bubeck_Niklas_BA.main(args);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		});
 		btnCompute.setBounds(340, 571, 89, 23);

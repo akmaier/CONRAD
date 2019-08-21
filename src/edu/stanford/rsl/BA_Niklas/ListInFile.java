@@ -5,7 +5,7 @@ import java.util.*;
 
 public class ListInFile {
 	
-    public static void export(List<Float> darklist, String string) { 
+    public static void export(List<Float> darklist, String string, String name) { 
     	final long timeStart = System.currentTimeMillis();
     	
         PrintWriter printWriter = null; 
@@ -22,6 +22,6 @@ public class ListInFile {
             if(printWriter != null) printWriter.close(); 
         }
         final long timeEnd = System.currentTimeMillis(); 
-	     System.out.println("Export done in: " + (timeEnd - timeStart) + " Millisek.");
+	     System.out.println("Export " + name + " to " + string + " done in: " + (timeEnd - timeStart) + " Millisek.");
     } 
 }

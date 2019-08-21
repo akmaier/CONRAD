@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*; 
+import java.io.*; 
 
 /**
  * Bachelor thesis of Niklas Bubeck
@@ -206,7 +207,7 @@ public class Bubeck_Niklas_BA {
 	
 
 
-	public static double[][] get_comp_points(NumericGrid abso, NumericGrid dark, NumericGrid thresh_map, boolean thresh){
+	public static double[][] get_comp_points(NumericGrid abso, NumericGrid dark, NumericGrid thresh_map, boolean thresh) throws IOException{
 	    
 		if(thresh == true){
 			NumericPointwiseOperators.multiplyBy(dark, thresh_map);
@@ -219,13 +220,30 @@ public class Bubeck_Niklas_BA {
 		Grid2D abs = (Grid2D) abso;
 		Grid2D dar = (Grid2D) dark;
 		
-		for(int i = 0; i < size; i++){
-			for(int j = 0; j < size; j++){
+		FileWriter fileWriterdark = new FileWriter("C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Files/dark.csv");
+		PrintWriter printWriterdark = new PrintWriter(fileWriterdark);
+		
+		FileWriter fileWriterabso = new FileWriter("C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Files/abso.csv");
+		PrintWriter printWriterabso = new PrintWriter(fileWriterabso);
+		
+		for(int i = 0; i < abs.getHeight(); i++){
+			for(int j = 0; j < abs.getWidth(); j++){
+				System.out.println("i: " + i + "j: "+ j);
 				
-				abslist.add(abs.getAtIndex(i, j));
-				darklist.add(dar.getAtIndex(i, j));
+				// punkt in file reinschreiben
+				printWriterdark.println(dar.getAtIndex(i, j));
+				printWriterabso.println(dar.getAtIndex(i, j));
+				
+			    
+			    
+//				abslist.add(abs.getAtIndex(i, j));
+//				darklist.add(dar.getAtIndex(i, j));
 			}
 		}
+		
+		printWriterabso.close();
+		printWriterdark.close();
+
 		
 		// get rid of duplicates
 		// TODO cut duplicates with new sorting  
@@ -245,33 +263,85 @@ public class Bubeck_Niklas_BA {
 //        } 
         
         
-		ListInFile.export(darklist, "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Files/dark.csv");
-		ListInFile.export(abslist, "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Files/abso.csv");
+//		ListInFile.export(darklist, "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Files/dark.csv", "dark-values");
+//		ListInFile.export(abslist, "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Files/abso.csv", "amp-values");
 
+		
+		
+		
+		BufferedReader csvDarkReader = new BufferedReader(new FileReader("C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Files/dark.csv"));
+		BufferedReader csvAbsoReader = new BufferedReader(new FileReader("C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Files/abso.csv"));
 
-		double[][] points = new double[abslist.size()][2];
+		
+
+		String[] darkpoints = new String [200*360];
+		String[] absopoints = new String [200*360];
+		
+		int darkcounter = 0;
+		while ((csvDarkReader.readLine()) != null) {
+			darkpoints[darkcounter] = csvDarkReader.readLine();
+			darkcounter++;
+		    // do something with the data
+		}
+		
+		int absocounter = 0;
+		while ((csvAbsoReader.readLine()) != null) {
+			absopoints[absocounter] = csvAbsoReader.readLine();
+			absocounter++;
+		}
+		
+		System.out.println(darkpoints[10] + absopoints[20]);
+		csvDarkReader.close();
+		csvAbsoReader.close();
+		
+		System.out.println(absocounter + " hallo" + darkcounter);
+		
+		double [][] points = new double [absocounter][2];
+		
+		for(int i = 0; i < absocounter; i++) {
+			points[i][0] = Double.parseDouble(darkpoints[i]);
+			points[i][1] = Double.parseDouble(darkpoints[i]);
+		}
+		
 //		System.out.println(newAbs.size());
 //		System.out.println(points.length);
-		for (int i = 0; i < points.length; i++) {
-	        points[i][0] = darklist.get(i);
-	        points[i][1] = abslist.get(i);
-	    }
-
+//		for (int i = 0; i < 200*360; i++) {
+//	        points[i][0] = darklist.get(i);
+//	        points[i][1] = abslist.get(i);
+//	    }
+		
 		return points;
 	}
 	
-	public static NumericGrid correct_absorption(NumericGrid dark, NumericGrid abso, double thresh, int iter_num){
+	
+    /**
+     * corrects absorption
+     * @param dark - Sinogram of DFI 
+     * @param abso - Sinogram of Absorption
+     * @param thresh - thresholding value 
+     * @param iter_num - number of iterations 
+  	 *
+     * @return  dabso - correctet absoption image
+     * @throws IOException 
+     */
+	public static NumericGrid correct_absorption(NumericGrid dark_orig, NumericGrid dark, NumericGrid abso, double thresh, int iter_num) throws IOException{
 		
 		Grid2D thresh_map = new Grid2D(size, size);
-		Grid2D dabso = new Grid2D(size, size);
+		for(int i = 0; i < size; i++) {
+			for(int j = 0; j < size; j++) {
+				thresh_map.setAtIndex(i, j, 1);
+			}
+		}
+//		Grid2D dabso = new Grid2D(size, size);
 
 		// calc inital fabso
-		double [][] points = get_comp_points(abso, dark, thresh_map, false);
+		double [][] points = get_comp_points(abso, dark, thresh_map, true);
 		PolynomialRegression regression = PolynomialRegression.calc_regression(points, 3);
 		
 		// calc thresholding map
 		int iter = 1;
 		while(iter <= iter_num){
+			System.out.println("correct_absorption iteration: " + iter);
 			for (int i = 0; i < size; i++){
 				for(int j = 0; j < size; j++){
 					int idx[] = {i, j};
@@ -290,6 +360,7 @@ public class Bubeck_Niklas_BA {
 			points = get_comp_points(abso, dark, thresh_map, true);
 			regression = PolynomialRegression.calc_regression(points, 3);
 			
+			iter++;
 		}
 		
 		Grid2D end = new Grid2D(size, size);
@@ -301,11 +372,17 @@ public class Bubeck_Niklas_BA {
 				end.addAtIndex(i, j, (float) value);
 			}
 		}
-				
-			
-
-		dabso = (Grid2D) NumericPointwiseOperators.subtractedBy(dark, end);
 		
+		end.show("end");
+		
+		
+		int[] hallo = end.getSize();
+		int[] ciao = dark.getSize();
+		System.out.println(hallo[0]);
+		System.out.println(ciao[0]);
+
+		NumericGrid dabso = NumericPointwiseOperators.subtractedBy(dark_orig, end);
+		dabso.show("dabso");
 		return dabso;
 	}
 	
@@ -406,7 +483,7 @@ public class Bubeck_Niklas_BA {
 		}
 		
 		
-		ListInFile.export(errorlist, "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Files/error.csv");
+		ListInFile.export(errorlist, "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Files/error.csv", "error-values");
 		
 		System.out.println("iterative reconstruction done");
 		return pci_recon;
@@ -417,8 +494,9 @@ public class Bubeck_Niklas_BA {
 	/**
 	 * MAIN 
 	 * @param args
+	 * @throws IOException 
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 
 		// time
 		final long timeStart = System.currentTimeMillis();
@@ -450,9 +528,6 @@ public class Bubeck_Niklas_BA {
 		}
 		
 		Boolean vischecked = Boolean.parseBoolean(args[11]);
-		if(vischecked) {
-			
-		}
 		
 		
 		// start ImageJ
@@ -479,7 +554,7 @@ public class Bubeck_Niklas_BA {
 			
 			pci_sino = p.project(pci, new Grid2D(detector_width, nr_of_projections));
 			//pci_sino.show();
-
+			System.out.println("simulated data with nr_ellipses: " + nr_ellipses);
 			
 			/*
 			 * ------------------------------------------------------------------------------------------------------
@@ -491,13 +566,15 @@ public class Bubeck_Niklas_BA {
 			if(trcchecked) {
 				pci_sino = fake_truncation(pci_sino, xstart, xend, "x", value, false, "pending");
 				pci_sino = fake_truncation(pci_sino, ystart, yend, "y", value, false, "pending");
-				//pci_sino.show("pci-fake");
+				//pci_sino.show("pci-fake");				
+				System.out.println("truncated data from " + xstart + " to " + xend + " with value " + value);
+				System.out.println("truncated data from " + ystart + " to " + yend + " with value " + value);
 
 				
 			}
 			
 			// backproject (reconstruct)
-			pci_reko = p.filtered_backprojection(pci_sino, size);
+//			pci_reko = p.filtered_backprojection(pci_sino, size);
 //			pci_reko.show("reconstruction");
 			
 			// calculate the difference 
@@ -524,32 +601,33 @@ public class Bubeck_Niklas_BA {
  * 
  * ------------------------------------------------------------------------------------------------------
  */
-		if(vischecked) {
-			Grid2D thresh_map = new Grid2D(size, size);
-			double [][] points = get_comp_points(pci_sino.getAmp(), pci_sino.getDark(), thresh_map, false);
-			PolynomialRegression regression = PolynomialRegression.calc_regression(points, 3);
-			System.out.println(regression);
-			List<Float> reglist = new ArrayList<Float>();
-			for(int i = 0; i <= 3; i++) {
-				reglist.add((float) regression.beta(i));
-			}
-			ListInFile.export(reglist, "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Files/reg.csv");
-
+	
+		Grid2D thresh_map = new Grid2D(size, size);
+		double [][] points = get_comp_points(pci_sino.getAmp(), pci_sino.getDark(), thresh_map, false);
+		PolynomialRegression regression = PolynomialRegression.calc_regression(points, 3);
+		List<Float> reglist = new ArrayList<Float>();
+		for(int i = 0; i <= 3; i++) {
+			reglist.add((float) regression.beta(i));
 		}
+		ListInFile.export(reglist, "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Files/reg.csv", "regression");
+
+
 		
 /*
  * -------------------------------------------------------------------------------------------------------
  * + execute BA.py to visualize the comparison points and the calculated polynom
  * -------------------------------------------------------------------------------------------------------
  */
-		
-		String command = "py C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Files/BA.py";
-		try {
-			Process p = Runtime.getRuntime().exec(command);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if(vischecked) {
+			String command = "py C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Files/BA.py";
+			try {
+				Process p = Runtime.getRuntime().exec(command);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
+		
 		
 /*
  * ------------------------------------------------------------------------------------------------------
@@ -569,8 +647,24 @@ public class Bubeck_Niklas_BA {
 //		}
 //		LineChartEx.calc_linechart(line);
 		
+		
+/*
+ * ------------------------------------------------------------------------------------------------------
+ * + Space to add and test stuff
+ * ------------------------------------------------------------------------------------------------------
+ */
+		// Absorption Correction
+//		NumericGrid dabso = correct_absorption(pci.getDark(), pci_sino.getDark(), pci.getAmp(), 2, 10);
+//		dabso.show();
+		
+/*
+ * --------------------------------------------------------------------------------------------------------
+ * + console addings 
+ * -------------------------------------------------------------------------------------------------------
+ */
+		
 		 final long timeEnd = System.currentTimeMillis(); 
-	     System.out.println("Done in : " + (timeEnd - timeStart) + " Millisek.");
+	     System.out.println("Executing Bubeck_Niklas_BA done in : " + (timeEnd - timeStart) + " Millisek.");
 	}
 
 }

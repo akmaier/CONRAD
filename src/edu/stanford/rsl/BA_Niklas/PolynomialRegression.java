@@ -131,7 +131,6 @@ public class PolynomialRegression {
     public static PolynomialRegression calc_regression(double[][] points, int deg) {
         double[] x = new double[points.length];
         double[] y = new double[points.length];
-        System.out.println("length: "+ points[1].length);
         for(int i = 0; i < points.length; i++){
         	x[i] = points[i][0];
         	y[i] = points[i][1];
