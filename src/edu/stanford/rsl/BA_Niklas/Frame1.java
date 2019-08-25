@@ -39,6 +39,10 @@ public class Frame1 {
 	private JTextField error_val;
 	private JLabel lblErrorval;
 	private JCheckBox visCheckbox;
+	private JTextField xstart2;
+	private JTextField ystart2;
+	private JTextField xend2;
+	private JTextField yend2;
 
 	/**
 	 * Launch the application.
@@ -83,16 +87,16 @@ public class Frame1 {
 		frame.getContentPane().add(lblNrellipses);
 		
 		lblStart = new JLabel("start");
-		lblStart.setBounds(288, 83, 23, 14);
+		lblStart.setBounds(245, 83, 23, 14);
 		frame.getContentPane().add(lblStart);
 		
 		lblEnd = new JLabel("end");
-		lblEnd.setBounds(340, 83, 23, 14);
+		lblEnd.setBounds(288, 83, 23, 14);
 		frame.getContentPane().add(lblEnd);
 		
 		xstart = new JTextField();
-		xstart.setText("25");
-		xstart.setBounds(288, 108, 36, 20);
+		xstart.setText("0");
+		xstart.setBounds(245, 108, 36, 20);
 		frame.getContentPane().add(xstart);
 		xstart.setColumns(10);
 		
@@ -107,29 +111,65 @@ public class Frame1 {
 		
 		xend = new JTextField();
 		xend.setText("50");
-		xend.setBounds(340, 108, 36, 20);
+		xend.setBounds(288, 108, 36, 20);
 		frame.getContentPane().add(xend);
 		xend.setColumns(10);
 		
 		JLabel lblXaxes = new JLabel("x-axes");
-		lblXaxes.setBounds(242, 111, 46, 14);
+		lblXaxes.setBounds(189, 111, 46, 14);
 		frame.getContentPane().add(lblXaxes);
 		
 		JLabel lblYaxes = new JLabel("y-axes");
-		lblYaxes.setBounds(242, 139, 46, 14);
+		lblYaxes.setBounds(189, 136, 46, 14);
 		frame.getContentPane().add(lblYaxes);
 		
 		ystart = new JTextField();
-		ystart.setText("125");
-		ystart.setBounds(288, 136, 36, 20);
+		ystart.setText("0");
+		ystart.setBounds(245, 133, 36, 20);
 		frame.getContentPane().add(ystart);
 		ystart.setColumns(10);
 		
 		yend = new JTextField();
-		yend.setText("150");
-		yend.setBounds(340, 136, 36, 20);
+		yend.setText("90");
+		yend.setBounds(288, 133, 36, 20);
 		frame.getContentPane().add(yend);
 		yend.setColumns(10);
+		
+		xstart2 = new JTextField();
+		xstart2.setText("150");
+		xstart2.setColumns(10);
+		xstart2.setBounds(344, 108, 36, 20);
+		frame.getContentPane().add(xstart2);
+		
+		ystart2 = new JTextField();
+		ystart2.setText("270");
+		ystart2.setColumns(10);
+		ystart2.setBounds(344, 133, 36, 20);
+		frame.getContentPane().add(ystart2);
+		
+		xend2 = new JTextField();
+		xend2.setText("200");
+		xend2.setColumns(10);
+		xend2.setBounds(390, 108, 36, 20);
+		frame.getContentPane().add(xend2);
+		
+		yend2 = new JTextField();
+		yend2.setText("360");
+		yend2.setColumns(10);
+		yend2.setBounds(390, 133, 36, 20);
+		frame.getContentPane().add(yend2);
+		
+		JLabel label = new JLabel("start");
+		label.setBounds(340, 83, 23, 14);
+		frame.getContentPane().add(label);
+		
+		JLabel label_1 = new JLabel("end");
+		label_1.setBounds(387, 83, 23, 14);
+		frame.getContentPane().add(label_1);
+		
+		JCheckBox darkCheckbox = new JCheckBox("Only Dark");
+		darkCheckbox.setBounds(70, 132, 97, 23);
+		frame.getContentPane().add(darkCheckbox);
 		
 		lblValue = new JLabel("value");
 		lblValue.setBounds(242, 164, 46, 14);
@@ -174,8 +214,8 @@ public class Frame1 {
 		btnCompute.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				// perfom computing action
-				
-				String[] args = {Boolean.toString(simCheckbox.isSelected()), nr_ellipses.getText(), Boolean.toString(trcCheckbox.isSelected()), xstart.getText(), xend.getText(), ystart.getText(), yend.getText(), value.getText(), Boolean.toString(iterCheckbox.isSelected()), iter_num.getText(), error_val.getText(), Boolean.toString(visCheckbox.isSelected())}; 
+
+				String[] args = {Boolean.toString(simCheckbox.isSelected()), nr_ellipses.getText(), Boolean.toString(trcCheckbox.isSelected()), xstart.getText(), xend.getText(), xstart2.getText(), xend2.getText(), ystart.getText(), yend.getText(), ystart2.getText(), yend2.getText(),Boolean.toString(darkCheckbox.isSelected()), value.getText(), Boolean.toString(iterCheckbox.isSelected()), iter_num.getText(), error_val.getText(), Boolean.toString(visCheckbox.isSelected())}; 
 				try {
 					Bubeck_Niklas_BA.main(args);
 				} catch (IOException e) {
@@ -186,6 +226,8 @@ public class Frame1 {
 		});
 		btnCompute.setBounds(340, 571, 89, 23);
 		frame.getContentPane().add(btnCompute);
+		
+		
 		
 
 		

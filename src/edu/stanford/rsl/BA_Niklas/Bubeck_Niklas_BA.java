@@ -18,6 +18,7 @@ import ij.ImageJ;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.builder.ReflectionToStringBuilder;
+import org.math.plot.utils.Array;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,8 +39,13 @@ public class Bubeck_Niklas_BA {
 	static int size = 128;
 	static int xstart;
 	static int xend;
+	static int xstart2;
+	static int xend2;
 	static int ystart;
 	static int yend;
+	static int ystart2;
+	static int yend2;
+	static boolean only_dark;
 	static int value;
 	static int nr_ellipses;
 	static int iter_num;
@@ -73,8 +79,8 @@ public class Bubeck_Niklas_BA {
             t[i][1] = Math.random() - 0.5; // delta_y
             
             // size between 0 and 0.75
-            ab[i][0] = Math.random() * 0.75; // a
-            ab[i][1] = Math.random() * 0.75; // b
+            ab[i][0] = Math.random() * 2; // a
+            ab[i][1] = Math.random() * 2; // b
             
             // rotation
             double alpha = Math.random()*90;
@@ -150,7 +156,7 @@ public class Bubeck_Niklas_BA {
      * @return  Phase contrast images containing absorption (phase) and dark-field phantoms with artifacts
      */
 //	TODO: filters
-	public static PhaseContrastImages fake_truncation(PhaseContrastImages pci_sino, int min, int max, String axes, int value, boolean random, String filter){
+	public static PhaseContrastImages fake_truncation(PhaseContrastImages pci_sino, int min, int max, int min2, int max2, String axes, int value, boolean random, boolean only_dark, String filter){
 		int width = pci_sino.getWidth();
 		int height = pci_sino.getHeight();
 		Grid2D fake_amp = (Grid2D) pci_sino.getAmp();
@@ -159,23 +165,28 @@ public class Bubeck_Niklas_BA {
 		for (int i= 0; i< width; i++){
 			for(int j =0; j < height; j++){
 				if (axes == "x"){
-					if (i > min && i < max){
+					if ((i > min && i < max) || (i > min2 && i < max2)){
 						if (random == true){
 							value = (int) (Math.random() * 255);
 						}
 						
-						fake_amp.setAtIndex(i, j, value);
+						if(!only_dark) {
+							fake_amp.setAtIndex(i, j, value);
+							fake_phase.setAtIndex(i, j, value);
+						}
 						fake_dark.setAtIndex(i, j, value);
-						fake_phase.setAtIndex(i, j, value);
 					}
 				}else if (axes == "y"){
-					if (j > min && j < max){
+					if ((j > min && j < max) || (j > min2 && j < max2)){
 						if (random == true){
 							value = (int) (Math.random() * 255);
 						}
-						fake_amp.setAtIndex(i, j, value);
+						
+						if(!only_dark) {
+							fake_amp.setAtIndex(i, j, value);
+							fake_phase.setAtIndex(i, j, value);
+						}
 						fake_dark.setAtIndex(i, j, value);
-						fake_phase.setAtIndex(i, j, value);
 					}
 				}
 				
@@ -226,13 +237,12 @@ public class Bubeck_Niklas_BA {
 		FileWriter fileWriterabso = new FileWriter("C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Files/abso.csv");
 		PrintWriter printWriterabso = new PrintWriter(fileWriterabso);
 		
-		for(int i = 0; i < abs.getHeight(); i++){
-			for(int j = 0; j < abs.getWidth(); j++){
-				System.out.println("i: " + i + "j: "+ j);
+		for(int i = 0; i < abs.getWidth(); i++){
+			for(int j = 0; j < abs.getHeight(); j++){
 				
 				// punkt in file reinschreiben
 				printWriterdark.println(dar.getAtIndex(i, j));
-				printWriterabso.println(dar.getAtIndex(i, j));
+				printWriterabso.println(abs.getAtIndex(i, j));
 				
 			    
 			    
@@ -278,29 +288,31 @@ public class Bubeck_Niklas_BA {
 		String[] absopoints = new String [200*360];
 		
 		int darkcounter = 0;
-		while ((csvDarkReader.readLine()) != null) {
-			darkpoints[darkcounter] = csvDarkReader.readLine();
+		String darkline;
+		while ((darkline = csvDarkReader.readLine()) != null) {
+			darkpoints[darkcounter] = darkline;
 			darkcounter++;
 		    // do something with the data
 		}
 		
 		int absocounter = 0;
-		while ((csvAbsoReader.readLine()) != null) {
-			absopoints[absocounter] = csvAbsoReader.readLine();
+		String absoline;
+		while ((absoline = csvAbsoReader.readLine()) != null) {
+			absopoints[absocounter] = absoline;
 			absocounter++;
 		}
 		
-		System.out.println(darkpoints[10] + absopoints[20]);
 		csvDarkReader.close();
 		csvAbsoReader.close();
 		
-		System.out.println(absocounter + " hallo" + darkcounter);
-		
+		System.out.println("laenge: " + darkpoints[70000]);
+		System.out.println("laenge: " + darkpoints[20000]);
+
 		double [][] points = new double [absocounter][2];
 		
 		for(int i = 0; i < absocounter; i++) {
 			points[i][0] = Double.parseDouble(darkpoints[i]);
-			points[i][1] = Double.parseDouble(darkpoints[i]);
+			points[i][1] = Double.parseDouble(absopoints[i]);
 		}
 		
 //		System.out.println(newAbs.size());
@@ -384,6 +396,11 @@ public class Bubeck_Niklas_BA {
 		NumericGrid dabso = NumericPointwiseOperators.subtractedBy(dark_orig, end);
 		dabso.show("dabso");
 		return dabso;
+	}
+	
+	
+	public static NumericGrid fill_up_sinogram(NumericGrid sino_dark, NumericGrid sino_abso, Regression regression) {
+		return sino_abso;
 	}
 	
 	public static PhaseContrastImages iterative_reconstruction(NumericGrid orig_dark, PhaseContrastImages pci_sino, int iter_num, int error){		
@@ -516,18 +533,23 @@ public class Bubeck_Niklas_BA {
 		if(trcchecked) {
 			xstart = Integer.parseInt(args[3]);
 			xend = Integer.parseInt(args[4]);
-			ystart = Integer.parseInt(args[5]);
-			yend = Integer.parseInt(args[6]);
-			value = Integer.parseInt(args[7]);
+			xstart2 = Integer.parseInt(args[5]);
+			xend2 = Integer.parseInt(args[6]);
+			ystart = Integer.parseInt(args[7]);
+			yend = Integer.parseInt(args[8]);
+			ystart2 = Integer.parseInt(args[9]);
+			yend2 = Integer.parseInt(args[10]);
+			only_dark = Boolean.parseBoolean(args[11]);
+			value = Integer.parseInt(args[12]);
 		}
 		
-		Boolean iterchecked = Boolean.parseBoolean(args[8]);
+		Boolean iterchecked = Boolean.parseBoolean(args[13]);
 		if (iterchecked) {
-			iter_num = Integer.parseInt(args[9]);
-			error_val = Integer.parseInt(args[10]);
+			iter_num = Integer.parseInt(args[14]);
+			error_val = Integer.parseInt(args[15]);
 		}
 		
-		Boolean vischecked = Boolean.parseBoolean(args[11]);
+		Boolean vischecked = Boolean.parseBoolean(args[16]);
 		
 		
 		// start ImageJ
@@ -553,7 +575,7 @@ public class Bubeck_Niklas_BA {
 			ProjectorAndBackprojector p = new ProjectorAndBackprojector(nr_of_projections, 2*Math.PI); 
 			
 			pci_sino = p.project(pci, new Grid2D(detector_width, nr_of_projections));
-			//pci_sino.show();
+			pci_sino.show();
 			System.out.println("simulated data with nr_ellipses: " + nr_ellipses);
 			
 			/*
@@ -564,9 +586,9 @@ public class Bubeck_Niklas_BA {
 			 */				
 			
 			if(trcchecked) {
-				pci_sino = fake_truncation(pci_sino, xstart, xend, "x", value, false, "pending");
-				pci_sino = fake_truncation(pci_sino, ystart, yend, "y", value, false, "pending");
-				//pci_sino.show("pci-fake");				
+				pci_sino = fake_truncation(pci_sino, xstart, xend, xstart2, xend2, "x", value, false, true, "pending");
+//				pci_sino = fake_truncation(pci_sino, ystart, yend, ystart2, yend2, "y", value, false, true,  "pending");
+				pci_sino.show("pci-fake");				
 				System.out.println("truncated data from " + xstart + " to " + xend + " with value " + value);
 				System.out.println("truncated data from " + ystart + " to " + yend + " with value " + value);
 
@@ -603,7 +625,11 @@ public class Bubeck_Niklas_BA {
  */
 	
 		Grid2D thresh_map = new Grid2D(size, size);
+		pci_sino.getDark().show("Dark");
+		pci_sino.getAmp().show("Amp");
 		double [][] points = get_comp_points(pci_sino.getAmp(), pci_sino.getDark(), thresh_map, false);
+		
+//		double [][] points2 = {{2 ,3}, {2, 8}, {3, 4} ,{10, 5} ,{14, 3} ,{3, 8}};
 		PolynomialRegression regression = PolynomialRegression.calc_regression(points, 3);
 		List<Float> reglist = new ArrayList<Float>();
 		for(int i = 0; i <= 3; i++) {

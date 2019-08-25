@@ -1,5 +1,7 @@
 package edu.stanford.rsl.BA_Niklas;
 
+import org.math.plot.utils.Array;
+
 /*************************************************************************
  *  Compilation:  javac -cp .:jama.jar PolynomialRegression.java
  *  Execution:    java  -cp .:jama.jar PolynomialRegression
@@ -135,10 +137,17 @@ public class PolynomialRegression {
         	x[i] = points[i][0];
         	y[i] = points[i][1];
         }
+       
+        System.out.println(Array.toString(x));
+       
         
-        PolynomialRegression regression = new PolynomialRegression(x, y, deg);
+        System.out.println(Array.toString(y));
+        System.out.println(Integer.toString(points.length));
+        PolynomialRegression regression = new PolynomialRegression(y, x, deg);
 //        System.out.println(regression);
 //        System.out.println(regression.beta(1));
+        System.out.println("Polynomial Regression done");
+        System.out.println(regression);
         return regression;
     }
 }
