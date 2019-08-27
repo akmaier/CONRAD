@@ -94,7 +94,7 @@ public class Bubeck_Niklas_BA {
 
 			// values
 			rho[i] = Math.random();
-			df[i] =  Math.random();
+			df[i] = Math.random();
 
 		}
 	}
@@ -259,6 +259,13 @@ public class Bubeck_Niklas_BA {
 					continue;
 
 				}
+				
+//				if ((0 == (int) abs.getAtIndex(i, j)) && ( 0 == (int) dar.getAtIndex(i, j))) {
+//					System.out.println("ist 0 0 ");
+//					continue;
+//
+//				}
+				
 				printWriterdark.println(dar.getAtIndex(i, j));
 				printWriterabso.println(abs.getAtIndex(i, j));
 
@@ -421,14 +428,120 @@ public class Bubeck_Niklas_BA {
 				float val = (float) (regression.beta(3) * Math.pow(temp, 3) + regression.beta(2) * Math.pow(temp, 2)
 						+ regression.beta(1) * temp + regression.beta(0));
 				System.out.println("i: " + i + "j: " + j + "val: " + val);
-				if ((i > xstart && i < xend) || (i > xstart2 && i < xend2)) {
-					dark.setAtIndex(i, j, val);
-				}
+//				if ((i > xstart && i < xend) || (i > xstart2 && i < xend2)) {
+//					dark.setAtIndex(i, j, val);
+//				}
+				dark.setAtIndex(i, j, val);
 
 			}
 		}
 
 		return sino_dark;
+	}
+
+	public static void calculate_sino_dark() throws IOException {
+		ProjectorAndBackprojector p = new ProjectorAndBackprojector(nr_of_projections, 2 * Math.PI);
+
+		Grid2D thresh_map = new Grid2D(size, size);
+//		pci_sino.getDark().show("Dark");
+//	pci_sino.getAmp().show("Amp");
+		double[][] points = get_comp_points(pci_sino.getAmp(), pci_sino.getDark(), thresh_map, false);
+		
+		// Absorption Correction
+//		NumericGrid dabso = correct_absorption(pci.getDark(), pci_sino.getDark(), pci.getAmp(), 2, 10);
+//		dabso.show();
+
+//		double [][] points2 = {{2 ,3}, {2, 8}, {3, 4} ,{10, 5} ,{14, 3} ,{3, 8}};
+		
+		// Calculate regression and put the values to list
+		PolynomialRegression regression = PolynomialRegression.calc_regression(points, 3);
+		List<Float> reglist = new ArrayList<Float>();
+		for (int i = 0; i <= 3; i++) {
+			reglist.add((float) regression.beta(i));
+		}
+		ListInFile.export(reglist, "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Files/reg.csv", "regression");
+		
+		//execute Python script to visualize data
+		String command = "py C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Files/BA.py";
+		try {
+			Process process = Runtime.getRuntime().exec(command);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		// fill up unknown dark_sinogram data
+		NumericGrid filled_dark_sino = fill_up_sinogram(pci_sino.getDark(), pci_sino.getAmp(), regression);
+//		filled_dark_sino.show("filled_up");
+
+		
+		// build picture with ones for scaling the backprojection
+		Grid2D ones = new Grid2D(size, size);
+		for (int i = 0; i < size; i++) {
+			for (int j = 0; j < size; j++) {
+				ones.setAtIndex(i, j, 1);
+			}
+		}
+
+		// forward and back projection
+		ProjectorAndBackprojector o = new ProjectorAndBackprojector(360, 2 * Math.PI);
+		Grid2D sino_ones = o.project(ones, new Grid2D(200, 360));
+//				sino_ones.show("sino_ones");
+		Grid2D ones_reko = o.backprojection_pixel(sino_ones, size);
+		NumericGrid reko_temp = p.backprojection_pixel((Grid2D) filled_dark_sino, size);
+		NumericPointwiseOperators.divideBy(reko_temp, ones_reko);
+		
+		NumericGrid reko_fbp = o.filtered_backprojection((Grid2D) filled_dark_sino, size);
+		
+		reko_fbp.show("reko_fbp");
+		
+		// save image in path
+		ImagePlus imp = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) reko_temp).createImage());
+		String path = "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/reko";
+		IJ.saveAs(imp, "png", path);
+		
+		ImagePlus imp8 = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) reko_fbp).createImage());
+		String path8 = "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/reko_fbp";
+		IJ.saveAs(imp8, "png", path8);
+		
+//		reko_temp.show("filled up reko");
+
+//		pci_sino2.getDark().show("Dark start");
+		NumericGrid diff = NumericPointwiseOperators.subtractedBy(pci_sino2.getDark(), pci_sino.getDark());
+//		diff.show("Differenz");
+
+		//visualize differents
+		ImagePlus imp3 = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) diff).createImage());
+		IJ.saveAs(imp3, "png","C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/difference");
+//		return filled_dark_sino;
+	}
+
+	public static NumericGrid iterative_dark_reconstruction(NumericGrid dark_sino) {
+		// build picture with ones for scaling the backprojection
+		Grid2D ones = new Grid2D(size, size);
+		for (int i = 0; i < size; i++) {
+			for (int j = 0; j < size; j++) {
+				ones.setAtIndex(i, j, 1);
+			}
+		}
+
+		// forward and back projection
+		ProjectorAndBackprojector o = new ProjectorAndBackprojector(360, 2 * Math.PI);
+		Grid2D sino_ones = o.project(ones, new Grid2D(200, 360));
+//		sino_ones.show("sino_ones");
+		Grid2D ones_reko = o.backprojection_pixel(sino_ones, size);
+//		ones_reko.show("ones_reko");
+
+		// lokalisation algorithm : wie schaut das DFI aus ? braucht man das?
+
+		// fill up sinogram
+		int i = 1;
+		while (i < iter_num) {
+
+		}
+		NumericGrid dark_end = null;
+		return dark_end;
 	}
 
 	public static PhaseContrastImages iterative_reconstruction(NumericGrid orig_dark, PhaseContrastImages pci_sino,
@@ -474,11 +587,9 @@ public class Bubeck_Niklas_BA {
 			PhaseContrastImages sino_recon = p.project(pci_recon, new Grid2D(200, 360));
 //			sino_recon.show("sino_recon");
 
-			
-			
-			// !!! Dark bild vergleicht sich mit sich selbst dementsprechend wird es nur immer schlechter !!!
-			
-			
+			// !!! Dark bild vergleicht sich mit sich selbst dementsprechend wird es nur
+			// immer schlechter !!!
+
 			// Build difference of recon_sino and given sino
 			NumericPointwiseOperators.subtractBy(sino_recon.getAmp(), pci_sino.getAmp());
 			NumericPointwiseOperators.subtractBy(sino_recon.getPhase(), pci_sino.getPhase());
@@ -512,10 +623,12 @@ public class Bubeck_Niklas_BA {
 			if (i == 10 || i == 20 || i == 50 || i == 70 || i == 100) {
 
 				pci_recon.show("recon" + i);
-				
-				ImagePlus imp = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D)pci_recon.getDark()).createImage());
-				String path = "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/filled" + Integer.toString(i);
-				IJ.save(imp, path);
+
+				ImagePlus imp = new ImagePlus("Filled",
+						ImageUtil.wrapGrid2D((Grid2D) pci_recon.getDark()).createImage());
+				String path = "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/filled"
+						+ Integer.toString(i);
+				IJ.saveAs(imp, "png", path);
 			}
 
 			// Errorfunction
@@ -601,13 +714,29 @@ public class Bubeck_Niklas_BA {
 			// create phantoms
 			pci = simulate_data();
 			pci.show("pci");
-
+			ImagePlus imp = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) pci.getDark()).createImage());
+			String path = "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/groundTruthDark";
+			IJ.saveAs(imp, "png", path);
+			
+			ImagePlus imp2 = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) pci.getAmp()).createImage());
+			String path2 = "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/groundTruthAbsorption";
+			IJ.saveAs(imp2,"png", path2);
+			
+			
 			// define geometry
 			int detector_width = 200;
 			int nr_of_projections = 360;
 
 			pci_sino = p.project(pci, new Grid2D(detector_width, nr_of_projections));
 			pci_sino2 = p.project(pci, new Grid2D(detector_width, nr_of_projections));
+			
+			ImagePlus imp5 = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) pci_sino.getAmp()).createImage());
+			String path5 = "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/AbsorptionSinogram";
+			IJ.saveAs(imp5,"png", path5);
+			
+			ImagePlus imp6 = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) pci_sino2.getDark()).createImage());
+			String path6 = "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/OrigDarkSino";
+			IJ.saveAs(imp6, "png", path6);
 
 			System.out.println("simulated data with nr_ellipses: " + nr_ellipses);
 
@@ -623,7 +752,19 @@ public class Bubeck_Niklas_BA {
 			if (trcchecked) {
 				pci_sino = fake_truncation(pci_sino, xstart, xend, xstart2, xend2, "x", value, false, true, "pending");
 //				pci_sino = fake_truncation(pci_sino, ystart, yend, ystart2, yend2, "y", value, false, true,  "pending");
-//				pci_sino.show("pci-fake");				
+//				pci_sino.show("pci-fake");	
+				
+				ImagePlus imp3 = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) pci_sino.getDark()).createImage());
+				String path3 = "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/TruncatedDfSinogram";
+				IJ.saveAs(imp3, "png", path3);
+				
+				ProjectorAndBackprojector o = new ProjectorAndBackprojector(360, 2 * Math.PI);
+				Grid2D trunc_reko = o.backprojection_pixel((Grid2D)pci_sino.getDark(), size);
+				
+				ImagePlus imp4 = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) trunc_reko).createImage());
+				String path4 = "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/TruncatedDfi";
+				IJ.saveAs(imp4, "png", path4);
+				
 				System.out.println("truncated data from " + xstart + " to " + xend + " with value " + value);
 				System.out.println("truncated data from " + ystart + " to " + yend + " with value " + value);
 
@@ -648,41 +789,13 @@ public class Bubeck_Niklas_BA {
 		 * -----------------------------------------------------------------------------
 		 * -------------------------
 		 */
-
-		Grid2D thresh_map = new Grid2D(size, size);
-//			pci_sino.getDark().show("Dark");
-//		pci_sino.getAmp().show("Amp");
-		double[][] points = get_comp_points(pci_sino.getAmp(), pci_sino.getDark(), thresh_map, false);
-
-//		double [][] points2 = {{2 ,3}, {2, 8}, {3, 4} ,{10, 5} ,{14, 3} ,{3, 8}};
-		PolynomialRegression regression = PolynomialRegression.calc_regression(points, 3);
-		List<Float> reglist = new ArrayList<Float>();
-		for (int i = 0; i <= 3; i++) {
-			reglist.add((float) regression.beta(i));
-		}
-		ListInFile.export(reglist, "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Files/reg.csv", "regression");
-
-		String command = "py C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Files/BA.py";
-		try {
-			Process process = Runtime.getRuntime().exec(command);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		for (int i = 0; i < 1; i++) {
+			ImagePlus imp = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) pci_sino.getDark()).createImage());
+			String path = "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/reko" + i;
+			IJ.saveAs(imp, "png", path);
+			calculate_sino_dark();
 		}
 
-		NumericGrid temp = fill_up_sinogram(pci_sino.getDark(), pci_sino.getAmp(), regression);
-		temp.show("filled_up");
-		NumericGrid reko_temp = p.filtered_backprojection_phase((Grid2D) temp, size);
-		reko_temp.show("filled up reko");
-
-		pci_sino2.getDark().show("Dark start");
-		NumericGrid test = NumericPointwiseOperators.subtractedBy(pci_sino2.getDark(), pci_sino.getDark());
-		test.show("Differenz");
-		
-		ImagePlus imp3 = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D)test).createImage());
-		imp3.show("imp3");
-		IJ.save(imp3, "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/test");
-		
 		/*
 		 * -----------------------------------------------------------------------------
 		 * ------------------------- compute iterative reconstruction
@@ -692,9 +805,9 @@ public class Bubeck_Niklas_BA {
 
 		if (iterchecked) {
 			PhaseContrastImages end = iterative_reconstruction(pci.getDark(), pci_sino, iter_num, 0);
-	
+
 //			PhaseContrastImages end2 = iterative_reconstruction(pci.getDark(), pci_sino2, iter_num, 0);
-			
+
 		}
 
 		/*
@@ -739,9 +852,6 @@ public class Bubeck_Niklas_BA {
 		 * -----------------------------------------------------------------------------
 		 * -------------------------
 		 */
-		// Absorption Correction
-//		NumericGrid dabso = correct_absorption(pci.getDark(), pci_sino.getDark(), pci.getAmp(), 2, 10);
-//		dabso.show();
 
 		/*
 		 * -----------------------------------------------------------------------------
