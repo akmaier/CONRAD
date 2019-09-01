@@ -23,6 +23,8 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.math.plot.utils.Array;
 
+import org.apache.commons.math3.distribution.NormalDistribution;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -152,7 +154,101 @@ public class Bubeck_Niklas_BA {
 		PhaseContrastImages pci = new PhaseContrastImages(amplitude, phase, dark_field);
 		return pci;
 	}
+	
+	
+	public static Grid2D blur(NumericGrid grid, double sigma, int kernelsize)
+	{
+		Grid2D img = (Grid2D) grid;
+		double[] kernel = createKernel(sigma, kernelsize);
+		for(int i = 0; i < img.getWidth(); i++)
+		{
+			for(int j = 0; j < img.getHeight(); j++)
+			{
+				double overflow = 0;
+				int counter = 0;
+				int kernelhalf = (kernelsize - 1)/2;
+				double value = 0;
+				for(int k = i - kernelhalf; k < i + kernelhalf; k++)
+				{
+					for(int l = j - kernelhalf; l < j + kernelhalf; l++)
+					{
+						if(k < 0 || k >= img.getWidth() || l < 0 || l >= img.getHeight())
+						{
+							counter++;
+							overflow += kernel[counter];
+							continue;
+						}
+						
+						double val = img.getAtIndex(k, l);
+						value += val * kernel[counter];
+						
+						counter++;
+					}
+					counter++;
+				}
+				
+				if(overflow > 0)
+				{
+					value = 0;
+					
+					counter = 0;
+					for(int k = i - kernelhalf; k < i + kernelhalf; k++)
+					{
+						for(int l = j - kernelhalf; l < j + kernelhalf; l++)
+						{
+							if(k < 0 || k >= img.getWidth() || l < 0 || l >= img.getHeight())
+							{
+								counter++;
+								continue;
+							}
+							
+							double val = img.getAtIndex(k, l);
+							value += val * kernel[counter]*(1/(1-overflow));
+							
+							counter++;
+						}
+						counter++;
+					}
+				}
+				
+				img.setAtIndex(i, j, (float) value);
+			}
+		}
+		return img;
+	}
+	
+	public static double[] createKernel(double sigma, int kernelsize)
+	{
+		double[] kernel = new double[kernelsize*kernelsize];
+		for(int i = 0;  i < kernelsize; i++)
+		{
+			double x = i - (kernelsize -1) / 2;
+			for(int j = 0; j < kernelsize; j++)
+			{
+				double y = j - (kernelsize -1)/2;
+				kernel[j + i*kernelsize] = 1 / (2 * Math.PI * sigma * sigma) * Math.exp(-(x*x + y*y) / (2 * sigma *sigma));
+			}
+		}
+		float sum = 0;
+		for(int i = 0; i < kernelsize; i++)
+		{
+			for(int j = 0; j < kernelsize; j++)
+			{
+				sum += kernel[j + i*kernelsize];
+			}
+		}
+		for(int i = 0; i < kernelsize; i++)
+		{
+			for(int j = 0; j < kernelsize; j++)
+			{
+				kernel[j + i*kernelsize] /= sum;
+			}
+		}
+		return kernel;
+	}
 
+	
+	
 	/**
 	 * simulates truncation
 	 * 
@@ -723,6 +819,13 @@ public class Bubeck_Niklas_BA {
 			IJ.saveAs(imp2,"png", path2);
 			
 			
+			Grid2D blurred = blur(pci.getAmp(), 10, 49);
+			ImagePlus imp7 = new ImagePlus("Filled", ImageUtil.wrapGrid2D(blurred).createImage());
+			String path7 = "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/gaussian_blurred";
+			IJ.saveAs(imp7,"png", path7);
+			
+			
+			
 			// define geometry
 			int detector_width = 200;
 			int nr_of_projections = 360;
@@ -737,7 +840,8 @@ public class Bubeck_Niklas_BA {
 			ImagePlus imp6 = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) pci_sino2.getDark()).createImage());
 			String path6 = "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/OrigDarkSino";
 			IJ.saveAs(imp6, "png", path6);
-
+			
+			
 			System.out.println("simulated data with nr_ellipses: " + nr_ellipses);
 
 			/*
@@ -852,7 +956,9 @@ public class Bubeck_Niklas_BA {
 		 * -----------------------------------------------------------------------------
 		 * -------------------------
 		 */
-
+		
+		NormalDistribution nd = new NormalDistribution(1000, 100);
+		System.out.println("Normaldistrubution: " + nd);
 		/*
 		 * -----------------------------------------------------------------------------
 		 * --------------------------- + console addings
