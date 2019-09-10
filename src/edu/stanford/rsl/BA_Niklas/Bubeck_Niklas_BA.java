@@ -325,7 +325,9 @@ public class Bubeck_Niklas_BA {
 		PhaseContrastImages pci_reko = p.filtered_backprojection(sino_original, size);
 		return pci_reko;
 	}
+	
 
+	
 	public static double[][] get_comp_points(NumericGrid abso, NumericGrid dark, NumericGrid thresh_map, boolean thresh)
 			throws IOException {
 
@@ -541,6 +543,9 @@ public class Bubeck_Niklas_BA {
 		Grid2D thresh_map = new Grid2D(size, size);
 //		pci_sino.getDark().show("Dark");
 //	pci_sino.getAmp().show("Amp");
+		
+		Grid2D splitted_dark = 
+		
 		double[][] points = get_comp_points(pci_sino.getAmp(), pci_sino.getDark(), thresh_map, false);
 		
 		// Absorption Correction
