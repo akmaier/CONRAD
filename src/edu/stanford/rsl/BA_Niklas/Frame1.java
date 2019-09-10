@@ -45,6 +45,7 @@ public class Frame1 {
 	private JTextField ystart2;
 	private JTextField xend2;
 	private JTextField yend2;
+	private JTextField noisetype;
 
 	/**
 	 * Launch the application.
@@ -79,7 +80,7 @@ public class Frame1 {
 		frame.getContentPane().setLayout(null);
 		
 		nr_ellipses = new JTextField();
-		nr_ellipses.setText("5");
+		nr_ellipses.setText("2");
 		nr_ellipses.setBounds(288, 21, 36, 20);
 		frame.getContentPane().add(nr_ellipses);
 		nr_ellipses.setColumns(10);
@@ -108,11 +109,12 @@ public class Frame1 {
 		simCheckbox.setSelected(true);
 		
 		JCheckBox trcCheckbox = new JCheckBox("truncate data");
+		trcCheckbox.setSelected(true);
 		trcCheckbox.setBounds(47, 107, 97, 23);
 		frame.getContentPane().add(trcCheckbox);
 		
 		xend = new JTextField();
-		xend.setText("50");
+		xend.setText("75");
 		xend.setBounds(288, 108, 36, 20);
 		frame.getContentPane().add(xend);
 		xend.setColumns(10);
@@ -138,7 +140,7 @@ public class Frame1 {
 		yend.setColumns(10);
 		
 		xstart2 = new JTextField();
-		xstart2.setText("150");
+		xstart2.setText("125");
 		xstart2.setColumns(10);
 		xstart2.setBounds(344, 108, 36, 20);
 		frame.getContentPane().add(xstart2);
@@ -170,6 +172,7 @@ public class Frame1 {
 		frame.getContentPane().add(label_1);
 		
 		JCheckBox darkCheckbox = new JCheckBox("Only Dark");
+		darkCheckbox.setSelected(true);
 		darkCheckbox.setBounds(70, 132, 97, 23);
 		frame.getContentPane().add(darkCheckbox);
 		
@@ -188,7 +191,7 @@ public class Frame1 {
 		frame.getContentPane().add(iterCheckbox);
 		
 		iter_num = new JTextField();
-		iter_num.setText("50");
+		iter_num.setText("5");
 		iter_num.setBounds(288, 197, 23, 20);
 		frame.getContentPane().add(iter_num);
 		iter_num.setColumns(10);
@@ -198,7 +201,7 @@ public class Frame1 {
 		frame.getContentPane().add(lblIternum);
 		
 		error_val = new JTextField();
-		error_val.setText("0.5");
+		error_val.setText("0");
 		error_val.setBounds(288, 234, 23, 20);
 		frame.getContentPane().add(error_val);
 		error_val.setColumns(10);
@@ -210,6 +213,17 @@ public class Frame1 {
 		visCheckbox = new JCheckBox("show visualizations");
 		visCheckbox.setBounds(47, 285, 97, 23);
 		frame.getContentPane().add(visCheckbox);
+
+		
+		JCheckBox noisechecked = new JCheckBox("add noise");
+		noisechecked.setBounds(70, 46, 97, 23);
+		frame.getContentPane().add(noisechecked);
+		
+		noisetype = new JTextField();
+		noisetype.setText("gaussian");
+		noisetype.setBounds(173, 47, 86, 20);
+		frame.getContentPane().add(noisetype);
+		noisetype.setColumns(10);
 		
 		
 		JButton btnCompute = new JButton("Compute");
@@ -217,19 +231,19 @@ public class Frame1 {
 			public void actionPerformed(ActionEvent arg0) {
 				// perfom computing action
 
-				String[] args = {Boolean.toString(simCheckbox.isSelected()), nr_ellipses.getText(), Boolean.toString(trcCheckbox.isSelected()), xstart.getText(), xend.getText(), xstart2.getText(), xend2.getText(), ystart.getText(), yend.getText(), ystart2.getText(), yend2.getText(),Boolean.toString(darkCheckbox.isSelected()), value.getText(), Boolean.toString(iterCheckbox.isSelected()), iter_num.getText(), error_val.getText(), Boolean.toString(visCheckbox.isSelected())}; 
+				String[] args = {Boolean.toString(simCheckbox.isSelected()), nr_ellipses.getText(), Boolean.toString(trcCheckbox.isSelected()), xstart.getText(), xend.getText(), xstart2.getText(), xend2.getText(), ystart.getText(), yend.getText(), ystart2.getText(), yend2.getText(),Boolean.toString(darkCheckbox.isSelected()), value.getText(), Boolean.toString(iterCheckbox.isSelected()), iter_num.getText(), error_val.getText(), Boolean.toString(visCheckbox.isSelected()), Boolean.toString(noisechecked.isSelected()), noisetype.getText()}; 
 				try {
-					Bubeck_Niklas_BA.main(args);
+					Bubeck_Niklas_BA.all(args);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
 		});
+	
+				
 		btnCompute.setBounds(340, 571, 89, 23);
 		frame.getContentPane().add(btnCompute);
-		
-		
 		
 
 		
