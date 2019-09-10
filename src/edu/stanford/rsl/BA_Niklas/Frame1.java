@@ -45,6 +45,7 @@ public class Frame1 {
 	private JTextField ystart2;
 	private JTextField xend2;
 	private JTextField yend2;
+	private JTextField noisetype;
 
 	/**
 	 * Launch the application.
@@ -112,7 +113,7 @@ public class Frame1 {
 		frame.getContentPane().add(trcCheckbox);
 		
 		xend = new JTextField();
-		xend.setText("50");
+		xend.setText("75");
 		xend.setBounds(288, 108, 36, 20);
 		frame.getContentPane().add(xend);
 		xend.setColumns(10);
@@ -138,7 +139,7 @@ public class Frame1 {
 		yend.setColumns(10);
 		
 		xstart2 = new JTextField();
-		xstart2.setText("150");
+		xstart2.setText("125");
 		xstart2.setColumns(10);
 		xstart2.setBounds(344, 108, 36, 20);
 		frame.getContentPane().add(xstart2);
@@ -210,6 +211,17 @@ public class Frame1 {
 		visCheckbox = new JCheckBox("show visualizations");
 		visCheckbox.setBounds(47, 285, 97, 23);
 		frame.getContentPane().add(visCheckbox);
+
+		
+		JCheckBox noisechecked = new JCheckBox("add noise");
+		noisechecked.setBounds(70, 46, 97, 23);
+		frame.getContentPane().add(noisechecked);
+		
+		noisetype = new JTextField();
+		noisetype.setText("gaussian");
+		noisetype.setBounds(173, 47, 86, 20);
+		frame.getContentPane().add(noisetype);
+		noisetype.setColumns(10);
 		
 		
 		JButton btnCompute = new JButton("Compute");
@@ -217,19 +229,19 @@ public class Frame1 {
 			public void actionPerformed(ActionEvent arg0) {
 				// perfom computing action
 
-				String[] args = {Boolean.toString(simCheckbox.isSelected()), nr_ellipses.getText(), Boolean.toString(trcCheckbox.isSelected()), xstart.getText(), xend.getText(), xstart2.getText(), xend2.getText(), ystart.getText(), yend.getText(), ystart2.getText(), yend2.getText(),Boolean.toString(darkCheckbox.isSelected()), value.getText(), Boolean.toString(iterCheckbox.isSelected()), iter_num.getText(), error_val.getText(), Boolean.toString(visCheckbox.isSelected())}; 
+				String[] args = {Boolean.toString(simCheckbox.isSelected()), nr_ellipses.getText(), Boolean.toString(trcCheckbox.isSelected()), xstart.getText(), xend.getText(), xstart2.getText(), xend2.getText(), ystart.getText(), yend.getText(), ystart2.getText(), yend2.getText(),Boolean.toString(darkCheckbox.isSelected()), value.getText(), Boolean.toString(iterCheckbox.isSelected()), iter_num.getText(), error_val.getText(), Boolean.toString(visCheckbox.isSelected()), Boolean.toString(noisechecked.isSelected()), noisetype.getText()}; 
 				try {
-					Bubeck_Niklas_BA.main(args);
+					Bubeck_Niklas_BA.all(args);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
 		});
+	
+				
 		btnCompute.setBounds(340, 571, 89, 23);
 		frame.getContentPane().add(btnCompute);
-		
-		
 		
 
 		
