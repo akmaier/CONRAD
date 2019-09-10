@@ -1,6 +1,5 @@
 package edu.stanford.rsl.BA_Niklas;
 
-import edu.stanford.rsl.BA_Niklas.UserInterface;
 import edu.stanford.rsl.BA_Niklas.Regression;
 import edu.stanford.rsl.BA_Niklas.PolynomialRegression;
 import edu.stanford.rsl.BA_Niklas.ListInFile;
@@ -56,6 +55,12 @@ public class Bubeck_Niklas_BA {
 	static int nr_ellipses;
 	static int iter_num;
 	static float error_val;
+	static String noisetype;
+	static Boolean simchecked;
+	static Boolean iterchecked;
+	static Boolean trcchecked;
+	static Boolean noisechecked;
+	static Boolean vischecked;
 	static SimpleMatrix[] R; // rotation matrices.
 	static double[][] t; // displacement vectors.
 	static double[][] ab; // the length of the principal axes.
@@ -66,8 +71,7 @@ public class Bubeck_Niklas_BA {
 	static List<Float> errorlist = new ArrayList<Float>();
 	static PhaseContrastImages pci;
 	static PhaseContrastImages pci_sino;
-	static PhaseContrastImages pci_sino2;
-	static PhaseContrastImages pci_reko;
+	static PhaseContrastImages pci_sino_truncated;
 
 	/**
 	 * creates random ellipses
@@ -86,8 +90,8 @@ public class Bubeck_Niklas_BA {
 			t[i][1] = Math.random() - 0.5; // delta_y
 
 			// size between 0 and 0.75
-			ab[i][0] = Math.random() * 2; // a
-			ab[i][1] = Math.random() * 2; // b
+			ab[i][0] = Math.random() * 0.75; // a
+			ab[i][1] = Math.random() * 0.75; // b
 
 			// rotation
 			double alpha = Math.random() * 90;
@@ -154,101 +158,233 @@ public class Bubeck_Niklas_BA {
 		PhaseContrastImages pci = new PhaseContrastImages(amplitude, phase, dark_field);
 		return pci;
 	}
-	
-	
-	public static Grid2D blur(NumericGrid grid, double sigma, int kernelsize)
-	{
-		Grid2D img = (Grid2D) grid;
-		double[] kernel = createKernel(sigma, kernelsize);
-		for(int i = 0; i < img.getWidth(); i++)
-		{
-			for(int j = 0; j < img.getHeight(); j++)
-			{
-				double overflow = 0;
-				int counter = 0;
-				int kernelhalf = (kernelsize - 1)/2;
-				double value = 0;
-				for(int k = i - kernelhalf; k < i + kernelhalf; k++)
-				{
-					for(int l = j - kernelhalf; l < j + kernelhalf; l++)
-					{
-						if(k < 0 || k >= img.getWidth() || l < 0 || l >= img.getHeight())
-						{
-							counter++;
-							overflow += kernel[counter];
-							continue;
-						}
-						
-						double val = img.getAtIndex(k, l);
-						value += val * kernel[counter];
-						
-						counter++;
-					}
-					counter++;
+
+//	public static Grid2D blur(NumericGrid grid, double sigma, int kernelsize) {
+//		Grid2D img = (Grid2D) grid;
+//		double[] kernel = createKernel(sigma, kernelsize);
+//		for (int i = 0; i < img.getWidth(); i++) {
+//			for (int j = 0; j < img.getHeight(); j++) {
+//				double overflow = 0;
+//				int counter = 0;
+//				int kernelhalf = (kernelsize - 1) / 2;
+//				double value = 0;
+//				for (int k = i - kernelhalf; k < i + kernelhalf; k++) {
+//					for (int l = j - kernelhalf; l < j + kernelhalf; l++) {
+//						if (k < 0 || k >= img.getWidth() || l < 0 || l >= img.getHeight()) {
+//							counter++;
+//							overflow += kernel[counter];
+//							continue;
+//						}
+//
+//						double val = img.getAtIndex(k, l);
+//						value += val * kernel[counter];
+//
+//						counter++;
+//					}
+//					counter++;
+//				}
+//
+//				if (overflow > 0) {
+//					value = 0;
+//
+//					counter = 0;
+//					for (int k = i - kernelhalf; k < i + kernelhalf; k++) {
+//						for (int l = j - kernelhalf; l < j + kernelhalf; l++) {
+//							if (k < 0 || k >= img.getWidth() || l < 0 || l >= img.getHeight()) {
+//								counter++;
+//								continue;
+//							}
+//
+//							double val = img.getAtIndex(k, l);
+//							value += val * kernel[counter] * (1 / (1 - overflow));
+//
+//							counter++;
+//						}
+//						counter++;
+//					}
+//				}
+//
+//				img.setAtIndex(i, j, (float) value);
+//			}
+//		}
+//		return img;
+//	}
+//
+//	public static double[] createKernel(double sigma, int kernelsize) {
+//		double[] kernel = new double[kernelsize * kernelsize];
+//		for (int i = 0; i < kernelsize; i++) {
+//			double x = i - (kernelsize - 1) / 2;
+//			for (int j = 0; j < kernelsize; j++) {
+//				double y = j - (kernelsize - 1) / 2;
+//				kernel[j + i * kernelsize] = 1 / (2 * Math.PI * sigma * sigma)
+//						* Math.exp(-(x * x + y * y) / (2 * sigma * sigma));
+//			}
+//		}
+//		float sum = 0;
+//		for (int i = 0; i < kernelsize; i++) {
+//			for (int j = 0; j < kernelsize; j++) {
+//				sum += kernel[j + i * kernelsize];
+//			}
+//		}
+//		for (int i = 0; i < kernelsize; i++) {
+//			for (int j = 0; j < kernelsize; j++) {
+//				kernel[j + i * kernelsize] /= sum;
+//			}
+//		}
+//		return kernel;
+//	}
+
+	public static NumericGrid add_noise(NumericGrid img, double mean, double variance, String distribution) {
+		Grid2D image = (Grid2D) img;
+		for (int i = 0; i < image.getWidth(); i++) {
+			for (int j = 0; j < image.getHeight(); j++) {
+				if (image.getAtIndex(i, j) == (float) 0.0) {
+					continue;
 				}
-				
-				if(overflow > 0)
-				{
-					value = 0;
-					
-					counter = 0;
-					for(int k = i - kernelhalf; k < i + kernelhalf; k++)
-					{
-						for(int l = j - kernelhalf; l < j + kernelhalf; l++)
-						{
-							if(k < 0 || k >= img.getWidth() || l < 0 || l >= img.getHeight())
-							{
-								counter++;
-								continue;
-							}
-							
-							double val = img.getAtIndex(k, l);
-							value += val * kernel[counter]*(1/(1-overflow));
-							
-							counter++;
-						}
-						counter++;
-					}
+
+				double noise = 0;
+
+				if (distribution == "gaussian") {
+					java.util.Random r = new java.util.Random();
+					noise = r.nextGaussian() * Math.sqrt(variance) + mean;
 				}
-				
-				img.setAtIndex(i, j, (float) value);
+
+				float val = image.getAtIndex(i, j);
+				image.setAtIndex(i, j, val + (float) noise);
+
 			}
 		}
-		return img;
-	}
-	
-	public static double[] createKernel(double sigma, int kernelsize)
-	{
-		double[] kernel = new double[kernelsize*kernelsize];
-		for(int i = 0;  i < kernelsize; i++)
-		{
-			double x = i - (kernelsize -1) / 2;
-			for(int j = 0; j < kernelsize; j++)
-			{
-				double y = j - (kernelsize -1)/2;
-				kernel[j + i*kernelsize] = 1 / (2 * Math.PI * sigma * sigma) * Math.exp(-(x*x + y*y) / (2 * sigma *sigma));
-			}
-		}
-		float sum = 0;
-		for(int i = 0; i < kernelsize; i++)
-		{
-			for(int j = 0; j < kernelsize; j++)
-			{
-				sum += kernel[j + i*kernelsize];
-			}
-		}
-		for(int i = 0; i < kernelsize; i++)
-		{
-			for(int j = 0; j < kernelsize; j++)
-			{
-				kernel[j + i*kernelsize] /= sum;
-			}
-		}
-		return kernel;
+
+		return image;
 	}
 
-	
-	
+	private static double calculate_mean_value(String[] mean_values) {
+		int counter = 0;
+		double sum = 0;
+		double mean;
+		for (int i = 0; i < mean_values.length; i++) {
+			if (mean_values[i] == null) {
+				continue;
+			} else {
+				counter++;
+				sum += Double.parseDouble(mean_values[i]);
+			}
+		}
+		mean = sum / counter;
+		return mean;
+	}
+
+	public static NumericGrid[] get_segmentation(NumericGrid dark_gt, double noise) {
+		Grid2D darkgt = (Grid2D) dark_gt;
+		Float[] values = new Float[darkgt.getHeight() * darkgt.getWidth()];
+		int counter = 0;
+		for (int i = 0; i < darkgt.getWidth(); i++) {
+			for (int j = 0; j < darkgt.getHeight(); j++) {
+				values[counter] = darkgt.getAtIndex(i, j);
+				counter++;
+			}
+		}
+
+//		String[] means = new String[20];
+//		String[][] mean_values = new String[20][darkgt.getHeight() * darkgt.getWidth()];
+//		means[0] = "0.0";
+//		int matcounter = 0;
+//		int test = 0;
+//		for (int z = 0; z < matcounter; z++) {
+//
+//			for (int y = 0; y < values.length; y++) {
+//
+//				System.out.println(
+//						"wert: " + values[y] + " untere Grenz: " + (Double.parseDouble(means[matcounter]) - noise)
+//								+ " obere Grenze: " + Double.parseDouble(means[matcounter]) + noise);
+//				if ((values[y] > Double.parseDouble(means[matcounter]) - noise)
+//						&& (values[y] < Double.parseDouble(means[matcounter]) + noise)) {
+//					System.out.println("ich bin in der ersten schleife");
+//					mean_values[matcounter][y] = values[y].toString();
+//					double mean = calculate_mean_value(mean_values[matcounter]);
+//					means[matcounter] = Double.toString(mean);
+//				} else {
+//					System.out.println("ich bin im Else fall");
+//					matcounter++;
+//					means[matcounter] = values[y].toString();
+//
+////				if(means[matcounter] == null) {
+////				}
+//					mean_values[matcounter][y] = values[y].toString();
+//				}
+//
+//			}
+//
+//			if (means[matcounter + 1] == null) {
+//				System.out.println("test");
+//				break;
+//			}
+//
+//		}
+
+		// only use unique values
+		Float[] unique = Arrays.stream(values).distinct().toArray(Float[]::new);
+
+		// sort with increasing number
+//		System.out.println(test);
+//		for (int i = 0; i < means.length; i++) {
+//			System.out.println(means[i]);
+//		}
+
+		Arrays.sort(unique);
+
+		// calc thresh values
+		Float[] thresh = new Float[unique.length - 1];
+		for (int k = 0; k < unique.length - 1; k++) {
+			thresh[k] = ((unique[k]) + (unique[k + 1])) / 2;
+		}
+
+		System.out.println(Arrays.toString(values));
+		System.out.println(Arrays.toString(unique));
+		System.out.println(Arrays.toString(thresh));
+
+		NumericGrid[] materials = new NumericGrid[thresh.length + 1];
+		for (int l = 0; l <= thresh.length; l++) {
+			Grid2D mat = (Grid2D) darkgt.clone();
+
+			for (int i = 0; i < darkgt.getWidth(); i++) {
+				for (int j = 0; j < darkgt.getHeight(); j++) {
+
+					// picture with the background color
+					if (l == 0) {
+						if (darkgt.getAtIndex(i, j) > thresh[0]) {
+							mat.setAtIndex(i, j, 0);
+
+						}
+
+					}
+
+					else if (l == thresh.length) {
+						if (darkgt.getAtIndex(i, j) < thresh[l - 1]) {
+							mat.setAtIndex(i, j, 0);
+
+						}
+
+					} else {
+
+						if (darkgt.getAtIndex(i, j) < thresh[l - 1] || darkgt.getAtIndex(i, j) > thresh[l]) {
+							mat.setAtIndex(i, j, 0);
+							System.out.println("bin drin");
+						}
+
+					}
+
+				}
+			}
+			ImagePlus imp8 = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) mat).createImage());
+			String path8 = "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/IchbinMat" + l;
+			IJ.saveAs(imp8, "png", path8);
+			materials[l] = mat;
+
+		}
+		return materials;
+	}
+
 	/**
 	 * simulates truncation
 	 * 
@@ -265,13 +401,32 @@ public class Bubeck_Niklas_BA {
 	 *         phantoms with artifacts
 	 */
 //	TODO: filters
-	public static PhaseContrastImages fake_truncation(PhaseContrastImages pci_sino, int min, int max, int min2,
-			int max2, String axes, int value, boolean random, boolean only_dark, String filter) {
-		int width = pci_sino.getWidth();
-		int height = pci_sino.getHeight();
-		Grid2D fake_amp = (Grid2D) pci_sino.getAmp();
-		Grid2D fake_dark = (Grid2D) pci_sino.getDark();
-		Grid2D fake_phase = (Grid2D) pci_sino.getPhase();
+	public static PhaseContrastImages fake_truncation(PhaseContrastImages pciSino, int min, int max, int min2, int max2,
+			String axes, int value, boolean random, boolean only_dark, String filter) {
+		int width = pciSino.getWidth();
+		int height = pciSino.getHeight();
+
+		Grid2D amp = (Grid2D) pciSino.getAmp();
+		Grid2D dark = (Grid2D) pciSino.getDark();
+		Grid2D phase = (Grid2D) pciSino.getPhase();
+
+		Grid2D fake_amp = new Grid2D(200, 360);
+		Grid2D fake_dark = new Grid2D(200, 360);
+		Grid2D fake_phase = new Grid2D(200, 360);
+
+		for (int k = 0; k < fake_amp.getWidth(); k++) {
+			for (int l = 0; l < fake_amp.getHeight(); l++) {
+				float val_amp = amp.getAtIndex(k, l);
+				float val_dark = dark.getAtIndex(k, l);
+				float val_phase = phase.getAtIndex(k, l);
+
+				fake_amp.setAtIndex(k, l, val_amp);
+				fake_dark.setAtIndex(k, l, val_dark);
+				fake_phase.setAtIndex(k, l, val_phase);
+
+			}
+		}
+
 		for (int i = 0; i < width; i++) {
 			for (int j = 0; j < height; j++) {
 				if (axes == "x") {
@@ -307,6 +462,40 @@ public class Bubeck_Niklas_BA {
 
 		PhaseContrastImages pci_sino_fake = new PhaseContrastImages(fake_amp, fake_phase, fake_dark);
 		return pci_sino_fake;
+	}
+
+	public static NumericGrid fake_truncation_image(Grid2D image, int min, int max, String axes, int value) {
+
+		Grid2D trunc = new Grid2D(image.getWidth(), image.getHeight());
+//		int width = image.getWidth();
+//		int height = image.getHeight();
+
+		for (int k = 0; k < image.getWidth(); k++) {
+			for (int l = 0; l < image.getHeight(); l++) {
+				float val = image.getAtIndex(k, l);
+
+				trunc.setAtIndex(k, l, val);
+
+			}
+		}
+
+		for (int i = 0; i < 200; i++) {
+			for (int j = 0; j < 360; j++) {
+				if (axes == "x") {
+					if ((i >= min && i <= max)) {
+
+						trunc.setAtIndex(i, j, value);
+					}
+				} else if (axes == "y") {
+					if ((j > min && j < max)) {
+						trunc.setAtIndex(i, j, value);
+					}
+				}
+
+			}
+		}
+
+		return trunc;
 	}
 
 	public static PhaseContrastImages region_of_interest(PhaseContrastImages sino_original,
@@ -355,15 +544,16 @@ public class Bubeck_Niklas_BA {
 					continue;
 
 				}
-				
+
 //				if ((0 == (int) abs.getAtIndex(i, j)) && ( 0 == (int) dar.getAtIndex(i, j))) {
 //					System.out.println("ist 0 0 ");
 //					continue;
 //
 //				}
-				
+//				if(abs.getAtIndex(i, j) != (float) 0.0) {
 				printWriterdark.println(dar.getAtIndex(i, j));
 				printWriterabso.println(abs.getAtIndex(i, j));
+//				}
 
 //				abslist.add(abs.getAtIndex(i, j));
 //				darklist.add(dar.getAtIndex(i, j));
@@ -515,40 +705,60 @@ public class Bubeck_Niklas_BA {
 	public static NumericGrid fill_up_sinogram(NumericGrid sino_dark, NumericGrid sino_abso,
 			PolynomialRegression regression) {
 
-		Grid2D abs = (Grid2D) sino_abso;
-		Grid2D dark = (Grid2D) sino_dark;
+		Grid2D abs_global = (Grid2D) sino_abso;
+		Grid2D dark_global = (Grid2D) sino_dark;
+
+		Grid2D abs = new Grid2D(200, 360);
+		Grid2D dark = new Grid2D(200, 360);
+
+		for (int k = 0; k < abs.getWidth(); k++) {
+			for (int l = 0; l < abs.getHeight(); l++) {
+				float val_amp = abs_global.getAtIndex(k, l);
+				float val_dark = dark_global.getAtIndex(k, l);
+
+				abs.setAtIndex(k, l, val_amp);
+				dark.setAtIndex(k, l, val_dark);
+
+			}
+		}
 
 		for (int i = 0; i < abs.getWidth(); i++) {
 			for (int j = 0; j < abs.getHeight(); j++) {
+
 				float temp = abs.getAtIndex(i, j);
 				float val = (float) (regression.beta(3) * Math.pow(temp, 3) + regression.beta(2) * Math.pow(temp, 2)
 						+ regression.beta(1) * temp + regression.beta(0));
 				System.out.println("i: " + i + "j: " + j + "val: " + val);
-//				if ((i > xstart && i < xend) || (i > xstart2 && i < xend2)) {
+//				if (((i > xstart && i < xend) || (i > xstart2 && i < xend2)) && (temp != (float) 0.0)) {
 //					dark.setAtIndex(i, j, val);
+//					System.out.println("setze value dark: " + val + "und temp als: " + temp + "an der stelle i: " + i
+//							+ "und j: " + j);
 //				}
 				dark.setAtIndex(i, j, val);
 
 			}
 		}
 
-		return sino_dark;
+		return dark;
 	}
 
-	public static void calculate_sino_dark() throws IOException {
+	public static NumericGrid calculate_sino_dark(NumericGrid amp_material, NumericGrid sino_dark_trunc)
+			throws IOException {
 		ProjectorAndBackprojector p = new ProjectorAndBackprojector(nr_of_projections, 2 * Math.PI);
-
+		amp_material.show("ich bin der fehler");
+		Grid2D amp_mat = (Grid2D) amp_material;
+		Grid2D sino_amp_mat = p.project(amp_mat, new Grid2D(200, 360));
 		Grid2D thresh_map = new Grid2D(size, size);
 //		pci_sino.getDark().show("Dark");
 //	pci_sino.getAmp().show("Amp");
-		double[][] points = get_comp_points(pci_sino.getAmp(), pci_sino.getDark(), thresh_map, false);
-		
+		double[][] points = get_comp_points(sino_amp_mat, sino_dark_trunc, thresh_map, false);
+
 		// Absorption Correction
 //		NumericGrid dabso = correct_absorption(pci.getDark(), pci_sino.getDark(), pci.getAmp(), 2, 10);
 //		dabso.show();
 
 //		double [][] points2 = {{2 ,3}, {2, 8}, {3, 4} ,{10, 5} ,{14, 3} ,{3, 8}};
-		
+
 		// Calculate regression and put the values to list
 		PolynomialRegression regression = PolynomialRegression.calc_regression(points, 3);
 		List<Float> reglist = new ArrayList<Float>();
@@ -556,8 +766,8 @@ public class Bubeck_Niklas_BA {
 			reglist.add((float) regression.beta(i));
 		}
 		ListInFile.export(reglist, "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Files/reg.csv", "regression");
-		
-		//execute Python script to visualize data
+
+		// execute Python script to visualize data
 		String command = "py C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Files/BA.py";
 		try {
 			Process process = Runtime.getRuntime().exec(command);
@@ -565,52 +775,53 @@ public class Bubeck_Niklas_BA {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		
+
 		// fill up unknown dark_sinogram data
-		NumericGrid filled_dark_sino = fill_up_sinogram(pci_sino.getDark(), pci_sino.getAmp(), regression);
+		NumericGrid filled_dark_sino = fill_up_sinogram(sino_dark_trunc, sino_amp_mat, regression);
 //		filled_dark_sino.show("filled_up");
-
-		
-		// build picture with ones for scaling the backprojection
-		Grid2D ones = new Grid2D(size, size);
-		for (int i = 0; i < size; i++) {
-			for (int j = 0; j < size; j++) {
-				ones.setAtIndex(i, j, 1);
-			}
-		}
-
-		// forward and back projection
-		ProjectorAndBackprojector o = new ProjectorAndBackprojector(360, 2 * Math.PI);
-		Grid2D sino_ones = o.project(ones, new Grid2D(200, 360));
-//				sino_ones.show("sino_ones");
-		Grid2D ones_reko = o.backprojection_pixel(sino_ones, size);
-		NumericGrid reko_temp = p.backprojection_pixel((Grid2D) filled_dark_sino, size);
-		NumericPointwiseOperators.divideBy(reko_temp, ones_reko);
-		
-		NumericGrid reko_fbp = o.filtered_backprojection((Grid2D) filled_dark_sino, size);
-		
-		reko_fbp.show("reko_fbp");
-		
-		// save image in path
-		ImagePlus imp = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) reko_temp).createImage());
-		String path = "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/reko";
-		IJ.saveAs(imp, "png", path);
-		
-		ImagePlus imp8 = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) reko_fbp).createImage());
-		String path8 = "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/reko_fbp";
-		IJ.saveAs(imp8, "png", path8);
-		
-//		reko_temp.show("filled up reko");
-
+//
+////		// build picture with ones for scaling the backprojection
+////		Grid2D ones = new Grid2D(size, size);
+////		for (int i = 0; i < size; i++) {
+////			for (int j = 0; j < size; j++) {
+////				ones.setAtIndex(i, j, 1);
+////			}
+////		}
+////
+////		// forward and back projection
+//		ProjectorAndBackprojector o = new ProjectorAndBackprojector(360, 2 * Math.PI);
+////		Grid2D sino_ones = o.project(ones, new Grid2D(200, 360));
+//////				sino_ones.show("sino_ones");
+////		Grid2D ones_reko = o.backprojection_pixel(sino_ones, size);
+////		NumericGrid reko_temp = p.backprojection_pixel((Grid2D) filled_dark_sino, size);
+////		NumericPointwiseOperators.divideBy(reko_temp, ones_reko);
+//
+//		NumericGrid reko_fbp = o.filtered_backprojection((Grid2D) filled_dark_sino, size);
+//
+////		reko_fbp.show("reko_fbp");
+//
+//		// save image in path
+//		ImagePlus imp = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) reko_temp).createImage());
+//		String path = "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/reko";
+//		IJ.saveAs(imp, "png", path);
+//
+//		ImagePlus imp8 = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) reko_fbp).createImage());
+//		String path8 = "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/reko_fbp";
+//		IJ.saveAs(imp8, "png", path8);
+//
+////		reko_temp.show("filled up reko");
+//
 //		pci_sino2.getDark().show("Dark start");
-		NumericGrid diff = NumericPointwiseOperators.subtractedBy(pci_sino2.getDark(), pci_sino.getDark());
+//		NumericGrid diff = NumericPointwiseOperators.subtractedBy(filled_dark_sino, pci_sino_truncated.getDark());
 //		diff.show("Differenz");
-
-		//visualize differents
-		ImagePlus imp3 = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) diff).createImage());
-		IJ.saveAs(imp3, "png","C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/difference");
-//		return filled_dark_sino;
+//
+//		// visualize differents
+//		ImagePlus imp3 = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) diff).createImage());
+//		IJ.saveAs(imp3, "png", "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/difference");
+//		
+//		float error = NumericPointwiseOperators.mean(diff);
+//		errorlist.add(error);
+		return filled_dark_sino;
 	}
 
 	public static NumericGrid iterative_dark_reconstruction(NumericGrid dark_sino) {
@@ -748,17 +959,7 @@ public class Bubeck_Niklas_BA {
 		return pci_recon;
 	}
 
-	/**
-	 * MAIN
-	 * 
-	 * @param args
-	 * @throws IOException
-	 */
-	public static void main(String[] args) throws IOException {
-
-		// time
-		final long timeStart = System.currentTimeMillis();
-
+	public static void all(String[] args) throws IOException {
 		/*
 		 * -----------------------------------------------------------------------------
 		 * ------------------------- + initializing args values from userinterface frame
@@ -766,12 +967,12 @@ public class Bubeck_Niklas_BA {
 		 * -------------------------
 		 */
 
-		Boolean simchecked = Boolean.parseBoolean(args[0]);
+		simchecked = Boolean.parseBoolean(args[0]);
 		if (simchecked) {
 			nr_ellipses = Integer.parseInt(args[1]);
 		}
 
-		Boolean trcchecked = Boolean.parseBoolean(args[2]);
+		trcchecked = Boolean.parseBoolean(args[2]);
 		if (trcchecked) {
 			xstart = Integer.parseInt(args[3]);
 			xend = Integer.parseInt(args[4]);
@@ -785,13 +986,21 @@ public class Bubeck_Niklas_BA {
 			value = Integer.parseInt(args[12]);
 		}
 
-		Boolean iterchecked = Boolean.parseBoolean(args[13]);
-		if (iterchecked) {
-			iter_num = Integer.parseInt(args[14]);
-			error_val = Integer.parseInt(args[15]);
+		iterchecked = Boolean.parseBoolean(args[13]);
+
+		iter_num = Integer.parseInt(args[14]);
+		error_val = Integer.parseInt(args[15]);
+
+		vischecked = Boolean.parseBoolean(args[16]);
+
+		noisechecked = Boolean.parseBoolean(args[17]);
+		if (noisechecked) {
+			noisetype = args[18];
+
 		}
 
-		Boolean vischecked = Boolean.parseBoolean(args[16]);
+		// time
+		final long timeStart = System.currentTimeMillis();
 
 		// start ImageJ
 		new ImageJ();
@@ -813,35 +1022,39 @@ public class Bubeck_Niklas_BA {
 			ImagePlus imp = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) pci.getDark()).createImage());
 			String path = "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/groundTruthDark";
 			IJ.saveAs(imp, "png", path);
-			
+
 			ImagePlus imp2 = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) pci.getAmp()).createImage());
 			String path2 = "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/groundTruthAbsorption";
-			IJ.saveAs(imp2,"png", path2);
-			
-			
-			Grid2D blurred = blur(pci.getAmp(), 10, 49);
-			ImagePlus imp7 = new ImagePlus("Filled", ImageUtil.wrapGrid2D(blurred).createImage());
-			String path7 = "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/gaussian_blurred";
-			IJ.saveAs(imp7,"png", path7);
-			
-			
-			
+			IJ.saveAs(imp2, "png", path2);
+			if (noisechecked) {
+				NumericGrid noisy_dark = add_noise(pci.getDark(), 0.0, 0.5, noisetype);
+				noisy_dark.show("ich bin noisy");
+			}
+
+//			Grid2D blurred = blur(pci.getAmp(), 10, 49);
+//			ImagePlus imp7 = new ImagePlus("Filled", ImageUtil.wrapGrid2D(blurred).createImage());
+//			String path7 = "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/gaussian_blurred";
+//			IJ.saveAs(imp7,"png", path7);
+//			
+
 			// define geometry
 			int detector_width = 200;
 			int nr_of_projections = 360;
 
 			pci_sino = p.project(pci, new Grid2D(detector_width, nr_of_projections));
-			pci_sino2 = p.project(pci, new Grid2D(detector_width, nr_of_projections));
-			
+
+			Grid2D instreko = p.filtered_backprojection((Grid2D) pci_sino.getDark(), size);
+			instreko.show("direkte fbp");
+
 			ImagePlus imp5 = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) pci_sino.getAmp()).createImage());
 			String path5 = "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/AbsorptionSinogram";
-			IJ.saveAs(imp5,"png", path5);
-			
-			ImagePlus imp6 = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) pci_sino2.getDark()).createImage());
+			IJ.saveAs(imp5, "png", path5);
+
+			ImagePlus imp6 = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) pci_sino.getDark()).createImage());
 			String path6 = "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/OrigDarkSino";
 			IJ.saveAs(imp6, "png", path6);
-			
-			
+			pci_sino.getDark().show("orig dark");
+
 			System.out.println("simulated data with nr_ellipses: " + nr_ellipses);
 
 			/*
@@ -854,21 +1067,25 @@ public class Bubeck_Niklas_BA {
 			 */
 
 			if (trcchecked) {
-				pci_sino = fake_truncation(pci_sino, xstart, xend, xstart2, xend2, "x", value, false, true, "pending");
-//				pci_sino = fake_truncation(pci_sino, ystart, yend, ystart2, yend2, "y", value, false, true,  "pending");
+				PhaseContrastImages pci_sino_copy = pci_sino;
+				pci_sino_truncated = fake_truncation(pci_sino_copy, xstart, xend, xstart2, xend2, "x", value, false,
+						true, "pending");
 //				pci_sino.show("pci-fake");	
-				
-				ImagePlus imp3 = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) pci_sino.getDark()).createImage());
+//				truncated_dark_sino = fake_truncation(pci_sino_copy, xstart, xend, xstart2, xend2, "x", value, false,
+//						true, "pending").getDark();
+
+				ImagePlus imp3 = new ImagePlus("Filled",
+						ImageUtil.wrapGrid2D((Grid2D) pci_sino_truncated.getDark()).createImage());
 				String path3 = "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/TruncatedDfSinogram";
 				IJ.saveAs(imp3, "png", path3);
-				
+
 				ProjectorAndBackprojector o = new ProjectorAndBackprojector(360, 2 * Math.PI);
-				Grid2D trunc_reko = o.backprojection_pixel((Grid2D)pci_sino.getDark(), size);
-				
+				Grid2D trunc_reko = o.backprojection_pixel((Grid2D) pci_sino_truncated.getDark(), size);
+
 				ImagePlus imp4 = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) trunc_reko).createImage());
 				String path4 = "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/TruncatedDfi";
 				IJ.saveAs(imp4, "png", path4);
-				
+
 				System.out.println("truncated data from " + xstart + " to " + xend + " with value " + value);
 				System.out.println("truncated data from " + ystart + " to " + yend + " with value " + value);
 
@@ -892,14 +1109,74 @@ public class Bubeck_Niklas_BA {
 		 * 
 		 * -----------------------------------------------------------------------------
 		 * -------------------------
+		 * 
 		 */
-		for (int i = 0; i < 1; i++) {
-			ImagePlus imp = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) pci_sino.getDark()).createImage());
-			String path = "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/reko" + i;
-			IJ.saveAs(imp, "png", path);
-			calculate_sino_dark();
-		}
+		
+		// copy
+		Grid2D trcdark = (Grid2D) pci_sino_truncated.getDark();
+		Grid2D sino_dark_trunc = new Grid2D(200, 360);
+		for (int k = 0; k < trcdark.getWidth(); k++) {
+			for (int l = 0; l < trcdark.getHeight(); l++) {
+				float val = trcdark.getAtIndex(k, l);
 
+				sino_dark_trunc.setAtIndex(k, l, val);
+
+			}
+		}
+		
+		NumericGrid[] amp_materials = get_segmentation(pci.getAmp(), 0.01);
+		NumericGrid[] filled_sinos = new NumericGrid[amp_materials.length];
+		NumericGrid[] trunc_filled_sinos = new NumericGrid[amp_materials.length];
+		Grid2D all_sinos = new Grid2D(200, 360);
+		all_sinos.show("all sinos");
+		for (int j = 1; j < amp_materials.length; j++) {
+			for (int counter = 0; counter < iter_num; counter++) {
+				ImagePlus imp = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) sino_dark_trunc).createImage());
+				String path = "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/reko" + counter;
+				IJ.saveAs(imp, "png", path);
+//				pci_sino.getDark().show("reko dark");
+
+				filled_sinos[j] = calculate_sino_dark(amp_materials[j], sino_dark_trunc);
+				sino_dark_trunc = (Grid2D) filled_sinos[j];
+				
+				NumericGrid diff = NumericPointwiseOperators.subtractedBy(pci_sino.getDark(), sino_dark_trunc);
+				ImagePlus imp3 = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) diff).createImage());
+				IJ.saveAs(imp3, "png", "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/difference");
+				float error = NumericPointwiseOperators.mean(diff);
+				errorlist.add(error);
+				System.out.println("error betraegt: " + error);
+
+			}
+
+			System.out.println(Arrays.toString(filled_sinos[j].getSize()));
+			trunc_filled_sinos[j] = fake_truncation_image((Grid2D) filled_sinos[j], xend, xstart2, "x", value);
+
+			NumericPointwiseOperators.addBy(all_sinos, trunc_filled_sinos[j]);
+			trunc_filled_sinos[j].show("trunc filled sino " + j);
+			all_sinos.show("all_sinos");
+
+		}
+		ListInFile.export(errorlist, "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Files/error.csv", "error-values");
+		NumericGrid trc_all_sinos = fake_truncation_image((Grid2D) all_sinos, xend, xstart2, "x", value);
+		trc_all_sinos.show("trc_all_sinos");
+		pci_sino_truncated.getDark().show("lelel");
+		NumericPointwiseOperators.addBy(trc_all_sinos, pci_sino_truncated.getDark());
+		trc_all_sinos.show("endsinogramm");
+		
+		ImagePlus imp3 = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) trc_all_sinos).createImage());
+		IJ.saveAs(imp3, "png", "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/sinoendergebnis");
+		
+		
+		NumericGrid reko = p.filtered_backprojection((Grid2D)trc_all_sinos, size);
+		reko.show("end reko");
+		
+		ImagePlus imp4 = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) reko).createImage());
+		IJ.saveAs(imp4, "png", "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/fbp_rekonstruction_dark");
+		
+		
+//		pci.show("pci");
+//		pci_sino.show("pci_sino");
+//		pci_sino_truncated.show("pci_sino_truncated");
 		/*
 		 * -----------------------------------------------------------------------------
 		 * ------------------------- compute iterative reconstruction
@@ -956,9 +1233,10 @@ public class Bubeck_Niklas_BA {
 		 * -----------------------------------------------------------------------------
 		 * -------------------------
 		 */
-		
+
 		NormalDistribution nd = new NormalDistribution(1000, 100);
 		System.out.println("Normaldistrubution: " + nd);
+
 		/*
 		 * -----------------------------------------------------------------------------
 		 * --------------------------- + console addings
@@ -968,6 +1246,19 @@ public class Bubeck_Niklas_BA {
 
 		final long timeEnd = System.currentTimeMillis();
 		System.out.println("Executing Bubeck_Niklas_BA done in : " + (timeEnd - timeStart) + " Millisek.");
+
+	}
+
+	/**
+	 * MAIN
+	 * 
+	 * @param args
+	 * @throws IOException
+	 */
+	public static void main(String[] args) throws IOException {
+
+		Frame1.main(args);
+
 	}
 
 }
