@@ -2,6 +2,7 @@ package edu.stanford.rsl.BA_Niklas;
 
 import edu.stanford.rsl.BA_Niklas.Regression;
 import edu.stanford.rsl.BA_Niklas.PolynomialRegression;
+import edu.stanford.rsl.BA_Niklas.MatrixValues;
 import edu.stanford.rsl.BA_Niklas.ListInFile;
 import com.zetcode.linechartex.ScatterPlot;
 import com.zetcode.linechartex.LineChartEx;
@@ -665,7 +666,9 @@ public class Bubeck_Niklas_BA {
 
 		return points;
 	}
+	
 
+	
 	/**
 	 * corrects absorption
 	 * 
@@ -1167,55 +1170,60 @@ public class Bubeck_Niklas_BA {
 			}
 		}
 		
+		
 		NumericGrid[] amp_materials = get_segmentation(pci.getAmp(), 0.01);
-		NumericGrid[] filled_sinos = new NumericGrid[amp_materials.length];
-		NumericGrid[] trunc_filled_sinos = new NumericGrid[amp_materials.length];
-		Grid2D all_sinos = new Grid2D(200, 360);
-		all_sinos.show("all sinos");
-		for (int j = 1; j < amp_materials.length; j++) {
-			for (int counter = 0; counter < iter_num; counter++) {
-				ImagePlus imp = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) sino_dark_trunc).createImage());
-				String path = "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/reko" + counter;
-				IJ.saveAs(imp, "png", path);
-//				pci_sino.getDark().show("reko dark");    
-
-				filled_sinos[j] = calculate_sino_dark(amp_materials[j], sino_dark_trunc, amp_materials, counter);
-				sino_dark_trunc = (Grid2D) filled_sinos[j];
-				
-				NumericGrid diff = NumericPointwiseOperators.subtractedBy(pci_sino.getDark(), sino_dark_trunc);
-				ImagePlus imp3 = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) diff).createImage());
-				IJ.saveAs(imp3, "png", "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/difference");
-				float error = NumericPointwiseOperators.mean(diff);
-				errorlist.add(error);
-				System.out.println("error betraegt: " + error);
-
-			}
-
-			System.out.println(Arrays.toString(filled_sinos[j].getSize()));
-			trunc_filled_sinos[j] = fake_truncation_image((Grid2D) filled_sinos[j], xend, xstart2, "x", value);
-
-			NumericPointwiseOperators.addBy(all_sinos, trunc_filled_sinos[j]);
-			trunc_filled_sinos[j].show("trunc filled sino " + j);
-			all_sinos.show("all_sinos");
-
-		}
-		ListInFile.export(errorlist, "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Files/error.csv", "error-values");
-		NumericGrid trc_all_sinos = fake_truncation_image((Grid2D) all_sinos, xend, xstart2, "x", value);
-		trc_all_sinos.show("trc_all_sinos");
-		pci_sino_truncated.getDark().show("lelel");
-		NumericPointwiseOperators.addBy(trc_all_sinos, pci_sino_truncated.getDark());
-		trc_all_sinos.show("endsinogramm");
-		
-		ImagePlus imp3 = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) trc_all_sinos).createImage());
-		IJ.saveAs(imp3, "png", "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/sinoendergebnis");
+		get_matrix_values()
 		
 		
-		NumericGrid reko = p.filtered_backprojection((Grid2D)trc_all_sinos, size);
-		reko.show("end reko");
-		
-		ImagePlus imp4 = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) reko).createImage());
-		IJ.saveAs(imp4, "png", "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/fbp_rekonstruction_dark");
-		
+//		NumericGrid[] amp_materials = get_segmentation(pci.getAmp(), 0.01);
+//		NumericGrid[] filled_sinos = new NumericGrid[amp_materials.length];
+//		NumericGrid[] trunc_filled_sinos = new NumericGrid[amp_materials.length];
+//		Grid2D all_sinos = new Grid2D(200, 360);
+//		all_sinos.show("all sinos");
+//		for (int j = 1; j < amp_materials.length; j++) {
+//			for (int counter = 0; counter < iter_num; counter++) {
+//				ImagePlus imp = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) sino_dark_trunc).createImage());
+//				String path = "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/reko" + counter;
+//				IJ.saveAs(imp, "png", path);
+////				pci_sino.getDark().show("reko dark");    
+//
+//				filled_sinos[j] = calculate_sino_dark(amp_materials[j], sino_dark_trunc, amp_materials, counter);
+//				sino_dark_trunc = (Grid2D) filled_sinos[j];
+//				
+//				NumericGrid diff = NumericPointwiseOperators.subtractedBy(pci_sino.getDark(), sino_dark_trunc);
+//				ImagePlus imp3 = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) diff).createImage());
+//				IJ.saveAs(imp3, "png", "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/difference");
+//				float error = NumericPointwiseOperators.mean(diff);
+//				errorlist.add(error);
+//				System.out.println("error betraegt: " + error);
+//
+//			}
+//
+//			System.out.println(Arrays.toString(filled_sinos[j].getSize()));
+//			trunc_filled_sinos[j] = fake_truncation_image((Grid2D) filled_sinos[j], xend, xstart2, "x", value);
+//
+//			NumericPointwiseOperators.addBy(all_sinos, trunc_filled_sinos[j]);
+//			trunc_filled_sinos[j].show("trunc filled sino " + j);
+//			all_sinos.show("all_sinos");
+//
+//		}
+//		ListInFile.export(errorlist, "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Files/error.csv", "error-values");
+//		NumericGrid trc_all_sinos = fake_truncation_image((Grid2D) all_sinos, xend, xstart2, "x", value);
+//		trc_all_sinos.show("trc_all_sinos");
+//		pci_sino_truncated.getDark().show("lelel");
+//		NumericPointwiseOperators.addBy(trc_all_sinos, pci_sino_truncated.getDark());
+//		trc_all_sinos.show("endsinogramm");
+//		
+//		ImagePlus imp3 = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) trc_all_sinos).createImage());
+//		IJ.saveAs(imp3, "png", "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/sinoendergebnis");
+//		
+//		
+//		NumericGrid reko = p.filtered_backprojection((Grid2D)trc_all_sinos, size);
+//		reko.show("end reko");
+//		
+//		ImagePlus imp4 = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) reko).createImage());
+//		IJ.saveAs(imp4, "png", "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/fbp_rekonstruction_dark");
+//		
 		
 //		pci.show("pci");
 //		pci_sino.show("pci_sino");
