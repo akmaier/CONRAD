@@ -1177,7 +1177,7 @@ public class Bubeck_Niklas_BA {
 				ImagePlus imp = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) sino_dark_trunc).createImage());
 				String path = "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/reko" + counter;
 				IJ.saveAs(imp, "png", path);
-//				pci_sino.getDark().show("reko dark");
+//				pci_sino.getDark().show("reko dark");    
 
 				filled_sinos[j] = calculate_sino_dark(amp_materials[j], sino_dark_trunc, amp_materials, counter);
 				sino_dark_trunc = (Grid2D) filled_sinos[j];
