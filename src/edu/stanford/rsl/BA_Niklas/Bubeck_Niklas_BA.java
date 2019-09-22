@@ -2,7 +2,6 @@ package edu.stanford.rsl.BA_Niklas;
 
 import edu.stanford.rsl.BA_Niklas.Regression;
 import edu.stanford.rsl.BA_Niklas.PolynomialRegression;
-import edu.stanford.rsl.BA_Niklas.MatrixValues;
 import edu.stanford.rsl.BA_Niklas.ListInFile;
 import com.zetcode.linechartex.ScatterPlot;
 import com.zetcode.linechartex.LineChartEx;
@@ -383,7 +382,13 @@ public class Bubeck_Niklas_BA {
 			materials[l] = mat;
 
 		}
-		return materials;
+		NumericGrid[] wo_bg = new NumericGrid[materials.length - 1];
+		int cter = 0;
+		for (int i = 1; i < materials.length; i++) {
+			wo_bg[cter] = materials[i];
+			cter++;
+		}
+		return wo_bg;
 	}
 
 	/**
@@ -667,7 +672,98 @@ public class Bubeck_Niklas_BA {
 		return points;
 	}
 	
-
+	public static NumericGrid[] get_masks(NumericGrid[] segmentations) {
+		NumericGrid[] masks = new NumericGrid[segmentations.length];
+		for(int i = 0; i < segmentations.length; i++) {
+			Grid2D temp = new Grid2D(size, size);
+			for(int k = 0 ; k < size; k++) {
+				for(int l = 0; l < size; l++) {
+					int[] idx = {k, l};
+					if(segmentations[i].getValue(idx) == (float) 0.0) {
+						temp.setValue(0, idx);
+						continue;
+					}else {
+						temp.setValue(1, idx);
+					}
+				}
+			}
+			temp.show("maske temp");
+			masks[i] = temp;
+		}
+		
+		return masks;
+	}
+	
+	public static double[][] get_lgs_values_x(NumericGrid[] masks_sino, String variant){
+		double[][] x = new double[200*360][masks_sino.length];
+		if(variant == "amp") {
+			for(int i = 0; i < masks_sino.length; i++) {
+				int counter = 0;
+				for(int k = 0; k < 200; k++) {
+					for(int l = 0; l < 360; l++) {
+						int[] idx = {k ,l};
+						x[counter][i] = masks_sino[i].getValue(idx);
+						counter++;
+					}
+				}
+			}
+		}
+		
+		if(variant == "dark") {
+			for(int i = 0; i < masks_sino.length; i++) {
+				int counter = 0;
+				for(int k = 0; k < 200; k++) {
+					for(int l = 0; l < 360; l++) {
+						
+						if(k < xend || k > xstart2) {
+							continue;
+						}
+						
+						int[] idx = {k ,l};
+						x[counter][i] = masks_sino[i].getValue(idx);
+						counter++;
+					}
+				}
+			}
+		}
+		
+		
+		return x;
+	}
+	
+	public static double[] get_lgs_values_y(NumericGrid sinogram, String variant) {
+		double[] y = new double[200*360];
+		
+		if(variant == "amp") {
+			int counter = 0;
+			for(int k = 0; k < 200; k++) {
+				for(int l = 0; l < 360; l++) {
+					int[] idx = {k ,l};
+					y[counter] = sinogram.getValue(idx);
+					counter++;
+				}
+			}
+		}
+		
+		if(variant == "dark") {
+			int counter = 0;
+			for(int k = 0; k < 200; k++) {
+				for(int l = 0; l < 360; l++) {
+					
+					if(k < xend || k > xstart2) {
+						continue;
+					}
+					
+					int[] idx = {k ,l};
+					y[counter] = sinogram.getValue(idx);
+					counter++;
+				}
+			}
+		}
+		
+		return y;
+	}
+	
 	
 	/**
 	 * corrects absorption
@@ -1172,59 +1268,74 @@ public class Bubeck_Niklas_BA {
 		
 		
 		NumericGrid[] amp_materials = get_segmentation(pci.getAmp(), 0.01);
-		get_matrix_values()
+		//sinograms of materials
+		NumericGrid[] amp_materials_sino = new NumericGrid[amp_materials.length];
+		for(int i = 0; i< amp_materials.length; i++) {
+			amp_materials_sino[i] = p.project((Grid2D) amp_materials[i], new Grid2D(200, 360));
+			amp_materials_sino[i].show("sino maske");
+		}
 		
 		
-//		NumericGrid[] amp_materials = get_segmentation(pci.getAmp(), 0.01);
-//		NumericGrid[] filled_sinos = new NumericGrid[amp_materials.length];
-//		NumericGrid[] trunc_filled_sinos = new NumericGrid[amp_materials.length];
-//		Grid2D all_sinos = new Grid2D(200, 360);
-//		all_sinos.show("all sinos");
-//		for (int j = 1; j < amp_materials.length; j++) {
-//			for (int counter = 0; counter < iter_num; counter++) {
-//				ImagePlus imp = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) sino_dark_trunc).createImage());
-//				String path = "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/reko" + counter;
-//				IJ.saveAs(imp, "png", path);
-////				pci_sino.getDark().show("reko dark");    
-//
-//				filled_sinos[j] = calculate_sino_dark(amp_materials[j], sino_dark_trunc, amp_materials, counter);
-//				sino_dark_trunc = (Grid2D) filled_sinos[j];
-//				
-//				NumericGrid diff = NumericPointwiseOperators.subtractedBy(pci_sino.getDark(), sino_dark_trunc);
-//				ImagePlus imp3 = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) diff).createImage());
-//				IJ.saveAs(imp3, "png", "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/difference");
-//				float error = NumericPointwiseOperators.mean(diff);
-//				errorlist.add(error);
-//				System.out.println("error betraegt: " + error);
-//
-//			}
-//
-//			System.out.println(Arrays.toString(filled_sinos[j].getSize()));
-//			trunc_filled_sinos[j] = fake_truncation_image((Grid2D) filled_sinos[j], xend, xstart2, "x", value);
-//
-//			NumericPointwiseOperators.addBy(all_sinos, trunc_filled_sinos[j]);
-//			trunc_filled_sinos[j].show("trunc filled sino " + j);
-//			all_sinos.show("all_sinos");
-//
-//		}
-//		ListInFile.export(errorlist, "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Files/error.csv", "error-values");
-//		NumericGrid trc_all_sinos = fake_truncation_image((Grid2D) all_sinos, xend, xstart2, "x", value);
-//		trc_all_sinos.show("trc_all_sinos");
-//		pci_sino_truncated.getDark().show("lelel");
-//		NumericPointwiseOperators.addBy(trc_all_sinos, pci_sino_truncated.getDark());
-//		trc_all_sinos.show("endsinogramm");
-//		
-//		ImagePlus imp3 = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) trc_all_sinos).createImage());
-//		IJ.saveAs(imp3, "png", "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/sinoendergebnis");
-//		
-//		
-//		NumericGrid reko = p.filtered_backprojection((Grid2D)trc_all_sinos, size);
-//		reko.show("end reko");
-//		
-//		ImagePlus imp4 = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) reko).createImage());
-//		IJ.saveAs(imp4, "png", "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/fbp_rekonstruction_dark");
-//		
+		NumericGrid[] masks = get_masks(amp_materials);
 		
+		// sinograms of masks
+		NumericGrid[] masks_sino = new NumericGrid[masks.length];
+		for(int i = 0; i< masks.length; i++) {
+			masks_sino[i] = p.project((Grid2D) masks[i], new Grid2D(200, 360));
+			masks_sino[i].show("sino maske");
+		}
+		
+		double[][] x_amp = get_lgs_values_x(masks_sino, "amp");
+		double[][] x_dark = get_lgs_values_x(masks_sino, "dark");
+		pci_sino.getAmp().show("AMP sino");
+		double [] y_amp = get_lgs_values_y(pci_sino.getAmp(), "amp");
+		double [] y_dark = get_lgs_values_y(pci_sino_truncated.getDark(), "dark");
+
+		System.out.println(Arrays.toString(x_amp[0]));
+		
+		MultipleLinearRegression regression = new MultipleLinearRegression(x_amp, y_amp);
+
+        System.out.printf("%.2f + %.2f beta1  (R^2 = %.2f)\n",
+                      regression.beta(0), regression.beta(1), regression.R2());
+ 
+        
+		MultipleLinearRegression regression_dark = new MultipleLinearRegression(x_dark, y_dark);
+
+        System.out.printf("%.2f + %.2f beta1  (R^2 = %.2f)\n",
+                      regression_dark.beta(0), regression_dark.beta(1), regression_dark.R2());
+        
+        
+        
+        Grid2D add = new Grid2D(200, 360);
+        NumericPointwiseOperators.copy(add, pci_sino_truncated.getDark());
+        NumericGrid[] fill_up = new NumericGrid[masks.length];
+        double[] correlation = new double[masks.length];
+        for(int i = 0; i < masks.length; i++) {
+        	Grid2D dark_sino = new Grid2D(200, 360);
+        	correlation[i] = regression_dark.beta(i) / regression.beta(i);
+        	
+        	for(int k = 0; k < 200; k++) {
+        		for(int l = 0; l < 360; l++) {
+        			if(k >= xend && k <= xstart2) {
+        				continue;
+        			}
+        			int[] idx = {k, l};
+        			float amp_value = amp_materials_sino[i].getValue(idx);
+        			float val = (float) (amp_value * correlation[i]);
+        			dark_sino.setAtIndex(k, l, val);
+        		}
+        	}
+        	fill_up[i] = dark_sino;
+        	NumericPointwiseOperators.addBy(add, dark_sino);
+        }
+		
+        add.show("added");
+        
+        NumericGrid dark_reco = p.filtered_backprojection(add, size);
+        
+        dark_reco.show("last reco");
+        
+        
 //		pci.show("pci");
 //		pci_sino.show("pci_sino");
 //		pci_sino_truncated.show("pci_sino_truncated");
