@@ -1273,6 +1273,10 @@ public class Bubeck_Niklas_BA {
 		for(int i = 0; i< amp_materials.length; i++) {
 			amp_materials_sino[i] = p.project((Grid2D) amp_materials[i], new Grid2D(200, 360));
 			amp_materials_sino[i].show("sino maske");
+			
+			ImagePlus imp5 = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) pci_sino.getAmp()).createImage());
+			String path5 = "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/masks_sinogramm" + i;
+			IJ.saveAs(imp5, "png", path5);
 		}
 		
 		
