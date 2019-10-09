@@ -24,9 +24,8 @@ import org.math.plot.utils.Array;
 
 import org.apache.commons.math3.distribution.NormalDistribution;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.*;
 import java.io.*;
 
@@ -77,6 +76,8 @@ public class Bubeck_Niklas_BA {
 	static PhaseContrastImages pci_sino;
 	static PhaseContrastImages pci_sino_truncated;
 	static NumericGrid splitted_dark;
+	static String pathtofile = "/CONRAD/src/edu/stanford/rsl/BA_Niklas/";
+	static String pathtoproject;
 
 	/**
 	 * creates random ellipses
@@ -252,6 +253,7 @@ public class Bubeck_Niklas_BA {
 				if (distribution == "gaussian") {
 					java.util.Random r = new java.util.Random();
 					noise = r.nextGaussian() * Math.sqrt(variance) + mean;
+					System.out.println("Noise: " + noise);
 				}
 
 				float val = image.getAtIndex(i, j);
@@ -259,7 +261,7 @@ public class Bubeck_Niklas_BA {
 
 			}
 		}
-
+		image.show("nooiiise");
 		return image;
 	}
 
@@ -279,13 +281,15 @@ public class Bubeck_Niklas_BA {
 		return mean;
 	}
 
-	public static NumericGrid[] get_segmentation(NumericGrid dark_gt, double noise) {
+	public static NumericGrid[] get_segmentation(NumericGrid dark_gt, double noise) throws IOException {
 		Grid2D darkgt = (Grid2D) dark_gt;
 		Float[] values = new Float[darkgt.getHeight() * darkgt.getWidth()];
+
 		int counter = 0;
 		for (int i = 0; i < darkgt.getWidth(); i++) {
 			for (int j = 0; j < darkgt.getHeight(); j++) {
-				values[counter] = darkgt.getAtIndex(i, j);
+				float value = darkgt.getAtIndex(i, j);
+				values[counter] = (float) ((double) Math.round(value * 100d) / 100d);
 				counter++;
 			}
 		}
@@ -327,6 +331,61 @@ public class Bubeck_Niklas_BA {
 //
 //		}
 
+		if (noisechecked) {
+			int test = 0;
+			int ctr = 0;
+			float[] histotemp = new float[darkgt.getHeight() * darkgt.getWidth()];
+			float[] numbertemp = new float[darkgt.getHeight() * darkgt.getWidth()];
+			for (int n = 0; n < values.length; n++) {
+				if (values[n] == (float) 0.0) {
+					test++;
+					continue;
+				}
+				boolean indicator = false;
+				for (int m = 0; m < values.length; m++) {
+					if (values[n] == histotemp[m]) {
+						numbertemp[m]++;
+						indicator = true;
+					}
+
+				}
+				if (!indicator) {
+					histotemp[ctr] = values[n];
+					ctr++;
+				}
+
+			}
+
+			Float[] histo = new Float[ctr];
+			Float[] number = new Float[ctr];
+			for (int h = 0; h < ctr; h++) {
+				histo[h] = histotemp[h];
+				number[h] = numbertemp[h];
+			}	
+				
+			
+				String pathhisto = pathtoproject + pathtofile + "Datasheets/values.csv";
+				String pathcount = pathtoproject + pathtofile + "Datasheets/count.csv";
+				String path_nr_ell = pathtoproject + pathtofile + "Datasheets/nr_ell.csv";
+				Float[] nr_ell = { (float) nr_ellipses };
+				ListInFile.export(Arrays.asList(histo), pathhisto, "histo-values");
+				ListInFile.export(Arrays.asList(number), pathcount, "count");
+				ListInFile.export(Arrays.asList(nr_ell), path_nr_ell, "Number of ellipses");
+
+				String command = "py " + pathtoproject + pathtofile + "PythonScripts/kmean.py";
+				try {
+					Process process = Runtime.getRuntime().exec(command);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+				
+			
+		}
+
+		
+
 		// only use unique values
 		Float[] unique = Arrays.stream(values).distinct().toArray(Float[]::new);
 
@@ -343,7 +402,37 @@ public class Bubeck_Niklas_BA {
 		for (int k = 0; k < unique.length - 1; k++) {
 			thresh[k] = ((unique[k]) + (unique[k + 1])) / 2;
 		}
+		
+		if(noisechecked) {
+			String paththresh = pathtoproject + pathtofile + "Datasheets/thresholds.csv";
+			
+			BufferedReader threshReader = new BufferedReader(
+					new FileReader(paththresh));
 
+			String[] threshs = new String[20];
+
+			int threshcounter = 0;
+			String threshline;
+			while ((threshline = threshReader.readLine()) != null) {
+				threshs[threshcounter] = threshline;
+				threshcounter++;
+				// do something with the data
+
+			}
+			int thctr = 0;
+			Float[] thresholds = new Float[nr_ellipses];
+			for(int o =0; o < threshs.length; o++) {
+				if(threshs[o] != null && threshs[o].length() > 0) {
+					thresholds[thctr] = Float.parseFloat(threshs[o]);
+					thctr++;
+				}
+			}
+			
+			System.out.println("Hier sind die threshs: " + threshs[4]);
+			thresh = thresholds;
+		}
+		
+		System.out.println((thresh.length));
 		System.out.println(Arrays.toString(values));
 		System.out.println(Arrays.toString(unique));
 		System.out.println(Arrays.toString(thresh));
@@ -351,7 +440,9 @@ public class Bubeck_Niklas_BA {
 		NumericGrid[] materials = new NumericGrid[thresh.length + 1];
 		for (int l = 0; l <= thresh.length; l++) {
 			Grid2D mat = (Grid2D) darkgt.clone();
-
+//			if(thresh[l] == null) {
+//				continue;
+//			}
 			for (int i = 0; i < darkgt.getWidth(); i++) {
 				for (int j = 0; j < darkgt.getHeight(); j++) {
 
@@ -374,7 +465,7 @@ public class Bubeck_Niklas_BA {
 
 						if (darkgt.getAtIndex(i, j) < thresh[l - 1] || darkgt.getAtIndex(i, j) > thresh[l]) {
 							mat.setAtIndex(i, j, 0);
-							System.out.println("bin drin");
+//							System.out.println("bin drin");
 						}
 
 					}
@@ -533,34 +624,32 @@ public class Bubeck_Niklas_BA {
 
 	public static NumericGrid split_dark(NumericGrid trc_dark_sino, NumericGrid mat, NumericGrid[] materials) {
 		ProjectorAndBackprojector p = new ProjectorAndBackprojector(nr_of_projections, 2 * Math.PI);
-		Grid2D mat_sino = p.project((Grid2D)mat, new Grid2D(200, 360));
-		
-		
+		Grid2D mat_sino = p.project((Grid2D) mat, new Grid2D(200, 360));
+
 		Grid2D splitted_calc_dark = new Grid2D(200, 360);
 		NumericPointwiseOperators.copy(splitted_dark, trc_dark_sino);
 		NumericPointwiseOperators.copy(splitted_calc_dark, trc_dark_sino);
-		
-		
-		for(int i = 0; i < materials.length; i++) {
-			if(mat == materials[i]) {
+
+		for (int i = 0; i < materials.length; i++) {
+			if (mat == materials[i]) {
 
 				continue;
 			}
-			
+
 			Grid2D material_sino = p.project((Grid2D) materials[i], new Grid2D(200, 360));
-			
-			for(int k =0; k< 200; k++) {
-				for(int l =0;l < 360; l++) {
-					int[] idx = {k, l};
-					if( material_sino.getAtIndex(k, l) == (float) 0.0) {
+
+			for (int k = 0; k < 200; k++) {
+				for (int l = 0; l < 360; l++) {
+					int[] idx = { k, l };
+					if (material_sino.getAtIndex(k, l) == (float) 0.0) {
 						continue;
-					}else {
-						((Grid2D) splitted_dark).setAtIndex(k, l,  (float) 1000);
-						splitted_calc_dark.setAtIndex(k, l,(float) 0.0);
+					} else {
+						((Grid2D) splitted_dark).setAtIndex(k, l, (float) 1000);
+						splitted_calc_dark.setAtIndex(k, l, (float) 0.0);
 					}
 				}
 			}
-			
+
 		}
 		return splitted_calc_dark;
 	}
@@ -578,11 +667,14 @@ public class Bubeck_Niklas_BA {
 
 		Grid2D abs = (Grid2D) abso;
 		Grid2D dar = (Grid2D) dark;
-
-		FileWriter fileWriterdark = new FileWriter("C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Files/dark.csv");
+		
+		String pathdark = pathtoproject + pathtofile + "DataSheets/dark.csv";
+		String pathabso = pathtoproject + pathtofile + "DataSheets/abso.csv";
+		
+		FileWriter fileWriterdark = new FileWriter(pathdark);
 		PrintWriter printWriterdark = new PrintWriter(fileWriterdark);
-
-		FileWriter fileWriterabso = new FileWriter("C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Files/abso.csv");
+		
+		FileWriter fileWriterabso = new FileWriter(pathabso);
 		PrintWriter printWriterabso = new PrintWriter(fileWriterabso);
 
 		for (int i = 0; i < abs.getWidth(); i++) {
@@ -596,8 +688,8 @@ public class Bubeck_Niklas_BA {
 
 					}
 				}
-				
-				if(((Grid2D) splitted_dark).getAtIndex(i, j) == (float) 1000 ) {
+
+				if (((Grid2D) splitted_dark).getAtIndex(i, j) == (float) 1000) {
 					continue;
 				}
 
@@ -638,11 +730,14 @@ public class Bubeck_Niklas_BA {
 
 //		ListInFile.export(darklist, "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Files/dark.csv", "dark-values");
 //		ListInFile.export(abslist, "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Files/abso.csv", "amp-values");
-
+		
+//		String pathdark = pathtoproject + pathtofile + "Datasheets/dark.csv";
+//		String pathabso = pathtoproject + pathtofile + "Datasheets/abso.csv";
+		
 		BufferedReader csvDarkReader = new BufferedReader(
-				new FileReader("C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Files/dark.csv"));
+				new FileReader(pathdark));
 		BufferedReader csvAbsoReader = new BufferedReader(
-				new FileReader("C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Files/abso.csv"));
+				new FileReader(pathabso));
 
 		String[] darkpoints = new String[200 * 360];
 		String[] absopoints = new String[200 * 360];
@@ -920,10 +1015,11 @@ public class Bubeck_Niklas_BA {
 		for (int i = 0; i <= 3; i++) {
 			reglist.add((float) regression.beta(i));
 		}
-		ListInFile.export(reglist, "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Files/reg.csv", "regression");
+		String pathreg = pathtoproject + pathtofile + "Datasheets/reg.csv";
+		ListInFile.export(reglist, pathreg, "regression");
 
 		// execute Python script to visualize data
-		String command = "py C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Files/BA.py";
+		String command = "py " + pathtoproject + pathtofile + "PythonScripts/polynom.py";
 		try {
 			Process process = Runtime.getRuntime().exec(command);
 		} catch (IOException e) {
@@ -1107,8 +1203,9 @@ public class Bubeck_Niklas_BA {
 
 			i++;
 		}
-
-		ListInFile.export(errorlist, "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Files/error.csv", "error-values");
+		
+		String patherror = pathtoproject + pathtofile + "Datasheets/error.csv";
+		ListInFile.export(errorlist, patherror, "error-values");
 
 		System.out.println("iterative reconstruction done");
 		return pci_recon;
@@ -1157,10 +1254,19 @@ public class Bubeck_Niklas_BA {
 		multipleMaterialCheck = Boolean.parseBoolean(args[19]);
 		path = args[20];
 		saveImagesCheck = Boolean.parseBoolean(args[21]);
-
+		pathtoproject = args[22];
+		
+		
+		
 		// time
 		final long timeStart = System.currentTimeMillis();
-
+		
+//		String projectpath = pathtoproject + pathtofile + "pathtoproject.csv";
+//		FileWriter csvWriter = new FileWriter(projectpath);
+//		csvWriter.append(pathtoproject);
+//		csvWriter.flush();
+//		csvWriter.close();
+		
 		// start ImageJ
 		new ImageJ();
 
@@ -1186,7 +1292,7 @@ public class Bubeck_Niklas_BA {
 			String path2 = "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/groundTruthAbsorption";
 			IJ.saveAs(imp2, "png", path2);
 			if (noisechecked) {
-				NumericGrid noisy_dark = add_noise(pci.getDark(), 0.0, 0.5, noisetype);
+				NumericGrid noisy_dark = add_noise(pci.getAmp(), 0, 0.001, "gaussian");
 				noisy_dark.show("ich bin noisy");
 			}
 
@@ -1317,13 +1423,13 @@ public class Bubeck_Niklas_BA {
 
 			MultipleLinearRegression regression = new MultipleLinearRegression(x_amp, y_amp);
 
-			System.out.printf("%.2f + %.2f beta1  (R^2 = %.2f)\n", regression.beta(0), regression.beta(1),
-					regression.R2());
+//			System.out.printf("%.2f + %.2f beta1  (R^2 = %.2f)\n", regression.beta(0), regression.beta(1),
+//					regression.R2());
 
 			MultipleLinearRegression regression_dark = new MultipleLinearRegression(x_dark, y_dark);
 
-			System.out.printf("%.2f + %.2f beta1  (R^2 = %.2f)\n", regression_dark.beta(0), regression_dark.beta(1),
-					regression_dark.R2());
+//			System.out.printf("%.2f + %.2f beta1  (R^2 = %.2f)\n", regression_dark.beta(0), regression_dark.beta(1),
+//					regression_dark.R2());
 
 			Grid2D add = new Grid2D(200, 360);
 			NumericPointwiseOperators.copy(add, pci_sino_truncated.getDark());
@@ -1409,8 +1515,8 @@ public class Bubeck_Niklas_BA {
 				all_sinos.show("all_sinos");
 
 			}
-			ListInFile.export(errorlist, "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Files/error.csv",
-					"error-values");
+			String patherror = pathtoproject + pathtofile + "Datasheets/error.csv";
+			ListInFile.export(errorlist, patherror, "error-values");
 			NumericGrid trc_all_sinos = fake_truncation_image((Grid2D) all_sinos, xend, xstart2, "x", value);
 			trc_all_sinos.show("trc_all_sinos");
 			pci_sino_truncated.getDark().show("lelel");
@@ -1455,7 +1561,7 @@ public class Bubeck_Niklas_BA {
 		 * --------------------------
 		 */
 		if (vischecked) {
-			String command1 = "py C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Files/BA.py";
+			String command1 = "py " + pathtoproject + pathtofile + "PythonScripts/error.py";
 			try {
 				Process process = Runtime.getRuntime().exec(command1);
 			} catch (IOException e) {

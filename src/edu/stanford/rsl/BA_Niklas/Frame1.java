@@ -46,6 +46,7 @@ public class Frame1 {
 	private JTextField yend2;
 	private JTextField noisetype;
 	private JTextField path;
+	private JTextField pathtoproject;
 
 	/**
 	 * Launch the application.
@@ -81,129 +82,129 @@ public class Frame1 {
 		
 		nr_ellipses = new JTextField();
 		nr_ellipses.setText("2");
-		nr_ellipses.setBounds(288, 21, 36, 20);
+		nr_ellipses.setBounds(288, 100, 36, 20);
 		frame.getContentPane().add(nr_ellipses);
 		nr_ellipses.setColumns(10);
 		
 		lblNrellipses = new JLabel("nr_ellipses");
-		lblNrellipses.setBounds(232, 24, 46, 14);
+		lblNrellipses.setBounds(232, 103, 46, 14);
 		frame.getContentPane().add(lblNrellipses);
 		
 		lblStart = new JLabel("start");
-		lblStart.setBounds(242, 130, 23, 14);
+		lblStart.setBounds(242, 184, 23, 14);
 		frame.getContentPane().add(lblStart);
 		
 		lblEnd = new JLabel("end");
-		lblEnd.setBounds(288, 130, 23, 14);
+		lblEnd.setBounds(288, 184, 23, 14);
 		frame.getContentPane().add(lblEnd);
 		
 		xstart = new JTextField();
 		xstart.setText("0");
-		xstart.setBounds(242, 155, 36, 20);
+		xstart.setBounds(242, 203, 36, 20);
 		frame.getContentPane().add(xstart);
 		xstart.setColumns(10);
 		
 		JCheckBox simCheckbox = new JCheckBox("simulate data");
-		simCheckbox.setBounds(47, 20, 97, 23);
+		simCheckbox.setBounds(47, 101, 97, 23);
 		frame.getContentPane().add(simCheckbox);
 		simCheckbox.setSelected(true);
 		
 		JCheckBox trcCheckbox = new JCheckBox("truncate data");
 		trcCheckbox.setSelected(true);
-		trcCheckbox.setBounds(47, 154, 97, 23);
+		trcCheckbox.setBounds(47, 202, 97, 23);
 		frame.getContentPane().add(trcCheckbox);
 		
 		xend = new JTextField();
 		xend.setText("75");
-		xend.setBounds(288, 155, 36, 20);
+		xend.setBounds(288, 203, 36, 20);
 		frame.getContentPane().add(xend);
 		xend.setColumns(10);
 		
 		JLabel lblXaxes = new JLabel("x-axes");
-		lblXaxes.setBounds(189, 158, 46, 14);
+		lblXaxes.setBounds(186, 206, 46, 14);
 		frame.getContentPane().add(lblXaxes);
 		
 		JLabel lblYaxes = new JLabel("y-axes");
-		lblYaxes.setBounds(189, 184, 46, 14);
+		lblYaxes.setBounds(189, 237, 46, 14);
 		frame.getContentPane().add(lblYaxes);
 		
 		ystart = new JTextField();
 		ystart.setText("0");
-		ystart.setBounds(242, 181, 36, 20);
+		ystart.setBounds(242, 234, 36, 20);
 		frame.getContentPane().add(ystart);
 		ystart.setColumns(10);
 		
 		yend = new JTextField();
 		yend.setText("90");
-		yend.setBounds(288, 181, 36, 20);
+		yend.setBounds(288, 234, 36, 20);
 		frame.getContentPane().add(yend);
 		yend.setColumns(10);
 		
 		xstart2 = new JTextField();
 		xstart2.setText("125");
 		xstart2.setColumns(10);
-		xstart2.setBounds(344, 155, 36, 20);
+		xstart2.setBounds(344, 203, 36, 20);
 		frame.getContentPane().add(xstart2);
 		
 		ystart2 = new JTextField();
 		ystart2.setText("270");
 		ystart2.setColumns(10);
-		ystart2.setBounds(344, 181, 36, 20);
+		ystart2.setBounds(344, 234, 36, 20);
 		frame.getContentPane().add(ystart2);
 		
 		xend2 = new JTextField();
 		xend2.setText("200");
 		xend2.setColumns(10);
-		xend2.setBounds(390, 155, 36, 20);
+		xend2.setBounds(390, 203, 36, 20);
 		frame.getContentPane().add(xend2);
 		
 		yend2 = new JTextField();
 		yend2.setText("360");
 		yend2.setColumns(10);
-		yend2.setBounds(390, 181, 36, 20);
+		yend2.setBounds(390, 234, 36, 20);
 		frame.getContentPane().add(yend2);
 		
 		JLabel label = new JLabel("start");
-		label.setBounds(343, 130, 23, 14);
+		label.setBounds(344, 184, 23, 14);
 		frame.getContentPane().add(label);
 		
 		JLabel label_1 = new JLabel("end");
-		label_1.setBounds(390, 130, 23, 14);
+		label_1.setBounds(390, 184, 23, 14);
 		frame.getContentPane().add(label_1);
 		
 		JCheckBox darkCheckbox = new JCheckBox("Only Dark");
 		darkCheckbox.setSelected(true);
-		darkCheckbox.setBounds(70, 180, 97, 23);
+		darkCheckbox.setBounds(70, 233, 97, 23);
 		frame.getContentPane().add(darkCheckbox);
 		
 		lblValue = new JLabel("value");
-		lblValue.setBounds(232, 230, 46, 14);
+		lblValue.setBounds(232, 265, 46, 14);
 		frame.getContentPane().add(lblValue);
 		
 		value = new JTextField();
 		value.setText("0");
-		value.setBounds(288, 227, 23, 20);
+		value.setBounds(288, 262, 23, 20);
 		frame.getContentPane().add(value);
 		value.setColumns(10);
 		
 		iter_num = new JTextField();
 		iter_num.setText("5");
-		iter_num.setBounds(245, 343, 23, 20);
+		iter_num.setBounds(242, 355, 23, 20);
 		frame.getContentPane().add(iter_num);
 		iter_num.setColumns(10);
 		
 		lblIternum = new JLabel("iter_num");
-		lblIternum.setBounds(189, 346, 46, 14);
+		lblIternum.setBounds(189, 358, 46, 14);
 		frame.getContentPane().add(lblIternum);
 		
 		error_val = new JTextField();
 		error_val.setText("0");
-		error_val.setBounds(245, 368, 23, 20);
+		error_val.setBounds(242, 386, 23, 20);
 		frame.getContentPane().add(error_val);
 		error_val.setColumns(10);
 		
 		lblErrorval = new JLabel("error_val");
-		lblErrorval.setBounds(189, 371, 46, 14);
+		lblErrorval.setBounds(189, 389, 46, 14);
 		frame.getContentPane().add(lblErrorval);
 		
 		visCheckbox = new JCheckBox("show visualizations");
@@ -212,26 +213,26 @@ public class Frame1 {
 
 		
 		JCheckBox noisechecked = new JCheckBox("add noise");
-		noisechecked.setBounds(70, 46, 97, 23);
+		noisechecked.setBounds(70, 127, 97, 23);
 		frame.getContentPane().add(noisechecked);
 		
 		noisetype = new JTextField();
 		noisetype.setText("gaussian");
-		noisetype.setBounds(173, 47, 86, 20);
+		noisetype.setBounds(173, 128, 86, 20);
 		frame.getContentPane().add(noisetype);
 		noisetype.setColumns(10);
 		
 		JCheckBox singleMaterialCheck = new JCheckBox("Single material");
-		singleMaterialCheck.setBounds(93, 316, 97, 23);
+		singleMaterialCheck.setBounds(93, 328, 97, 23);
 		frame.getContentPane().add(singleMaterialCheck);
 		
 		JCheckBox multiMaterialCheck = new JCheckBox("Multiple material");
-		multiMaterialCheck.setBounds(268, 316, 112, 23);
+		multiMaterialCheck.setBounds(268, 328, 112, 23);
 		frame.getContentPane().add(multiMaterialCheck);
 		
 		path = new JTextField();
 		path.setText("C:\\Users\\Niklas\\Documents\\Uni\\Bachelorarbeit\\Bilder\\BilderTestFilled");
-		path.setBounds(219, 491, 181, 20);
+		path.setBounds(70, 536, 310, 20);
 		frame.getContentPane().add(path);
 		path.setColumns(10);
 		
@@ -242,6 +243,17 @@ public class Frame1 {
 		JLabel lblTo = new JLabel("to");
 		lblTo.setBounds(173, 494, 16, 14);
 		frame.getContentPane().add(lblTo);
+	
+		pathtoproject = new JTextField();
+		pathtoproject.setText("C:/Reconstruction");
+		pathtoproject.setBounds(70, 53, 297, 20);
+		frame.getContentPane().add(pathtoproject);
+		pathtoproject.setColumns(10);
+		
+		JLabel lblPleaseEnterThe = new JLabel("Please enter the Path to your CONRAD project");
+		lblPleaseEnterThe.setBounds(93, 28, 233, 14);
+		frame.getContentPane().add(lblPleaseEnterThe);
+		
 		
 		JButton btnCompute = new JButton("Compute");
 		btnCompute.addActionListener(new ActionListener() {
@@ -270,7 +282,8 @@ public class Frame1 {
 						Boolean.toString(singleMaterialCheck.isSelected()),
 						Boolean.toString(multiMaterialCheck.isSelected()),
 						path.getText(),
-						Boolean.toString(chckbxSaveImages.isSelected())
+						Boolean.toString(chckbxSaveImages.isSelected()),
+						pathtoproject.getText()
 				}; 
 				try {
 					Bubeck_Niklas_BA.all(args);
@@ -284,6 +297,8 @@ public class Frame1 {
 				
 		btnCompute.setBounds(340, 571, 89, 23);
 		frame.getContentPane().add(btnCompute);
+		
+	
 		
 		
 		

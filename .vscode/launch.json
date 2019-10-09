@@ -1,0 +1,15 @@
+// Use IntelliSense to learn about possible attributes.
+// Hover to view descriptions of existing attributes.
+// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch test.py",
+      "type": "python",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/src/edu/stanford/rsl/BA_Niklas/PythonScripts",
+      "program": "${workspaceFolder}/src/edu/stanford/rsl/BA_Niklas/PythonScripts/test.py"
+    }
+  ]
+}
