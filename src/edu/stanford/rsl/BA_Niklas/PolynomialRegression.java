@@ -138,11 +138,6 @@ public class PolynomialRegression {
         	y[i] = points[i][1];
         }
        
-        System.out.println(Array.toString(x));
-       
-        
-        System.out.println(Array.toString(y));
-        System.out.println(Integer.toString(points.length));
         PolynomialRegression regression = new PolynomialRegression(y, x, deg);
 //        System.out.println(regression);
 //        System.out.println(regression.beta(1));

@@ -43,11 +43,7 @@ newhisto = [float(i) for i in histo]
 newcount = [float(i) for i in count]
 
 
-plt.plot(newhisto, newcount, "ro", label="histogram")
-plt.legend()
-plt.ylabel("count")
-plt.xlabel("value")
-plt.show()
+
 
 
 #scaling
@@ -75,11 +71,7 @@ print(kmeans.cluster_centers_)
 # save new clusters for chart
 y_km = kmeans.fit_predict(histopoints)
 
-plt.scatter(histopoints[y_km ==0,0], histopoints[y_km == 0,1], s=50, c='red')
-plt.scatter(histopoints[y_km ==1,0], histopoints[y_km == 1,1], s=50, c='black')
-plt.scatter(histopoints[y_km ==2,0], histopoints[y_km == 2,1], s=50, c='blue')
-plt.scatter(histopoints[y_km ==3,0], histopoints[y_km == 3,1], s=50, c='cyan')
-plt.show()
+
 
 centers = kmeans.cluster_centers_
 means = [0]
@@ -104,3 +96,15 @@ with open(threshs, "w") as csv_file:
     spamwriter = csv.writer(csv_file, delimiter=':')
     spamwriter.writerows(map(lambda x: [x], thresholds))
 
+
+plt.plot(newhisto, newcount, "ro", label="histogram")
+plt.legend()
+plt.ylabel("count")
+plt.xlabel("value")
+plt.show()
+
+plt.scatter(histopoints[y_km ==0,0], histopoints[y_km == 0,1], s=50, c='red')
+plt.scatter(histopoints[y_km ==1,0], histopoints[y_km == 1,1], s=50, c='black')
+plt.scatter(histopoints[y_km ==2,0], histopoints[y_km == 2,1], s=50, c='blue')
+plt.scatter(histopoints[y_km ==3,0], histopoints[y_km == 3,1], s=50, c='cyan')
+plt.show()

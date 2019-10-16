@@ -27,6 +27,7 @@ import org.apache.commons.math3.distribution.NormalDistribution;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.io.*;
 
 /**
@@ -88,27 +89,63 @@ public class Bubeck_Niklas_BA {
 		ab = new double[nr_ellipses][2];
 		rho = new double[nr_ellipses];
 		df = new double[nr_ellipses];
-
-		for (int i = 0; i < nr_ellipses; i++) {
-
-			// translation between -0.5 and 0.5
-			t[i][0] = Math.random() - 0.5; // delta_x
-			t[i][1] = Math.random() - 0.5; // delta_y
-
-			// size between 0 and 0.75
-			ab[i][0] = Math.random() * 0.75; // a
-			ab[i][1] = Math.random() * 0.75; // b
-
-			// rotation
-			double alpha = Math.random() * 90;
-			R[i] = new SimpleMatrix(
-					new double[][] { { Math.cos(alpha), -Math.sin(alpha) }, { Math.sin(alpha), Math.cos(alpha) } });
-
-			// values
-			rho[i] = Math.random();
-			df[i] = Math.random();
-
-		}
+		
+		
+		
+		t[0][0] = 0.42;
+		t[0][1] = 0.21;
+		t[1][0] = -0.49;
+		t[1][1] = 0.05;
+		
+		ab[0][0] = 0.45;
+		ab[0][1] = 0.16;
+		ab[1][0] = 0.55;
+		ab[1][1] = 0.60;
+		
+		double alpha0 = 33.16;
+		R[0] = new SimpleMatrix(
+				new double[][] { { Math.cos(alpha0), -Math.sin(alpha0) }, { Math.sin(alpha0), Math.cos(alpha0) } });
+		
+		double alpha1 = 6.6;
+		R[1] = new SimpleMatrix(
+				new double[][] { { Math.cos(alpha1), -Math.sin(alpha1) }, { Math.sin(alpha1), Math.cos(alpha1) } });
+		
+		rho[0] = 0.92; 
+		rho[1] = 0.40;
+		
+		df[0] = 0.61;
+		df[1] = 0.98;
+		
+//		for (int i = 0; i < nr_ellipses; i++) {
+//
+//			// translation between -0.5 and 0.5
+//			t[i][0] = Math.random() - 0.5; // delta_x
+//			t[i][1] = Math.random() - 0.5; // delta_y
+//			
+//			System.out.println("translation x: " + t[i][0]);
+//			System.out.println("translation y: " + t[i][1]);
+//			// size between 0 and 0.75
+//			ab[i][0] = Math.random() * 0.75; // a
+//			ab[i][1] = Math.random() * 0.75; // b
+//			
+//			System.out.println("size a: " + ab[i][0]);
+//			System.out.println("size b: " + ab[i][1]);
+//			
+//			// rotation
+//			double alpha = Math.random() * 90;
+//			R[i] = new SimpleMatrix(
+//					new double[][] { { Math.cos(alpha), -Math.sin(alpha) }, { Math.sin(alpha), Math.cos(alpha) } });
+//			
+//			System.out.println("rotation " + alpha);
+//			
+//			// values
+//			rho[i] = Math.random();
+//			df[i] = Math.random();
+//			
+//			System.out.println("signal intensity : " + rho[i]);
+//			System.out.println("dark-field signal intensity: " + df[i]);
+//
+//		}
 	}
 
 	/**
@@ -253,7 +290,6 @@ public class Bubeck_Niklas_BA {
 				if (distribution == "gaussian") {
 					java.util.Random r = new java.util.Random();
 					noise = r.nextGaussian() * Math.sqrt(variance) + mean;
-					System.out.println("Noise: " + noise);
 				}
 
 				float val = image.getAtIndex(i, j);
@@ -281,7 +317,7 @@ public class Bubeck_Niklas_BA {
 		return mean;
 	}
 
-	public static NumericGrid[] get_segmentation(NumericGrid dark_gt, double noise) throws IOException {
+	public static NumericGrid[] get_segmentation(NumericGrid dark_gt, double noise) throws IOException, InterruptedException {
 		Grid2D darkgt = (Grid2D) dark_gt;
 		Float[] values = new Float[darkgt.getHeight() * darkgt.getWidth()];
 
@@ -404,6 +440,7 @@ public class Bubeck_Niklas_BA {
 		}
 		
 		if(noisechecked) {
+			TimeUnit.SECONDS.sleep(3);
 			String paththresh = pathtoproject + pathtofile + "Datasheets/thresholds.csv";
 			
 			BufferedReader threshReader = new BufferedReader(
@@ -683,7 +720,6 @@ public class Bubeck_Niklas_BA {
 //				 punkt in file reinschreiben
 				if (counter == 0) {
 					if ((i > xstart && i < xend) || (i > xstart2 && i < xend2)) {
-						System.out.println("ist 0 0 ");
 						continue;
 
 					}
@@ -995,10 +1031,18 @@ public class Bubeck_Niklas_BA {
 		Grid2D thresh_map = new Grid2D(size, size);
 //		pci_sino.getDark().show("Dark");
 //	pci_sino.getAmp().show("Amp");
-
+		
 		if (counter == 0) {
+			int random = (int) Math.random();
 			sino_dark_trunc = split_dark(pci_sino_truncated.getDark(), amp_material, materials);
-			sino_dark_trunc.show("splitted dark");
+//			sino_dark_trunc.show("splitted dark");
+			if(saveImagesCheck) {
+				ImagePlus imp8 = new ImagePlus("Filled", ImageUtil.wrapGrid2D((Grid2D) sino_dark_trunc).createImage());
+				String path8 = path + "splitted_dark" + random;
+				IJ.saveAs(imp8, "png", path8);
+			}
+			
+			
 		}
 
 		double[][] points = get_comp_points(sino_amp_mat, sino_dark_trunc, thresh_map, false, counter);
@@ -1211,7 +1255,7 @@ public class Bubeck_Niklas_BA {
 		return pci_recon;
 	}
 
-	public static void all(String[] args) throws IOException {
+	public static void all(String[] args) throws IOException, InterruptedException {
 		/*
 		 * -----------------------------------------------------------------------------
 		 * ------------------------- + initializing args values from userinterface frame
@@ -1292,7 +1336,8 @@ public class Bubeck_Niklas_BA {
 			String path2 = "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/groundTruthAbsorption";
 			IJ.saveAs(imp2, "png", path2);
 			if (noisechecked) {
-				NumericGrid noisy_dark = add_noise(pci.getAmp(), 0, 0.001, "gaussian");
+				NumericGrid noisy_amp = add_noise(pci.getAmp(), 0, 0.001, "gaussian");
+				NumericGrid noisy_dark = add_noise(pci.getDark(), 0, 0.001, "gaussian");
 				noisy_dark.show("ich bin noisy");
 			}
 
