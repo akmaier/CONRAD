@@ -93,9 +93,9 @@ public class Bubeck_Niklas_BA {
 		rho = new double[nr_ellipses];
 		df = new double[nr_ellipses];
 
-		t[0][0] = 0.42;
+		t[0][0] = 0.32;
 		t[0][1] = 0.21;
-		t[1][0] = -0.49;
+		t[1][0] = -0.19;
 		t[1][1] = 0.05;
 //		t[2][0] = 0.42;
 //		t[2][1] = -0.75;
@@ -716,16 +716,18 @@ public class Bubeck_Niklas_BA {
 
 		for (int i = 0; i < materials.length; i++) {
 			if (mat == materials[i]) {
-
+				
 				continue;
 			}
 
 			Grid2D material_sino = p.project((Grid2D) materials[i], new Grid2D(200, 360));
-
+			
+			
+			
 			for (int k = 0; k < 200; k++) {
 				for (int l = 0; l < 360; l++) {
 					int[] idx = { k, l };
-					if (material_sino.getAtIndex(k, l) == (float) 0.0) {
+					if ((material_sino.getAtIndex(k, l) == (float) 0.0)) {   //|| (single_mat_sino.getAtIndex(k, l) != (float) 0.0)) 
 						continue;
 					} else {
 						((Grid2D) splitted_dark).setAtIndex(k, l, (float) 1000);
@@ -740,7 +742,10 @@ public class Bubeck_Niklas_BA {
 
 	public static double[][] get_comp_points(NumericGrid abso, NumericGrid dark, NumericGrid thresh_map, boolean thresh,
 			int counter) throws IOException {
-
+		
+		abso.show("absorption get_comp");
+		dark.show("dark get_comp");
+		
 		if (thresh == true) {
 			NumericPointwiseOperators.multiplyBy(dark, thresh_map);
 			NumericPointwiseOperators.multiplyBy(abso, thresh_map);
@@ -760,7 +765,7 @@ public class Bubeck_Niklas_BA {
 
 		FileWriter fileWriterabso = new FileWriter(pathabso);
 		PrintWriter printWriterabso = new PrintWriter(fileWriterabso);
-
+		splitted_dark.show("splitted dark");
 		for (int i = 0; i < abs.getWidth(); i++) {
 			for (int j = 0; j < abs.getHeight(); j++) {
 
@@ -771,7 +776,7 @@ public class Bubeck_Niklas_BA {
 
 					}
 				}
-
+				
 				if (((Grid2D) splitted_dark).getAtIndex(i, j) == (float) 1000) {
 					continue;
 				}
@@ -1409,6 +1414,7 @@ public class Bubeck_Niklas_BA {
 			String path6 = "C:/Users/Niklas/Documents/Uni/Bachelorarbeit/Bilder/BilderTestFilled/OrigDarkSino";
 			IJ.saveAs(imp6, "png", path6);
 			pci_sino.getDark().show("orig dark");
+			pci_sino.getAmp().show("orig abso");
 
 			System.out.println("simulated data with nr_ellipses: " + nr_ellipses);
 
