@@ -227,7 +227,7 @@ public class OpenCLForwardProjector implements GUIConfigurable, Citeable {
 			originShift = getOriginTransform();
 		
 		// New srcPoint in the Canonical coord sys
-		SimpleVector srcPtW = proj.computeCameraCenter().negated();//computeSrcPt(projectionMatrix, invARmatrixMat);
+		SimpleVector srcPtW = proj.computeCameraCenter().negated();//computeSrcPt(proj.computeP(), invARmatrixMat); //
 		srcPoint.getBuffer().put((float) -(-0.5 * (volumeSize[0] -1.0) + originShift.getElement(0)*invVoxelScale.getElement(0,0) + invVoxelScale.getElement(0,0) * srcPtW.getElement(0))); 
 		srcPoint.getBuffer().put((float) -(-0.5 * (volumeSize[1] -1.0) + originShift.getElement(1)*invVoxelScale.getElement(1,1) + invVoxelScale.getElement(1,1) * srcPtW.getElement(1))); 
 		srcPoint.getBuffer().put((float) -(-0.5 * (volumeSize[2] -1.0) + originShift.getElement(2)*invVoxelScale.getElement(2,2) + invVoxelScale.getElement(2,2) * srcPtW.getElement(2))); 
@@ -279,6 +279,12 @@ public class OpenCLForwardProjector implements GUIConfigurable, Citeable {
 		Jama.Matrix at = projectionMatrix.getMatrix(0, 2, 3, 3);
 		//at = at.times(-1.0);
 		return invertedProjMatrix.times(at);
+	}
+	
+	public static SimpleVector computeSrcPt(SimpleMatrix projectionMatrix, SimpleMatrix invertedProjMatrix) {
+		SimpleVector at = projectionMatrix.getSubCol(0, 3, 3);//.getMatrix(0, 2, 3, 3);
+		//at = at.times(-1.0);
+		return SimpleOperators.multiply(invertedProjMatrix, at);
 	}
 	
 	protected SimpleVector getOriginTransform(){
