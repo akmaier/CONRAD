@@ -21,22 +21,27 @@ import com.jogamp.opencl.CLImageFormat.ChannelOrder;
 import com.jogamp.opencl.CLImageFormat.ChannelType;
 import com.jogamp.opencl.CLMemory.Mem;
 
-import Jama.Matrix;
-import Jama.SingularValueDecomposition;
 import edu.stanford.rsl.apps.gui.Citeable;
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
 import edu.stanford.rsl.conrad.data.numeric.Grid3D;
-import edu.stanford.rsl.conrad.geometry.trajectories.Trajectory;
 import edu.stanford.rsl.conrad.io.ImagePlusDataSink;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
-import edu.stanford.rsl.conrad.numerics.SimpleOperators;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
-import edu.stanford.rsl.conrad.numerics.SimpleVector.VectorNormType;
 import edu.stanford.rsl.conrad.reconstruction.VOIBasedReconstructionFilter;
 import edu.stanford.rsl.conrad.utils.CONRAD;
 import edu.stanford.rsl.conrad.utils.Configuration;
 import edu.stanford.rsl.conrad.utils.ImageGridBuffer;
 import edu.stanford.rsl.conrad.utils.ImageUtil;
+
+/**
+ * Backprojection on GPU using OpenCL.
+ * 
+ * If Moving Least Squares deformation should be included in the reconstruction, the deformation parameters (points
+ * before and after) need to be set using the method setDeformParameters() before the init() method is called.
+ * 
+ * @author Martin Berger, Jennifer Maier
+ *
+ */
 
 public class OpenCLBackProjector extends VOIBasedReconstructionFilter implements Runnable, Citeable{
 
@@ -228,7 +233,7 @@ public class OpenCLBackProjector extends VOIBasedReconstructionFilter implements
 
 			commandQueue.
 			putWriteBuffer(volumePointer, true).
-			finish();
+			finish();			
 
 			initialized = true;
 		}
@@ -449,8 +454,6 @@ public class OpenCLBackProjector extends VOIBasedReconstructionFilter implements
 			.putArg(projectionMatrix)
 			.putArg(projectionMultiplier);
 		} else {
-//			System.out.println("pBuff = " + pBuff.getBuffer().get(0) + ", " + pBuff.getBuffer().get(1) + ", " + pBuff.getBuffer().get(2));
-//			System.out.println("qBuff = " + qBuff.getBuffer().get(0) + ", " + qBuff.getBuffer().get(1) + ", " + qBuff.getBuffer().get(2));
 			kernelFunction.rewind();
 			kernelFunction
 			.putArg(volumePointer)
@@ -467,26 +470,10 @@ public class OpenCLBackProjector extends VOIBasedReconstructionFilter implements
 			.putArg(projectionTex)
 			.putArg(projectionMatrix)
 			.putArg(projectionMultiplier)
-			.putArg((float) p[0].getElement(0))
-			.putArg((float) p[0].getElement(1))
-			.putArg((float) p[0].getElement(2))
-			.putArg((float) p[1].getElement(0))
-			.putArg((float) p[1].getElement(1))
-			.putArg((float) p[1].getElement(2))
-			.putArg((float) p[2].getElement(0))
-			.putArg((float) p[2].getElement(1))
-			.putArg((float) p[2].getElement(2))
-			.putArg((float) qs[projectionNumber][0].getElement(0))
-			.putArg((float) qs[projectionNumber][0].getElement(1))
-			.putArg((float) qs[projectionNumber][0].getElement(2))
-			.putArg((float) qs[projectionNumber][1].getElement(0))
-			.putArg((float) qs[projectionNumber][1].getElement(1))
-			.putArg((float) qs[projectionNumber][1].getElement(2))
-			.putArg((float) qs[projectionNumber][2].getElement(0))
-			.putArg((float) qs[projectionNumber][2].getElement(1))
-			.putArg((float) qs[projectionNumber][2].getElement(2));
+			.putArg(pBuff)
+			.putArg(qBuff)
+			.putArg((int) p.length);
 		}
-
 
 
 		int[] realLocalSize = new int[2];
@@ -503,27 +490,37 @@ public class OpenCLBackProjector extends VOIBasedReconstructionFilter implements
 		}
 
 		// Call the OpenCL kernel, writing the results into the volume which is pointed at
-		commandQueue
-		.putWriteImage(projectionTex, true)
-		.put2DRangeKernel(kernelFunction, 0, 0, globalWorkSize[0], globalWorkSize[1], realLocalSize[0], realLocalSize[1])
-		//.finish()
-		//.putReadBuffer(dOut, true)
-		.finish();
+		if (this.pBuff == null) {
+			commandQueue
+			.putWriteImage(projectionTex, true)
+			.put2DRangeKernel(kernelFunction, 0, 0, globalWorkSize[0], globalWorkSize[1], realLocalSize[0], realLocalSize[1])
+			.finish();
+		} else {
+			commandQueue
+			.putWriteImage(projectionTex, true)
+			.putWriteBuffer(pBuff, true)
+			.putWriteBuffer(qBuff, true)
+			.put2DRangeKernel(kernelFunction, 0, 0, globalWorkSize[0], globalWorkSize[1], realLocalSize[0], realLocalSize[1])
+			.finish();
+		}
+		
+
 	}
 
 	private void initDeformedCoordinates(int projectionNumber) {
 
 		SimpleVector[] q = this.qs[projectionNumber];
 		
-		float[] p_floats = {
-				(float)p[0].getElement(0), (float)p[0].getElement(1), (float)p[0].getElement(2),
-				(float)p[1].getElement(0), (float)p[1].getElement(1), (float)p[1].getElement(2),
-				(float)p[2].getElement(0), (float)p[2].getElement(1), (float)p[2].getElement(2)};
-		
-		float[] q_floats = {
-				(float)q[0].getElement(0), (float)q[0].getElement(1), (float)q[0].getElement(2),
-				(float)q[1].getElement(0), (float)q[1].getElement(1), (float)q[1].getElement(2),
-				(float)q[2].getElement(0), (float)q[2].getElement(1), (float)q[2].getElement(2)};
+		float[] p_floats = new float[3*p.length];
+		float[] q_floats = new float[3*q.length];
+		for (int i = 0; i < p.length; i++) {
+			p_floats[3*i]   = (float)p[i].getElement(0);
+			p_floats[3*i+1] = (float)p[i].getElement(1);
+			p_floats[3*i+2] = (float)p[i].getElement(2);
+			q_floats[3*i]   = (float)q[i].getElement(0);
+			q_floats[3*i+1] = (float)q[i].getElement(1);
+			q_floats[3*i+2] = (float)q[i].getElement(2);
+		}
 
 		CLBuffer<FloatBuffer> pBuffer = context.createFloatBuffer(p.length*p[0].getLen(), Mem.READ_ONLY);
 		pBuffer.getBuffer().put(p_floats);
@@ -534,60 +531,6 @@ public class OpenCLBackProjector extends VOIBasedReconstructionFilter implements
 		qBuffer.getBuffer().put(q_floats);
 		qBuffer.getBuffer().rewind();
 		this.qBuff = qBuffer;
-	}
-
-	public static SimpleVector mls_rigid_deformation3D(Grid3D volume, SimpleVector coords, SimpleVector[] pIn, SimpleVector[] qIn, double alpha) {
-		// Rigid deformation
-		// Params:
-		// image - ndarray: original image
-		// p - ndarray: an array with size [n, 2], original control points
-		// q - ndarray: an array with size [n, 2], final control points
-		// alpha - float: parameter used by weights
-		// density - float: density of the grids
-		// Return:
-		// A deformed image.
-
-
-		SimpleVector[] p = pIn.clone();
-		SimpleVector[] q = qIn.clone();
-		SimpleVector v = coords.clone();
-
-		// wi
-		double[] w = new double[q.length];
-		double wSum = 0.0;
-		for (int i = 0; i < w.length; i++) {
-			w[i] = 1.0/Math.pow(SimpleOperators.subtract(p[i], v).norm(VectorNormType.VEC_NORM_L2), 2.0*alpha);
-			wSum += w[i];
-		}
-
-		// q* and p*
-		SimpleVector qStar = new SimpleVector(q[0].getLen());
-		SimpleVector pStar = new SimpleVector(p[0].getLen());
-		for (int i = 0; i < w.length; i++) {
-			qStar.add(q[i].multipliedBy(w[i]));
-			pStar.add(p[i].multipliedBy(w[i]));
-		}
-		qStar.divideBy(wSum);
-		pStar.divideBy(wSum);
-
-		// PQ'
-		SimpleMatrix PQtrans = new SimpleMatrix(pIn[0].getLen(), qIn[0].getLen());
-		for (int i = 0; i < pIn.length; i++) {			
-			SimpleMatrix pi_min_pStar = new SimpleMatrix(new double[][] {SimpleOperators.subtract(p[i], pStar).copyAsDoubleArray()});
-			SimpleMatrix qi_min_qStar = new SimpleMatrix(new double[][] {SimpleOperators.subtract(q[i], qStar).copyAsDoubleArray()});
-			PQtrans.add(SimpleOperators.multiplyMatrices(pi_min_pStar.transposed(), qi_min_qStar).multipliedBy(w[i]));
-		}
-		SingularValueDecomposition svd = new SingularValueDecomposition(new Matrix(PQtrans.copyAsDoubleArray()));
-		SimpleMatrix U = new SimpleMatrix(svd.getU().getArrayCopy());
-		SimpleMatrix V = new SimpleMatrix(svd.getV().getArrayCopy());
-
-		// transform input coords
-		SimpleVector v_min_pStar = SimpleOperators.subtract(v, pStar); 
-		SimpleMatrix VUtrans = SimpleOperators.multiplyMatrices(V,U.transposed());
-		SimpleVector v_transformed = SimpleOperators.add(SimpleOperators.multiply(VUtrans, v_min_pStar), qStar);
-
-		return v_transformed;
-
 	}
 
 	public void loadInputQueue(Grid3D input) throws IOException {
@@ -788,6 +731,14 @@ public class OpenCLBackProjector extends VOIBasedReconstructionFilter implements
 		return "OpenCL Backprojector";
 	}
 
+	/**
+	 * set parameters used for deformation
+	 * 
+	 * @param p  original positions of points used for deformation. Contains n 3D-vectors if there are n points used
+	 *           for deformation
+	 * @param qs deformed positions of points used for deformation. If there are p projections used for backprojection
+	 *           and n points used for deformation, the array contains p x n 3D-vectors.
+	 */
 	public void setDeformParameters(SimpleVector[] p, SimpleVector[][] qs) {
 		this.p = p;
 		this.qs = qs;
@@ -796,6 +747,6 @@ public class OpenCLBackProjector extends VOIBasedReconstructionFilter implements
 
 }
 /*
- * Copyright (C) 2010-2014 Martin Berger
+ * Copyright (C) 2010-2021 Martin Berger, Jennifer Maier
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
  */

@@ -104,60 +104,70 @@ __kernel void backprojectKernel(
  *
  *
  * -------------------------------------------------------------------------- */
-float4 mls_deformation(float v0, float v1, float v2, float p00, float p01, float p02, float p10, float p11, float p12, float p20, float p21, float p22, float q00, float q01, float q02, float q10, float q11, float q12, float q20, float q21, float q22)
+float4 mls_deformation(float x, float y, float z, global float* p, global float* q, int noPoints)
 {
-	// wi
-	float w0 = 1/((p00 - v0) * (p00 - v0) + (p01 - v1) * (p01 - v1) + (p02 - v2) * (p02 - v2));
-	float w1 = 1/((p10 - v0) * (p10 - v0) + (p11 - v1) * (p11 - v1) + (p12 - v2) * (p12 - v2));
-	float w2 = 1/((p20 - v0) * (p20 - v0) + (p21 - v1) * (p21 - v1) + (p22 - v2) * (p22 - v2));
-	float wSum = w0 + w1 + w2;
-
+	
 	// q* and p*
-	float qStar0 = (q00 * w0 + q10 * w1 + q20 * w2) / wSum;
-	float qStar1 = (q01 * w0 + q11 * w1 + q21 * w2) / wSum;
-	float qStar2 = (q02 * w0 + q12 * w1 + q22 * w2) / wSum;
-
-	float pStar0 = (p00 * w0 + p10 * w1 + p20 * w2) / wSum;
-	float pStar1 = (p01 * w0 + p11 * w1 + p21 * w2) / wSum;
-	float pStar2 = (p02 * w0 + p12 * w1 + p22 * w2) / wSum;
-
-
+	float qStar0 = 0;
+	float qStar1 = 0;
+	float qStar2 = 0;
+	float pStar0 = 0;
+	float pStar1 = 0;
+	float pStar2 = 0;
+	float wSum = 0;
+	
+	for (unsigned int idx = 0; idx < noPoints; idx++) {
+		float w = 1/((p[idx*3] - x) * (p[idx*3] - x) + (p[idx*3+1] - y) * (p[idx*3+1] - y) + (p[idx*3+2] - z) * (p[idx*3+2] - z));
+		wSum += w;
+		qStar0 += q[idx*3] * w;
+		qStar1 += q[idx*3+1] * w;
+		qStar2 += q[idx*3+2] * w;
+		pStar0 += p[idx*3] * w;
+		pStar1 += p[idx*3+1] * w;
+		pStar2 += p[idx*3+2] * w;
+	}
+	qStar0 /= wSum;
+	qStar1 /= wSum;
+	qStar2 /= wSum;
+	pStar0 /= wSum;
+	pStar1 /= wSum;
+	pStar2 /= wSum;
+		
+	
 	// PQ'
-	float p0_min_pStar0 = p00 - pStar0;
-	float p0_min_pStar1 = p01 - pStar1;
-	float p0_min_pStar2 = p02 - pStar2;
-
-	float p1_min_pStar0 = p10 - pStar0;
-	float p1_min_pStar1 = p11 - pStar1;
-	float p1_min_pStar2 = p12 - pStar2;
-
-	float p2_min_pStar0 = p20 - pStar0;
-	float p2_min_pStar1 = p21 - pStar1;
-	float p2_min_pStar2 = p22 - pStar2;
-
-	float q0_min_qStar0 = q00 - qStar0;
-	float q0_min_qStar1 = q01 - qStar1;
-	float q0_min_qStar2 = q02 - qStar2;
-
-	float q1_min_qStar0 = q10 - qStar0;
-	float q1_min_qStar1 = q11 - qStar1;
-	float q1_min_qStar2 = q12 - qStar2;
-
-	float q2_min_qStar0 = q20 - qStar0;
-	float q2_min_qStar1 = q21 - qStar1;
-	float q2_min_qStar2 = q22 - qStar2;
-
-	float PQtrans0 = w0*p0_min_pStar0*q0_min_qStar0 + w1*p1_min_pStar0*q1_min_qStar0 + w2*p2_min_pStar0*q2_min_qStar0;
-	float PQtrans3 = w0*p0_min_pStar0*q0_min_qStar1 + w1*p1_min_pStar0*q1_min_qStar1 + w2*p2_min_pStar0*q2_min_qStar1;
-	float PQtrans6 = w0*p0_min_pStar0*q0_min_qStar2 + w1*p1_min_pStar0*q1_min_qStar2 + w2*p2_min_pStar0*q2_min_qStar2;
-
-	float PQtrans1 = w0*p0_min_pStar1*q0_min_qStar0 + w1*p1_min_pStar1*q1_min_qStar0 + w2*p2_min_pStar1*q2_min_qStar0;
-	float PQtrans4 = w0*p0_min_pStar1*q0_min_qStar1 + w1*p1_min_pStar1*q1_min_qStar1 + w2*p2_min_pStar1*q2_min_qStar1;
-	float PQtrans7 = w0*p0_min_pStar1*q0_min_qStar2 + w1*p1_min_pStar1*q1_min_qStar2 + w2*p2_min_pStar1*q2_min_qStar2;
-
-	float PQtrans2 = w0*p0_min_pStar2*q0_min_qStar0 + w1*p1_min_pStar2*q1_min_qStar0 + w2*p2_min_pStar2*q2_min_qStar0;
-	float PQtrans5 = w0*p0_min_pStar2*q0_min_qStar1 + w1*p1_min_pStar2*q1_min_qStar1 + w2*p2_min_pStar2*q2_min_qStar1;
-	float PQtrans8 = w0*p0_min_pStar2*q0_min_qStar2 + w1*p1_min_pStar2*q1_min_qStar2 + w2*p2_min_pStar2*q2_min_qStar2;
+	float PQtrans0 = 0;
+	float PQtrans1 = 0;
+	float PQtrans2 = 0;
+	float PQtrans3 = 0;
+	float PQtrans4 = 0;
+	float PQtrans5 = 0;
+	float PQtrans6 = 0;
+	float PQtrans7 = 0;
+	float PQtrans8 = 0;
+	for (unsigned int idx = 0; idx < noPoints; idx++) {
+		float w = 1/((p[idx*3] - x) * (p[idx*3] - x) + (p[idx*3+1] - y) * (p[idx*3+1] - y) + (p[idx*3+2] - z) * (p[idx*3+2] - z));
+		
+		float p_min_pStar0 = p[idx*3] - pStar0;
+		float p_min_pStar1 = p[idx*3+1] - pStar1;
+		float p_min_pStar2 = p[idx*3+2] - pStar2;
+		
+		float q_min_qStar0 = q[idx*3] - qStar0;
+		float q_min_qStar1 = q[idx*3+1] - qStar1;
+		float q_min_qStar2 = q[idx*3+2] - qStar2;
+		
+		PQtrans0 += w*p_min_pStar0*q_min_qStar0;
+		PQtrans3 += w*p_min_pStar0*q_min_qStar1;
+		PQtrans6 += w*p_min_pStar0*q_min_qStar2;
+		
+		PQtrans1 += w*p_min_pStar1*q_min_qStar0;
+		PQtrans4 += w*p_min_pStar1*q_min_qStar1;
+		PQtrans7 += w*p_min_pStar1*q_min_qStar2;
+		
+		PQtrans2 += w*p_min_pStar2*q_min_qStar0;
+		PQtrans5 += w*p_min_pStar2*q_min_qStar1;
+		PQtrans8 += w*p_min_pStar2*q_min_qStar2;
+		
+	}
 
 	// svd
 	int n = 3;
@@ -556,9 +566,9 @@ float4 mls_deformation(float v0, float v1, float v2, float p00, float p01, float
 	}
 
 	// transform input coords
-	float v_min_pStar0 = v0 - pStar0;
-	float v_min_pStar1 = v1 - pStar1;
-	float v_min_pStar2 = v2 - pStar2;
+	float x_min_pStar = x - pStar0;
+	float y_min_pStar = y - pStar1;
+	float z_min_pStar = z - pStar2;
 
 	float VUtrans0 = V0*U0 + V3*U3 + V6*U6;
 	float VUtrans1 = V1*U0 + V4*U3 + V7*U6;
@@ -586,11 +596,11 @@ float4 mls_deformation(float v0, float v1, float v2, float p00, float p01, float
 		VUtrans8 = V2*U2 + V5*U5 + V8*U8;
 	}
 
-	float v_transformed0 = VUtrans0*v_min_pStar0 + VUtrans3*v_min_pStar1 + VUtrans6*v_min_pStar2 + qStar0;
-	float v_transformed1 = VUtrans1*v_min_pStar0 + VUtrans4*v_min_pStar1 + VUtrans7*v_min_pStar2 + qStar1;
-	float v_transformed2 = VUtrans2*v_min_pStar0 + VUtrans5*v_min_pStar1 + VUtrans8*v_min_pStar2 + qStar2;
-
-	float4 v_transformed = (float4)(v_transformed0, v_transformed1, v_transformed2, 0.0f);
+	float x_transformed = VUtrans0*x_min_pStar + VUtrans3*y_min_pStar + VUtrans6*z_min_pStar + qStar0;
+	float y_transformed = VUtrans1*x_min_pStar + VUtrans4*y_min_pStar + VUtrans7*z_min_pStar + qStar1;
+	float z_transformed = VUtrans2*x_min_pStar + VUtrans5*y_min_pStar + VUtrans8*z_min_pStar + qStar2;
+	
+	float4 v_transformed = (float4)(x_transformed, y_transformed, z_transformed, 0.0f);
 	return v_transformed;
 
 }
@@ -611,25 +621,11 @@ __kernel void backprojectKernelDeformed(
 		__read_only image2d_t gTex2D,
 		__constant Tcoord_dev* gProjMatrix,
 		float projMultiplier,
-		float p00,
-		float p01,
-		float p02,
-		float p10,
-		float p11,
-		float p12,
-		float p20,
-		float p21,
-		float p22,
-		float q00,
-		float q01,
-		float q02,
-		float q10,
-		float q11,
-		float q12,
-		float q20,
-		float q21,
-		float q22)
+		global float* p,
+		global float* q,
+		int noPoints)
 {
+	
 	int gidx = get_group_id(0);
 	int gidy = get_group_id(1);
 	int lidx = get_local_id(0);
@@ -649,14 +645,11 @@ __kernel void backprojectKernelDeformed(
 
 	for (unsigned int z = 0; z < recoSizeZ; z++){
 
-		float4 coords_new = mls_deformation((x * voxelSpacingX) - offsetX, (y * voxelSpacingY) - offsetY, (z * voxelSpacingZ) - offsetZ, p00, p01, p02, p10, p11, p12, p20, p21, p22, q00, q01, q02, q10, q11, q12, q20, q21, q22);
+		float4 coords_new = mls_deformation((x * voxelSpacingX) - offsetX, (y * voxelSpacingY) - offsetY, (z * voxelSpacingZ) - offsetZ, p, q, noPoints);
 		float xcoord = coords_new.x;
 		float ycoord = coords_new.y;
 		float zcoord = coords_new.z;
-		//float xcoord = (x * voxelSpacingX) - offsetX + (q10-p10);
-		//float ycoord = (y * voxelSpacingY) - offsetY + (q11-p11);
-		//float zcoord = (z * voxelSpacingZ) - offsetZ + (q12-p12);
-
+		
 		// precompute everything except z from the matrix multiplication
 		float precomputeR = gProjMatrix[3]  + ycoord * gProjMatrix[1] + xcoord * gProjMatrix[0];
 		float precomputeS = gProjMatrix[7]  + ycoord * gProjMatrix[5] + xcoord * gProjMatrix[4];
@@ -666,14 +659,14 @@ __kernel void backprojectKernelDeformed(
 		float r = zcoord * gProjMatrix[2]  + precomputeR;
 		float s = zcoord * gProjMatrix[6]  + precomputeS;
 		float t = zcoord * gProjMatrix[10] + precomputeT;
-
+		
 		// compute projection coordinates 
 		float denom = 1.0f / t;
 		float fu = r * denom;
 		float fv = s * denom;
-
+		
 		float proj_val = read_imagef(gTex2D, sampler, (float2)(fu + 0.5f + offset, fv + 0.5f)).x;
-
+		
 		// compute volume index for x,y,z
 		unsigned long idx = z*zStride + y*yStride + x;
     
@@ -686,7 +679,8 @@ __kernel void backprojectKernelDeformed(
 }
 
 
+
 /*
- * Copyright (C) 2010-2014 Martin Berger
+ * Copyright (C) 2010-2021 Martin Berger, Jennifer Maier
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
 */
