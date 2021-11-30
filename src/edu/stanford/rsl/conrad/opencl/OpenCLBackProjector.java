@@ -652,7 +652,6 @@ public class OpenCLBackProjector extends VOIBasedReconstructionFilter implements
 
 	private synchronized void workOnProjectionData(){
 		if (projectionsAvailable.size() > 0){
-			System.out.println(projectionsAvailable.size());
 			Integer current = projectionsAvailable.get(0);
 			projectionsAvailable.remove(0);
 			projectSingleProjection(current.intValue(),  
