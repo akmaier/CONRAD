@@ -60,18 +60,26 @@ public class FlexibleFileOpener extends FileOpener {
 		// Skip if required
 		if (preOffset!=0) is.skip(preOffset);
 
-		// Just return orgiinal input stream if uncompressed
+		// Just return original input stream if uncompressed
 		if (gunzipMode==UNCOMPRESSED) return is;
 
 		//  else put a regular GZIPInputStream on top 
-		// NB should only do this if less than 138s because that will take 
-		// care of things automatically
-		
-		if(gunzipMode==GZIP){
-			boolean lessThan138s = IJ.getVersion().compareTo("1.38s")<0;
-			if(lessThan138s) return new GZIPInputStream(is);
-			else return is;
-		}
+		/** BEGIN legacy code, kept for reference
+		* NB should only do this if less than 138s because that will take care of things automatically.
+		* if(gunzipMode==GZIP){
+		*	boolean lessThan138s = IJ.getVersion().compareTo("1.38s")<0;
+		*	if(lessThan138s) return new GZIPInputStream(is);
+		*	else return is;
+		* }
+		* END of legacy code.
+		* 2018-09-19:  	According to
+		* 				http://www.cas.miamioh.edu/~meicenrd/anatomy/Ch14_IndependentInvestigation/ImageJ/ij-docs/ij-docs/notes.html
+		* 				version 1.38s and beyond should handle gzip automatically.
+		* 				However, the library class {@link ij.io.FileOpener} only recognizes files of .gz and .gzip ending as GZIP compressed.
+		* 				This is not the case for .nrrd files, which have encoding information in their header.
+		* 				Consequently, a GZIPInputStream is needed here regardless of version.
+		*/
+		if(gunzipMode==GZIP) return new GZIPInputStream(is,50000);
 		
 		// or put a ZInputStream on top (from jzlib)
 		if(gunzipMode==ZLIB) return new ZInputStream(is);

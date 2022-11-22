@@ -49,7 +49,7 @@ public class Grid4D extends NumericGrid {
 		this.spacing = new double[4];
 		this.origin = new double[4];
 		for (int i = 0; i < 4; ++i) {
-			assert this.size[4] > 0 : "Size values have to be greater than zero!";
+			assert this.size[i] > 0 : "Size values have to be greater than zero!";
 		}
 
 		if (allocateImmediately) {

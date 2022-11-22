@@ -69,7 +69,7 @@ public class PolynomialFunction extends Function {
 	public String toString() {
 		String revan = "" + params[0] + " ";
 		for (int i=1; i <= degree; i++){
-			revan += params[i] + " x^" +i;
+			revan += "+ " +params[i] + " x^" +i;
 		}
 		return revan;
 	}
@@ -77,6 +77,25 @@ public class PolynomialFunction extends Function {
 	@Override
 	public int getMinimumNumberOfCorrespondences() {
 		return degree + 1;
+	}
+
+	@Override
+	public void setParametersFromDoubleArray(double[] param) {
+		params = param;	
+	}
+	
+	public static void main(String [] args){
+		PolynomialFunction func = new PolynomialFunction();
+		func.setDegree(5);
+		double [] x = {10000, 50000, 100000, 2000000, 600000000};
+		double [] y = {10, 50, 75, 500, 3000};
+		func.fitToPoints(x, y);
+		System.out.println(func 
+				+ "\n" + func.evaluate(10000)
+				+ "\n" + func.evaluate(50000)
+				+ "\n" + func.evaluate(2000000)
+				+ "\n" + func.evaluate(600000000)
+				+ "\n" + func.evaluate(83000000*1000));
 	}
 
 }

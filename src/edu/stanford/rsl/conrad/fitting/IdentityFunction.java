@@ -30,4 +30,9 @@ public class IdentityFunction extends Function {
 		return new double[] {};
 	}
 
+	@Override
+	public void setParametersFromDoubleArray(double[] param) {
+		
+	}
+
 }

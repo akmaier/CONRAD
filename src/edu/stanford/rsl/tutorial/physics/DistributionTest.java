@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - Andreas Maier, Oliver Taubmann, Fabian Rückert 
+ * Copyright (C) 2014 - Andreas Maier, Oliver Taubmann, Fabian RÃ¼ckert 
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
 */
 package edu.stanford.rsl.tutorial.physics;

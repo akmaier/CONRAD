@@ -346,7 +346,7 @@ public class DicomDecoder {
 		if (getInputStream()!=null) {
 			// Use large buffer to allow URL stream to be reset after reading header
 			f = getInputStream();
-			f.mark(400000);
+			f.mark(4000000);
 		} else
 			f = new BufferedInputStream(new FileInputStream(directory + fileName));
 		if (IJ.debugMode) {

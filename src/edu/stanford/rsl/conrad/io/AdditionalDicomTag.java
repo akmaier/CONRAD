@@ -14,6 +14,13 @@ public class AdditionalDicomTag {
 	public int tag = 0x00180050;
 	public FileInfo fi;
 
+	/**
+	 * Reads the tag from the DICOM header
+	 * @param tag the tag
+	 * @param elementLength the length of the tag
+	 * @return true, if the tag could be extracted.
+	 * @throws IOException
+	 */
 	public boolean readTag(int tag, int elementLength) throws IOException{
 		if (tag == this.tag ) {
 			String spacing = decoder.getString(elementLength);

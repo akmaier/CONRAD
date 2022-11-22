@@ -23,9 +23,9 @@ import edu.stanford.rsl.tutorial.physics.XRayTracer.RaytraceResult;
 
 
 /**
- * Raytraces x-rays and saves the results.
+ * Raytraces X-rays and saves the results.
  * 
- * @author Fabian Rückert
+ * @author Fabian RÃ¼ckert
  */
 
 public class XRayWorker implements Runnable{

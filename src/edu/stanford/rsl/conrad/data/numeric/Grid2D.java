@@ -63,9 +63,11 @@ public class Grid2D extends NumericGrid implements Transformable {
 		}
 	}
 	
-	
+	/**
+	 * Copy constructor.
+	 * @param input {@link Grid2D} to be copied
+	 */
 	public Grid2D(Grid2D input){
-		// assert input.getWidth()*input.getHeight() == this.buffer.length;
 		this.size = input.size.clone();
 		this.spacing = input.spacing.clone();
 		this.origin = input.origin.clone();
@@ -98,7 +100,6 @@ public class Grid2D extends NumericGrid implements Transformable {
 	}
 	
 
-	@Deprecated
 	/**
 	 * Set the corresponding Grid1D object on the linear 2D row memory
 	 * 
@@ -109,24 +110,22 @@ public class Grid2D extends NumericGrid implements Transformable {
 	 * which is a fundamental difference to the structure of Grid3D,
 	 * which is defined by an ArrayList of Grid2Ds.
 	 * 
-	 * You can do a little workaround, when adding the following code:
+	 * You can do a little workaround if later external change of the given subGrid is needed,
+	 * by adding the following code:
 	 * 
 	 * myGrid2D.setSubgrid(j, Grid1D myGrid1D);
 	 * myGrid1D = myGrid2D.getSubGrid(j);
 	 *
-	 * This code is deprecated since no final solution was found 
-	 * to solve the prior mentioned problem.
-	 * 
 	 * @param j The row-index (y-index, height-index)
 	 * @param subGrid
 	 */
 	public void setSubGrid(int j, Grid1D subGrid) {
+
+		// Each {@link Grid1D} in (the member array) subGrids has a reference to the linear buffer containing all entries.
+		// Consequently, copying the content of given subGrid to the appropriate buffer position is sufficient.
+		System.arraycopy(subGrid.getBuffer(), 0, this.buffer, this.columnOffsets[j], subGrid.getBuffer().length);
 		
-        for (int i=0; i<subGrid.getSize()[0]; ++i) {
-            setAtIndex(j, i, subGrid.getAtIndex(i));
-        }
-       
-        
+   
         notifyAfterWrite();
 	}
 	
@@ -148,15 +147,13 @@ public class Grid2D extends NumericGrid implements Transformable {
 	
 	public float getAtIndex(int i, int j) {
 		notifyBeforeRead();
-		//FIXME (maybe use getPixelValue instead)
 		return this.getPixelValue(i, j);
 	}
 	
 	
 	public void setAtIndex(int i, int j, float val) {
-		//FIXME (maybe use putPixelValue instead)
-		 this.putPixelValue(i, j, val);
-		 notifyAfterWrite();
+		this.putPixelValue(i, j, val);
+		notifyAfterWrite();
 	}
 
 	

@@ -98,4 +98,10 @@ public class LinearFunction extends Function {
 		return new double[]{m,t};
 	}
 
+	@Override
+	public void setParametersFromDoubleArray(double[] param) {
+		m = param[0];
+		t = param[1];
+	}
+
 }

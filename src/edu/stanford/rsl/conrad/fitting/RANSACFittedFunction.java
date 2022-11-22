@@ -145,4 +145,9 @@ public class RANSACFittedFunction extends Function {
 		return baseFunction.getParametersAsDoubleArray();
 	}
 
+	@Override
+	public void setParametersFromDoubleArray(double[] param) {
+		baseFunction.setParametersFromDoubleArray(param);
+	}
+
 }
