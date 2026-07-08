@@ -20,19 +20,31 @@ float4 CohenSutherlandLineClip(float x0, float y0, float x1, float y1, float xmi
 
 float2 intersectLines(float2 p1, float2 p2, float2 p3, float2 p4);
 
+// FIX: line intersection matching the CPU path (source->recon x detector line).
+float2 intersectLinesFixed(float2 p1, float2 p2, float2 p3, float2 p4);
+float2 intersectLinesFixed(float2 p1, float2 p2, float2 p3, float2 p4) {
+	float dNom = (p1.x - p2.x)*(p3.y - p4.y) - (p1.y - p2.y)*(p3.x - p4.x);
+	if (dNom < 0.000001f && dNom > -0.000001f) { float2 r = {NAN, NAN}; return r; }
+	float px = (p1.x*p2.y - p1.y*p2.x)*(p3.x - p4.x) - (p1.x - p2.x)*(p3.x*p4.y - p3.y*p4.x);
+	float py = (p1.x*p2.y - p1.y*p2.x)*(p3.y - p4.y) - (p1.y - p2.y)*(p3.x*p4.y - p3.y*p4.x);
+	float2 isect = {px/dNom, py/dNom};
+	return isect;
+}
+
 kernel void backprojectPixelDriven2DCL(
-	/* not yet... float2 gridSpacing, */
 	image2d_t sino,
 	global float* grid,
 	int gridSizeX,
-	int gridSizeY, 
+	int gridSizeY,
 	float maxT,
 	float deltaT,
 	float maxBeta,
 	float deltaBeta,
 	float focalLength,
 	int maxTIndex,
-	int maxBetaIndex
+	int maxBetaIndex,
+	float spacingX,
+	float spacingY
 	) {
 	// compute x, y from thread idx
 	const int x = get_global_id(0);// x index
@@ -43,45 +55,36 @@ kernel void backprojectPixelDriven2DCL(
 	}
 	float normalizationFactor = maxBetaIndex / M_PI_F;
 	int idx = mad24(y,gridSizeX,x);
-	grid[idx] = 0;
-	
+
+	// FIX: pixel -> world with reconstruction spacing (was hardcoded 1 mm/px).
+	float2 point = {(x-gridSizeX/2.0f)*spacingX, (y-gridSizeY/2.0f)*spacingY};
+	float sum = 0.0f;
+
 	for(int b=0; b<maxBetaIndex; ++b){
-		// compute beta [rad] and angular functions.
 		float beta = deltaBeta * b;
 		float cosBeta = cos(beta);
 		float sinBeta = sin(beta);
 
-		float2 a = {focalLength * cosBeta, focalLength * sinBeta};
-		float2 p0 = {-maxT / 2.f * sinBeta, maxT / 2.f * cosBeta};
-		
-		// compute two points on the line through t and beta
-		// We use PointND for points in 3D space and SimpleVector for directions.
-		float2 point = {x-gridSizeX/2.0f, y-gridSizeY/2.0f};
-		float2 origin = {0.0f,0.0f};
-		
-		float2 detectorPixel = intersectLines(point, a, p0, origin);
-	 	if (isnan(detectorPixel.x))
-	 		continue;
-		float2 p = detectorPixel -p0;
-		if((p.x*p0.x+p.y*p0.y)>0)//wrong direction//FIXME
-		//len=-len;
-			continue;
-		float len = length(p);		
-		float t = len/deltaT -0.5f;
-		if(t>maxT)
-		continue;//******************************************FIXME
-		float2 bt = {t+0.5f, b+0.5f};
-		float val = read_imagef(sino, linearSampler, bt).x;
-		//DistanceWeighting //No distance weighting for iterative reconstruction
-		//float radius = length(point);
-		//float phi = (float) ((M_PI_F/2) + atan2(point.y, point.x));
-		//float dWeight = (focalLength  +radius*sin(beta - phi))/focalLength;
-		//float valtemp = val / (dWeight*dWeight*normalizationFactor);
+		float2 a  = {focalLength * cosBeta, focalLength * sinBeta};   // source
+		float2 p0 = {-maxT / 2.f * sinBeta, maxT / 2.f * cosBeta};    // detector origin
+		float2 dir = -p0;                                            // detector direction
 
-		//grid[idx] += valtemp;
-		grid[idx] += val;
+		// FIX: correct detector-coordinate geometry (replaces the //FIXME sign/guard
+		// hacks), reproducing CPU backprojectPixelDriven exactly.
+		float2 detectorPixel = intersectLinesFixed(a, point, p0, p0 + dir);
+		if (isnan(detectorPixel.x))
+			continue;
+		float2 p = detectorPixel - p0;
+		float len = length(p);
+		if ((p.x*dir.x + p.y*dir.y) < 0.0f)   // signed detector coordinate
+			len = -len;
+		float t = (len - 0.5f) / deltaT;
+		if (t < 0.0f || t + 1.0f >= (float) maxTIndex)
+			continue;
+		float2 bt = {t + 0.5f, b + 0.5f};
+		sum += read_imagef(sino, linearSampler, bt).x;
 	} // end for
-	
+	grid[idx] = sum / normalizationFactor;
 }
 kernel void backprojectPixelDriven1DCL(
 	/* not yet... float2 gridSpacing, */

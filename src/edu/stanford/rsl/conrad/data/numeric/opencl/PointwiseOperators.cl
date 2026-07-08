@@ -424,6 +424,30 @@ kernel void absolute(global float *grid, int const num_elements )
 }
 
 
+/* grid = exp(grid) -- element-wise natural exponential (used by GridOperators.exp) */
+kernel void exponential(global float *grid, int const num_elements )
+{
+    int global_id = get_global_id(0);
+
+    if(global_id >= num_elements)
+        return;
+
+    grid[global_id] = exp(grid[global_id]);
+}
+
+
+/* grid = log(grid) -- element-wise natural logarithm (used by GridOperators.log) */
+kernel void logarithm(global float *grid, int const num_elements )
+{
+    int global_id = get_global_id(0);
+
+    if(global_id >= num_elements)
+        return;
+
+    grid[global_id] = log(grid[global_id]);
+}
+
+
 /* grid = pow(grid, exponent) */
 kernel void power(global float *grid, const float exponent, int const num_elements )
 {

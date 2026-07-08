@@ -45,6 +45,13 @@ public class FanBeamBackprojector2D {
 	maxT, maxBeta;
 	private int	maxTIndex, maxBetaIndex;
 	private int imgSizeX, imgSizeY;
+	// FIX: reconstruction pixel spacing [mm/px] for the CL pixel-driven kernel
+	// (upstream never passed spacing -> "// TODO: Spacing"). Default 1.0.
+	private float spacingX = 1.0f, spacingY = 1.0f;
+
+	/** Set isotropic reconstruction voxel spacing [mm/px] for the OpenCL backprojector. */
+	public void setSpacing(double spacing) { this.spacingX = (float) spacing; this.spacingY = (float) spacing; }
+	public void setSpacing(double sx, double sy) { this.spacingX = (float) sx; this.spacingY = (float) sy; }
 
 	public FanBeamBackprojector2D(double focalLength, double deltaT, double deltaBeta ,int imageSizeX, int imageSizeY) {
 		this.focalLength = (float) focalLength;
@@ -469,7 +476,8 @@ public class FanBeamBackprojector2D {
 		.putArg(imgSizeX).putArg(imgSizeY)
 		.putArg((float)maxT).putArg((float)deltaT)
 		.putArg((float)maxBeta).putArg((float)deltaBeta)
-		.putArg((float)focalLength).putArg(maxTIndex).putArg(maxBetaIndex); // TODO: Spacing :)
+		.putArg((float)focalLength).putArg(maxTIndex).putArg(maxBetaIndex)
+	.putArg(spacingX).putArg(spacingY); // FIX: pass reconstruction pixel spacing
 
 		// createCommandQueue
 		CLCommandQueue queue = device.createCommandQueue();
@@ -633,7 +641,8 @@ public class FanBeamBackprojector2D {
 		.putArg(imgSizeX).putArg(imgSizeY)
 		.putArg((float)maxT).putArg((float)deltaT)
 		.putArg((float)maxBeta).putArg((float)deltaBeta)
-		.putArg((float)focalLength).putArg(maxTIndex).putArg(maxBetaIndex);
+		.putArg((float)focalLength).putArg(maxTIndex).putArg(maxBetaIndex)
+		.putArg(spacingX).putArg(spacingY); // FIX: pass reconstruction pixel spacing
 		System.out.println(globalWorkSizeY +" "+globalWorkSizeX+ " "+localWorkSize);
 		// createCommandQueue
 		CLCommandQueue queue = device.createCommandQueue();

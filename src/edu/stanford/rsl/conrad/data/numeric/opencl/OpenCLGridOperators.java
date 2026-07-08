@@ -526,7 +526,7 @@ public class OpenCLGridOperators extends NumericGridOperator {
 		clGrid.getDelegate().prepareForDeviceOperation();
 		
 		CLBuffer<FloatBuffer> clmem = clGrid.getDelegate().getCLBuffer();
-		runKernel("expontial", device, clmem);
+		runKernel("exponential", device, clmem);
 		
 		clGrid.getDelegate().notifyDeviceChange();
 	}
