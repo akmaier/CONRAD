@@ -260,7 +260,28 @@ public class OpenCLGridOperators extends NumericGridOperator {
 		kernel.rewind();
 		return resultBuffer;
 	}
-	
+
+	/**
+	 * Run a void kernel with the format 'grid = op(grid, intValue)', e.g. the
+	 * noise kernels that take an unsigned RNG seed. The kernel signature is
+	 * (global float *grid, uint value, int num_elements).
+	 */
+	private void runKernel(String kernelName, CLDevice device, CLBuffer<FloatBuffer> gridBuffer, int value) {
+		int elementCount = gridBuffer.getCLCapacity();
+
+		OpenCLSetup openCLSetup = new OpenCLSetup(kernelName, device);
+		CLKernel kernel = openCLSetup.getKernel();
+		CLCommandQueue queue = openCLSetup.getCommandQueue();
+
+		int localSize = openCLSetup.getLocalSize();
+		int globalSize = openCLSetup.getGlobalSize(elementCount);
+
+		kernel.putArg(gridBuffer).putArg(value).putArg(elementCount);
+		queue.put1DRangeKernel(kernel, 0, globalSize, localSize);
+		queue.finish();
+		kernel.rewind();
+	}
+
 	/**
 	 * Run gradient kernel based on subtraction of two grids with an offsetvalue
 	 * @param kernelName    name of the kernel
@@ -541,7 +562,37 @@ public class OpenCLGridOperators extends NumericGridOperator {
 		
 		CLBuffer<FloatBuffer> clmem = clGrid.getDelegate().getCLBuffer();
 		runKernel("logarithm", device, clmem);
-		
+
+		clGrid.getDelegate().notifyDeviceChange();
+	}
+
+
+	/**
+	 * Replace each element (interpreted as a Poisson mean lambda) by a Poisson
+	 * random draw, on the device. Uses the Philox4x32-10 counter-based RNG with
+	 * Knuth (small lambda) / PTRS transformed rejection (large lambda). The seed
+	 * makes the result reproducible; independent realizations differ in seed.
+	 */
+	@Override
+	public void poisson(final NumericGrid grid, final int seed) {
+		OpenCLGridInterface clGrid = (OpenCLGridInterface) grid;
+		CLDevice device = clGrid.getDelegate().getCLDevice();
+		clGrid.getDelegate().prepareForDeviceOperation();
+		runKernel("poisson", device, clGrid.getDelegate().getCLBuffer(), seed);
+		clGrid.getDelegate().notifyDeviceChange();
+	}
+
+	/**
+	 * Fill each element with a standard normal N(0,1) draw on the device
+	 * (Philox4x32-10 + Box-Muller). Compose with multiplyBy/addBy for arbitrary
+	 * mean and (per-element) standard deviation.
+	 */
+	@Override
+	public void standardNormal(final NumericGrid grid, final int seed) {
+		OpenCLGridInterface clGrid = (OpenCLGridInterface) grid;
+		CLDevice device = clGrid.getDelegate().getCLDevice();
+		clGrid.getDelegate().prepareForDeviceOperation();
+		runKernel("standardNormal", device, clGrid.getDelegate().getCLBuffer(), seed);
 		clGrid.getDelegate().notifyDeviceChange();
 	}
 	

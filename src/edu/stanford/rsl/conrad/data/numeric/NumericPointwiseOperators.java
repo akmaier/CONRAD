@@ -195,7 +195,17 @@ public abstract class NumericPointwiseOperators {
 	public static void exp(NumericGrid data) {
 		data.getGridOperator().exp(data);
 	}
-	
+
+	/** Replace each element (a Poisson mean) by a Poisson random draw (seeded, reproducible). */
+	public static void poisson(NumericGrid data, int seed) {
+		data.getGridOperator().poisson(data, seed);
+	}
+
+	/** Fill each element with a standard normal N(0,1) draw (seeded, reproducible). */
+	public static void standardNormal(NumericGrid data, int seed) {
+		data.getGridOperator().standardNormal(data, seed);
+	}
+
 	/** set maximum value, all values > max are set to max */
 	public static void setMax(NumericGrid data, float max) {
 		data.getGridOperator().setMax(data, max);

@@ -4,6 +4,8 @@
 */
 package edu.stanford.rsl.conrad.data.numeric;
 
+import java.util.Random;
+
 import edu.stanford.rsl.conrad.data.numeric.iterators.NumericPointwiseIteratorND;
 
 public class NumericGridOperator {
@@ -443,6 +445,69 @@ public class NumericGridOperator {
 		while (it.hasNext())
 			it.setNext((float) Math.exp(it.get()));
 		data.notifyAfterWrite();
+	}
+
+	/**
+	 * Replace each element (interpreted as a Poisson mean lambda) by a Poisson
+	 * random draw. Knuth's product method for small lambda, Hoermann's PTRS
+	 * transformed rejection (JSCS 1993) for large lambda -- exact across the
+	 * range and matching the OpenCL kernel. The seed makes it reproducible.
+	 */
+	public void poisson(NumericGrid grid, int seed) {
+		Random rng = new Random(seed & 0xffffffffL);
+		NumericPointwiseIteratorND it = new NumericPointwiseIteratorND(grid);
+		while (it.hasNext())
+			it.setNext(poissonSample(it.get(), rng));
+		grid.notifyAfterWrite();
+	}
+
+	/** Fill each element with a standard normal N(0,1) draw (reproducible via seed). */
+	public void standardNormal(NumericGrid grid, int seed) {
+		Random rng = new Random(seed & 0xffffffffL);
+		NumericPointwiseIteratorND it = new NumericPointwiseIteratorND(grid);
+		while (it.hasNext())
+			it.setNext((float) rng.nextGaussian());
+		grid.notifyAfterWrite();
+	}
+
+	private static float poissonSample(float lambda, Random rng) {
+		if (lambda <= 0f) return 0f;
+		if (lambda < 30f) {                       // Knuth
+			double L = Math.exp(-lambda), p = 1.0;
+			int k = 0;
+			do { k++; p *= rng.nextDouble(); } while (p > L);
+			return k - 1;
+		}
+		double smu = Math.sqrt(lambda);           // PTRS
+		double b = 0.931 + 2.53 * smu;
+		double a = -0.059 + 0.02483 * b;
+		double invA = 1.1239 + 1.1328 / (b - 3.4);
+		double vr = 0.9277 - 3.6224 / (b - 2.0);
+		double loglam = Math.log(lambda);
+		while (true) {
+			double U = rng.nextDouble() - 0.5;
+			double V = rng.nextDouble();
+			double us = 0.5 - Math.abs(U);
+			double k = Math.floor((2.0 * a / us + b) * U + lambda + 0.43);
+			if (us >= 0.07 && V <= vr) return (float) k;
+			if (k < 0) continue;
+			if (us < 0.013 && V > us) continue;
+			if (Math.log(V * invA / (a / (us * us) + b)) <= k * loglam - lambda - logGamma(k + 1.0))
+				return (float) k;
+		}
+	}
+
+	/** Lanczos approximation of ln(Gamma(x)) for x > 0. */
+	private static double logGamma(double x) {
+		final double[] c = {676.5203681218851, -1259.1392167224028, 771.32342877765313,
+				-176.61502916214059, 12.507343278686905, -0.13857109526572012,
+				9.9843695780195716e-6, 1.5056327351493116e-7};
+		x -= 1.0;
+		double a = 0.99999999999980993;
+		double t = x + 7.5;
+		for (int i = 0; i < c.length; i++)
+			a += c[i] / (x + i + 1);
+		return 0.5 * Math.log(2 * Math.PI) + (x + 0.5) * Math.log(t) - t + Math.log(a);
 	}
 
 	/** set maximum value, all values > max are set to max */
