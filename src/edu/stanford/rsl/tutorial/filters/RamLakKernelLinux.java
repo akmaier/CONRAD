@@ -10,8 +10,8 @@ public class RamLakKernelLinux extends Grid1DComplex implements GridKernel {
 	 public RamLakKernelLinux(final int size, double deltaS) {
 		super(FFTUtil.getNextPowerOfTwo(size) * 4);
 		final int paddedSize = getSize()[0];
-		final float odd = -1.f / ((float) (Math.PI * Math.PI*deltaS*deltaS));
-		setAtIndex(0, (float) (0.25f / (deltaS*deltaS)));
+		final float odd = -1.f / ((float) (Math.PI * Math.PI*deltaS));
+		setAtIndex(0, (float) (0.25f / (deltaS)));
 		for (int i = 1; i < paddedSize / 4; ++i) {
 			if (1 == (i % 2))
 				setAtIndex(i, odd /(i * i));
