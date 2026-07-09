@@ -60,6 +60,11 @@ kernel void backprojectPixelDriven2DCL(
 	float2 point = {(x-gridSizeX/2.0f)*spacingX, (y-gridSizeY/2.0f)*spacingY};
 	float sum = 0.0f;
 
+	// FIX: reinstate fan-beam distance weighting 1/U^2 (upstream commented it out,
+	// causing radial cupping). radius/phi are per-voxel constants across views.
+	float radius = length(point);
+	float phi = M_PI_2_F + atan2(point.y, point.x);
+
 	for(int b=0; b<maxBetaIndex; ++b){
 		float beta = deltaBeta * b;
 		float cosBeta = cos(beta);
@@ -82,7 +87,8 @@ kernel void backprojectPixelDriven2DCL(
 		if (t < 0.0f || t + 1.0f >= (float) maxTIndex)
 			continue;
 		float2 bt = {t + 0.5f, b + 0.5f};
-		sum += read_imagef(sino, linearSampler, bt).x;
+		float dWeight = (focalLength + radius * sin(beta - phi)) / focalLength;
+		sum += read_imagef(sino, linearSampler, bt).x / (dWeight * dWeight);
 	} // end for
 	grid[idx] = sum / normalizationFactor;
 }
@@ -145,11 +151,10 @@ kernel void backprojectPixelDriven1DCL(
 		float val = read_imagef(sino, linearSampler, bt).x;
 		
 		//DistanceWeighting
-		//float radius = length(point);
-		//float phi = (float) ((M_PI/2) + atan2(point.y, point.x));
-		//float dWeight = (focalLength  +radius*sin(beta - phi))/focalLength;
-		//float valtemp = val / (dWeight*dWeight*normalizationFactor);
-		float valtemp=val/normalizationFactor;
+		float radius = length(point);
+		float phi = (float) ((M_PI/2) + atan2(point.y, point.x));
+		float dWeight = (focalLength  +radius*sin(beta - phi))/focalLength;
+		float valtemp = val / (dWeight*dWeight*normalizationFactor);
         grid[idx] += valtemp;
         
 	//} // end for

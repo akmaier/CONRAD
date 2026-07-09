@@ -34,8 +34,11 @@ import edu.stanford.rsl.conrad.numerics.SimpleVector;
 import edu.stanford.rsl.conrad.opencl.OpenCLUtil;
 
 
-/**This backprojector removed the distance weighting from the backprojector in the file tutorial.fan,
- * since the ART algorithm only needs a backprojection without any filtering
+/**Fan-beam pixel-driven backprojector with the analytic 1/U^2 distance weighting
+ * reinstated (both the CPU path and the OpenCL kernels). Without it a filtered
+ * fan-beam reconstruction of a uniform object shows radial cupping. Note: if this
+ * class is used as a plain (unweighted) adjoint for iterative schemes such as ART,
+ * the distance weighting must be disabled again.
 **/
 public class FanBeamBackprojector2D {
 	final double samplingRate = 3.d;
@@ -312,14 +315,12 @@ public class FanBeamBackprojector2D {
 							continue;
 						
 						float val = InterpolationOperators.interpolateLinear(subSino, t);
-						/*
-						//DistanceWeighting
+						// FIX: reinstate fan-beam distance weighting 1/U^2 (was commented
+						// out -> radial cupping in analytic FBP).
 						float radius = (float) reconstructionPointWorld.getAbstractVector().normL2();
 						float phi = (float) ((Math.PI/2) + Math.atan2(reconstructionPointWorld.get(1), reconstructionPointWorld.get(0)));
 						float dWeight = (float) ((focalLength  +radius*Math.sin(beta - phi))/focalLength);
 						valtemp = (float) (val / (dWeight*dWeight));
-						*/
-						valtemp=val;
 					}
 					else
 					{
