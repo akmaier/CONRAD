@@ -15,13 +15,13 @@ public class SheppLoganKernel extends Grid1DComplex implements GridKernel {
 		super(size);
 		final int paddedSize = getSize()[0];
 //		final float odd = -1.f / ((float) (Math.PI * Math.PI * deltaS));
-		setAtIndex(0, (float) (2 / (Math.PI*Math.PI*deltaS*deltaS)));
+		setAtIndex(0, (float) (2 / (Math.PI*Math.PI*deltaS)));
 		for (int i = 1; i < paddedSize/2; ++i) {
-				setAtIndex(i,(float) (-2.0 / (Math.PI*Math.PI*deltaS*deltaS*(4*i*i-1.0))));
+				setAtIndex(i,(float) (-2.0 / (Math.PI*Math.PI*deltaS*(4*i*i-1.0))));
 		}
 		for (int i = paddedSize / 2; i < paddedSize; ++i) {
 			final float tmp = paddedSize - i;
-				setAtIndex(i,(float) (-2.0 / (Math.PI*Math.PI*deltaS*deltaS*(4*tmp*tmp-1.0))));
+				setAtIndex(i,(float) (-2.0 / (Math.PI*Math.PI*deltaS*(4*tmp*tmp-1.0))));
 		}
 		transformForward();
 	}
