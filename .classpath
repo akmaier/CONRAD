@@ -43,7 +43,6 @@
 	<classpathentry kind="lib" path="lib/jogl-all-natives-windows-i586.jar"/>
 	<classpathentry kind="lib" path="lib/jogl-all.jar"/>
 	<classpathentry kind="lib" path="lib/jtransforms-2.3.jar"/>
-	<classpathentry kind="lib" path="lib/junit-4.8.2.jar"/>
 	<classpathentry kind="lib" path="lib/jzlib-1.0.7.jar"/>
 	<classpathentry kind="lib" path="lib/latexlet.jar"/>
 	<classpathentry kind="lib" path="lib/qdox-1.12.1.jar"/>
@@ -69,5 +68,6 @@
 	<classpathentry kind="lib" path="lib/jpop.0.7.5.jar"/>
 	<classpathentry kind="lib" path="lib/fastica-1.11.jar" sourcepath="lib/fastica-1.11-src.zip"/>
 	<classpathentry kind="lib" path="lib/sis-jhdf5-batteries_included.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="src"/>
 </classpath>
