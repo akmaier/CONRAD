@@ -12,23 +12,23 @@
     <void property="compositionTable">
      <void method="put">
       <string>C</string>
-      <double>0.2100988746286455</double>
+      <double>228.19</double>
      </void>
      <void method="put">
       <string>H</string>
-      <double>0.13540469897990942</double>
+      <double>26.20644</double>
      </void>
      <void method="put">
       <string>I</string>
-      <double>0.3700039735268485</double>
+      <double>380.71341</double>
      </void>
      <void method="put">
       <string>N</string>
-      <double>0.04084769960515297</double>
+      <double>42.03</double>
      </void>
      <void method="put">
       <string>O</string>
-      <double>1.0125047532594436</double>
+      <double>144.0</double>
      </void>
     </void>
    </object>
