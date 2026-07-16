@@ -45,6 +45,7 @@ public abstract class CONRAD {
 	public static boolean useGarbageCollection;
 	public static final String EOL = System.getProperty("line.separator");
 	public static final long INPUT_QUEUE_DELAY = 0;
+	public static ClassLoader classLoaderForPyconrad = null; /// Regular ClassLoader doesnot work with pyconrad since Thread is detached from JVM
 	/**
 	 * This flag can be used to control debug outputs.
 	 * 0: No Debug output
@@ -272,6 +273,8 @@ public abstract class CONRAD {
 	private static ArrayList<Class<? extends Object>> getClasses(String packageName)
 			throws ClassNotFoundException, IOException {
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		if (classLoader == null ) 
+			classLoader = CONRAD.classLoaderForPyconrad;
 		assert classLoader != null;
 		String path = packageName.replace('.', '/');
 		Enumeration<URL> resources = classLoader.getResources(path);
