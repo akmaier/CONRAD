@@ -26,11 +26,22 @@ import edu.stanford.rsl.conrad.data.numeric.Grid2D;
 import edu.stanford.rsl.conrad.data.numeric.Grid3D;
 import edu.stanford.rsl.conrad.io.ImagePlusDataSink;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
+import edu.stanford.rsl.conrad.numerics.SimpleVector;
 import edu.stanford.rsl.conrad.reconstruction.VOIBasedReconstructionFilter;
 import edu.stanford.rsl.conrad.utils.CONRAD;
 import edu.stanford.rsl.conrad.utils.Configuration;
 import edu.stanford.rsl.conrad.utils.ImageGridBuffer;
 import edu.stanford.rsl.conrad.utils.ImageUtil;
+
+/**
+ * Backprojection on GPU using OpenCL.
+ * 
+ * If Moving Least Squares deformation should be included in the reconstruction, the deformation parameters (points
+ * before and after) need to be set using the method setDeformParameters() before the init() method is called.
+ * 
+ * @author Martin Berger, Jennifer Maier
+ *
+ */
 
 public class OpenCLBackProjector extends VOIBasedReconstructionFilter implements Runnable, Citeable{
 
@@ -77,6 +88,13 @@ public class OpenCLBackProjector extends VOIBasedReconstructionFilter implements
 	 */
 	protected float h_volume[];
 
+	/**
+	 * Deformed 3D coordinates
+	 */
+	protected SimpleVector[] p = null;
+	protected SimpleVector[][] qs = null;
+	private CLBuffer<FloatBuffer> pBuff;
+	private CLBuffer<FloatBuffer> qBuff;
 
 	/**
 	 * The global variable of the module which stores the
@@ -94,6 +112,8 @@ public class OpenCLBackProjector extends VOIBasedReconstructionFilter implements
 	private long subVolumeZ = 0;
 
 	private boolean initialized = false;
+
+	
 
 	public OpenCLBackProjector () {
 		super();
@@ -187,8 +207,11 @@ public class OpenCLBackProjector extends VOIBasedReconstructionFilter implements
 			}
 
 			// create the computing kernel
-			kernelFunction = program.createCLKernel("backprojectKernel");
-
+			if (this.p == null) {
+				kernelFunction = program.createCLKernel("backprojectKernel");
+			} else {
+				kernelFunction = program.createCLKernel("backprojectKernelDeformed");
+			}
 			// create the reconstruction volume;
 			// createFloatBuffer uses a byteBuffer internally --> h_volume.length cannot be > 2^31/4 = 2^31/2^2 = 2^29
 			// Thus, 2^29 would already cause a overflow (negative sign) of the integer in the byte buffer! Maximum length is (2^29-1)
@@ -210,7 +233,7 @@ public class OpenCLBackProjector extends VOIBasedReconstructionFilter implements
 
 			commandQueue.
 			putWriteBuffer(volumePointer, true).
-			finish();
+			finish();			
 
 			initialized = true;
 		}
@@ -326,7 +349,7 @@ public class OpenCLBackProjector extends VOIBasedReconstructionFilter implements
 				// Create the array that will contain the projection data. 
 				projectionArray = context.createFloatBuffer(projection.getWidth()*projection.getHeight(), Mem.READ_ONLY);
 			}
-			
+
 			// Copy the projection data to the array 
 			projectionArray.getBuffer().put(projection.getBuffer());
 			projectionArray.getBuffer().rewind();
@@ -334,7 +357,7 @@ public class OpenCLBackProjector extends VOIBasedReconstructionFilter implements
 			if(projectionTex != null && !projectionTex.isReleased()){			
 				projectionTex.release();
 			}
-			
+
 			// set the texture
 			CLImageFormat format = new CLImageFormat(ChannelOrder.INTENSITY, ChannelType.FLOAT);
 			projectionTex = context.createImage2d(projectionArray.getBuffer(), projection.getWidth(), projection.getHeight(), format, Mem.READ_ONLY);
@@ -399,6 +422,11 @@ public class OpenCLBackProjector extends VOIBasedReconstructionFilter implements
 		if (!largeVolumeMode) {
 			projections.remove(projectionNumber);
 		}
+
+		if (this.p != null) {
+			initDeformedCoordinates(projectionNumber);
+		}
+
 		// backproject for each slice
 		// OpenCL Grids are only two dimensional!
 		int reconDimensionZ = dimz;
@@ -407,28 +435,51 @@ public class OpenCLBackProjector extends VOIBasedReconstructionFilter implements
 		double voxelSpacingZ = getGeometry().getVoxelSpacingZ();
 
 		// write kernel parameters
-		kernelFunction.rewind();
-		kernelFunction
-		.putArg(volumePointer)
-		.putArg(getGeometry().getReconDimensionX())
-		.putArg(getGeometry().getReconDimensionY())
-		.putArg(reconDimensionZ)
-		.putArg((int) lineOffset)
-		.putArg((float) voxelSpacingX)
-		.putArg((float) voxelSpacingY)
-		.putArg((float) voxelSpacingZ)
-		.putArg((float) offsetX)
-		.putArg((float) offsetY)
-		.putArg((float) offsetZ)
-		.putArg(projectionTex)
-		.putArg(projectionMatrix)
-		.putArg(projectionMultiplier);
+		// deformed coordinates
+		if (this.pBuff == null) {
+			kernelFunction.rewind();
+			kernelFunction
+			.putArg(volumePointer)
+			.putArg(getGeometry().getReconDimensionX())
+			.putArg(getGeometry().getReconDimensionY())
+			.putArg(reconDimensionZ)
+			.putArg((int) lineOffset)
+			.putArg((float) voxelSpacingX)
+			.putArg((float) voxelSpacingY)
+			.putArg((float) voxelSpacingZ)
+			.putArg((float) offsetX)
+			.putArg((float) offsetY)
+			.putArg((float) offsetZ)
+			.putArg(projectionTex)
+			.putArg(projectionMatrix)
+			.putArg(projectionMultiplier);
+		} else {
+			kernelFunction.rewind();
+			kernelFunction
+			.putArg(volumePointer)
+			.putArg(getGeometry().getReconDimensionX())
+			.putArg(getGeometry().getReconDimensionY())
+			.putArg(reconDimensionZ)
+			.putArg((int) lineOffset)
+			.putArg((float) voxelSpacingX)
+			.putArg((float) voxelSpacingY)
+			.putArg((float) voxelSpacingZ)
+			.putArg((float) offsetX)
+			.putArg((float) offsetY)
+			.putArg((float) offsetZ)
+			.putArg(projectionTex)
+			.putArg(projectionMatrix)
+			.putArg(projectionMultiplier)
+			.putArg(pBuff)
+			.putArg(qBuff)
+			.putArg((int) p.length);
+		}
 
-		
+
 		int[] realLocalSize = new int[2];
 		realLocalSize[0] = Math.min(device.getMaxWorkGroupSize(),bpBlockSize[0]);
 		realLocalSize[1] = Math.max(1, Math.min(device.getMaxWorkGroupSize()/realLocalSize[0], bpBlockSize[1]));
-		
+
 		// rounded up to the nearest multiple of localWorkSize
 		int[] globalWorkSize = {getGeometry().getReconDimensionX(), getGeometry().getReconDimensionY()}; 
 		if ((globalWorkSize[0] % realLocalSize[0] ) != 0){
@@ -439,12 +490,47 @@ public class OpenCLBackProjector extends VOIBasedReconstructionFilter implements
 		}
 
 		// Call the OpenCL kernel, writing the results into the volume which is pointed at
-		commandQueue
-		.putWriteImage(projectionTex, true)
-		.put2DRangeKernel(kernelFunction, 0, 0, globalWorkSize[0], globalWorkSize[1], realLocalSize[0], realLocalSize[1])
-		//.finish()
-		//.putReadBuffer(dOut, true)
-		.finish();
+		if (this.pBuff == null) {
+			commandQueue
+			.putWriteImage(projectionTex, true)
+			.put2DRangeKernel(kernelFunction, 0, 0, globalWorkSize[0], globalWorkSize[1], realLocalSize[0], realLocalSize[1])
+			.finish();
+		} else {
+			commandQueue
+			.putWriteImage(projectionTex, true)
+			.putWriteBuffer(pBuff, true)
+			.putWriteBuffer(qBuff, true)
+			.put2DRangeKernel(kernelFunction, 0, 0, globalWorkSize[0], globalWorkSize[1], realLocalSize[0], realLocalSize[1])
+			.finish();
+		}
+		
+
+	}
+
+	private void initDeformedCoordinates(int projectionNumber) {
+
+		SimpleVector[] q = this.qs[projectionNumber];
+		
+		float[] p_floats = new float[3*p.length];
+		float[] q_floats = new float[3*q.length];
+		for (int i = 0; i < p.length; i++) {
+			p_floats[3*i]   = (float)p[i].getElement(0);
+			p_floats[3*i+1] = (float)p[i].getElement(1);
+			p_floats[3*i+2] = (float)p[i].getElement(2);
+			q_floats[3*i]   = (float)q[i].getElement(0);
+			q_floats[3*i+1] = (float)q[i].getElement(1);
+			q_floats[3*i+2] = (float)q[i].getElement(2);
+		}
+
+		CLBuffer<FloatBuffer> pBuffer = context.createFloatBuffer(p.length*p[0].getLen(), Mem.READ_ONLY);
+		pBuffer.getBuffer().put(p_floats);
+		pBuffer.getBuffer().rewind();
+		this.pBuff = pBuffer;
+
+		CLBuffer<FloatBuffer> qBuffer = context.createFloatBuffer(q.length*q[0].getLen(), Mem.READ_ONLY);
+		qBuffer.getBuffer().put(q_floats);
+		qBuffer.getBuffer().rewind();
+		this.qBuff = qBuffer;
 	}
 
 	public void loadInputQueue(Grid3D input) throws IOException {
@@ -644,8 +730,22 @@ public class OpenCLBackProjector extends VOIBasedReconstructionFilter implements
 		return "OpenCL Backprojector";
 	}
 
+	/**
+	 * set parameters used for deformation
+	 * 
+	 * @param p  original positions of points used for deformation. Contains n 3D-vectors if there are n points used
+	 *           for deformation
+	 * @param qs deformed positions of points used for deformation. If there are p projections used for backprojection
+	 *           and n points used for deformation, the array contains p x n 3D-vectors.
+	 */
+	public void setDeformParameters(SimpleVector[] p, SimpleVector[][] qs) {
+		this.p = p;
+		this.qs = qs;
+	}
+
+
 }
 /*
- * Copyright (C) 2010-2014 Martin Berger
+ * Copyright (C) 2010-2021 Martin Berger, Jennifer Maier
  * CONRAD is developed as an Open Source project under the GNU General Public License (GPL).
  */
